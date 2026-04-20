@@ -28,7 +28,7 @@ export class ModulesCrudImpl extends BaseSource {
       });
 
       return modules;
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     }
   }
@@ -63,7 +63,7 @@ export class ModulesCrudImpl extends BaseSource {
         await moduleRp.save(newModule);
 
         await qr.commitTransaction();
-      } catch (error) {
+      } catch (error: any) {
         failMsg += ` ${ctx.getCode()},`;
         await qr.rollbackTransaction();
       } finally {

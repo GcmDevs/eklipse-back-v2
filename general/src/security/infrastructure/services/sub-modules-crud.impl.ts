@@ -51,7 +51,7 @@ export class SubModulesCrudImpl extends BaseSource {
         await subModuleRp.save(newSubModule);
 
         await qr.commitTransaction();
-      } catch (error) {
+      } catch (error: any) {
         failMsg += ` ${ctx.getCode()},`;
         await qr.rollbackTransaction();
       } finally {

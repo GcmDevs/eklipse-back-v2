@@ -95,7 +95,7 @@ export class LoginUserImpl {
       } else {
         throw new Error(errorMsg);
       }
-    } catch (error) {
+    } catch (error: any) {
       await qr.rollbackTransaction();
       throw new Error(error.message);
     } finally {

@@ -17,7 +17,7 @@ export class AuthController {
     try {
       const response = await this._loginUser.execute(payload, fromMobile, expiredSuperFast);
       return response;
-    } catch (error) {
+    } catch (error: any) {
       throw new UnauthorizedException(error.message);
     }
   }

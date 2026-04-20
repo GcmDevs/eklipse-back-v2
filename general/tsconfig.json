@@ -8,8 +8,8 @@
     "allowSyntheticDefaultImports": true,
     "target": "ES2021",
     "sourceMap": true,
+    "rootDir": "..",
     "outDir": "./dist",
-    "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": false,
@@ -18,14 +18,14 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@authorities/*": ["../@authorities/*"],
-      "@common/*": ["../@common/*"],
-      "@rsa/*": ["../rsa/*"],
       "@env": ["../env"],
-      "@gen/authorities": ["authorities"],
-      "@gen/types/*": ["@types/*"],
-      "@gen/orm/*": ["@orm/*"],
-      "@gen/*": ["src/*"]
+      "@rsa/*": ["../rsa/*"],
+      "@common/*": ["../@common/*"],
+      "@gen/authorities": ["./authorities"],
+      "@gen/types/*": ["./@types/*"],
+      "@gen/orm/*": ["./@orm/*"],
+      "@gen/*": ["./src/*"]
     }
-  }
+  },
+  "include": ["src/**/*", "../@common/**/*"]
 }

@@ -119,7 +119,7 @@ export const fetchAuthsByUser = async (p: { id?: number; ctx?: GcmContextType; t
     });
 
     return { authorities, onlyCodes: uniq(codes) };
-  } catch (error) {
+  } catch (error: any) {
     throw new BadRequestException(error.message);
   }
 };
@@ -188,7 +188,7 @@ export const fetchAuths = async (ctx: GcmContextType) => {
     });
 
     return { authorities: authoritiesFiltered, onlyCodes: uniq(codes) };
-  } catch (error) {
+  } catch (error: any) {
     throw new BadRequestException(error.message);
   }
 };

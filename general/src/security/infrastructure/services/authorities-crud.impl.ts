@@ -14,7 +14,7 @@ export class AuthoritiesCrudImpl extends BaseSource {
     try {
       const res = await fetchAuths(this.auth.context);
       return res.authorities;
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     }
   }
@@ -81,7 +81,7 @@ export class AuthoritiesCrudImpl extends BaseSource {
         await authorityRp.save(newAuthority);
 
         await qr.commitTransaction();
-      } catch (error) {
+      } catch (error: any) {
         failMsg = error.message;
         await qr.rollbackTransaction();
       } finally {

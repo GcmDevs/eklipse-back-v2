@@ -14,7 +14,7 @@ export class ResourcesController {
     try {
       const users = await this._resources.fetchActiveUsers();
       return users;
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     }
   }
@@ -24,7 +24,7 @@ export class ResourcesController {
     try {
       const roles = await this._resources.fetchRoles();
       return roles;
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     }
   }
@@ -34,7 +34,7 @@ export class ResourcesController {
     try {
       const centers = await this._resources.fetchCenters();
       return centers;
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     }
   }
@@ -44,7 +44,7 @@ export class ResourcesController {
     try {
       const data = await this._resources.fetchMyAuthData();
       return data;
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     }
   }

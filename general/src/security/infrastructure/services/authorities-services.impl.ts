@@ -14,7 +14,7 @@ export class AuthoritiesServicesImpl extends BaseSource {
       const me = await userRp.findOne({ where: { id: this.auth.id }, relations: ['role'] });
       me.encryptId();
       return me;
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     }
   }
@@ -26,7 +26,7 @@ export class AuthoritiesServicesImpl extends BaseSource {
       ).authorities;
 
       return authorities;
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     }
   }
@@ -39,7 +39,7 @@ export class AuthoritiesServicesImpl extends BaseSource {
     try {
       const myAuthorities = await fetchAuthsByUser({ id: this.auth.id, ctx: this.auth.context });
       return { ...myAuthorities, enabledModules: enabledModules(myAuthorities.onlyCodes) };
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     }
   }
@@ -68,7 +68,7 @@ export class AuthoritiesServicesImpl extends BaseSource {
       await this.qr.commitTransaction();
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       await this.qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
@@ -101,7 +101,7 @@ export class AuthoritiesServicesImpl extends BaseSource {
       await this.qr.commitTransaction();
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       await this.qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
@@ -132,7 +132,7 @@ export class AuthoritiesServicesImpl extends BaseSource {
       await this.qr.commitTransaction();
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       await this.qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
@@ -165,7 +165,7 @@ export class AuthoritiesServicesImpl extends BaseSource {
       await this.qr.commitTransaction();
 
       return true;
-    } catch (error) {
+    } catch (error: any) {
       await this.qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {

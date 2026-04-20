@@ -53,7 +53,7 @@ const decodeToken = (token: string): ITokenDecoded => {
     tkFt.user.fullName = tkDecoded.fnm;
 
     return tkFt;
-  } catch (error) {
+  } catch (error: any) {
     throw new Error(error.message);
   }
 };

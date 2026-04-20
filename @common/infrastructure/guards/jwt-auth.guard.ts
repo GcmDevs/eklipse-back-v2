@@ -14,7 +14,7 @@ export class JwtAuthGuard implements CanActivate {
         if (!tkDcd) throw new Error('In development, you need at least a real token');
       }
       return true;
-    } catch (error) {
+    } catch (error: any) {
       throw new UnauthorizedException(error.message);
     }
   }

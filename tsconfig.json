@@ -9,7 +9,6 @@
     "target": "ES2021",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": false,
@@ -18,11 +17,15 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@env": ["env"],
-      "@gen/authorities": ["general/authorities"],
-      "@gen/types/*": ["general/@types/*"],
-      "@gen/orm/*": ["general/@orm/*"],
-      "@gen/*": ["general/src/*"]
+      "@env": ["./env"],
+      "@gen/authorities": ["./general/authorities"],
+      "@gen/types/*": ["./general/@types/*"],
+      "@gen/orm/*": ["./general/@orm/*"],
+      "@gen/*": ["./general/src/*"],
+      "@inn/authorities": ["./inventario/authorities"],
+      "@inn/types/*": ["./inventario/@types/*"],
+      "@inn/orm/*": ["./inventario/@orm/*"],
+      "@inn/*": ["./inventario/src/*"]
     }
   }
 }
