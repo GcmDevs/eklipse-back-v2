@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
-import { GcmContextType } from '@common/domain/types';
-import { ITokenDecoded, JWTServices, RSAServices } from '@common/application/services';
+import { GcmContextType } from '../../domain/types';
+import { ITokenDecoded, JWTServices, RSAServices } from '../../application/services';
 import { _PrivSecAuthOrm } from '../orm/authority.orm';
 import { _PrivSecUserOrm } from '../orm/user.orm';
 import { switchConn } from './connections';

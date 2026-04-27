@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, ManyToMany } from 'typeorm';
-import { RSAServices } from '@common/application/services';
+import { RSAServices } from '../../application/services';
 import { _PrivSecSubModuleOrm } from './sub-module.orm';
 import { _PrivSecModuleOrm } from './module.orm';
 import { _PrivSecUserOrm } from './user.orm';

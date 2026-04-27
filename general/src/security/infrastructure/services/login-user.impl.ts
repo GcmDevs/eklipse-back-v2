@@ -68,7 +68,7 @@ export class LoginUserImpl {
 
           if (!newLastAuth) {
             newLastAuth = new LastAuthOrm();
-            newLastAuth.user = user;
+            newLastAuth.userId = user.id;
             newLastAuth.timesFromMobile = fromMobile ? 1 : 0;
             newLastAuth.timesFromWeb = fromMobile ? 0 : 1;
             if (fromMobile) newLastAuth.lastAuthOnMobile = new Date();

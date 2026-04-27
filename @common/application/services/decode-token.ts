@@ -3,7 +3,7 @@ import {
   GcmContextCode,
   GcmContextType,
   gcmContextFactory,
-} from '@common/domain/types';
+} from '../../domain/types';
 import { jwtDecode } from 'jwt-decode';
 import { RSAServices } from './rsa';
 

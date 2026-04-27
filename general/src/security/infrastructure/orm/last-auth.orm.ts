@@ -7,6 +7,9 @@ export class LastAuthOrm {
   @PrimaryGeneratedColumn({ name: 'OID' })
   id: number;
 
+  @Column({ name: 'GENUSUARIO' })
+  userId: number;
+
   @OneToOne(() => _PrivSecUserOrm)
   @JoinColumn({ name: 'GENUSUARIO' })
   user: _PrivSecUserOrm;

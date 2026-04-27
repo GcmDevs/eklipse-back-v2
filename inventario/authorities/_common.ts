@@ -5,7 +5,7 @@ export const INN_MODULES = {
   SUBS: {
     RECEPCION_TECNICA: `${inn}001`,
     DOCUMENTOS: `${inn}002`,
-    SUMINISTROS: `${inn}003`,
+    SUMINISTROS_PACIENTE: `${inn}003`,
     CENTRAL_COMPRAS: `${inn}004`,
     PRODUCTOS: `${inn}005`,
     COTIZACIONES_PREFABRICADAS: `${inn}006`,

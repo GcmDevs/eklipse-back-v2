@@ -1,4 +1,3 @@
-import { IsNull } from 'typeorm';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { BaseSource, fetchAuths } from '@common/infrastructure/services';
 import { _PrivSecSubModuleOrm } from '@common/infrastructure/orm/sub-module.orm';

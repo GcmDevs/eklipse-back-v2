@@ -1,7 +1,7 @@
 import { Reflector } from '@nestjs/core';
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { ADMIN_AUTHORITY } from '@common/application/constants';
-import { JWTServices } from '@common/application/services';
+import { ADMIN_AUTHORITY } from '../../application/constants';
+import { JWTServices } from '../../application/services';
 import { fetchAuthsByUser } from '../services';
 
 @Injectable()

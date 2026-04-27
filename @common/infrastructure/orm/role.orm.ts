@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { _PrivSecUserOrm } from './user.orm';
 import { _PrivSecAuthOrm } from './authority.orm';
-import { RSAServices } from '@common/application/services';
+import { RSAServices } from '../../application/services';
 
 @Entity('GENROL')
 export class _PrivSecRoleOrm {

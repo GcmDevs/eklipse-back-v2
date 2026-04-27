@@ -1,7 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, JoinColumn, ManyToOne } from 'typeorm';
 import { _PrivSecAuthOrm } from './authority.orm';
 import { _PrivSecModuleOrm } from './module.orm';
-import { RSAServices } from '@common/application/services';
+import { RSAServices } from '../../application/services';
 
 @Entity('EKGENSUBMODULO')
 export class _PrivSecSubModuleOrm {

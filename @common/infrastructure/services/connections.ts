@@ -1,5 +1,5 @@
 import { DataSource, EntitySchema, EntityTarget } from 'typeorm';
-import { GCM_CONTEXTS, GcmContextType } from '@common/domain/types';
+import { GCM_CONTEXTS, GcmContextType } from '../../domain/types';
 import { _PRIV_ORM_AUTH_SEC_ENTITIES } from '../orm';
 import { processEnv } from '@env';
 

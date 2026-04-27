@@ -1,5 +1,5 @@
 import { Module, OnModuleInit } from '@nestjs/common';
-import { initializeSources } from '@common/infrastructure/services';
+import { initializeSources } from './@common/infrastructure/services';
 import { SecurityModule } from '@gen/security/module';
 import { ENTITIES } from './app.entities';
 
