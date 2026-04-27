@@ -22,9 +22,10 @@ export class SuministrosAuthUnreqController {
   async findByPattern(
     @Param('pattern') pattern: string,
     @Param('lessDays') lessDays: number,
-    @Query('contextCode') contextCode: GcmContextCode
+    @Query('contextCode') contextCode: GcmContextCode,
+    @Query('onlyRecibidos') onlyRecibidos: boolean
   ) {
-    return this._services.findByPattern(pattern, +lessDays, contextCode);
+    return this._services.findByPattern(pattern, +lessDays, contextCode, onlyRecibidos);
   }
 
   @Get('info-modificacion-suministros-recibidos/:id')

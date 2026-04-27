@@ -26,4 +26,5 @@ export class SuministroPacienteOrm {
   detalle: DetalleSuministroPacienteOrm[];
 
   isListoParaEntrega: boolean;
+  isEntregado: boolean;
 }

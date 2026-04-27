@@ -87,7 +87,12 @@ export class RecibirSuministrosAuthUnreqImpl {
     }
   }
 
-  public async findByPattern(pattern: string, lessDays: number, contextCode: GcmContextCode) {
+  public async findByPattern(
+    pattern: string,
+    lessDays: number,
+    contextCode: GcmContextCode,
+    onlyRecibidos: boolean
+  ) {
     try {
       if (!contextCode) contextCode = this._auth.context.getCode();
 
@@ -126,10 +131,18 @@ export class RecibirSuministrosAuthUnreqImpl {
 
       documentos.map(doc => {
         const docModifi = ordSumModifi.find(mod => mod.ordenSuministrosId === doc.id);
-        if (docModifi) doc.isListoParaEntrega = true;
+        if (docModifi) {
+          doc.isListoParaEntrega = true;
+          if (docModifi.fechaEntrega) doc.isEntregado = true;
+        }
       });
 
-      return dataToFetchSumPac(estancia, documentos);
+      return dataToFetchSumPac(
+        estancia,
+        onlyRecibidos
+          ? documentos.filter(d => d.isEntregado)
+          : documentos.filter(d => !d.isEntregado)
+      );
     } catch (error: any) {
       throw new BadRequestException(error.message);
     }

@@ -19,7 +19,7 @@ export class SuministrosController {
     private _modificarRecibidos: ModificarSuministrosRecibidosImpl
   ) {}
 
-  @Authorities([INN_AUTHORITIES.SUMINISTROS_PACIENTE.DISABLED_1])
+  @Authorities([INN_AUTHORITIES.SUMINISTROS_PACIENTE.GESTIONAR])
   @Get('listo-para-entrega/:ordenSuministrosId')
   async suministrosListosParaEntrega(
     @Param('ordenSuministrosId') ordenSuministrosId: number
@@ -31,7 +31,7 @@ export class SuministrosController {
     }
   }
 
-  @Authorities([INN_AUTHORITIES.SUMINISTROS_PACIENTE.DISABLED_1])
+  @Authorities([INN_AUTHORITIES.SUMINISTROS_PACIENTE.GESTIONAR])
   @Put('recibir')
   async recibirSuministros(
     @Body() payload: SumPacRecibidoPayload[],
@@ -44,7 +44,7 @@ export class SuministrosController {
     }
   }
 
-  @Authorities([INN_AUTHORITIES.SUMINISTROS_PACIENTE.DISABLED_1])
+  @Authorities([INN_AUTHORITIES.SUMINISTROS_PACIENTE.GESTIONAR])
   @Put('modificar-recibidos')
   async modificarSuministrosRecibidos(
     @Body() payload: SumPacModifiRecibiPayload

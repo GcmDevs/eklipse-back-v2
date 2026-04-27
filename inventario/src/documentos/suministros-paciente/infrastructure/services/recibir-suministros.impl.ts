@@ -33,21 +33,23 @@ export class RecibirSuministrosImpl extends BaseSource {
       await this.qr.connect();
       await this.qr.startTransaction();
 
+      const despachadorIdDecoded = RSAServices.decryptId(despachadorId);
+
       for (let index = 0; index < suministros.length; index++) {
         const el = suministros[index];
-        await this.qr.query(recibirSuministroQuery(el.id, el.cantidadRecibida, this.auth.id));
+        await this.qr.query(
+          recibirSuministroQuery(el.id, el.cantidadRecibida, despachadorIdDecoded)
+        );
       }
 
       const rp = this.qr.manager.getRepository(SuministroPacienteRecibidoOrm);
-
-      const despachadorIdDecoded = RSAServices.decryptId(despachadorId);
 
       const mod = await rp.findOne({ where: { ordenSuministrosId } });
 
       if (!mod) throw new Error('No se encontró la orden de suministro lista para entrega');
 
-      mod.usuarioEntregaId = despachadorIdDecoded;
-      mod.usuarioRecibeId = this.auth.id;
+      mod.usuarioEntregaId = this.auth.id;
+      mod.usuarioRecibeId = despachadorIdDecoded;
       mod.fechaEntrega = new Date();
 
       await rp.save(mod);
