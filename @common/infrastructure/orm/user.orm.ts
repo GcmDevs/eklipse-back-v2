@@ -32,6 +32,9 @@ export class _PrivSecUserOrm {
   @Column({ name: 'USUESTADO' })
   statusCode: number;
 
+  @Column({ name: 'USUULTAUT' })
+  lastAuth: Date;
+
   @ManyToMany(() => _PrivSecAuthOrm, authority => authority.users)
   @JoinTable({
     name: 'GCMUSUPERMISO',
