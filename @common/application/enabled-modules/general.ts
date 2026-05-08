@@ -1,4 +1,4 @@
-import { GEN_AUTHORITIES } from '@gen/authorities';
+import { GEN_AUTHORITIES } from "../../../general/authorities";
 
 export function enabledModules_GENERAL(authorities: string[]) {
   let response: string[] = [];

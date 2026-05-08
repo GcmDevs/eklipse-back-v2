@@ -22,10 +22,17 @@
       "@rsa/*": ["../rsa/*"],
       "@common/*": ["../@common/*"],
       "@authorities": ["./authorities"],
-      "@types/*": ["./@types/*"],
+      "@ctypes/*": ["./@types/*"],
       "@orm/*": ["./@orm/*"],
-      "@gen/*": ["./src/*"]
+      "@hpn/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "../@common/**/*"]
+  "include": [
+    "src/**/*",
+    "@common/**/*",
+    "@types/**/*",
+    "@orm/**/*",
+    "authorities/**/*",
+    "../@common/**/*"
+  ]
 }

@@ -1,10 +1,10 @@
-import { generateApiUrlBase, GLOBAL_VALID_HOSTS, processEnv } from './env';
+import { generateApiUrlBase, GLOBAL_VALID_HOSTS, processEnv } from '@env';
 
 const production = processEnv.PRODUCTION;
 const showDocs = processEnv.SHOW_DOCS;
 const isHttps = processEnv.IS_HTTPS;
 const apiUrlBase = generateApiUrlBase();
-const port = 8100;
+const port = 8102;
 
 export const ENVIRONMENTS = {
   production,

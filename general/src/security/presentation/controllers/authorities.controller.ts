@@ -5,7 +5,7 @@ import {
   AuthoritiesServicesImpl,
 } from '@gen/security/infrastructure/services';
 import { Authorities, CommonGuards } from '@common/presentation/decorators';
-import { SEC_AUTHORITIES } from '@gen/authorities';
+import { SEC_AUTHORITIES } from '@authorities';
 import { CreateAuthorityDto } from '../dtos';
 
 @CommonGuards()

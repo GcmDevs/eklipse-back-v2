@@ -2,7 +2,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Controller, Post, Body } from '@nestjs/common';
 import { Authorities, CommonGuards } from '@common/presentation/decorators';
 import { SubModulesCrudImpl } from '@gen/security/infrastructure/services';
-import { SEC_AUTHORITIES } from '@gen/authorities';
+import { SEC_AUTHORITIES } from '@authorities';
 import { CreateSubModuleDto } from '../dtos';
 
 @CommonGuards()

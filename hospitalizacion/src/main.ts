@@ -8,8 +8,8 @@ import * as fs from 'fs';
 
 async function bootstrap() {
   const httpsOptions = {
-    cert: fs.readFileSync('./rsa/https/certificate.pem', 'utf8'),
-    key: fs.readFileSync('./rsa/https/certificate.key', 'utf8'),
+    cert: fs.readFileSync('../rsa/https/certificate.pem', 'utf8'),
+    key: fs.readFileSync('../rsa/https/certificate.key', 'utf8'),
   };
 
   const app = await NestFactory.create<NestExpressApplication>(
@@ -24,7 +24,7 @@ async function bootstrap() {
     })
   );
 
-  app.useStaticAssets('./public', {
+  app.useStaticAssets('../public', {
     prefix: '/public',
     index: false,
   });
