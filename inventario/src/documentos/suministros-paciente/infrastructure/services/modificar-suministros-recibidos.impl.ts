@@ -3,9 +3,13 @@ import { BaseSource } from '@common/infrastructure/services';
 import { SumPacDto, SumPacModifiRecibiPayload } from '../../presentation/dtos';
 import { findSuministrosByIdQuery, recibirSuministroQuery } from '../queries';
 import { SuministroPacienteRecibidoOrm } from '@inn/orm/inn/documentos';
+import { RSAServices } from '@common/application/services';
 
 export class ModificarSuministrosRecibidosImpl extends BaseSource {
-  public async execute(payload: SumPacModifiRecibiPayload): Promise<boolean> {
+  public async execute(
+    payload: SumPacModifiRecibiPayload,
+    despachadorId: string
+  ): Promise<boolean> {
     const arrWithIds = cloneDeep(payload.suministros).map(item => item.id);
 
     const suministros: SumPacDto[] = await this.conn.query(findSuministrosByIdQuery(arrWithIds));
@@ -34,6 +38,8 @@ export class ModificarSuministrosRecibidosImpl extends BaseSource {
       await this.qr.connect();
       await this.qr.startTransaction();
 
+      const despachadorIdDecoded = RSAServices.decryptId(despachadorId);
+
       const rp = this.qr.manager.getRepository(SuministroPacienteRecibidoOrm);
 
       const modificacion = await rp.findOne({
@@ -44,11 +50,11 @@ export class ModificarSuministrosRecibidosImpl extends BaseSource {
         for (let index = 0; index < suministros.length; index++) {
           const el = suministros[index];
           await this.qr.query(
-            recibirSuministroQuery(el.id, el.cantidadRecibidaModificada, this.auth.id)
+            recibirSuministroQuery(el.id, el.cantidadRecibidaModificada, despachadorIdDecoded)
           );
         }
 
-        modificacion.usuarioModificaId = this.auth.id;
+        modificacion.usuarioModificaId = despachadorIdDecoded;
         modificacion.fechaModificacion = new Date();
 
         await rp.save(modificacion);

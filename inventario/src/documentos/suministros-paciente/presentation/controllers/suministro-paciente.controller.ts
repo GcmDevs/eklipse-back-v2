@@ -1,5 +1,5 @@
 import { ApiTags } from '@nestjs/swagger';
-import { BadRequestException, Body, Controller, Get, Param, Put, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Param, Patch, Query } from '@nestjs/common';
 import { Authorities, CommonGuards } from '@common/presentation/decorators';
 import { SumPacModifiRecibiPayload, SumPacRecibidoPayload } from '../dtos';
 import { INN_AUTHORITIES } from '@inn/authorities';
@@ -20,19 +20,20 @@ export class SuministrosController {
   ) {}
 
   @Authorities([INN_AUTHORITIES.SUMINISTROS_PACIENTE.GESTIONAR])
-  @Get('listo-para-entrega/:ordenSuministrosId')
+  @Patch('listo-para-entrega/:ordenSuministrosId')
   async suministrosListosParaEntrega(
-    @Param('ordenSuministrosId') ordenSuministrosId: number
+    @Param('ordenSuministrosId') ordenSuministrosId: number,
+    @Body() payload: SumPacRecibidoPayload[]
   ): Promise<boolean> {
     try {
-      return this._suministrosListosEntrega.execute(+ordenSuministrosId);
+      return this._suministrosListosEntrega.execute(+ordenSuministrosId, payload);
     } catch (error: any) {
       throw new BadRequestException(error.message);
     }
   }
 
   @Authorities([INN_AUTHORITIES.SUMINISTROS_PACIENTE.GESTIONAR])
-  @Put('recibir')
+  @Patch('recibir')
   async recibirSuministros(
     @Body() payload: SumPacRecibidoPayload[],
     @Query('despachadorId') despachadorId: string
@@ -45,12 +46,13 @@ export class SuministrosController {
   }
 
   @Authorities([INN_AUTHORITIES.SUMINISTROS_PACIENTE.GESTIONAR])
-  @Put('modificar-recibidos')
+  @Patch('modificar-recibidos')
   async modificarSuministrosRecibidos(
-    @Body() payload: SumPacModifiRecibiPayload
+    @Body() payload: SumPacModifiRecibiPayload,
+    @Query('despachadorId') despachadorId: string
   ): Promise<boolean> {
     try {
-      return this._modificarRecibidos.execute(payload);
+      return this._modificarRecibidos.execute(payload, despachadorId);
     } catch (error: any) {
       throw new BadRequestException(error.message);
     }

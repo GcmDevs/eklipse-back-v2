@@ -17,7 +17,7 @@ export class RecibirSuministrosImpl extends BaseSource {
       if (!i) ordenSuministrosId = suministro.ordenId;
       const isSameOrden = suministro.ordenId !== ordenSuministrosId;
       if (isSameOrden) throw new Error('No todos los items pertenecen a la misma orden');
-      if (suministro.recibidoPor) throw new Error('Uno de los items fue recibido previamente');
+      //if (suministro.recibidoPor) throw new Error('Uno de los items fue recibido previamente');
       const sumRecArr = payload.filter(sumRec => sumRec.id === suministro.id);
       if (sumRecArr.length) suministro.cantidadRecibida = sumRecArr[0].cantidad;
       if ([null, undefined].indexOf(suministro.cantidadRecibida) >= 0) {

@@ -1,9 +1,11 @@
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { SumPacModule } from './documentos/suministros-paciente/module';
+import { MAOSModule } from './maos/module';
 
 const config = [
   // --- AVOID NOWRAP --- //
+  { name: 'Materiales osteosintesis', url: 'docs/maos', version: `1.0`, modules: [MAOSModule] },
   { name: 'Suministros paciente', url: 'docs/sumpac', version: `1.0`, modules: [SumPacModule] },
 ];
 
