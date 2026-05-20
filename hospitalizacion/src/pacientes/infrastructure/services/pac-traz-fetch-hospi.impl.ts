@@ -5,6 +5,7 @@ import { PacienteTrazadorRes } from '@hpn/pacientes/application/responses';
 import { PacientePreAltaOrm, PacTrazEncuestaOrm } from '../orm/pacientes-trazadores';
 import { dataToPacienteTrazadorRes } from '../factories';
 import { EstanciaOrm } from '@orm/hpn';
+import { ultimoDiagnosticoPrincipalByIngresoIdQuery, UltimoDiagnosticoRes } from '../queries';
 
 @Injectable()
 export class PacTrazFetchPacientesPreAltaImpl extends BaseSource {
@@ -42,12 +43,17 @@ export class PacTrazFetchPacientesPreAltaImpl extends BaseSource {
       pacientesPreAlta.some(p => p.ingresoId === ea.ingresoId)
     );
 
+    const ultimosDiagnosticos: UltimoDiagnosticoRes[] = await this.conn.query(
+      ultimoDiagnosticoPrincipalByIngresoIdQuery(filteredByPacientePreAlta.map(ea => ea.ingresoId))
+    );
+
     return filteredByPacientePreAlta.map(ea =>
-      dataToPacienteTrazadorRes(
-        ea,
-        pacientesPreAlta.find(p => p.ingresoId === ea.ingresoId),
-        encuestas.find(e => e.ingresoId === ea.ingresoId)
-      )
+      dataToPacienteTrazadorRes({
+        estancia: ea,
+        pacientePreAlta: pacientesPreAlta.find(p => p.ingresoId === ea.ingresoId),
+        encuesta: encuestas.find(e => e.ingresoId === ea.ingresoId),
+        ultimoDiagnostico: ultimosDiagnosticos.find(d => d.ingresoId === ea.ingresoId),
+      })
     );
   }
 }

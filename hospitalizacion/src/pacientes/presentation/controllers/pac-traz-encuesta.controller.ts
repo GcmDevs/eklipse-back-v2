@@ -29,7 +29,7 @@ export class EncuestaController {
     }
   }
 
-  @ApiOperation({ summary: 'Registra las respuestas dee la encuesta uno por uno.' })
+  @ApiOperation({ summary: 'Registra las respuestas de la encuesta uno por uno.' })
   @ApiResponse({ status: 201, description: 'Respuesta almacenada exitosamente.' })
   @Post('encuesta/one-by-one')
   async realizarEncuesta(@Body() body: RespuestaPacienteTrazadorDto) {

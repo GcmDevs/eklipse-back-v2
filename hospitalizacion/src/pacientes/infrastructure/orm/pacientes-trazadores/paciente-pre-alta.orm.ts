@@ -33,7 +33,7 @@ export class PacientePreAltaOrm {
   fechaCreacion: Date;
 
   @Column({ name: 'HORA' })
-  hora: number;
+  horaAltaEstimada: number;
 
   @Column({ name: 'OBSERVACION' })
   observacion: string;

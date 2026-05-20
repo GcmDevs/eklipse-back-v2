@@ -21,6 +21,28 @@ export class PacTrazRespuestaRes {
   pregunta: PacTrazPreguntaRes;
 }
 
+export class PacTrazMedicoDiagnosRes {
+  @ApiProperty()
+  documento: string;
+  @ApiProperty()
+  nombre: string;
+}
+
+export class PacTrazUltimoDiagnosticoPrincipalRes {
+  @ApiProperty()
+  id: number;
+  @ApiProperty()
+  codigo: string;
+  @ApiProperty()
+  descripcion: string;
+  @ApiProperty()
+  observaciones: string;
+  @ApiProperty()
+  fecha: Date;
+  @ApiProperty({ type: PacTrazMedicoDiagnosRes })
+  medico: PacTrazMedicoDiagnosRes;
+}
+
 export class PacienteTrazadorRes {
   @ApiProperty()
   id: number;
@@ -42,4 +64,10 @@ export class PacienteTrazadorRes {
   identificacionPreAlta: string;
   @ApiProperty({ type: BasicTypeRes })
   estado: PacTrazEncEstadoType;
+  @ApiProperty({ type: PacTrazUltimoDiagnosticoPrincipalRes })
+  ultimoDiagnosticoPrincipal: PacTrazUltimoDiagnosticoPrincipalRes;
+  @ApiProperty()
+  fechaPrealta: Date;
+  @ApiProperty()
+  altaEstimada: string;
 }
