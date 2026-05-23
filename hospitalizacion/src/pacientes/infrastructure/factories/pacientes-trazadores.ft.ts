@@ -16,6 +16,11 @@ export const dataToPacienteTrazadorRes = (data: {
   const estadoCode = !encuesta ? 1 : encuesta.isFinalizada ? 3 : 2;
   return {
     id: estancia.ingreso.paciente.id,
+    centro: {
+      id: estancia.ingreso.centro.id,
+      codigo: estancia.ingreso.centro.codigo,
+      nombre: estancia.ingreso.centro.nombre,
+    },
     ingresoId: estancia.ingreso.id,
     nombreCompleto: estancia.ingreso.paciente.nombreCompleto,
     documento: {

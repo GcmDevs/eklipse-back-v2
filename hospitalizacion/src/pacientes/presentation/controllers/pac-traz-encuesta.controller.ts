@@ -1,7 +1,11 @@
 import { BadRequestException, Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { CommonGuards } from '@common/presentation/decorators';
-import { PacienteTrazadorRes, PacTrazRespuestaRes } from '@hpn/pacientes/application/responses';
+import {
+  PacienteTrazadorRes,
+  PacTrazAvancesEncuestaRes,
+  PacTrazRespuestaRes,
+} from '@hpn/pacientes/application/responses';
 import { RespuestaPacienteTrazadorDto } from '../dtos';
 import {
   PacTrazAvancesEncuestaImpl,
@@ -41,14 +45,14 @@ export class EncuestaController {
   }
 
   @ApiOperation({ summary: 'Devuelve los valores respondidos en la encuesta.' })
-  @ApiResponse({ status: 200, isArray: true, type: PacTrazRespuestaRes })
+  @ApiResponse({ status: 200, type: PacTrazAvancesEncuestaRes })
   @ApiQuery({ name: 'addInfoAdicional', required: false })
   @Get('encuesta/avances/:pacienteId/:ingresoId')
   async avancesEncuesta(
     @Param('pacienteId') pacienteId: number,
     @Param('ingresoId') ingresoId: number,
     @Query('addInfoAdicional') addInfoAdicional: boolean
-  ): Promise<PacTrazRespuestaRes[]> {
+  ): Promise<PacTrazAvancesEncuestaRes> {
     try {
       return await this._avancesEncuesta.execute(+pacienteId, +ingresoId, addInfoAdicional);
     } catch (error: any) {

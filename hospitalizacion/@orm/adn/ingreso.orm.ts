@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 't
 import { CausaIngresoCode, FormaIngresoCode, TipoIngresoCode } from '@ctypes/adn/ingresos';
 import { DetalleContratoOrm } from '@orm/gen/contratos';
 import { PacienteOrm } from '@orm/gen/pacientes';
+import { CentroOrm } from './centro.orm';
 
 @Entity('ADNINGRESO')
 export class IngresoOrm {
@@ -29,6 +30,13 @@ export class IngresoOrm {
   @ManyToOne(() => PacienteOrm)
   @JoinColumn([{ name: 'GENPACIEN', referencedColumnName: 'id' }])
   paciente: PacienteOrm;
+
+  @Column({ name: 'ADNCENATE' })
+  centroId: number;
+
+  @ManyToOne(() => CentroOrm)
+  @JoinColumn([{ name: 'ADNCENATE', referencedColumnName: 'id' }])
+  centro: CentroOrm;
 
   @Column({ name: 'GENDETCON' })
   detalleContratoId: number;

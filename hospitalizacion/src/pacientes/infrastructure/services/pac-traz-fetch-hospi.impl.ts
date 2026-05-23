@@ -20,6 +20,7 @@ export class PacTrazFetchPacientesPreAltaImpl extends BaseSource {
         'ingreso',
         'cama',
         'cama.subgrupo',
+        'ingreso.centro',
         'ingreso.paciente',
         'ingreso.detalleContrato',
       ],

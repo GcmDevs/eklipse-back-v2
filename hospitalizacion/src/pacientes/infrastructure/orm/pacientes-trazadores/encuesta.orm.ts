@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { UsuarioOrm } from '@orm/gen/usuarios';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 
 @Entity({ name: 'EKHPNPACTRAZENCUESTA' })
 export class PacTrazEncuestaOrm {
@@ -13,6 +14,10 @@ export class PacTrazEncuestaOrm {
 
   @Column({ name: 'GENUSUARIO' })
   usuarioId: number;
+
+  @ManyToOne(() => UsuarioOrm)
+  @JoinColumn({ name: 'GENUSUARIO', referencedColumnName: 'id' })
+  usuario: UsuarioOrm;
 
   @Column({ name: 'FECHACREACION' })
   fechaCreacion: Date;

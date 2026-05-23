@@ -1,9 +1,9 @@
-import { BaseSource } from '@common/infrastructure/services';
-import { Injectable } from '@nestjs/common';
-import { EstanciaOrm } from '@orm/hpn';
 import { IsNull } from 'typeorm';
-import { dataToPacienteHospitalizadoRes } from '../factories';
+import { EstanciaOrm } from '@orm/hpn';
+import { Injectable } from '@nestjs/common';
 import { PacienteHospitalizadoRes } from '@hpn/pacientes/application/responses';
+import { dataToPacienteHospitalizadoRes } from '../factories';
+import { BaseSource } from '@common/infrastructure/services';
 
 @Injectable()
 export class FetchPacientesHospitalizadosImpl extends BaseSource {
