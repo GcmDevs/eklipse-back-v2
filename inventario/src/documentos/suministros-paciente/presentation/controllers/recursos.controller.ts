@@ -3,6 +3,9 @@ import { BadRequestException, Controller, Get, Param } from '@nestjs/common';
 import { GCM_CONTEXTS, GcmContextCode, gcmContextFactory } from '@common/domain/types';
 import { switchConn } from '@common/infrastructure/services';
 import { SRDCentroOrm } from '@inn/orm/shared-bd';
+import { PacienteHospitalizadoI, pacientesHospitalizadosQuery } from '../../infrastructure/queries';
+import { SuministroPacienteRecibidoOrm } from '@inn/orm/inn/documentos';
+import { In, IsNull } from 'typeorm';
 
 @ApiTags('Recursos')
 @Controller('v1/inn/suministros-paciente/recursos')
@@ -12,16 +15,23 @@ export class RecursosController {
     try {
       const ctx = gcmContextFactory(contextCode);
       const conn = switchConn(ctx);
-      const query = `SELECT P.OID pacienteId, I.AINCONSEC consecutivoIngreso,
-      P.GPANOMCOM nombreCompletoPaciente, P.PACNUMDOC cedulaPaciente, C.HCACODIGO codigoCama,
-      SG.HSUCODIGO codigoSubgrupo, SG.HSUNOMBRE nombreSubgrupo, I.ADNCENATE centroId
-      FROM HPNESTANC E INNER JOIN ADNINGRESO I ON E.ADNINGRES = I.OID
-      INNER JOIN GENPACIEN P ON I.GENPACIEN = P.OID
-      INNER JOIN HPNDEFCAM C ON I.HPNDEFCAM = C.OID
-      INNER JOIN HPNSUBGRU SG ON C.HPNSUBGRU = SG.OID
-      WHERE E.HESFECSAL IS NULL AND E.ADNINGRES IS NOT NULL
-      AND (C.HCAESTADO < 3) AND I.AINURGCON <> 1`;
-      return await conn.query(query);
+      const results: PacienteHospitalizadoI[] = await conn.query(pacientesHospitalizadosQuery());
+
+      const sumPacRecRp = conn.manager.getRepository(SuministroPacienteRecibidoOrm);
+
+      const ingresosIds = results.map(r => r.ingresoId);
+
+      const suministrosRecibidos = await sumPacRecRp.find({
+        where: { ingresoId: In(ingresosIds), usuarioRecibeId: IsNull() },
+      });
+
+      results.map(r => {
+        if (suministrosRecibidos.some(s => s.ingresoId === r.ingresoId)) {
+          r.tieneSuministrosPorEntregar = true;
+        } else r.tieneSuministrosPorEntregar = false;
+      });
+
+      return results;
     } catch (error: any) {
       throw new BadRequestException(error.message);
     }

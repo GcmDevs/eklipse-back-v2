@@ -32,7 +32,7 @@ export const dataToFetchSumPac = (estancia: EstanciaOrm, documentos: SuministroP
         consecutivo: sumPac.documento.consecutivo,
         fechaCreacion: sumPac.documento.fechaCreacion,
         fechaConfirmacion: sumPac.documento.fechaConfirmacion,
-        isListoParaEntrega: sumPac.isListoParaEntrega,
+        isListoParaEntrega: sumPac.isListoParaEntrega || false,
         creadoPor: {
           nombreCompleto: sumPac.documento.creadoPor.nombreCompleto.trim(),
           numeroDocumento: sumPac.documento.creadoPor.cedula,

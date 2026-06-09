@@ -12,6 +12,12 @@ export class SuministrosListosParaEntregaImpl extends BaseSource {
     const arrWithIds = cloneDeep(payload).map(item => item.id);
     const suministros: SumPacDto[] = await this.conn.query(findSuministrosByIdQuery(arrWithIds));
 
+    const ingresoId = (
+      await this.conn.query(
+        `select ADNINGRESO from INNCSUMPA where OID =${suministros[0].ordenId} order by oid desc;`
+      )
+    )[0].ADNINGRESO;
+
     suministros.map((suministro, i) => {
       if (!i) ordenSuministrosId = suministro.ordenId;
       const isSameOrden = suministro.ordenId !== ordenSuministrosId;
@@ -36,6 +42,12 @@ export class SuministrosListosParaEntregaImpl extends BaseSource {
 
       const despachadorIdDecoded = this.auth.id;
 
+      const exist = await rp.findOne({ where: { ordenSuministrosId } });
+
+      if (exist) {
+        throw new Error('Ya se ha registrado esta orden de suministro como lista para entrega');
+      }
+
       for (let index = 0; index < suministros.length; index++) {
         const el = suministros[index];
         await this.qr.query(
@@ -43,15 +55,10 @@ export class SuministrosListosParaEntregaImpl extends BaseSource {
         );
       }
 
-      const exist = await rp.findOne({ where: { ordenSuministrosId } });
-
-      if (exist) {
-        throw new Error('Ya se ha registrado esta orden de suministro como lista para entrega');
-      }
-
       const newMod = new SuministroPacienteRecibidoOrm();
       newMod.ordenSuministrosId = ordenSuministrosId;
       newMod.usuarioEntregaId = this.auth.id;
+      newMod.ingresoId = ingresoId;
 
       await rp.save(newMod);
 

@@ -8,6 +8,9 @@ export class SuministroPacienteRecibidoOrm {
   @ViewColumn({ name: 'INNCSUMPA' })
   ordenSuministrosId: number;
 
+  @ViewColumn({ name: 'ADNINGRESO' })
+  ingresoId: number;
+
   @ViewColumn({ name: 'GENUSUENT' })
   usuarioEntregaId: number;
 
