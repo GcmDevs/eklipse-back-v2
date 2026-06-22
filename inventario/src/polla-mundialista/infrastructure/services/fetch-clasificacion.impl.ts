@@ -1,13 +1,16 @@
 import { BaseSource } from '@common/infrastructure/services';
 import { PollaMundialistaApuestaOrm, PollaMundialistaOrm } from '@inn/orm/inn/polla-mundialista';
-import { ClasificacionUsuarioRes } from '@inn/polla-mundialista/application/responses';
+import {
+  ClasificacionUsuarioRes,
+  DefiClasifiRes,
+} from '@inn/polla-mundialista/application/responses';
 import { Injectable } from '@nestjs/common';
 import { calcularPuntosPronostico } from '../factories';
 import { orderBy } from 'lodash';
 
 @Injectable()
 export class FetchClasificacionImpl extends BaseSource {
-  async execute(): Promise<ClasificacionUsuarioRes[]> {
+  async execute(): Promise<DefiClasifiRes> {
     const partidoRp = this.ekConn.getRepository(PollaMundialistaOrm);
     const apuestaRp = this.conn.getRepository(PollaMundialistaApuestaOrm);
 
@@ -33,13 +36,15 @@ export class FetchClasificacionImpl extends BaseSource {
       return apuesta;
     });
 
-    const clasificacion = new Map<number, ClasificacionUsuarioRes>();
+    const tempClasificacion = new Map<number, ClasificacionUsuarioRes>();
 
     apuestas.forEach(apuesta => {
-      let usuario = clasificacion.get(apuesta.usuarioId);
+      let usuario = tempClasificacion.get(apuesta.usuarioId);
 
       if (!usuario) {
         usuario = {
+          id: apuesta.id,
+          posicion: 0,
           usuarioId: apuesta.usuarioId,
           cedula: apuesta.usuario.cedula,
           nombreCompleto: apuesta.usuario.nombreCompleto,
@@ -48,7 +53,7 @@ export class FetchClasificacionImpl extends BaseSource {
           aciertos: 0,
           pendientes: 0,
         };
-        clasificacion.set(apuesta.usuarioId, usuario);
+        tempClasificacion.set(apuesta.usuarioId, usuario);
       }
 
       usuario.puntos += calcularPuntosPronostico(
@@ -86,11 +91,21 @@ export class FetchClasificacionImpl extends BaseSource {
       );
     });
 
-    const results = [...clasificacion.values()].sort(
+    const results = [...tempClasificacion.values()].sort(
       (usuarioA, usuarioB) =>
         usuarioB.puntos - usuarioA.puntos || usuarioA.usuarioId - usuarioB.usuarioId
     );
 
-    return orderBy(results, 'puntos', 'desc');
+    const clasificacion = orderBy(results, ['puntos', 'id'], 'desc');
+
+    clasificacion.map((usuario, index) => (usuario.posicion = index + 1));
+
+    return {
+      colaboradoresActivos: clasificacion.length,
+      clasificacion: clasificacion.slice(0, 5),
+      miPosicion: clasificacion.find(
+        usuario => usuario.usuarioId === this.getTokenDecoded().user.id
+      ),
+    };
   }
 }

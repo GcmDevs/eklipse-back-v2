@@ -1,6 +1,6 @@
 import { BadRequestException, Controller, Get } from '@nestjs/common';
 import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ClasificacionUsuarioRes } from '../../application/responses';
+import { DefiClasifiRes } from '../../application/responses';
 import { FetchClasificacionImpl } from '../../infrastructure/services';
 
 @ApiTags('Polla mundialista')
@@ -8,9 +8,9 @@ import { FetchClasificacionImpl } from '../../infrastructure/services';
 export class ClasificacionController {
   constructor(private _fetchClasificacion: FetchClasificacionImpl) {}
 
-  @ApiResponse({ status: 200, type: ClasificacionUsuarioRes, isArray: true })
+  @ApiResponse({ status: 200, type: DefiClasifiRes })
   @Get()
-  async fetch(): Promise<ClasificacionUsuarioRes[]> {
+  async fetch(): Promise<DefiClasifiRes> {
     try {
       return await this._fetchClasificacion.execute();
     } catch (error: any) {

@@ -10,8 +10,6 @@ export class PollaMundialistaApuestaOrm {
   @Column({ name: 'EKPOLMUN' })
   pollaMundialistaId: number;
 
-  pollaMundialista: PollaMundialistaOrm;
-
   @Column({ name: 'GENUSUARIO' })
   usuarioId: number;
 
@@ -24,4 +22,6 @@ export class PollaMundialistaApuestaOrm {
 
   @Column({ name: 'VISITAPREDI' })
   visitantePrediccion: number;
+
+  pollaMundialista: PollaMundialistaOrm;
 }

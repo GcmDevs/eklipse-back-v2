@@ -31,4 +31,9 @@ export class PollaMundialistaOrm {
 
   @Column({ name: 'ISCERRADO' })
   isCerrado: boolean;
+
+  localPrediccion: number;
+  visitantePrediccion: number;
+  puntaje: number;
+  estado: 'Pendiente' | 'Guardado' | 'Cerrado';
 }
