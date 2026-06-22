@@ -37,6 +37,7 @@ export class AuthoritiesServicesImpl extends BaseSource {
     enabledModules: string[];
   }> {
     try {
+      if (!this.auth.isDim) return { authorities: [], onlyCodes: [], enabledModules: [] };
       const myAuthorities = await fetchAuthsByUser({ id: this.auth.id, ctx: this.auth.context });
       return { ...myAuthorities, enabledModules: enabledModules(myAuthorities.onlyCodes) };
     } catch (error: any) {

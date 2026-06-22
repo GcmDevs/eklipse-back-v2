@@ -13,6 +13,7 @@ import { switchConn } from '@common/infrastructure/services';
 import { gcmContextFactory } from '@common/domain/types';
 import { ENVIRONMENTS } from '@gen/app.environments';
 import { processEnv } from '@env';
+import { _PrivSecEkUserOrm } from '@common/infrastructure/orm/ek-user.orm';
 
 @Injectable()
 export class LoginUserImpl {
@@ -27,9 +28,14 @@ export class LoginUserImpl {
       await qr.startTransaction();
 
       const userRp = qr.manager.getRepository(_PrivSecUserOrm);
+      const ekUserRp = qr.manager.getRepository(_PrivSecEkUserOrm);
       const lastAuthRp = qr.manager.getRepository(LastAuthOrm);
 
-      const user = await userRp.findOne({
+      let user: _PrivSecUserOrm | _PrivSecEkUserOrm | null = null;
+      let matchingPasswords = false;
+      let isDimUser = true;
+
+      user = await userRp.findOne({
         where: [{ document: username }],
         select: {
           id: true,
@@ -37,8 +43,25 @@ export class LoginUserImpl {
           fullName: true,
           password: true,
           statusCode: true,
+          lastAuth: true,
         },
       });
+
+      if (!user) {
+        // Si el usuario no es de dinamica debe ser de eklipse
+        user = await ekUserRp.findOne({
+          where: [{ document: username }],
+          select: {
+            id: true,
+            document: true,
+            fullName: true,
+            password: true,
+            statusCode: true,
+            lastAuth: true,
+          },
+        });
+        if (user) isDimUser = false;
+      }
 
       if (!user) throw new Error(errorMsg);
 
@@ -48,13 +71,18 @@ export class LoginUserImpl {
         );
       }
 
-      const matchingPasswords = await cryptoServices.compareDimPassword(password, user.password);
+      if (isDimUser) {
+        matchingPasswords = await cryptoServices.compareDimPassword(password, user.password);
+      } else {
+        matchingPasswords = await cryptoServices.compare(password, user.password);
+      }
 
       if (matchingPasswords) {
         const payload: IAuthToken = {
           jti: RSAServices.encryptId(user.id),
           dcm: user.document,
           fnm: user.fullName,
+          dim: isDimUser,
           sub: context,
         };
 
@@ -63,7 +91,7 @@ export class LoginUserImpl {
           algorithm: 'HS512',
         });
 
-        if (!expiredSuperFast) {
+        if (!expiredSuperFast && isDimUser) {
           let newLastAuth = await lastAuthRp.findOne({ where: { user } });
 
           if (!newLastAuth) {
@@ -88,8 +116,12 @@ export class LoginUserImpl {
           user.lastAuth = new Date();
 
           if (ENVIRONMENTS.production) {
-            await userRp.save(user);
-            await lastAuthRp.save(newLastAuth);
+            if (isDimUser) {
+              await userRp.save(user);
+              await lastAuthRp.save(newLastAuth);
+            } else {
+              await ekUserRp.save(user);
+            }
           }
         }
 

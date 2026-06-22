@@ -64,7 +64,7 @@ export class ModificarSuministrosRecibidosImpl extends BaseSource {
       } else {
         return false;
       }
-    } catch (error) {
+    } catch (error: any) {
       await this.qr.rollbackTransaction();
     } finally {
       await this.qr.release();

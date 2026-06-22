@@ -7,6 +7,7 @@ import { PacienteOrm } from './paciente.orm';
 import { ContratoOrm } from './contrato.orm';
 import { TerceroOrm } from './tercero.orm';
 import { UsuarioOrm } from './usuario.orm';
+import { UsuarioExternoOrm } from './usuario-externo.orm';
 
 export * from './usuario-dependencia.orm';
 export * from './area-servicio.orm';
@@ -17,6 +18,7 @@ export * from './paciente.orm';
 export * from './contrato.orm';
 export * from './tercero.orm';
 export * from './usuario.orm';
+export * from './usuario-externo.orm';
 
 export const ORM_GEN_ENTITIES = [
   UsuarioDependenciaOrm,
@@ -28,4 +30,5 @@ export const ORM_GEN_ENTITIES = [
   TerceroOrm,
   UsuarioOrm,
   ContratoOrm,
+  UsuarioExternoOrm,
 ];

@@ -1,0 +1,96 @@
+import { BaseSource } from '@common/infrastructure/services';
+import { PollaMundialistaApuestaOrm, PollaMundialistaOrm } from '@inn/orm/inn/polla-mundialista';
+import { ClasificacionUsuarioRes } from '@inn/polla-mundialista/application/responses';
+import { Injectable } from '@nestjs/common';
+import { calcularPuntosPronostico } from '../factories';
+import { orderBy } from 'lodash';
+
+@Injectable()
+export class FetchClasificacionImpl extends BaseSource {
+  async execute(): Promise<ClasificacionUsuarioRes[]> {
+    const partidoRp = this.ekConn.getRepository(PollaMundialistaOrm);
+    const apuestaRp = this.conn.getRepository(PollaMundialistaApuestaOrm);
+
+    const partidos = await partidoRp.find();
+
+    const apuestas = await apuestaRp.find({
+      relations: ['usuario'],
+    });
+
+    apuestas.map(apuesta => {
+      const partido = partidos.find(
+        partido =>
+          partido.localMarcador === apuesta.localPrediccion &&
+          partido.visitanteMarcador === apuesta.visitantePrediccion
+      );
+
+      apuesta.pollaMundialista = partido;
+    });
+
+    apuestas.map(apuesta => {
+      const partido = partidos.find(partido => partido.id === apuesta.pollaMundialistaId);
+      apuesta.pollaMundialista = partido;
+      return apuesta;
+    });
+
+    const clasificacion = new Map<number, ClasificacionUsuarioRes>();
+
+    apuestas.forEach(apuesta => {
+      let usuario = clasificacion.get(apuesta.usuarioId);
+
+      if (!usuario) {
+        usuario = {
+          usuarioId: apuesta.usuarioId,
+          cedula: apuesta.usuario.cedula,
+          nombreCompleto: apuesta.usuario.nombreCompleto,
+          puntos: 0,
+          exactos: 0,
+          aciertos: 0,
+          pendientes: 0,
+        };
+        clasificacion.set(apuesta.usuarioId, usuario);
+      }
+
+      usuario.puntos += calcularPuntosPronostico(
+        apuesta.pollaMundialista.localMarcador,
+        apuesta.pollaMundialista.visitanteMarcador,
+        apuesta.localPrediccion,
+        apuesta.visitantePrediccion
+      );
+
+      usuario.exactos += calcularPuntosPronostico(
+        apuesta.pollaMundialista.localMarcador,
+        apuesta.pollaMundialista.visitanteMarcador,
+        apuesta.localPrediccion,
+        apuesta.visitantePrediccion,
+        true
+      );
+
+      usuario.aciertos += calcularPuntosPronostico(
+        apuesta.pollaMundialista.localMarcador,
+        apuesta.pollaMundialista.visitanteMarcador,
+        apuesta.localPrediccion,
+        apuesta.visitantePrediccion,
+        false,
+        true
+      );
+
+      usuario.pendientes += calcularPuntosPronostico(
+        apuesta.pollaMundialista.localMarcador,
+        apuesta.pollaMundialista.visitanteMarcador,
+        apuesta.localPrediccion,
+        apuesta.visitantePrediccion,
+        false,
+        false,
+        true
+      );
+    });
+
+    const results = [...clasificacion.values()].sort(
+      (usuarioA, usuarioB) =>
+        usuarioB.puntos - usuarioA.puntos || usuarioA.usuarioId - usuarioB.usuarioId
+    );
+
+    return orderBy(results, 'puntos', 'desc');
+  }
+}

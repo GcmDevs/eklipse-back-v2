@@ -12,6 +12,7 @@ export interface IAuthToken {
   sub: GcmContextCode;
   dcm: string;
   fnm: string;
+  dim: boolean;
   iat?: number;
   exp?: number;
 }
@@ -22,6 +23,7 @@ export interface ITokenDecoded {
     document: string;
     fullName: string;
   };
+  isDim: boolean;
   context: GcmContextType;
   createdAt: Date;
   expiredAt: Date;
@@ -38,19 +40,15 @@ const decodeToken = (token: string): ITokenDecoded => {
 
     const tkFt: ITokenDecoded = {
       user: {
-        id: 0,
-        document: '',
-        fullName: '',
+        id: RSAServices.decryptId(tkDecoded.jti),
+        document: tkDecoded.dcm,
+        fullName: tkDecoded.fnm,
       },
-      context: GCM_CONTEXTS.ALTACENTRO,
+      isDim: tkDecoded.dim,
+      context: gcmContextFactory(tkDecoded.sub),
       createdAt: _tokenDateToDate(tkDecoded.iat),
       expiredAt: _tokenDateToDate(tkDecoded.exp),
     };
-
-    tkFt.context = gcmContextFactory(tkDecoded.sub);
-    tkFt.user.id = RSAServices.decryptId(tkDecoded.jti);
-    tkFt.user.document = tkDecoded.dcm;
-    tkFt.user.fullName = tkDecoded.fnm;
 
     return tkFt;
   } catch (error: any) {

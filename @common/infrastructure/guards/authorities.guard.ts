@@ -13,7 +13,6 @@ export class AuthoritiesGuard implements CanActivate {
     if (!authorities) return true;
 
     const tk = context.switchToHttp().getRequest().headers.authorization.split(' ')[1];
-    const tkDcd = JWTServices.decodeToken(tk);
 
     let userAuthorities: string[] = [];
 
