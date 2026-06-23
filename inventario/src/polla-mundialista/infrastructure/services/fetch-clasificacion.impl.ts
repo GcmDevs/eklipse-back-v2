@@ -7,18 +7,27 @@ import {
 import { Injectable } from '@nestjs/common';
 import { calcularPuntosPronostico } from '../factories';
 import { orderBy } from 'lodash';
+import { _PrivSecEkUserOrm } from '@common/infrastructure/orm/ek-user.orm';
+import { In } from 'typeorm';
+import { UsuarioExternoOrm, UsuarioOrm } from '@inn/orm/gen';
 
 @Injectable()
 export class FetchClasificacionImpl extends BaseSource {
   async execute(): Promise<DefiClasifiRes> {
     const partidoRp = this.ekConn.getRepository(PollaMundialistaOrm);
     const apuestaRp = this.conn.getRepository(PollaMundialistaApuestaOrm);
+    const ekUsuarioRp = this.ekConn.getRepository(UsuarioExternoOrm);
+    const usuarioRp = this.conn.getRepository(UsuarioOrm);
 
     const partidos = await partidoRp.find();
 
-    const apuestas = await apuestaRp.find({
-      relations: ['usuario'],
-    });
+    const apuestas = await apuestaRp.find();
+
+    const usuariosIdsExternos = apuestas.filter(a => a.isExterno).map(a => a.usuarioId);
+    const usuariosIdsDinamica = apuestas.filter(a => !a.isExterno).map(a => a.usuarioId);
+
+    const usuariosDinamica = await usuarioRp.find({ where: { id: In(usuariosIdsDinamica) } });
+    const usuariosExternos = await ekUsuarioRp.find({ where: { id: In(usuariosIdsExternos) } });
 
     apuestas.map(apuesta => {
       const partido = partidos.find(
@@ -31,6 +40,9 @@ export class FetchClasificacionImpl extends BaseSource {
     });
 
     apuestas.map(apuesta => {
+      apuesta.usuario = apuesta.isExterno
+        ? usuariosExternos.find(ue => ue.id === apuesta.usuarioId)
+        : (usuariosDinamica.find(ud => ud.id === apuesta.usuarioId) as any);
       const partido = partidos.find(partido => partido.id === apuesta.pollaMundialistaId);
       apuesta.pollaMundialista = partido;
       return apuesta;

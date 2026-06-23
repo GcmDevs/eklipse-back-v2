@@ -14,6 +14,10 @@ export class AuthoritiesGuard implements CanActivate {
 
     const tk = context.switchToHttp().getRequest().headers.authorization.split(' ')[1];
 
+    const tkDcd = JWTServices.decodeToken(tk);
+
+    if (tkDcd.passWasReset) throw new Error('Debes cambiar tu contraseña antes de continuar');
+
     let userAuthorities: string[] = [];
 
     authorities.push(ADMIN_AUTHORITY);

@@ -1,6 +1,6 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('EKGENUSUARIO')
+@Entity('GENUSUEXT')
 export class _PrivSecEkUserOrm {
   @PrimaryGeneratedColumn({ name: 'OID' })
   id: number;
@@ -19,4 +19,7 @@ export class _PrivSecEkUserOrm {
 
   @Column({ name: 'LASTAUTH' })
   lastAuth: Date;
+
+  @Column({ name: 'ISRESET' })
+  passwordIsReset: boolean;
 }

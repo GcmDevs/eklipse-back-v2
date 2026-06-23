@@ -13,6 +13,7 @@ export interface IAuthToken {
   dcm: string;
   fnm: string;
   dim: boolean;
+  rst: boolean;
   iat?: number;
   exp?: number;
 }
@@ -24,6 +25,7 @@ export interface ITokenDecoded {
     fullName: string;
   };
   isDim: boolean;
+  passWasReset: boolean;
   context: GcmContextType;
   createdAt: Date;
   expiredAt: Date;
@@ -45,6 +47,7 @@ const decodeToken = (token: string): ITokenDecoded => {
         fullName: tkDecoded.fnm,
       },
       isDim: tkDecoded.dim,
+      passWasReset: tkDecoded.rst,
       context: gcmContextFactory(tkDecoded.sub),
       createdAt: _tokenDateToDate(tkDecoded.iat),
       expiredAt: _tokenDateToDate(tkDecoded.exp),

@@ -24,7 +24,7 @@ export const dataToSolicitudRes = (
     estado: estadoTypeFactory(data.estadoCode) as any,
     prioridad: prioridadTypeFactory(data.prioridadCode) as any,
     usuarioExterno: {
-      documento: usuarioExterno.documento,
+      documento: usuarioExterno.cedula,
       nombreCompleto: usuarioExterno.nombreCompleto,
     },
     usuarioResponsable: {

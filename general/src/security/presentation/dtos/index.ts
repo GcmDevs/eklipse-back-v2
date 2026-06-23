@@ -1,6 +1,7 @@
 import { IsString, MaxLength } from 'class-validator';
 
 export * from './login-user.dto';
+export * from './update-password.dto';
 
 export class CreateModuleDto {
   @IsString()

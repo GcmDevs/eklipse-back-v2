@@ -26,6 +26,7 @@ export class PronosticarPartidoImpl extends BaseSource {
         apuesta = apuestaRp.create({
           pollaMundialistaId: partidoId,
           usuarioId: this.auth.id,
+          isExterno: !this.auth.isDim,
         });
       }
 

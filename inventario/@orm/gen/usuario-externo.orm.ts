@@ -1,12 +1,12 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity('EKGENUSUARIO')
+@Entity('GENUSUEXT')
 export class UsuarioExternoOrm {
   @PrimaryGeneratedColumn({ name: 'OID' })
   id: number;
 
   @Column({ name: 'DOCUMENTO' })
-  documento: string;
+  cedula: string;
 
   @Column({ name: 'NOMCOM' })
   nombreCompleto: string;

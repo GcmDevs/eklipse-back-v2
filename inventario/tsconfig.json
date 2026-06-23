@@ -34,5 +34,6 @@
     "@orm/**/*",
     "authorities/**/*",
     "../@common/**/*"
-  ]
+  ],
+  "exclude": ["node_modules", "dist", "test", "ignored", "**/*spec.ts"]
 }

@@ -6,14 +6,14 @@ import {
   estadoUsuarioTypeFactory,
 } from '@gen/security/domain/types/gen/usuarios';
 import { cryptoServices, IAuthToken, RSAServices } from '@common/application/services';
+import { _PrivSecEkUserOrm } from '@common/infrastructure/orm/ek-user.orm';
 import { _PrivSecUserOrm } from '@common/infrastructure/orm/user.orm';
+import { gcmContextFactory, GcmContexts } from '@common/domain/types';
 import { LoginUserDto } from '@gen/security/presentation/dtos';
 import { LastAuthOrm } from '@gen/security/infrastructure/orm';
 import { switchConn } from '@common/infrastructure/services';
-import { gcmContextFactory } from '@common/domain/types';
 import { ENVIRONMENTS } from '@gen/app.environments';
 import { processEnv } from '@env';
-import { _PrivSecEkUserOrm } from '@common/infrastructure/orm/ek-user.orm';
 
 @Injectable()
 export class LoginUserImpl {
@@ -22,13 +22,19 @@ export class LoginUserImpl {
     const { username, password, context } = payload;
 
     const conn = switchConn(gcmContextFactory(payload.context));
+    const ekConn = switchConn(gcmContextFactory(GcmContexts.EKLIPSE));
+
     const qr = conn.createQueryRunner();
+    const ekQr = ekConn.createQueryRunner();
+
     await qr.connect();
+    await ekQr.connect();
     try {
       await qr.startTransaction();
+      await ekQr.startTransaction();
 
       const userRp = qr.manager.getRepository(_PrivSecUserOrm);
-      const ekUserRp = qr.manager.getRepository(_PrivSecEkUserOrm);
+      const ekUserRp = ekQr.manager.getRepository(_PrivSecEkUserOrm);
       const lastAuthRp = qr.manager.getRepository(LastAuthOrm);
 
       let user: _PrivSecUserOrm | _PrivSecEkUserOrm | null = null;
@@ -58,6 +64,7 @@ export class LoginUserImpl {
             password: true,
             statusCode: true,
             lastAuth: true,
+            passwordIsReset: true,
           },
         });
         if (user) isDimUser = false;
@@ -77,9 +84,12 @@ export class LoginUserImpl {
         matchingPasswords = await cryptoServices.compare(password, user.password);
       }
 
+      const passwordIsReset = !isDimUser ? (user as any).passwordIsReset : false;
+
       if (matchingPasswords) {
         const payload: IAuthToken = {
           jti: RSAServices.encryptId(user.id),
+          rst: passwordIsReset,
           dcm: user.document,
           fnm: user.fullName,
           dim: isDimUser,
@@ -87,7 +97,7 @@ export class LoginUserImpl {
         };
 
         const token = jwt.sign(payload, processEnv.JWT_SECRET_KEY, {
-          expiresIn: expiredSuperFast ? '1h' : fromMobile ? '30d' : '7d',
+          expiresIn: expiredSuperFast || passwordIsReset ? '1h' : fromMobile ? '30d' : '7d',
           algorithm: 'HS512',
         });
 
@@ -126,16 +136,19 @@ export class LoginUserImpl {
         }
 
         await qr.commitTransaction();
+        await ekQr.commitTransaction();
 
-        return { token };
+        return { token, passwordIsReset };
       } else {
         throw new Error(errorMsg);
       }
     } catch (error: any) {
       await qr.rollbackTransaction();
+      await ekQr.rollbackTransaction();
       throw new Error(error.message);
     } finally {
       await qr.release();
+      await ekQr.release();
     }
   }
 }

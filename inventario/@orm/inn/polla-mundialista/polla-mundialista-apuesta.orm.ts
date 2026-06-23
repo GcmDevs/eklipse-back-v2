@@ -23,5 +23,8 @@ export class PollaMundialistaApuestaOrm {
   @Column({ name: 'VISITAPREDI' })
   visitantePrediccion: number;
 
+  @Column({ name: 'ISEXTERNO' })
+  isExterno: boolean;
+
   pollaMundialista: PollaMundialistaOrm;
 }
