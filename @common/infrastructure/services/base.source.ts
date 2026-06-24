@@ -27,7 +27,7 @@ export class BaseSource {
       const id = tkDecoded.user.id;
       const user = tkDecoded.user;
       const context = tkDecoded.context;
-      const isDim = tkDecoded.isDim;
+      const isDim = tkDecoded.isDim === undefined ? true : tkDecoded.isDim;
 
       return { id, user, context, isDim };
     } catch (error: any) {
