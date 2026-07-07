@@ -4,16 +4,16 @@ import { SuministroPacienteOrm } from '@inn/orm/inn/documentos';
 export const dataToFetchSumPac = (estancia: EstanciaOrm, documentos: SuministroPacienteOrm[]) => {
   return {
     ultimaEstancia: {
-      id: estancia.id,
-      fechaIngreso: estancia.fechaIngreso,
+      id: estancia.cama ? estancia.id : estancia.ingreso.id,
+      fechaIngreso: estancia.cama ? estancia.fechaIngreso : estancia.ingreso.fechaIngreso,
       cama: {
-        id: estancia.cama.id,
-        codigo: estancia.cama.codigo,
-        descripcion: estancia.cama.nombre,
+        id: estancia.cama ? estancia.cama.id : 0,
+        codigo: estancia.cama ? estancia.cama.codigo : 'SIN ESTANCIA ABIERTA',
+        descripcion: estancia.cama ? estancia.cama.nombre : 'SIN ESTANCIA ABIERTA',
         subgrupo: {
-          id: estancia.cama.subgrupo.id,
-          codigo: estancia.cama.subgrupo.codigo,
-          nombre: estancia.cama.subgrupo.nombre,
+          id: estancia.cama ? estancia.cama.subgrupo.id : 0,
+          codigo: estancia.cama ? estancia.cama.subgrupo.codigo : 'SIN ESTANCIA ABIERTA',
+          nombre: estancia.cama ? estancia.cama.subgrupo.nombre : 'SIN ESTANCIA ABIERTA',
         },
       },
       ingreso: {

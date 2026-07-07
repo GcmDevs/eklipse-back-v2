@@ -39,6 +39,9 @@ export class IngresoOrm {
   @Column({ name: 'GENDETCON' })
   contratoId: number;
 
+  @Column({ name: 'AINFECEGRE' })
+  fechaEgreso: Date;
+
   @ManyToOne(() => ContratoOrm)
   @JoinColumn([{ name: 'GENDETCON', referencedColumnName: 'id' }])
   contrato: ContratoOrm;

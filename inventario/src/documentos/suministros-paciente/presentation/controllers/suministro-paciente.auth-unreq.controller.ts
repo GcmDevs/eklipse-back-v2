@@ -9,15 +9,6 @@ import { SumPacModifiRecibiDto } from '../dtos';
 export class SuministrosAuthUnreqController {
   constructor(private _services: RecibirSuministrosAuthUnreqImpl) {}
 
-  @Get('find-by-consecutivo/:consecutivo/:lessDays')
-  async findByConsecutivo(
-    @Param('consecutivo') consecutivo: number,
-    @Param('lessDays') lessDays: number,
-    @Query('contextCode') contextCode: GcmContextCode
-  ) {
-    return this._services.findByConsecutivo(+consecutivo, +lessDays, contextCode);
-  }
-
   @Get('find-by-pattern/:pattern/:lessDays')
   async findByPattern(
     @Param('pattern') pattern: string,

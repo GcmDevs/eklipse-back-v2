@@ -9,6 +9,7 @@ import { EstanciaOrm } from '@inn/orm/hpn';
 import { SumPacModifiRecibiDto } from '../../presentation/dtos';
 import { SuministroPacienteOrm, SuministroPacienteRecibidoOrm } from '@inn/orm/inn/documentos';
 import { dataToFetchSumPac } from '../factories';
+import { IngresoOrm } from '@inn/orm/adn';
 
 @Injectable()
 export class RecibirSuministrosAuthUnreqImpl {
@@ -55,38 +56,6 @@ export class RecibirSuministrosAuthUnreqImpl {
     }
   }
 
-  public async findByConsecutivo(
-    consecutivo: number,
-    lessDays: number,
-    contextCode: GcmContextCode
-  ) {
-    try {
-      if (!contextCode) contextCode = this._auth.context.getCode();
-      const axios = require('axios');
-      const url = `http://localhost:4001/documentos/find-by-consecutivo/${consecutivo}/${lessDays}/${contextCode}`;
-      const result = await axios.get(url);
-
-      const conn = switchConn(gcmContextFactory(contextCode));
-      const ordSumModiRp = conn.getRepository(SuministroPacienteRecibidoOrm);
-
-      if (result.data && result.data.documentos && result.data.documentos.length) {
-        const ordSumModifi = await ordSumModiRp.find({
-          where: { ordenSuministrosId: In([0, ...result.data.documentos.map(r => r.id)]) },
-        });
-
-        result.data.documentos.map((doc: any) => {
-          const docModifi = ordSumModifi.find(mod => mod.ordenSuministrosId === doc.id);
-          if (docModifi) doc.isListoParaEntrega = true;
-          else doc.isListoParaEntrega = false;
-        });
-      }
-
-      return result.data;
-    } catch (error: any) {
-      throw new BadRequestException(error.message);
-    }
-  }
-
   public async findByPattern(
     pattern: string,
     lessDays: number,
@@ -99,22 +68,45 @@ export class RecibirSuministrosAuthUnreqImpl {
       const conn = switchConn(gcmContextFactory(contextCode));
       const ordSumModiRp = conn.getRepository(SuministroPacienteRecibidoOrm);
       const suministroPacienteRp = conn.getRepository(SuministroPacienteOrm);
+      const ingresoRp = conn.getRepository(IngresoOrm);
       const estanciaRp = conn.getRepository(EstanciaOrm);
 
-      const estancia = await estanciaRp.findOne({
-        where: [
-          { cama: { codigo: Like(`%${pattern}%`) }, fechaEgreso: null },
-          { ingreso: { consecutivo: Like(`%${pattern}%`) }, fechaEgreso: null },
-        ],
-        relations: ['cama', 'cama.subgrupo', 'ingreso', 'ingreso.paciente'],
+      const ingreso = await ingresoRp.findOne({
+        where: [{ consecutivo: Like(`%${pattern}%`), fechaEgreso: IsNull() }],
+        relations: ['paciente'],
         order: { id: 'DESC' },
       });
 
-      if (!estancia) throw new Error('No hay estancia activa con este consecutivo o cama');
+      let estancia: EstanciaOrm = new EstanciaOrm();
+      let ingresoId = 0;
+
+      if (!ingreso) {
+        estancia = await estanciaRp.findOne({
+          where: [
+            { cama: { codigo: Like(`%${pattern}%`) }, fechaEgreso: IsNull() },
+            { ingreso: { consecutivo: Like(`%${pattern}%`) }, fechaEgreso: IsNull() },
+          ],
+          relations: ['cama', 'cama.subgrupo', 'ingreso', 'ingreso.paciente'],
+          order: { id: 'DESC' },
+        });
+        if (!estancia) {
+          throw new Error('No se encontró ningún ingreso o estancia con el patrón proporcionado');
+        }
+        ingresoId = estancia.ingresoId;
+      } else {
+        ingresoId = ingreso.id;
+        estancia = await estanciaRp.findOne({
+          where: { ingresoId: ingreso.id, fechaEgreso: IsNull() },
+          relations: ['cama', 'cama.subgrupo'],
+          order: { id: 'DESC' },
+        });
+        if (!estancia) estancia = new EstanciaOrm();
+        estancia.ingreso = ingreso;
+      }
 
       const documentos = await suministroPacienteRp.find({
         where: {
-          ingresoId: estancia.ingresoId,
+          ingresoId,
           documento: {
             fechaCreacion: MoreThanOrEqual(new Date(Date.now() - lessDays * 24 * 60 * 60 * 1000)),
             fechaConfirmacion: Not(IsNull()),
@@ -144,6 +136,7 @@ export class RecibirSuministrosAuthUnreqImpl {
           : documentos.filter(d => !d.isEntregado)
       );
     } catch (error: any) {
+      console.error('Error en findByPattern:', error);
       throw new BadRequestException(error.message);
     }
   }
