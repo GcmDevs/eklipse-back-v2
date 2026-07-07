@@ -5,6 +5,7 @@ import { _PrivSecUserOrm } from '@common/infrastructure/orm/user.orm';
 import { _PrivSecRoleOrm } from '@common/infrastructure/orm/role.orm';
 import { enabledModules } from '@common/application/enabled-modules';
 import { RSAServices } from '@common/application/services';
+import { USU_EXTS } from '@common/domain/types';
 
 @Injectable()
 export class AuthoritiesServicesImpl extends BaseSource {
@@ -37,7 +38,13 @@ export class AuthoritiesServicesImpl extends BaseSource {
     enabledModules: string[];
   }> {
     try {
-      if (!this.auth.isDim) return { authorities: [], onlyCodes: [], enabledModules: [] };
+      if (!this.auth.isDim) {
+        const enabledModules = [];
+        if (this.auth.tipoUsuExt === USU_EXTS.GENTERCERP) {
+          enabledModules.push('inn', 'inn-central-mezclas', 'inn-central-mezclas-manage');
+        }
+        return { authorities: [], onlyCodes: [], enabledModules };
+      }
       const myAuthorities = await fetchAuthsByUser({ id: this.auth.id, ctx: this.auth.context });
       return { ...myAuthorities, enabledModules: enabledModules(myAuthorities.onlyCodes) };
     } catch (error: any) {

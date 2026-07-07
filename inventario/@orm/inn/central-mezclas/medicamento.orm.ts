@@ -1,6 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { MedicamentoSeleccionOrm } from './medicamento-seleccion.orm';
-import { LineaCode } from '@inn/types/inn/central-mezclas';
+import { LineaCode, UnidadCode } from '@inn/types/inn/central-mezclas';
 
 @Entity('EKINNCTMZMED')
 export class MedicamentoOrm {
@@ -9,6 +9,9 @@ export class MedicamentoOrm {
 
   @Column({ name: 'NOMBRE', length: 100 })
   nombre: string;
+
+  @Column({ name: 'UNIDAD' })
+  unidadCode: UnidadCode;
 
   @Column({ name: 'TIPO' })
   lineaCode: LineaCode;

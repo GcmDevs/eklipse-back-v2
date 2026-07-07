@@ -4,4 +4,6 @@ export * from './prioridad.type';
 export * from './unidad.type';
 export * from './vehiculo.type';
 export * from './tiempo-admin.type';
+export * from './via.type';
 export * from './via-administracion.type';
+export * from './forma-farmaceutica.type';

@@ -1,0 +1,23 @@
+import { CtmType } from './base.type';
+
+export type UsuExtCode = 1 | 2;
+
+export class UsuExtType extends CtmType<UsuExtCode> {}
+
+const GENUSUARIO = new UsuExtType(1, 'GENUSUARIO');
+const GENTERCERP = new UsuExtType(2, 'GENTERCERP');
+
+export function usuExtTypeFactory(code: UsuExtCode): UsuExtType {
+  switch (code) {
+    case 1:
+      return GENUSUARIO;
+    case 2:
+      return GENTERCERP;
+    default:
+      throw new Error('No existe usuario externo de este tipo');
+  }
+}
+
+export const USU_EXTS = { GENUSUARIO, GENTERCERP };
+
+export const USU_EXTS_VALUES = [GENUSUARIO, GENTERCERP];

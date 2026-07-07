@@ -2,7 +2,11 @@ import {
   GCM_CONTEXTS,
   GcmContextCode,
   GcmContextType,
+  USU_EXTS,
+  UsuExtCode,
+  UsuExtType,
   gcmContextFactory,
+  usuExtTypeFactory,
 } from '../../domain/types';
 import { jwtDecode } from 'jwt-decode';
 import { RSAServices } from './rsa';
@@ -13,6 +17,7 @@ export interface IAuthToken {
   dcm: string;
   fnm: string;
   dim: boolean;
+  tue: UsuExtCode;
   rst: boolean;
   iat?: number;
   exp?: number;
@@ -25,6 +30,7 @@ export interface ITokenDecoded {
     fullName: string;
   };
   isDim: boolean;
+  tipoUsuExt: UsuExtType;
   passWasReset: boolean;
   context: GcmContextType;
   createdAt: Date;
@@ -38,19 +44,16 @@ const _tokenDateToDate = (date: number): Date => {
 
 const decodeToken = (token: string): ITokenDecoded => {
   try {
-    const tkDecoded: IAuthToken = jwtDecode(token);
+    const tkDcd: IAuthToken = jwtDecode(token);
 
     const tkFt: ITokenDecoded = {
-      user: {
-        id: RSAServices.decryptId(tkDecoded.jti),
-        document: tkDecoded.dcm,
-        fullName: tkDecoded.fnm,
-      },
-      isDim: tkDecoded.dim,
-      passWasReset: tkDecoded.rst,
-      context: gcmContextFactory(tkDecoded.sub),
-      createdAt: _tokenDateToDate(tkDecoded.iat),
-      expiredAt: _tokenDateToDate(tkDecoded.exp),
+      user: { id: RSAServices.decryptId(tkDcd.jti), document: tkDcd.dcm, fullName: tkDcd.fnm },
+      isDim: tkDcd.dim === undefined ? true : tkDcd.dim,
+      tipoUsuExt: tkDcd.tue === undefined ? USU_EXTS.GENUSUARIO : usuExtTypeFactory(tkDcd.tue),
+      passWasReset: tkDcd.rst,
+      context: gcmContextFactory(tkDcd.sub),
+      createdAt: _tokenDateToDate(tkDcd.iat),
+      expiredAt: _tokenDateToDate(tkDcd.exp),
     };
 
     return tkFt;
@@ -59,6 +62,4 @@ const decodeToken = (token: string): ITokenDecoded => {
   }
 };
 
-export const JWTServices = {
-  decodeToken,
-};
+export const JWTServices = { decodeToken };

@@ -1,8 +1,17 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { PacienteExternoOrm } from './paciente-externo.orm';
 import { EstadoCode, LineaCode, PrioridadCode } from '@inn/types/inn/central-mezclas';
 import { UsuarioOrm } from '@inn/orm/gen';
 import { MedicamentoSeleccionOrm } from './medicamento-seleccion.orm';
+import { NutricionParenteralOrm } from './nutricion-parenteral.orm';
 
 @Entity('EKINNCTMZSOLI')
 export class SolicitudOrm {
@@ -21,6 +30,9 @@ export class SolicitudOrm {
 
   @OneToMany(() => MedicamentoSeleccionOrm, medicamento => medicamento.solicitud)
   seleccion: MedicamentoSeleccionOrm[];
+
+  @OneToOne(() => NutricionParenteralOrm, nutricionParenteral => nutricionParenteral.solicitud)
+  nutricionParenteral: NutricionParenteralOrm;
 
   @Column({ name: 'LINEA' })
   lineaCode: LineaCode;

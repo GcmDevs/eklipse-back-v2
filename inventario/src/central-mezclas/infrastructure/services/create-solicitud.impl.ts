@@ -1,13 +1,16 @@
 import { In } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { BaseSource } from '@common/infrastructure/services';
-import { ESTADOS } from '@inn/types/inn/central-mezclas';
+import { ESTADOS, LINEAS } from '@inn/types/inn/central-mezclas';
 import {
   CtMzPacienteExternoPayload,
+  CtMzNutricionParenteralPayload,
+  CtMzReempaqueReenvasePayload,
   CtMzSolicitudPayload,
 } from '@inn/central-mezclas/presentation/dtos';
 import {
   MedicamentoSeleccionOrm,
+  NutricionParenteralOrm,
   PacienteExternoOrm,
   MedicamentoOrm,
   SolicitudOrm,
@@ -16,7 +19,22 @@ import {
 @Injectable()
 export class CreateSolicitudImpl extends BaseSource {
   public async execute(payload: CtMzSolicitudPayload): Promise<boolean> {
-    await this._validateMedicamentos(payload.seleccion.map(item => item.medicamentoId));
+    if (this._isMedicamentoSeleccionLine(payload.lineaCode)) {
+      if (!payload.seleccion?.length) {
+        throw new Error('Debe enviar al menos un medicamento para la solicitud');
+      }
+
+      await this._validateMedicamentos(payload.seleccion.map(item => item.medicamentoId));
+    }
+
+    if (payload.lineaCode === LINEAS.NUTRICION_PARENTERAL.getCode()) {
+      this._validateNutricionParenteral(payload.nutricionParenteral);
+    }
+
+    if (payload.lineaCode === LINEAS.REEMPAQUE_REENVASE.getCode()) {
+      this._validateReempaqueReenvase(payload.reempaqueReenvase);
+      await this._validateMedicamentos([payload.reempaqueReenvase.medicamentoId]);
+    }
 
     try {
       await this.qr.connect();
@@ -24,6 +42,7 @@ export class CreateSolicitudImpl extends BaseSource {
 
       const solicitudRp = this.qr.manager.getRepository(SolicitudOrm);
       const seleccionRp = this.qr.manager.getRepository(MedicamentoSeleccionOrm);
+      const nutricionParenteralRp = this.qr.manager.getRepository(NutricionParenteralOrm);
 
       const pacienteExterno = await this._resolvePacienteExterno(
         payload.pacienteExternoId,
@@ -43,23 +62,47 @@ export class CreateSolicitudImpl extends BaseSource {
 
       const savedSolicitud = await solicitudRp.save(solicitud);
 
-      const seleccion = payload.seleccion.map(item =>
-        seleccionRp.create({
-          medicamentoId: item.medicamentoId,
-          unidadCode: item.unidadCode,
-          vehiculoCode: item.vehiculoCode,
-          concentracion: item.concentracion,
-          volumen: item.volumen,
-          cantidad: item.cantidad,
-          tiempoAdmin: item.tiempoAdmin,
-          uniMedTiempoAdminCode: item.uniMedTiempoAdminCode,
-          viaAdministracionCode: item.viaAdministracionCode,
-          fechaAplicacion: item.fechaAplicacion,
-          solicitudId: savedSolicitud.id,
-        })
-      );
+      if (this._isMedicamentoSeleccionLine(payload.lineaCode)) {
+        const seleccion = payload.seleccion.map(item =>
+          seleccionRp.create({
+            medicamentoId: item.medicamentoId,
+            vehiculoCode: item.vehiculoCode,
+            concentracion: item.concentracion,
+            volumen: item.volumen,
+            cantidad: item.cantidad,
+            tiempoAdmin: item.tiempoAdmin,
+            uniMedTiempoAdminCode: item.uniMedTiempoAdminCode,
+            viaAdministracionCode: item.viaAdministracionCode,
+            fechaAplicacion: item.fechaAplicacion,
+            solicitudId: savedSolicitud.id,
+          })
+        );
+        await seleccionRp.save(seleccion);
+      }
 
-      await seleccionRp.save(seleccion);
+      if (payload.lineaCode === LINEAS.NUTRICION_PARENTERAL.getCode()) {
+        const nutricionParenteral = nutricionParenteralRp.create({
+          ...payload.nutricionParenteral,
+          solicitudId: savedSolicitud.id,
+        });
+
+        await nutricionParenteralRp.save(nutricionParenteral);
+      }
+
+      if (payload.lineaCode === LINEAS.REEMPAQUE_REENVASE.getCode()) {
+        const reempaqueReenvase = seleccionRp.create({
+          medicamentoId: payload.reempaqueReenvase.medicamentoId,
+          viaAdministracionCode: payload.reempaqueReenvase.viaAdministracionCode,
+          laboratorio: payload.reempaqueReenvase.laboratorio,
+          cantidadAdecuar: payload.reempaqueReenvase.cantidadAdecuar,
+          lote: payload.reempaqueReenvase.lote,
+          fechaVencimiento: payload.reempaqueReenvase.fechaVencimiento,
+          solicitudId: savedSolicitud.id,
+        });
+
+        await seleccionRp.save(reempaqueReenvase);
+      }
+
       await this.qr.commitTransaction();
       return true;
     } catch (error: any) {
@@ -100,6 +143,24 @@ export class CreateSolicitudImpl extends BaseSource {
     const medicamentos = await medicamentoRp.find({ where: { id: In(uniqueIds) } });
     if (medicamentos.length !== uniqueIds.length) {
       throw new Error('Uno o varios medicamentos seleccionados no existen');
+    }
+  }
+
+  private _isMedicamentoSeleccionLine(lineaCode: number): boolean {
+    return (
+      lineaCode === LINEAS.ONCOLOGICO.getCode() || lineaCode === LINEAS.NO_ONCOLOGICO.getCode()
+    );
+  }
+
+  private _validateNutricionParenteral(payload?: CtMzNutricionParenteralPayload): void {
+    if (!payload) {
+      throw new Error('Debe enviar la informacion de nutricion parenteral');
+    }
+  }
+
+  private _validateReempaqueReenvase(payload?: CtMzReempaqueReenvasePayload): void {
+    if (!payload) {
+      throw new Error('Debe enviar la informacion de reempaque/reenvase');
     }
   }
 }

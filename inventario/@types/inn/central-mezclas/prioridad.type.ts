@@ -7,7 +7,6 @@ export class PrioridadType extends CtmType<PrioridadCode> {}
 const BAJA = new PrioridadType(1, 'BAJA');
 const MEDIA = new PrioridadType(2, 'MEDIA');
 const ALTA = new PrioridadType(3, 'ALTA');
-const CRITICA = new PrioridadType(4, 'CRITICA');
 
 export function prioridadTypeFactory(code: PrioridadCode): PrioridadType {
   switch (code) {
@@ -17,11 +16,9 @@ export function prioridadTypeFactory(code: PrioridadCode): PrioridadType {
       return MEDIA;
     case 3:
       return ALTA;
-    case 4:
-      return CRITICA;
   }
 }
 
-export const PRIORIDADES_VALUES = [BAJA, MEDIA, ALTA, CRITICA];
+export const PRIORIDADES_VALUES = [ALTA, MEDIA, BAJA];
 
-export const PRIORIDADES = { BAJA, MEDIA, ALTA, CRITICA };
+export const PRIORIDADES = { ALTA, MEDIA, BAJA };

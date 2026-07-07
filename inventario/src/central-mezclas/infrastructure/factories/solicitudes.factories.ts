@@ -45,7 +45,9 @@ export const dataToSolicitudRes = (
       const val: CtMzSeleccionRes = {
         nombre: item.medicamento.nombre,
         linea: lineaTypeFactory(item.medicamento.lineaCode) as any,
-        unidad: unidadTypeFactory(item.unidadCode) as any,
+        unidad: item.medicamento.unidadCode
+          ? (unidadTypeFactory(item.medicamento.unidadCode) as any)
+          : null,
         vehiculo: vehiculoTypeFactory(item.vehiculoCode) as any,
         concentracion: item.concentracion,
         volumen: item.volumen,

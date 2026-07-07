@@ -1,4 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { UsuExtCode } from '../../domain/types';
 
 @Entity('GENUSUEXT')
 export class _PrivSecEkUserOrm {
@@ -22,4 +23,7 @@ export class _PrivSecEkUserOrm {
 
   @Column({ name: 'ISRESET' })
   passwordIsReset: boolean;
+
+  @Column({ name: 'TIPOUSU' })
+  tipoUsuarioExternoCode: UsuExtCode;
 }

@@ -19,7 +19,7 @@ export class EstanciaOrm {
   cama: CamaOrm;
 
   @Column({ name: 'HPNDEFCAM' })
-  CamaId: number;
+  camaId: number;
 
   @Column({ name: 'HESFECING' })
   fechaIngreso: Date;

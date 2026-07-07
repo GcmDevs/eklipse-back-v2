@@ -10,7 +10,7 @@ export class FetchSolicitudesImpl extends BaseSource {
   async execute(fechaInicio: Date, fechaFin: Date) {
     const solicitudRp = this.conn.getRepository(SolicitudOrm);
     const pacienteExternoRp = this.conn.getRepository(PacienteExternoOrm);
-    const usuExtRp = this.conn.getRepository(UsuarioExternoOrm);
+    const usuExtRp = this.ekConn.getRepository(UsuarioExternoOrm);
 
     const solicitudes = await solicitudRp.find({
       where: { fechaCreacion: Between(fechaInicio, fechaFin) },

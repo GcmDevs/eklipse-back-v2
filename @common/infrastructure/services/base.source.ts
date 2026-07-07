@@ -28,8 +28,9 @@ export class BaseSource {
       const user = tkDecoded.user;
       const context = tkDecoded.context;
       const isDim = tkDecoded.isDim === undefined ? true : tkDecoded.isDim;
+      const tipoUsuExt = tkDecoded.tipoUsuExt;
 
-      return { id, user, context, isDim };
+      return { id, user, context, isDim, tipoUsuExt };
     } catch (error: any) {
       throw new UnauthorizedException(error.message);
     }

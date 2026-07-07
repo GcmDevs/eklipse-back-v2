@@ -2,10 +2,9 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 't
 import { MedicamentoOrm } from './medicamento.orm';
 import { SolicitudOrm } from './solicitud.orm';
 import {
-  TiempoAdminCode,
-  UnidadCode,
-  VehiculoCode,
   ViaAdministracionCode,
+  TiempoAdminCode,
+  VehiculoCode,
 } from '@inn/types/inn/central-mezclas';
 
 @Entity('EKINNCTMZMEDSEL')
@@ -20,13 +19,17 @@ export class MedicamentoSeleccionOrm {
   @JoinColumn({ name: 'EKINNCTMZMED', referencedColumnName: 'id' })
   medicamento: MedicamentoOrm;
 
-  @Column({ name: 'UNIDAD' })
-  unidadCode: UnidadCode;
+  @Column({ name: 'EKINNCTMZSOLI' })
+  solicitudId: number;
+
+  @ManyToOne(() => SolicitudOrm, solicitud => solicitud.seleccion)
+  @JoinColumn({ name: 'EKINNCTMZSOLI', referencedColumnName: 'id' })
+  solicitud: SolicitudOrm;
 
   @Column({ name: 'VEHICULO' })
   vehiculoCode: VehiculoCode;
 
-  @Column({ name: 'CONCENTRACION', length: 20 })
+  @Column({ name: 'CONCENTRACION', length: 100 })
   concentracion: string;
 
   @Column({ name: 'VOLUMEN', type: 'decimal', precision: 7, scale: 2 })
@@ -47,10 +50,15 @@ export class MedicamentoSeleccionOrm {
   @Column({ name: 'FECHAPLIC', type: 'timestamp' })
   fechaAplicacion: Date;
 
-  @Column({ name: 'EKINNCTMZSOLI' })
-  solicitudId: number;
+  @Column({ name: 'LABORATORIO', length: 100, nullable: true })
+  laboratorio: string;
 
-  @ManyToOne(() => SolicitudOrm, solicitud => solicitud.seleccion)
-  @JoinColumn({ name: 'EKINNCTMZSOLI', referencedColumnName: 'id' })
-  solicitud: SolicitudOrm;
+  @Column({ name: 'CANTIDADECUAR', type: 'decimal', precision: 9, scale: 2, nullable: true })
+  cantidadAdecuar: number;
+
+  @Column({ name: 'LOTE', length: 100, nullable: true })
+  lote: string;
+
+  @Column({ name: 'FECHAVENCI', type: 'date', nullable: true })
+  fechaVencimiento: Date;
 }

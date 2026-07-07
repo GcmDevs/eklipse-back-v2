@@ -8,7 +8,7 @@ import {
 import { cryptoServices, IAuthToken, RSAServices } from '@common/application/services';
 import { _PrivSecEkUserOrm } from '@common/infrastructure/orm/ek-user.orm';
 import { _PrivSecUserOrm } from '@common/infrastructure/orm/user.orm';
-import { gcmContextFactory, GcmContexts } from '@common/domain/types';
+import { gcmContextFactory, GcmContexts, usuExtTypeFactory, USU_EXTS } from '@common/domain/types';
 import { LoginUserDto } from '@gen/security/presentation/dtos';
 import { LastAuthOrm } from '@gen/security/infrastructure/orm';
 import { switchConn } from '@common/infrastructure/services';
@@ -40,6 +40,7 @@ export class LoginUserImpl {
       let user: _PrivSecUserOrm | _PrivSecEkUserOrm | null = null;
       let matchingPasswords = false;
       let isDimUser = true;
+      let tipoUsuExtCode = USU_EXTS.GENUSUARIO.getCode();
 
       user = await userRp.findOne({
         where: [{ document: username }],
@@ -65,9 +66,13 @@ export class LoginUserImpl {
             statusCode: true,
             lastAuth: true,
             passwordIsReset: true,
+            tipoUsuarioExternoCode: true,
           },
         });
         if (user) isDimUser = false;
+        if (user.tipoUsuarioExternoCode) {
+          tipoUsuExtCode = usuExtTypeFactory(user.tipoUsuarioExternoCode).getCode();
+        }
       }
 
       if (!user) throw new Error(errorMsg);
@@ -94,6 +99,7 @@ export class LoginUserImpl {
           fnm: user.fullName,
           dim: isDimUser,
           sub: context,
+          tue: tipoUsuExtCode,
         };
 
         const token = jwt.sign(payload, processEnv.JWT_SECRET_KEY, {
