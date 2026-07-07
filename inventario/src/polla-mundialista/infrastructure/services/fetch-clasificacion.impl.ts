@@ -6,7 +6,7 @@ import {
 } from '@inn/polla-mundialista/application/responses';
 import { Injectable } from '@nestjs/common';
 import { calcularPuntosPronostico } from '../factories';
-import { orderBy } from 'lodash';
+import { orderBy, uniq } from 'lodash';
 import { _PrivSecEkUserOrm } from '@common/infrastructure/orm/ek-user.orm';
 import { In } from 'typeorm';
 import { UsuarioExternoOrm, UsuarioOrm } from '@inn/orm/gen';
@@ -26,8 +26,10 @@ export class FetchClasificacionImpl extends BaseSource {
     const usuariosIdsExternos = apuestas.filter(a => a.isExterno).map(a => a.usuarioId);
     const usuariosIdsDinamica = apuestas.filter(a => !a.isExterno).map(a => a.usuarioId);
 
-    const usuariosDinamica = await usuarioRp.find({ where: { id: In(usuariosIdsDinamica) } });
-    const usuariosExternos = await ekUsuarioRp.find({ where: { id: In(usuariosIdsExternos) } });
+    const usuariosDinamica = await usuarioRp.find({ where: { id: In(uniq(usuariosIdsDinamica)) } });
+    const usuariosExternos = await ekUsuarioRp.find({
+      where: { id: In(uniq(usuariosIdsExternos)) },
+    });
 
     apuestas.map(apuesta => {
       const partido = partidos.find(
@@ -108,13 +110,14 @@ export class FetchClasificacionImpl extends BaseSource {
         usuarioB.puntos - usuarioA.puntos || usuarioA.usuarioId - usuarioB.usuarioId
     );
 
-    const clasificacion = orderBy(results, ['puntos', 'id'], 'desc');
+    const clasificacion = orderBy(results, ['puntos', 'exactos'], ['desc', 'desc']);
 
     clasificacion.map((usuario, index) => (usuario.posicion = index + 1));
 
     return {
       colaboradoresActivos: clasificacion.length,
-      clasificacion: clasificacion.slice(0, 5),
+      clasificacion:
+        this.auth.user.document === '1065819503' ? clasificacion : clasificacion.slice(0, 10),
       miPosicion: clasificacion.find(
         usuario => usuario.usuarioId === this.getTokenDecoded().user.id
       ),

@@ -16,7 +16,9 @@ export class PronosticarPartidoImpl extends BaseSource {
       const partido = await partidoRp.findOne({ where: { id: partidoId } });
 
       if (!partido) throw new Error('El partido no existe');
-      if (partido.isCerrado) throw new Error('El partido está cerrado para pronósticos');
+      if (partido.isCerrado || partido.fecha <= new Date()) {
+        throw new Error('El partido está cerrado para pronósticos');
+      }
 
       let apuesta = await apuestaRp.findOne({
         where: { pollaMundialistaId: partidoId, usuarioId: this.auth.id },

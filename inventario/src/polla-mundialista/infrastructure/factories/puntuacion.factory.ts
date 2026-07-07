@@ -7,7 +7,7 @@ export const calcularPuntosPronostico = (
   aciertos = false,
   pendientes = false
 ): number => {
-  if (!pendientes && !localMarcador && !visitanteMarcador) return 0;
+  if (!pendientes && localMarcador === null && visitanteMarcador === null) return 0;
 
   if (pendientes && !localMarcador && !visitanteMarcador) return 1;
 

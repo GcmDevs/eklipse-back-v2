@@ -16,13 +16,14 @@ export class FetchPartidosImpl extends BaseSource {
 
     const partidos = await partidoRp.find({
       order: { fecha: 'DESC' },
-      take: 5,
+      take: 6,
     });
 
     partidos.map(partido => {
       const apuesta = apuestas.find(a => a.pollaMundialistaId === partido.id);
       partido.localPrediccion = apuesta ? apuesta.localPrediccion : null;
       partido.visitantePrediccion = apuesta ? apuesta.visitantePrediccion : null;
+      if (partido.fecha <= new Date()) partido.isCerrado = true;
       if (
         partido.localPrediccion !== null &&
         partido.visitantePrediccion !== null &&
