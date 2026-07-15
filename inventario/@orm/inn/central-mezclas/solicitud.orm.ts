@@ -49,10 +49,16 @@ export class SolicitudOrm {
   @Column({ name: 'FECHACREA' })
   fechaCreacion: Date;
 
+  @Column({ name: 'FECHAGEST' })
+  fechaGestion: Date;
+
   @Column({ name: 'GENUSUARIO1', nullable: true })
   usuarioResponsableId: number;
 
   @ManyToOne(() => UsuarioOrm)
   @JoinColumn({ name: 'GENUSUARIO1', referencedColumnName: 'id' })
   usuarioResponsable: UsuarioOrm;
+
+  @Column({ name: 'OBSGEST' })
+  observacionGestion: string;
 }

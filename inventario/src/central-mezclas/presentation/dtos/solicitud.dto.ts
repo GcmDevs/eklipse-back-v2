@@ -17,6 +17,8 @@ import {
   ValidateNested,
 } from 'class-validator';
 import {
+  EstadoCode,
+  ESTADOS,
   FormaFarmaceuticaCode,
   LINEAS,
   LineaCode,
@@ -322,4 +324,21 @@ export class CtMzSolicitudPayload {
   @ValidateNested()
   @Type(() => CtMzReempaqueReenvasePayload)
   reempaqueReenvase?: CtMzReempaqueReenvasePayload;
+}
+
+export class CtMzGestionSolicitudPayload {
+  @ApiProperty({ enum: [2, 3, 4] })
+  @Type(() => Number)
+  @IsIn([2, 3, 4])
+  estadoCode: EstadoCode;
+
+  @ApiProperty({ required: false })
+  @ValidateIf(
+    payload =>
+      payload.estadoCode !== ESTADOS.ACEPTADA.getCode() || payload.observacion !== undefined
+  )
+  @IsString()
+  @IsNotEmpty()
+  @MaxLength(500)
+  observacion?: string;
 }

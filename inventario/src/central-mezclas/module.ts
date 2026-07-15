@@ -3,6 +3,8 @@ import { RecursosController, SolicitudesController } from './presentation/contro
 import {
   FetchSolicitudesImpl,
   CreateSolicitudImpl,
+  GestionarSolicitudImpl,
+  UpdateSolicitudImpl,
   FetchPacientesByPatternImpl,
   FetchMedicamentosByPatternImpl,
 } from './infrastructure/services';
@@ -12,6 +14,8 @@ import {
   providers: [
     FetchSolicitudesImpl,
     CreateSolicitudImpl,
+    GestionarSolicitudImpl,
+    UpdateSolicitudImpl,
     FetchPacientesByPatternImpl,
     FetchMedicamentosByPatternImpl,
   ],
