@@ -18,8 +18,11 @@ export class SolicitudOrm {
   @PrimaryGeneratedColumn({ name: 'OID' })
   id: number;
 
-  @Column({ name: 'GENUSUEXT' })
+  @Column({ name: 'GENUSUARIO' })
   usuarioExternoId: number;
+
+  @Column({ name: 'ISEXTERNO' })
+  isExterno: boolean;
 
   @Column({ name: 'EKINNCTMZPACEXT' })
   pacienteExternoId: number;
@@ -52,7 +55,4 @@ export class SolicitudOrm {
   @ManyToOne(() => UsuarioOrm)
   @JoinColumn({ name: 'GENUSUARIO1', referencedColumnName: 'id' })
   usuarioResponsable: UsuarioOrm;
-
-  @Column({ name: 'GENUSUOBS', length: 500, nullable: true })
-  usuResObs: string;
 }

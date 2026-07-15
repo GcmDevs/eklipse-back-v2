@@ -1,5 +1,5 @@
-import { ApiResponse, ApiTags } from '@nestjs/swagger';
-import { BadRequestException, Controller, Get, Param } from '@nestjs/common';
+import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { BadRequestException, Controller, Get, Param, Query } from '@nestjs/common';
 import { BasicTypeRes } from '@common/domain/types';
 import {
   CtMzMedicamentoSeleccionRes,
@@ -14,6 +14,7 @@ import {
   ESTADOS_VALUES,
   FORMAS_FARMACEUTICAS_VALUES,
   LINEAS_VALUES,
+  LineaCode,
   PRIORIDADES_VALUES,
   TIEMPOS_ADMIN_VALUES,
   UNIDADES_VALUES,
@@ -52,8 +53,8 @@ export class RecursosController {
   }
 
   @ApiResponse({ status: 200, type: CtMzPacienteRes, isArray: true })
-  @Get('pacientes/:pattern')
-  async fetchPacientesByPattern(@Param('pattern') pattern: string) {
+  @Get('pacientes')
+  async fetchPacientesByPattern(@Query('pattern') pattern: string) {
     try {
       return await this._fetchPacientesByPattern.execute(pattern);
     } catch (error: any) {
@@ -62,10 +63,17 @@ export class RecursosController {
   }
 
   @ApiResponse({ status: 200, type: CtMzMedicamentoSeleccionRes, isArray: true })
-  @Get('medicamentos/:pattern')
-  async fetchMedicamentosByPattern(@Param('pattern') pattern: string) {
+  @ApiQuery({ name: 'lineaCode', enum: [1, 2, 3, 4], required: true })
+  @Get('medicamentos')
+  async fetchMedicamentosByPattern(
+    @Query('pattern') pattern: string,
+    @Query('lineaCode') lineaCode: string
+  ) {
     try {
-      return await this._fetchMedicamentosByPattern.execute(pattern);
+      return await this._fetchMedicamentosByPattern.execute(
+        pattern,
+        Number(lineaCode) as LineaCode
+      );
     } catch (error: any) {
       throw new BadRequestException(error.message);
     }

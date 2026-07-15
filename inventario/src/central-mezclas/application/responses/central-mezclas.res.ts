@@ -15,9 +15,6 @@ export class CtMzUsuarioResponsableRes {
 
   @ApiProperty()
   nombreCompleto: string;
-
-  @ApiProperty()
-  observacion: string;
 }
 
 export class CtMzPacienteExternoRes {
@@ -41,14 +38,14 @@ export class CtMzSeleccionRes {
   @ApiProperty()
   nombre: string;
 
-  @ApiProperty({ type: BasicTypeRes })
-  linea: BasicTypeRes;
+  @ApiProperty()
+  lineaCode: number;
 
-  @ApiProperty({ type: BasicTypeRes })
-  unidad: BasicTypeRes;
+  @ApiProperty()
+  unidadCode: number;
 
-  @ApiProperty({ type: BasicTypeRes })
-  vehiculo: BasicTypeRes;
+  @ApiProperty()
+  vehiculoCode: number;
 
   @ApiProperty()
   concentracion: string;
@@ -62,14 +59,88 @@ export class CtMzSeleccionRes {
   @ApiProperty()
   tiempoAdmin: number;
 
-  @ApiProperty({ type: BasicTypeRes })
-  uniMedTiempoAdmin: BasicTypeRes;
+  @ApiProperty()
+  uniMedTiempoAdminCode: number;
 
   @ApiProperty()
   fechaAplicacion: Date;
 
-  @ApiProperty({ type: BasicTypeRes })
-  viaAdministracion: BasicTypeRes;
+  @ApiProperty()
+  viaAdministracionCode: number;
+
+  @ApiProperty()
+  laboratorio: string;
+
+  @ApiProperty()
+  cantidadAdecuar: number;
+
+  @ApiProperty()
+  lote: string;
+
+  @ApiProperty()
+  fechaVencimiento: Date;
+}
+
+export class CtMzNutricionParenteralRes {
+  @ApiProperty()
+  aa10Perc: number;
+
+  @ApiProperty()
+  aa15Perc: number;
+
+  @ApiProperty()
+  aaPed: number;
+
+  @ApiProperty()
+  glutamina: number;
+
+  @ApiProperty()
+  po4: number;
+
+  @ApiProperty()
+  dad50Perc: number;
+
+  @ApiProperty()
+  dad10Perc: number;
+
+  @ApiProperty()
+  tabperioK: number;
+
+  @ApiProperty()
+  tabperioNa: number;
+
+  @ApiProperty()
+  tabperioCa: number;
+
+  @ApiProperty()
+  tabperioMg: number;
+
+  @ApiProperty()
+  etPed: number;
+
+  @ApiProperty()
+  etAdu: number;
+
+  @ApiProperty()
+  vhid: number;
+
+  @ApiProperty()
+  vipPed: number;
+
+  @ApiProperty()
+  vipAdu: number;
+
+  @ApiProperty()
+  agua: number;
+
+  @ApiProperty()
+  lip20Perc: number;
+
+  @ApiProperty()
+  pesAjust: number;
+
+  @ApiProperty()
+  viaCode: number;
 }
 
 export class CtMzMedicamentoSeleccionRes {
@@ -110,6 +181,9 @@ export class CtMzSolicitudRes {
 
   @ApiProperty({ type: CtMzSeleccionRes, isArray: true })
   seleccion: CtMzSeleccionRes[];
+
+  @ApiProperty({ required: false, type: CtMzNutricionParenteralRes })
+  nutricionParenteral?: CtMzNutricionParenteralRes;
 }
 
 export class CtMzTypesRes {

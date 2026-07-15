@@ -1,4 +1,4 @@
-import { In } from 'typeorm';
+import { In, IsNull } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { BaseSource } from '@common/infrastructure/services';
 import { ESTADOS, LINEAS } from '@inn/types/inn/central-mezclas';
@@ -15,6 +15,9 @@ import {
   MedicamentoOrm,
   SolicitudOrm,
 } from '@inn/orm/inn/central-mezclas';
+import { PacienteOrm } from '@inn/orm/gen';
+import { IngresoOrm } from '@inn/orm/adn';
+import { EstanciaOrm } from '@inn/orm/hpn';
 
 @Injectable()
 export class CreateSolicitudImpl extends BaseSource {
@@ -27,11 +30,16 @@ export class CreateSolicitudImpl extends BaseSource {
       await this._validateMedicamentos(payload.seleccion.map(item => item.medicamentoId));
     }
 
-    if (payload.lineaCode === LINEAS.NUTRICION_PARENTERAL.getCode()) {
+    const isNutricionParenteral = payload.lineaCode === LINEAS.NUTRICION_PARENTERAL.getCode();
+    const isReempaqueReenvase = payload.lineaCode === LINEAS.REEMPAQUE_REENVASE.getCode();
+    const isOncologico = payload.lineaCode === LINEAS.ONCOLOGICO.getCode();
+    const isNoOncologico = payload.lineaCode === LINEAS.NO_ONCOLOGICO.getCode();
+
+    if (isNutricionParenteral) {
       this._validateNutricionParenteral(payload.nutricionParenteral);
     }
 
-    if (payload.lineaCode === LINEAS.REEMPAQUE_REENVASE.getCode()) {
+    if (isReempaqueReenvase) {
       this._validateReempaqueReenvase(payload.reempaqueReenvase);
       await this._validateMedicamentos([payload.reempaqueReenvase.medicamentoId]);
     }
@@ -51,13 +59,13 @@ export class CreateSolicitudImpl extends BaseSource {
 
       const solicitud = solicitudRp.create({
         usuarioExternoId: this.auth.id,
+        isExterno: !this.auth.isDim,
         pacienteExternoId: pacienteExterno.id,
         lineaCode: payload.lineaCode,
         estadoCode: ESTADOS.RADICADA.getCode(),
         prioridadCode: payload.prioridadCode,
         fechaCreacion: new Date(),
         usuarioResponsableId: null,
-        usuResObs: null,
       });
 
       const savedSolicitud = await solicitudRp.save(solicitud);
@@ -70,10 +78,10 @@ export class CreateSolicitudImpl extends BaseSource {
             concentracion: item.concentracion,
             volumen: item.volumen,
             cantidad: item.cantidad,
-            tiempoAdmin: item.tiempoAdmin,
-            uniMedTiempoAdminCode: item.uniMedTiempoAdminCode,
+            tiempoAdmin: isOncologico ? item.tiempoAdmin : null,
+            uniMedTiempoAdminCode: isOncologico ? item.uniMedTiempoAdminCode : null,
             viaAdministracionCode: item.viaAdministracionCode,
-            fechaAplicacion: item.fechaAplicacion,
+            fechaAplicacion: isOncologico ? item.fechaAplicacion : null,
             solicitudId: savedSolicitud.id,
           })
         );
@@ -118,21 +126,44 @@ export class CreateSolicitudImpl extends BaseSource {
     payload?: CtMzPacienteExternoPayload
   ): Promise<PacienteExternoOrm> {
     const pacienteExternoRp = this.qr.manager.getRepository(PacienteExternoOrm);
+    const pacienteRp = this.qr.manager.getRepository(PacienteOrm);
+    const ingresoRp = this.qr.manager.getRepository(IngresoOrm);
+    const estanciaRp = this.qr.manager.getRepository(EstanciaOrm);
+
+    let pacienteExterno: PacienteExternoOrm;
+    let ultimaEstancia: EstanciaOrm | null = null;
 
     if (pacienteExternoId) {
-      const pacienteExterno = await pacienteExternoRp.findOne({ where: { id: pacienteExternoId } });
-      if (!pacienteExterno) throw new Error('El paciente externo no existe');
-      return pacienteExterno;
+      const paciente = await pacienteRp.findOne({ where: { id: pacienteExternoId } });
+      if (!paciente) throw new Error('El paciente no existe');
+
+      const ultimoIngreso = await ingresoRp.findOne({
+        where: { pacienteId: paciente.id },
+        order: { fechaIngreso: 'DESC' },
+      });
+
+      if (ultimoIngreso) {
+        ultimaEstancia = await estanciaRp.findOne({
+          where: { ingresoId: ultimoIngreso?.id, fechaEgreso: IsNull() },
+          relations: ['cama'],
+          order: { fechaIngreso: 'DESC' },
+        });
+      }
+
+      pacienteExterno = pacienteExternoRp.create({
+        pacienteId: paciente.id,
+        estanciaId: ultimaEstancia ? ultimaEstancia.id : null,
+      });
+    } else {
+      if (!payload) throw new Error('Debe enviar el paciente de la solicitud');
+
+      pacienteExterno = pacienteExternoRp.create({
+        nombreCompleto: payload.nombreCompleto,
+        numeroDocumento: payload.numeroDocumento,
+        fechaNacimiento: payload.fechaNacimiento,
+        cama: payload.cama,
+      });
     }
-
-    if (!payload) throw new Error('Debe enviar el paciente de la solicitud');
-
-    const pacienteExterno = pacienteExternoRp.create({
-      nombreCompleto: payload.nombreCompleto,
-      numeroDocumento: payload.numeroDocumento,
-      fechaNacimiento: payload.fechaNacimiento,
-      cama: payload.cama,
-    });
 
     return pacienteExternoRp.save(pacienteExterno);
   }

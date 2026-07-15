@@ -22,7 +22,6 @@ import {
   LineaCode,
   PrioridadCode,
   TiempoAdminCode,
-  UnidadCode,
   ViaCode,
   VehiculoCode,
   ViaAdministracionCode,
@@ -87,12 +86,13 @@ export class CtMzSeleccionPayload {
   @ApiProperty()
   @Type(() => Number)
   @IsInt()
-  @Min(1)
+  @IsOptional()
   tiempoAdmin: number;
 
   @ApiProperty({ enum: [1, 2] })
   @Type(() => Number)
   @IsIn([1, 2])
+  @IsOptional()
   uniMedTiempoAdminCode: TiempoAdminCode;
 
   @ApiProperty({ enum: [1, 2, 3, 4, 5, 6, 7] })
