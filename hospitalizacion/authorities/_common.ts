@@ -12,5 +12,6 @@ export const HPN_MODULES = {
     APIS: `${hpn}007`,
     AUDITORIA: `${hpn}008`,
     PACIENTES: `${hpn}009`,
+    ROTULO_MEDICAMENTOS: `${hpn}010`,
   },
 };
