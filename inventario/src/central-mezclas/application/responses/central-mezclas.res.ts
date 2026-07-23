@@ -184,6 +184,9 @@ export class CtMzSolicitudRes {
 
   @ApiProperty({ required: false, type: CtMzNutricionParenteralRes })
   nutricionParenteral?: CtMzNutricionParenteralRes;
+
+  @ApiProperty()
+  notaRespuesta: string;
 }
 
 export class CtMzTypesRes {

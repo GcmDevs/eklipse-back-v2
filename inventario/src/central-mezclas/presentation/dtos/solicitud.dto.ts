@@ -338,7 +338,7 @@ export class CtMzGestionSolicitudPayload {
       payload.estadoCode !== ESTADOS.ACEPTADA.getCode() || payload.observacion !== undefined
   )
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
   @MaxLength(500)
   observacion?: string;
 }

@@ -91,6 +91,7 @@ export const dataToSolicitudRes = (
         : (pacExt.fechaNacimiento as any),
       cama: pacExt.estanciaId ? pacExt.estancia.cama.codigo : pacExt.cama,
     },
+    notaRespuesta: data.observacionGestion,
     ...(seleccion && { seleccion }),
     ...(nutricionParenteral && { nutricionParenteral }),
   };
