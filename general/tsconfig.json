@@ -27,5 +27,6 @@
       "@gen/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "../@common/**/*"]
+  "include": ["src/**/*", "../@common/**/*"],
+  "exclude": ["node_modules", "dist", "test", "ignored", "**/*spec.ts"]
 }

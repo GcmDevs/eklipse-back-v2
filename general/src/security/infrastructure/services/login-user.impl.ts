@@ -6,11 +6,12 @@ import {
   estadoUsuarioTypeFactory,
 } from '@gen/security/domain/types/gen/usuarios';
 import { cryptoServices, IAuthToken, RSAServices } from '@common/application/services';
+import { _PrivSecEkUserOrm } from '@common/infrastructure/orm/ek-user.orm';
 import { _PrivSecUserOrm } from '@common/infrastructure/orm/user.orm';
+import { gcmContextFactory, GcmContexts, usuExtTypeFactory, USU_EXTS } from '@common/domain/types';
 import { LoginUserDto } from '@gen/security/presentation/dtos';
 import { LastAuthOrm } from '@gen/security/infrastructure/orm';
 import { switchConn } from '@common/infrastructure/services';
-import { gcmContextFactory } from '@common/domain/types';
 import { ENVIRONMENTS } from '@gen/app.environments';
 import { processEnv } from '@env';
 
@@ -21,15 +22,27 @@ export class LoginUserImpl {
     const { username, password, context } = payload;
 
     const conn = switchConn(gcmContextFactory(payload.context));
+    const ekConn = switchConn(gcmContextFactory(GcmContexts.EKLIPSE));
+
     const qr = conn.createQueryRunner();
+    const ekQr = ekConn.createQueryRunner();
+
     await qr.connect();
+    await ekQr.connect();
     try {
       await qr.startTransaction();
+      await ekQr.startTransaction();
 
       const userRp = qr.manager.getRepository(_PrivSecUserOrm);
+      const ekUserRp = ekQr.manager.getRepository(_PrivSecEkUserOrm);
       const lastAuthRp = qr.manager.getRepository(LastAuthOrm);
 
-      const user = await userRp.findOne({
+      let user: _PrivSecUserOrm | _PrivSecEkUserOrm | null = null;
+      let matchingPasswords = false;
+      let isDimUser = true;
+      let tipoUsuExtCode = USU_EXTS.GENUSUARIO.getCode();
+
+      user = await userRp.findOne({
         where: [{ document: username }],
         select: {
           id: true,
@@ -37,8 +50,30 @@ export class LoginUserImpl {
           fullName: true,
           password: true,
           statusCode: true,
+          lastAuth: true,
         },
       });
+
+      if (!user) {
+        // Si el usuario no es de dinamica debe ser de eklipse
+        user = await ekUserRp.findOne({
+          where: [{ document: username }],
+          select: {
+            id: true,
+            document: true,
+            fullName: true,
+            password: true,
+            statusCode: true,
+            lastAuth: true,
+            passwordIsReset: true,
+            tipoUsuarioExternoCode: true,
+          },
+        });
+        if (user) isDimUser = false;
+        if (user.tipoUsuarioExternoCode) {
+          tipoUsuExtCode = usuExtTypeFactory(user.tipoUsuarioExternoCode).getCode();
+        }
+      }
 
       if (!user) throw new Error(errorMsg);
 
@@ -48,22 +83,31 @@ export class LoginUserImpl {
         );
       }
 
-      const matchingPasswords = await cryptoServices.compareDimPassword(password, user.password);
+      if (isDimUser) {
+        matchingPasswords = await cryptoServices.compareDimPassword(password, user.password);
+      } else {
+        matchingPasswords = await cryptoServices.compare(password, user.password);
+      }
+
+      const passwordIsReset = !isDimUser ? (user as any).passwordIsReset : false;
 
       if (matchingPasswords) {
         const payload: IAuthToken = {
           jti: RSAServices.encryptId(user.id),
+          rst: passwordIsReset,
           dcm: user.document,
           fnm: user.fullName,
+          dim: isDimUser,
           sub: context,
+          tue: tipoUsuExtCode,
         };
 
         const token = jwt.sign(payload, processEnv.JWT_SECRET_KEY, {
-          expiresIn: expiredSuperFast ? '1h' : fromMobile ? '30d' : '7d',
+          expiresIn: expiredSuperFast || passwordIsReset ? '1h' : fromMobile ? '30d' : '7d',
           algorithm: 'HS512',
         });
 
-        if (!expiredSuperFast) {
+        if (!expiredSuperFast && isDimUser) {
           let newLastAuth = await lastAuthRp.findOne({ where: { user } });
 
           if (!newLastAuth) {
@@ -88,22 +132,29 @@ export class LoginUserImpl {
           user.lastAuth = new Date();
 
           if (ENVIRONMENTS.production) {
-            await userRp.save(user);
-            await lastAuthRp.save(newLastAuth);
+            if (isDimUser) {
+              await userRp.save(user);
+              await lastAuthRp.save(newLastAuth);
+            } else {
+              await ekUserRp.save(user);
+            }
           }
         }
 
         await qr.commitTransaction();
+        await ekQr.commitTransaction();
 
-        return { token };
+        return { token, passwordIsReset };
       } else {
         throw new Error(errorMsg);
       }
     } catch (error: any) {
       await qr.rollbackTransaction();
+      await ekQr.rollbackTransaction();
       throw new Error(error.message);
     } finally {
       await qr.release();
+      await ekQr.release();
     }
   }
 }

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import {
   AuthoritiesController,
+  AuthTokReqController,
   SubModulesController,
   ResourcesController,
   ModulesController,
@@ -9,6 +10,7 @@ import {
 import {
   AuthoritiesServicesImpl,
   AuthoritiesCrudImpl,
+  UpdatePasswordImpl,
   SubModulesCrudImpl,
   ModulesCrudImpl,
   LoginUserImpl,
@@ -18,6 +20,7 @@ import {
 @Module({
   controllers: [
     AuthController,
+    AuthTokReqController,
     ResourcesController,
     ModulesController,
     SubModulesController,
@@ -28,6 +31,7 @@ import {
     AuthoritiesCrudImpl,
     SubModulesCrudImpl,
     ModulesCrudImpl,
+    UpdatePasswordImpl,
     ResourcesImpl,
     LoginUserImpl,
   ],
