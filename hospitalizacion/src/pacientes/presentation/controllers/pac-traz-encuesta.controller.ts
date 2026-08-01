@@ -29,7 +29,8 @@ export class EncuestaController {
     try {
       return await this._fetchPacientesPreAlta.execute();
     } catch (error: any) {
-      throw new Error(error.message);
+      console.log(error);
+      throw new BadRequestException(error.message);
     }
   }
 

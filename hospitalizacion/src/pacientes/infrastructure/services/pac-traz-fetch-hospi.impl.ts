@@ -45,7 +45,10 @@ export class PacTrazFetchPacientesPreAltaImpl extends BaseSource {
     );
 
     const ultimosDiagnosticos: UltimoDiagnosticoRes[] = await this.conn.query(
-      ultimoDiagnosticoPrincipalByIngresoIdQuery(filteredByPacientePreAlta.map(ea => ea.ingresoId))
+      ultimoDiagnosticoPrincipalByIngresoIdQuery([
+        ...filteredByPacientePreAlta.map(ea => ea.ingresoId),
+        0,
+      ])
     );
 
     return filteredByPacientePreAlta.map(ea =>

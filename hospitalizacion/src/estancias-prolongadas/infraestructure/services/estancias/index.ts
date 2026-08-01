@@ -9,5 +9,6 @@ export * from './cerrar-estancia.impl';
 export * from './estancia-prolongada-by-id.impl';
 export * from './actualizar-estancia-prolongada.impl';
 export * from './actualizar-accion.impl';
+export * from './listar-usuarios.impl';
 
 // export * from './update-domain-action.impl';
