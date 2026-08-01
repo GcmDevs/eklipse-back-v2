@@ -31,6 +31,7 @@ import {
   EstanciasProlongadasActivasImpl,
   EstanciasProlongadasQueryImpl,
   ListarSeguimientosImpl,
+  ListarUsuariosEstanciaProlongadaImpl,
   ObtenerActivityFeedImpl,
 } from '@hpn/estancias-prolongadas/infraestructure/services/estancias';
 
@@ -47,6 +48,7 @@ export class EstanciasProlongadasController {
     private readonly _obtenerActivityFeedImpl: ObtenerActivityFeedImpl,
     private readonly _crearSeguimientoImpl: CrearSeguimientoImpl,
     private readonly _listarSeguimientosImpl: ListarSeguimientosImpl,
+    private readonly _listarUsuariosImpl: ListarUsuariosEstanciaProlongadaImpl,
     private readonly _estanciaProlongadaByIdImpl: EstanciaProlongadaByIdImpl,
     private readonly _actualizarEstanciaProlongadaImpl: ActualizarEstanciaProlongadaImpl,
     private readonly _actualizarAccionImpl: ActualizarAccionImpl
@@ -73,9 +75,15 @@ export class EstanciasProlongadasController {
     }
   }
   @Get()
-  public async getEstanciasProlongadasActivas() {
+  public async getEstanciasProlongadasActivas(
+    @Query('fechaInicio') fechaInicio?: string,
+    @Query('fechaFin') fechaFin?: string
+  ) {
     try {
-      return await this._estanciasProlongadasActivasImpl.getEstanciasProlongadasActivas();
+      return await this._estanciasProlongadasActivasImpl.getEstanciasProlongadasActivas(
+        fechaInicio,
+        fechaFin
+      );
     } catch (error: any) {
       this.handleError(error);
     }
@@ -94,6 +102,15 @@ export class EstanciasProlongadasController {
   public async obtenerActivityFeed(@Query() query: ActivityFeedQueryDto) {
     try {
       return await this._obtenerActivityFeedImpl.obtenerActivityFeed(query);
+    } catch (error: any) {
+      this.handleError(error);
+    }
+  }
+
+  @Get('usuarios')
+  public async listarUsuarios() {
+    try {
+      return await this._listarUsuariosImpl.listarUsuarios();
     } catch (error: any) {
       this.handleError(error);
     }

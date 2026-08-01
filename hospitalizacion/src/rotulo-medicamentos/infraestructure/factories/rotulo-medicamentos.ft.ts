@@ -23,6 +23,11 @@ export const dataToRotuloMedicamentoRes = (rotulo: RotuloMedicamentoOrm): Rotulo
     inicio: rotulo.inicio,
     usuario: rotulo.usuario.nombreCompleto,
     ingresoConsecutivo: rotulo.ingreso.consecutivo,
+    tipoRotulo: rotulo.tipoRotulo,
+    mezcla: rotulo.mezcla,
+    preparacion: rotulo.preparacion,
+    velocidadInfusion: rotulo.velocidadInfusion,
+    finalizacion: rotulo.finalizacion,
   };
 };
 
@@ -47,6 +52,11 @@ export const dataToRegistrarRotuloMedicamentoRes = (
     cantidad: rotulo.cantidad,
     guardado: rotulo.guardado,
     administrado: rotulo.guardado,
+    tipoRotulo: rotulo.tipoRotulo,
+    mezcla: rotulo.mezcla,
+    preparacion: rotulo.preparacion,
+    velocidadInfusion: rotulo.velocidadInfusion,
+    finalizacion: rotulo.finalizacion,
   };
 };
 

@@ -19,11 +19,9 @@ export class DesactivarRotuloMedicamentoImpl extends BaseSource {
       if (!rotulo) {
         return false;
       }
-      console.log('00', rotulo);
 
       rotulo.activo = false;
       await rotuloRp.save(rotulo);
-      console.log('01', rotulo);
       await qr.commitTransaction();
       return true;
     } catch (error: any) {

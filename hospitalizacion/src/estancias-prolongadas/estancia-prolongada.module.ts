@@ -10,6 +10,7 @@ import {
   EstanciasProlongadasActivasImpl,
   EstanciasProlongadasQueryImpl,
   ListarSeguimientosImpl,
+  ListarUsuariosEstanciaProlongadaImpl,
   ObtenerActivityFeedImpl,
 } from './infraestructure/services/estancias';
 
@@ -31,7 +32,7 @@ import {
 } from './presentation/controllers';
 
 @Module({
-  controllers: [EstanciasProlongadasController, NotificacionesController, DominiosController],
+  controllers: [NotificacionesController, DominiosController, EstanciasProlongadasController],
   providers: [
     // Estancias Prolongadas
     CensoEstanciasProlongadasImpl,
@@ -41,6 +42,7 @@ import {
     ObtenerActivityFeedImpl,
     CrearSeguimientoImpl,
     ListarSeguimientosImpl,
+    ListarUsuariosEstanciaProlongadaImpl,
     ActualizarDominiosItemImpl,
     CerrarEstanciaImpl,
     EstanciaProlongadaByIdImpl,
