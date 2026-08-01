@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { TipoRotulo } from '@hpn/rotulo-medicamentos/shared/types';
 
 export class RotuloMedicamentoRes {
   @ApiProperty()
@@ -26,22 +27,37 @@ export class RotuloMedicamentoRes {
   servicio: string;
 
   @ApiProperty()
-  dosis: number;
+  dosis: number | null;
 
   @ApiProperty()
-  unidadMedida: string;
+  unidadMedida: string | null;
 
   @ApiProperty()
-  viaAdministracion: string;
+  viaAdministracion: string | null;
 
   @ApiProperty()
-  inicio: string;
+  inicio: string | null;
 
   @ApiProperty()
   usuario: string;
 
   @ApiProperty()
   ingresoConsecutivo: string;
+
+  @ApiProperty({ enum: TipoRotulo })
+  tipoRotulo: TipoRotulo;
+
+  @ApiProperty({ required: false, nullable: true })
+  mezcla: string | null;
+
+  @ApiProperty({ required: false, nullable: true })
+  preparacion: string | null;
+
+  @ApiProperty({ required: false, nullable: true })
+  velocidadInfusion: string | null;
+
+  @ApiProperty({ required: false, nullable: true })
+  finalizacion: string | null;
 }
 
 export class MedicamentoRotuloRes {
@@ -161,16 +177,16 @@ export class RegistrarRotuloMedicamentoRes {
   servicio: string;
 
   @ApiProperty()
-  dosis: number;
+  dosis: number | null;
 
   @ApiProperty()
-  viaAdministracion: string;
+  viaAdministracion: string | null;
 
   @ApiProperty()
-  inicio: string;
+  inicio: string | null;
 
   @ApiProperty()
-  unidadMedida: string;
+  unidadMedida: string | null;
 
   @ApiProperty()
   createdAt: Date;
@@ -186,4 +202,19 @@ export class RegistrarRotuloMedicamentoRes {
 
   @ApiProperty({ description: 'Indica que el medicamento fue administrado al generar el rótulo' })
   administrado: boolean;
+
+  @ApiProperty({ enum: TipoRotulo })
+  tipoRotulo: TipoRotulo;
+
+  @ApiProperty({ required: false, nullable: true })
+  mezcla: string | null;
+
+  @ApiProperty({ required: false, nullable: true })
+  preparacion: string | null;
+
+  @ApiProperty({ required: false, nullable: true })
+  velocidadInfusion: string | null;
+
+  @ApiProperty({ required: false, nullable: true })
+  finalizacion: string | null;
 }

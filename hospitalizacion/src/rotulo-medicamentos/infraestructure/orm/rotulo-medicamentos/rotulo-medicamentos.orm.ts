@@ -3,6 +3,7 @@ import { PacienteOrm } from '@orm/gen/pacientes';
 import { UsuarioOrm } from '@orm/gen/usuarios';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { MedicamentoOrm } from './medicamento.orm';
+import { TipoRotulo } from '@hpn/rotulo-medicamentos/shared/types';
 
 @Entity('EKHPNROTULOMEDICAMENTOS')
 export class RotuloMedicamentoOrm {
@@ -49,8 +50,8 @@ export class RotuloMedicamentoOrm {
   @Column({ name: 'SERVICIO', type: 'nvarchar', length: 100, nullable: true })
   servicio: string;
 
-  @Column({ name: 'DOSIS', type: 'decimal', precision: 18, scale: 2 })
-  dosis: number;
+  @Column({ name: 'DOSIS', type: 'decimal', precision: 18, scale: 2, nullable: true })
+  dosis: number | null;
 
   @Column({ name: 'VIAADMINISTRACION', type: 'nvarchar', length: 50, nullable: true })
   viaAdministracion: string;
@@ -58,8 +59,23 @@ export class RotuloMedicamentoOrm {
   @Column({ name: 'INICIO', type: 'nvarchar', length: 10, nullable: true })
   inicio: string;
 
-  @Column({ name: 'UNIDADMEDIDA', type: 'nvarchar', length: 20, default: 'ACTIVO' })
-  unidadMedida: string;
+  @Column({ name: 'UNIDADMEDIDA', type: 'nvarchar', length: 20, nullable: true })
+  unidadMedida: string | null;
+
+  @Column({ name: 'TIPOROTULO', type: 'nvarchar', length: 20, default: TipoRotulo.Medicamento })
+  tipoRotulo: TipoRotulo;
+
+  @Column({ name: 'MEZCLA', type: 'nvarchar', length: 250, nullable: true })
+  mezcla: string | null;
+
+  @Column({ name: 'PREPARACION', type: 'nvarchar', length: 10, nullable: true })
+  preparacion: string | null;
+
+  @Column({ name: 'VELOCIDADINFUSION', type: 'nvarchar', length: 100, nullable: true })
+  velocidadInfusion: string | null;
+
+  @Column({ name: 'FINALIZACION', type: 'nvarchar', length: 10, nullable: true })
+  finalizacion: string | null;
 
   @Column({ name: 'ACTIVO', type: 'tinyint' })
   activo: boolean;

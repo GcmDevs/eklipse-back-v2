@@ -12,6 +12,8 @@ import { RegistrarRotuloMedicamentoRes } from '@hpn/rotulo-medicamentos/applicat
 import { dataToRegistrarRotuloMedicamentoRes } from '../factories';
 import { In } from 'typeorm';
 import { medicamentosQuery } from '../queries/medicamentos.query';
+import { TipoRotulo } from '@hpn/rotulo-medicamentos/shared/types';
+import { validarHorariosSolucion } from '@hpn/rotulo-medicamentos/shared/utils/validar-horarios-solucion.util';
 
 @Injectable()
 export class RegistrarRotuloMedicamentosImpl extends BaseSource {
@@ -90,9 +92,15 @@ export class RegistrarRotuloMedicamentosImpl extends BaseSource {
 
       const cantidadActual = cantidadesPorCodigo.get(dto.codigoProducto);
       const producto = productosPorCodigo.get(dto.codigoProducto);
+      const tipoRotulo = dto.tipoRotulo ?? TipoRotulo.Medicamento;
+
+      validarHorariosSolucion(tipoRotulo, dto.preparacion, dto.inicio);
 
       if (cantidadActual === undefined) {
         throw new Error(`El medicamento ${dto.codigoProducto} no está ordenado para el ingreso`);
+      }
+      if (!producto) {
+        throw new Error(`El producto ${dto.codigoProducto} no fue encontrado`);
       }
       if (cantidadActual <= 0) {
         throw new Error(`El medicamento ${dto.codigoProducto} ya fue administrado completamente`);
@@ -108,10 +116,17 @@ export class RegistrarRotuloMedicamentosImpl extends BaseSource {
         productoId: producto.id,
         cama: dto.cama,
         servicio: dto.servicio ?? null,
-        dosis: dto.dosis,
-        unidadMedida: dto.unidadMedida,
-        viaAdministracion: dto.viaAdministracion ?? null,
+        dosis: tipoRotulo === TipoRotulo.Solucion ? null : dto.dosis,
+        unidadMedida: tipoRotulo === TipoRotulo.Solucion ? null : dto.unidadMedida,
+        viaAdministracion:
+          tipoRotulo === TipoRotulo.Solucion ? null : (dto.viaAdministracion ?? null),
         inicio: dto.inicio ?? null,
+        tipoRotulo,
+        mezcla: tipoRotulo === TipoRotulo.Solucion ? dto.mezcla?.trim() || null : null,
+        preparacion: tipoRotulo === TipoRotulo.Solucion ? dto.preparacion : null,
+        velocidadInfusion:
+          tipoRotulo === TipoRotulo.Solucion ? dto.velocidadInfusion?.trim() : null,
+        finalizacion: tipoRotulo === TipoRotulo.Solucion ? dto.finalizacion : null,
         activo: true,
         guardado: administrado,
         cantidad: cantidadRestante,

@@ -4,6 +4,10 @@ import {
   ActivityFeedQueryDto,
   ActivityFeedSeverity,
 } from '@hpn/estancias-prolongadas/presentation/dtos';
+import {
+  formatColombiaTimestamp,
+  isValidDate,
+} from '@hpn/estancias-prolongadas/shared/utils/format-date.util';
 import { Injectable } from '@nestjs/common';
 import { EstanciasProlongadasOrm } from '@orm/hpn/estancias-prolongadas';
 
