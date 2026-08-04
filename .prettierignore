@@ -3,3 +3,4 @@
 dist
 node_modules
 @common/application/enabled-modules
+inventario/@types
