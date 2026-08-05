@@ -11,19 +11,15 @@ const MEDICAMENTOS = new TipoType(4, 'MEDICAMENTOS');
 
 export function tipoTypeFactory(code: TipoCode): TipoType {
   switch (code) {
-    case 1:
-      return PRODUCTOS;
-    case 2:
-      return SERVICIOS;
-    case 3:
-      return ACTIVO_FIJO;
-    case 4:
-      return MEDICAMENTOS;
+    case 1: return PRODUCTOS;
+    case 2: return SERVICIOS;
+    case 3: return ACTIVO_FIJO;
+    case 4: return MEDICAMENTOS;
   }
 }
 
 export const TIPOS = { PRODUCTOS, SERVICIOS, ACTIVO_FIJO, MEDICAMENTOS };
 
-export const TIPOS_VALUES = [PRODUCTOS, SERVICIOS, ACTIVO_FIJO, MEDICAMENTOS];
+export const TIPOS_VALUES = Object.values(TIPOS);
 
 export const TIPOS_CODES_VALUES = [PRODUCTOS.getCode(), SERVICIOS.getCode(), ACTIVO_FIJO.getCode()];

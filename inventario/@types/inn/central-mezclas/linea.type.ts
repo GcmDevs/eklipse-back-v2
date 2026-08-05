@@ -11,17 +11,13 @@ const REEMPAQUE_REENVASE = new LineaType(4, 'REEMPAQUE/REENVASE');
 
 export function lineaTypeFactory(code: LineaCode): LineaType {
   switch (code) {
-    case 1:
-      return ONCOLOGICO;
-    case 2:
-      return NO_ONCOLOGICO;
-    case 3:
-      return NUTRICION_PARENTERAL;
-    case 4:
-      return REEMPAQUE_REENVASE;
+    case 1: return ONCOLOGICO;
+    case 2: return NO_ONCOLOGICO;
+    case 3: return NUTRICION_PARENTERAL;
+    case 4: return REEMPAQUE_REENVASE;
   }
 }
 
-export const LINEAS_VALUES = [ONCOLOGICO, NO_ONCOLOGICO, NUTRICION_PARENTERAL, REEMPAQUE_REENVASE];
+export const LINEAS = {ONCOLOGICO, NO_ONCOLOGICO, NUTRICION_PARENTERAL, REEMPAQUE_REENVASE};
 
-export const LINEAS = { ONCOLOGICO, NO_ONCOLOGICO, NUTRICION_PARENTERAL, REEMPAQUE_REENVASE };
+export const LINEAS_VALUES = Object.values(LINEAS);

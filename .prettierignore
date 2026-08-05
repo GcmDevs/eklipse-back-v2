@@ -3,4 +3,5 @@
 dist
 node_modules
 @common/application/enabled-modules
+@common/infrastructure/services/consecutivo.ts
 inventario/@types

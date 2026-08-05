@@ -9,6 +9,7 @@ import {
   EstadoCode,
   TipoCode,
   TipoType,
+  SOLICITUDES_RECHAZADAS_ESTADOS_CODES,
 } from '@inn/types/inn/central-compras/solicitudes';
 import { DetalleSolicitudOrm } from './detalle-solicitud.orm';
 import { DependenciaOrm, UsuarioOrm } from '@inn/orm/gen';
@@ -106,5 +107,9 @@ export class SolicitudOrm {
       delete this.estadoCode;
       delete this.tipoCode;
     }
+  }
+
+  wasRejected() {
+    return SOLICITUDES_RECHAZADAS_ESTADOS_CODES.indexOf(this.estadoCode) >= 0;
   }
 }

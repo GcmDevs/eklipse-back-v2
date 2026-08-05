@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { ProductoOrm } from '../../productos/producto.orm';
-import { SuministroPacienteOrm } from './suministro-paciente.orm';
+import { SuministroPacienteOrm } from './base.orm';
 
 @Entity('INNMSUMPA')
 export class DetalleSuministroPacienteOrm {
