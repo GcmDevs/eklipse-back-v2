@@ -34,6 +34,6 @@ export class PacienteExternoOrm {
   @Column({ name: 'CAMA', length: 100, nullable: true })
   cama: string;
 
-  @OneToMany(() => SolicitudOrm, (solicitud) => solicitud.pacienteExterno)
+  @OneToMany(() => SolicitudOrm, solicitud => solicitud.pacienteExterno)
   solicitudes: SolicitudOrm[];
 }
