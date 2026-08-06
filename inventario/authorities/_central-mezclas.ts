@@ -1,0 +1,6 @@
+import { INN_MODULES } from './common';
+
+export const CTMZ_AUTHS = {
+  CODE: INN_MODULES.SUBS.CENTRAL_MEZCLAS,
+  MANAGE: `${INN_MODULES.SUBS.CENTRAL_MEZCLAS}001`,
+};
