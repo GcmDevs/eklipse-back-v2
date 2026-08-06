@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany, Column } from 'typeorm';
-import { DetalleSuministroPacienteOrm } from './suministro-paciente.detalle.orm';
+import { DetalleSuministroPacienteOrm } from './detalle.orm';
 import { TIPOS_DOCUMENTO } from '@inn/types/inn/documentos';
 import { DocumentoOrm } from '../documento.orm';
 import { IngresoOrm } from '@inn/orm/adn';

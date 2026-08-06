@@ -11,22 +11,14 @@ const ANULADO = new EstadoDocumentoType(2, 'ANULADO');
 
 export function estadoDocumentoTypeFactory(code: EstadoDocumentoCode): EstadoDocumentoType {
   switch (code) {
-    case -1:
-      return NO_REGISTRADO;
-    case 0:
-      return REGISTRADO;
-    case 1:
-      return CONFIRMADO;
-    case 2:
-      return ANULADO;
+    case -1: return NO_REGISTRADO;
+    case 0: return REGISTRADO;
+    case 1: return CONFIRMADO;
+    case 2: return ANULADO;
   }
 }
 
-export const ESTADOS_DOCUMENTO_VALUES = [NO_REGISTRADO, REGISTRADO, CONFIRMADO, ANULADO];
 
-export const ESTADOS_DOCUMENTO = {
-  NO_REGISTRADO,
-  REGISTRADO,
-  CONFIRMADO,
-  ANULADO,
-};
+export const ESTADOS_DOCUMENTO = {NO_REGISTRADO, REGISTRADO, CONFIRMADO, ANULADO};
+
+export const ESTADOS_DOCUMENTO_VALUES = Object.values(ESTADOS_DOCUMENTO);

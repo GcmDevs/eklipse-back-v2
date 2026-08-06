@@ -1,4 +1,3 @@
-import { UsuarioDependenciaOrm } from './usuario-dependencia.orm';
 import { AreaServicioOrm } from './area-servicio.orm';
 import { ConsecutivoOrm } from './consecutivo.orm';
 import { DependenciaOrm } from './dependencia.orm';
@@ -9,7 +8,6 @@ import { TerceroOrm } from './tercero.orm';
 import { UsuarioOrm } from './usuario.orm';
 import { UsuarioExternoOrm } from './usuario-externo.orm';
 
-export * from './usuario-dependencia.orm';
 export * from './area-servicio.orm';
 export * from './dependencia.orm';
 export * from './consecutivo.orm';
@@ -21,7 +19,6 @@ export * from './usuario.orm';
 export * from './usuario-externo.orm';
 
 export const ORM_GEN_ENTITIES = [
-  UsuarioDependenciaOrm,
   AreaServicioOrm,
   ConsecutivoOrm,
   DependenciaOrm,

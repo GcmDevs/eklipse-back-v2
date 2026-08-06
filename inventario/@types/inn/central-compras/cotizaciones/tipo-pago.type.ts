@@ -10,15 +10,12 @@ const CREDIANTICIPO = new TipoPagoType(3, 'CREDIANTICIPO');
 
 export function tipoPagoTypeFactory(code: TipoPagoCode): TipoPagoType {
   switch (code) {
-    case 1:
-      return ANTICIPO;
-    case 2:
-      return A_CREDITO;
-    case 3:
-      return CREDIANTICIPO;
+    case 1: return ANTICIPO;
+    case 2: return A_CREDITO;
+    case 3: return CREDIANTICIPO;
   }
 }
 
 export const TIPOS_PAGO = { ANTICIPO, A_CREDITO, CREDIANTICIPO };
 
-export const TIPOS_PAGO_VALUES = [ANTICIPO, A_CREDITO, CREDIANTICIPO];
+export const TIPOS_PAGO_VALUES = Object.values(TIPOS_PAGO);

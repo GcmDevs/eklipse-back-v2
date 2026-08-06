@@ -41,7 +41,7 @@ export class AuthoritiesServicesImpl extends BaseSource {
       if (!this.auth.isDim) {
         const enabledModules = [];
         if (this.auth.tipoUsuExt === USU_EXTS.GENTERCERP) {
-          enabledModules.push('inn', 'inn-central-mezclas', 'inn-central-mezclas-manage');
+          enabledModules.push('inn', 'inn-ctmz', 'inn-ctmz-manage');
         }
         return { authorities: [], onlyCodes: [], enabledModules };
       }

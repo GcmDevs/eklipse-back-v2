@@ -21,6 +21,8 @@ import {
   CtMzGestionSolicitudPayload,
   CtMzSolicitudPayload,
 } from '@inn/central-mezclas/presentation/dtos';
+import { INN_AUTHORITIES } from '@inn/authorities';
+import { Authorities } from '@common/presentation/decorators';
 
 @ApiTags('Solicitudes')
 @Controller('v1/inn/central-mezclas/solicitudes')
@@ -72,6 +74,7 @@ export class SolicitudesController {
     }
   }
 
+  @Authorities([INN_AUTHORITIES.CENTRAL_MEZCLAS.MANAGE])
   @ApiBody({ type: CtMzGestionSolicitudPayload })
   @ApiResponse({ status: 200, type: Boolean })
   @Patch(':solicitudId/gestionar')

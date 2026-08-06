@@ -18,11 +18,7 @@ export class UpdatePasswordImpl extends BaseSource {
       const ekUsersRp = qr.manager.getRepository(_PrivSecEkUserOrm);
       const user = await ekUsersRp.findOne({
         where: { id: this.auth.id },
-        select: {
-          id: true,
-          password: true,
-          passwordIsReset: true,
-        },
+        select: { id: true, password: true, passwordIsReset: true },
       });
 
       if (!user) throw new Error('Usuario no encontrado');
