@@ -23,7 +23,7 @@ export class GestionarSolicitudImpl extends BaseSource {
       }
 
       solicitud.estadoCode = payload.estadoCode;
-      solicitud.observacionGestion = payload.observacion ?? '';
+      solicitud.observacionGestion = !payload.observacion ? null : payload.observacion;
       solicitud.usuarioResponsableId = this.auth.id;
       solicitud.fechaGestion = new Date();
 
