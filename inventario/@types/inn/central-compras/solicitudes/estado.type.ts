@@ -59,3 +59,12 @@ export const SOL_ESTADOS = {
 };
 
 export const SOL_ESTADOS_VALUES = Object.values(SOL_ESTADOS);
+
+
+export const SOLICITUDES_RECHAZADAS_ESTADOS_CODES = [
+  SOL_REASIGNADA_OTRO_CENTRO.getCode(),
+  SOL_CANCELADA.getCode(),
+  SOL_RECHAZO_TEMPORAL.getCode(),
+  SOL_RECHAZO_DEFINITIVO.getCode(),
+  SOL_GESTION_MANUAL.getCode(),
+];

@@ -14,23 +14,16 @@ const VAGINAL = new ViaAdministracionType(7, 'VAGINAL');
 
 export function viaAdministracionTypeFactory(code: ViaAdministracionCode): ViaAdministracionType {
   switch (code) {
-    case 1:
-      return IV;
-    case 2:
-      return IM;
-    case 3:
-      return SC;
-    case 4:
-      return IT;
-    case 5:
-      return ORAL;
-    case 6:
-      return SUBLINGUAL;
-    case 7:
-      return VAGINAL;
+    case 1: return IV;
+    case 2: return IM;
+    case 3: return SC;
+    case 4: return IT;
+    case 5: return ORAL;
+    case 6: return SUBLINGUAL;
+    case 7: return VAGINAL;
   }
 }
 
-export const VIAS_ADMINISTRACION_VALUES = [IV, IM, SC, IT, ORAL, SUBLINGUAL, VAGINAL];
+export const VIAS_ADMINISTRACION = {IV, IM, SC, IT, ORAL, SUBLINGUAL, VAGINAL};
 
-export const VIAS_ADMINISTRACION = { IV, IM, SC, IT, ORAL, SUBLINGUAL, VAGINAL };
+export const VIAS_ADMINISTRACION_VALUES = Object.values(VIAS_ADMINISTRACION);

@@ -11,17 +11,13 @@ const OVULOS = new FormaFarmaceuticaType(4, 'OVULOS');
 
 export function formaFarmaceuticaTypeFactory(code: FormaFarmaceuticaCode): FormaFarmaceuticaType {
   switch (code) {
-    case 1:
-      return TABLETAS;
-    case 2:
-      return CAPSULAS;
-    case 3:
-      return GRAGEAS;
-    case 4:
-      return OVULOS;
+    case 1: return TABLETAS;
+    case 2: return CAPSULAS;
+    case 3: return GRAGEAS;
+    case 4: return OVULOS;
   }
 }
 
-export const FORMAS_FARMACEUTICAS_VALUES = [TABLETAS, CAPSULAS, GRAGEAS, OVULOS];
+export const FORMAS_FARMACEUTICAS = {TABLETAS, CAPSULAS, GRAGEAS, OVULOS};
 
-export const FORMAS_FARMACEUTICAS = { TABLETAS, CAPSULAS, GRAGEAS, OVULOS };
+export const FORMAS_FARMACEUTICAS_VALUES = Object.values(FORMAS_FARMACEUTICAS);

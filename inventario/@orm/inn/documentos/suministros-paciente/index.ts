@@ -1,10 +1,10 @@
-import { SuministroPacienteOrm } from './suministro-paciente.orm';
-import { DetalleSuministroPacienteOrm } from './suministro-paciente.detalle.orm';
-import { SuministroPacienteRecibidoOrm } from './suministro-paciente.recibido.orm';
+import { SuministroPacienteOrm } from './base.orm';
+import { DetalleSuministroPacienteOrm } from './detalle.orm';
+import { SuministroPacienteRecibidoOrm } from './recibido.orm';
 
-export * from './suministro-paciente.orm';
-export * from './suministro-paciente.detalle.orm';
-export * from './suministro-paciente.recibido.orm';
+export * from './base.orm';
+export * from './detalle.orm';
+export * from './recibido.orm';
 
 export const ORM_INN_DOCUMENTOS_SUMPAC_ENTITIES = [
   SuministroPacienteOrm,

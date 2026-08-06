@@ -11,17 +11,13 @@ const CRITICA = new PrioridadType(4, 'CRITICA');
 
 export function prioridadTypeFactory(code: PrioridadCode): PrioridadType {
   switch (code) {
-    case 1:
-      return BAJA;
-    case 2:
-      return MEDIA;
-    case 3:
-      return ALTA;
-    case 4:
-      return CRITICA;
+    case 1: return BAJA;
+    case 2: return MEDIA;
+    case 3: return ALTA;
+    case 4: return CRITICA;
   }
 }
 
 export const PRIORIDADES = { BAJA, MEDIA, ALTA, CRITICA };
 
-export const PRIORIDADES_VALUES = [BAJA, MEDIA, ALTA, CRITICA];
+export const PRIORIDADES_VALUES = Object.values(PRIORIDADES);

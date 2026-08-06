@@ -11,17 +11,13 @@ const CANCELADA = new EstadoType(4, 'CANCELADA');
 
 export function estadoTypeFactory(code: EstadoCode): EstadoType {
   switch (code) {
-    case 1:
-      return RADICADA;
-    case 2:
-      return ACEPTADA;
-    case 3:
-      return RECHAZADA;
-    case 4:
-      return CANCELADA;
+    case 1: return RADICADA;
+    case 2: return ACEPTADA;
+    case 3: return RECHAZADA;
+    case 4: return CANCELADA;
   }
 }
 
-export const ESTADOS_VALUES = [RADICADA, ACEPTADA, RECHAZADA, CANCELADA];
+export const ESTADOS = {RADICADA, ACEPTADA, RECHAZADA, CANCELADA};
 
-export const ESTADOS = { RADICADA, ACEPTADA, RECHAZADA, CANCELADA };
+export const ESTADOS_VALUES = Object.values(ESTADOS);

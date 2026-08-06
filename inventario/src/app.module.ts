@@ -5,10 +5,11 @@ import { DocumentosModule } from './documentos/module';
 import { MAOSModule } from './maos/module';
 import { CentralMezclasModule } from './central-mezclas/module';
 import { PollaMundialistaModule } from './polla-mundialista/module';
+import { CentralComprasModule } from './central-compras/module';
 
 @Module({
   imports: [
-    // --- AVOID NOWRAP --- //
+    CentralComprasModule,
     DocumentosModule,
     MAOSModule,
     CentralMezclasModule,

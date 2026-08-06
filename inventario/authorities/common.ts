@@ -13,5 +13,6 @@ export const INN_MODULES = {
     FARMACIA: `${inn}008`,
     SERVICIO_TECNICO: `${inn}009`,
     EQUIPOS: `${inn}010`,
+    CENTRAL_MEZCLAS: `${inn}011`,
   },
 };

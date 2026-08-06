@@ -10,15 +10,12 @@ const ALTA = new PrioridadType(3, 'ALTA');
 
 export function prioridadTypeFactory(code: PrioridadCode): PrioridadType {
   switch (code) {
-    case 1:
-      return BAJA;
-    case 2:
-      return MEDIA;
-    case 3:
-      return ALTA;
+    case 1: return BAJA;
+    case 2: return MEDIA;
+    case 3: return ALTA;
   }
 }
 
-export const PRIORIDADES_VALUES = [ALTA, MEDIA, BAJA];
+export const PRIORIDADES = {ALTA, MEDIA, BAJA};
 
-export const PRIORIDADES = { ALTA, MEDIA, BAJA };
+export const PRIORIDADES_VALUES = Object.values(PRIORIDADES);

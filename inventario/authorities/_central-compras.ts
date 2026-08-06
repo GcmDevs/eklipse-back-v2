@@ -1,4 +1,4 @@
-import { INN_MODULES } from './_common';
+import { INN_MODULES } from './common';
 
 export const CTC_AUTHS = {
   CODE: INN_MODULES.SUBS.CENTRAL_COMPRAS,

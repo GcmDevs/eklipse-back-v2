@@ -48,6 +48,11 @@ export class UpdateSolicitudImpl extends BaseSource {
       solicitud.pacienteExternoId = pacienteExterno.id;
       solicitud.lineaCode = payload.lineaCode;
       solicitud.prioridadCode = payload.prioridadCode;
+      solicitud.fechaCreacion = new Date();
+      solicitud.observacionGestion = null;
+      solicitud.fechaGestion = null;
+      solicitud.usuarioResponsableId = null;
+      solicitud.estadoCode = ESTADOS.RADICADA.getCode();
 
       await solicitudRp.save(solicitud);
       await seleccionRp.delete({ solicitudId: solicitud.id });

@@ -12,5 +12,8 @@ export function enabledModules_INVENTARIO(authorities: string[]) {
   // CENTRAL DE COMPRAS
   if (authorities.includes(INN_AUTHORITIES.CENTRAL_COMPRAS.CODE)) response.push('inn-ctc');
   if (authorities.includes(INN_AUTHORITIES.CENTRAL_COMPRAS.VER_TODAS)) response.push('inn-ctc-manage');
+  // CENTRAL DE MEZCLAS
+  if (authorities.includes(INN_AUTHORITIES.CENTRAL_MEZCLAS.CODE)) response.push('inn-ctmz');
+  if (authorities.includes(INN_AUTHORITIES.CENTRAL_MEZCLAS.MANAGE)) response.push('inn-ctmz-manage');
   return response;
 }

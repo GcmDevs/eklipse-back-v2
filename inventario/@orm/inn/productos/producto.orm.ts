@@ -1,6 +1,7 @@
 import { Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { ItemCotizadoOrm } from '../central-compras/item-cotizado.orm';
 import { SetOrm } from '../central-compras/set.orm';
+import { ClaseProductoCode, ClaseProductoType, TipoProductoCode } from '@inn/types/inn/productos';
 
 @Entity('INNPRODUC')
 export class ProductoOrm {
@@ -9,6 +10,12 @@ export class ProductoOrm {
 
   @Column({ name: 'IPRCODIGO' })
   codigo: string;
+
+  @Column({ name: 'IPRCLAPRO' })
+  claseCode: ClaseProductoCode;
+
+  @Column({ name: 'IPRTIPPRO' })
+  tipoCode: TipoProductoCode;
 
   @Column({ name: 'IPRDESCOR' })
   descripcionCorta: string;
@@ -33,4 +40,7 @@ export class ProductoOrm {
 
   @ManyToMany(() => SetOrm, set => set.productos)
   sets: SetOrm[];
+
+  clase: ClaseProductoType;
+  descripcion: string;
 }
