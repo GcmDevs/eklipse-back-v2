@@ -7,7 +7,7 @@ import {
   TipoCode,
   TIPOS,
 } from '@inn/types/inn/central-compras/solicitudes';
-import { TipoDocumentoCode } from '@inn/types/inn/documentos';
+import { TipoDocumentoCode, TIPOS_DOCUMENTO } from '@inn/types/inn/documentos';
 import { Injectable } from '@nestjs/common';
 import { QueryRunner } from 'typeorm';
 
@@ -45,16 +45,21 @@ export class CentralComprasSource extends BaseSource {
   }
 
   protected keyWordsTipoOrden(tipo: TipoCode) {
-    const tipoDocumento: TipoDocumentoCode =
-      tipo === TIPOS.PRODUCTOS.getCode() ? 0 : tipo === TIPOS.SERVICIOS.getCode() ? 19 : 0;
+    const OCKey = TIPOS_DOCUMENTO.ORDEN_COMPRA.getCode();
+    const OSKey = TIPOS_DOCUMENTO.ORDEN_SERVICIO.getCode();
 
-    const tipoOrden =
-      tipoDocumento === 0 ? 'compra' : tipoDocumento === 19 ? 'servicio' : undefined;
+    const tipDoc: TipoDocumentoCode =
+      tipo === TIPOS.PRODUCTOS.getCode()
+        ? OCKey
+        : tipo === TIPOS.SERVICIOS.getCode()
+          ? OSKey
+          : OCKey;
 
-    const tipoOrdenAbr = tipoDocumento === 0 ? 'OC' : tipoDocumento === 19 ? 'OS' : undefined;
+    const tipoOrden = tipDoc === OCKey ? 'compra' : tipDoc === OSKey ? 'servicio' : undefined;
+    const tipoOrdenAbr = tipDoc === OCKey ? 'OC' : tipDoc === OSKey ? 'OS' : undefined;
 
     return {
-      tipoDocumento,
+      tipoDocumento: tipDoc,
       tipoOrden,
       tipoOrdenAbr,
     };
