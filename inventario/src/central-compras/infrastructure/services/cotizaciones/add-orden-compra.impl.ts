@@ -21,123 +21,117 @@ import {
 import { ProductoOrm } from '@inn/orm/inn/productos';
 import { ProductoOrm as AfnProductoOrm } from '@inn/orm/inn/activos-fijos';
 import { consecutivosServices } from '@common/infrastructure/services';
+import { TIPOS_DOCUMENTO } from '@inn/types/inn/documentos';
 
 @Injectable()
 export class AddOCImpl extends CentralComprasSource {
   public async execute(payload: AddOCDto) {
     const qr = this.dynamicQR(gcmContextFactory(payload.contextCode));
+
     await qr.connect();
     try {
       await qr.startTransaction();
 
+      // Repositorios
       const detalleOrdenActivoRp = qr.manager.getRepository(DetalleOrdenActivoOrm);
       const cotDocumentoRp = qr.manager.getRepository(DocumentoCotizacionOrm);
       const detalleOrdenRp = qr.manager.getRepository(DetalleOrdenCompraOrm);
       const cambioEstadoRp = qr.manager.getRepository(CambioEstadoOrm);
+      const activoFijoRp = qr.manager.getRepository(AfnProductoOrm);
       const cotizacionRp = qr.manager.getRepository(CotizacionOrm);
       const solicitudRp = qr.manager.getRepository(SolicitudOrm);
       const documentoRp = qr.manager.getRepository(DocumentoOrm);
+      const productoRp = qr.manager.getRepository(ProductoOrm);
       const pagoRp = qr.manager.getRepository(PagoOrm);
 
-      const cotizacion = await cotizacionRp.findOneOrFail({
+      // Autocompletar consecutivo
+      payload.consecutivo = consecutivosServices.autocomplete(payload.consecutivo);
+
+      // Obtener cotización
+      const cotizacion = await cotizacionRp.findOne({
         where: { id: payload.cotizacionId },
         relations: ['detalle', 'detalle.item'],
       });
 
-      if (!cotizacion.proveedorId) {
-        throw new Error(`La cotización aun no tiene un proveedor registrado`);
-      }
+      // Validar que exista la cotización y que tenga proveedor
+      if (!cotizacion) throw new Error(`No existe esta cotización`);
+      if (!cotizacion.proveedorId) throw new Error(`La cotización no tiene proveedor registrado`);
 
+      // Obtener solicitud y validar que no haya sido rechazada
+      const solicitud = await solicitudRp.findOne({ where: { id: cotizacion.solicitudId } });
+      if (solicitud.wasRejected()) throw new Error('Esta solicitud ya fue rechazada');
+
+      // Generar keywords para validar el tipo de orden de compra según el tipo de solicitud
+      const kwForOC = this.keyWordsTipoOrden(solicitud.tipoCode);
+
+      // Obtener documento y validar que exista y que no haya otra cotización con el mismo documento
+      const documento = await documentoRp.findOne({
+        where: { consecutivo: payload.consecutivo, tipoCode: kwForOC.tipoDocumento },
+        relations: ['creadoPor'],
+      });
+      if (!documento) throw new Error(`No existe ${kwForOC.tipoOrden} con este consecutivo`);
+      const cotsWithSameDoc = await cotizacionRp.find({ where: { cotDocumentoId: documento.id } });
+      if (cotsWithSameDoc.length) throw new Error(`Hay cots con esta ${kwForOC.tipoOrdenAbr}`);
+
+      // Obtener productos de la orden de compra
+      const allProds = await detalleOrdenRp.find({ where: { ordenId: documento.id } });
+      const afnProds = await detalleOrdenActivoRp.find({ where: { ordenId: documento.id } });
+      allProds.push(...(afnProds as any));
+
+      // Validar items aprobados
       const itemsAprobados = cotizacion.detalle.filter(item => item.isAprobado === true);
 
-      const solicitud = await solicitudRp.findOneOrFail({ where: { id: cotizacion.solicitudId } });
+      // Validar que la cantidad de items aprobados sea igual a la cantidad de productos en la oc
+      const isSameCantItems = itemsAprobados.length === allProds.length;
+      if (!isSameCantItems) throw new Error(`La cant. de prods no coincide`);
 
-      const activosFijosIds: number[] = [];
-      const productosIds: number[] = [];
-
+      // Traer productos de la cotización
+      const afnProdsFromCotIds: number[] = [];
+      const innProdsFromCotIds: number[] = [];
       cotizacion.detalle.forEach(el => {
         if (el.item.productoId) {
-          if (el.item.productoId) {
-            if (el.item.tipoCode === TIPOS.ACTIVO_FIJO.getCode()) {
-              activosFijosIds.push(el.item.productoId);
-            } else {
-              productosIds.push(el.item.productoId);
-            }
+          const itemIsActivoFijo = el.item.tipoCode === TIPOS.ACTIVO_FIJO.getCode();
+          if (itemIsActivoFijo) afnProdsFromCotIds.push(el.item.productoId);
+          else innProdsFromCotIds.push(el.item.productoId);
+        }
+      });
+
+      // Traer productos de dinamica requeridos en la cotización
+      const prodsFromDim: ProductoOrm[] = [];
+      const afnProdsFromBD = await activoFijoRp.find({ where: { id: In(afnProdsFromCotIds) } });
+      const innProdsFromBD = await productoRp.find({ where: { id: In(innProdsFromCotIds) } });
+      prodsFromDim.push(...innProdsFromBD);
+      prodsFromDim.push(
+        ...afnProdsFromBD.map(af => {
+          const prod = new ProductoOrm();
+          prod.id = af.id;
+          prod.codigo = af.codigo;
+          prod.descripcion = af.descripcion;
+          prod.descripcionCorta = af.descripcion;
+          prod.isBloqueado = false;
+          prod.precioSugerido = af.precioSugerido;
+          prod.clase = TIPOS.ACTIVO_FIJO as any;
+          prod.claseCode = TIPOS.ACTIVO_FIJO.getCode() as any;
+          prod.tipoCode = TIPOS.ACTIVO_FIJO.getCode() as any;
+          return prod;
+        })
+      );
+
+      // Mapear productos de dinamica a los items de la cotización
+      cotizacion.detalle.map(dt => {
+        if (dt.item) {
+          if (dt.item.productoId) {
+            const afnProd = prodsFromDim.find(
+              acf => acf.id === dt.item.productoId && acf.tipoCode === dt.item.tipoCode
+            );
+            if (afnProd && dt.item.marca) afnProd.marca = dt.item.marca;
+            dt.item.producto = afnProd;
           }
         }
       });
 
-      const dimProductos: ProductoOrm[] = [];
-
-      const activoFijoRp = qr.manager.getRepository(AfnProductoOrm);
-      const productoRp = qr.manager.getRepository(ProductoOrm);
-
-      const activosFijosFromBd = await activoFijoRp.find({ where: { id: In(activosFijosIds) } });
-      const productosFromBd = await productoRp.find({ where: { id: In(productosIds) } });
-
-      const prods = activosFijosFromBd.map(af => {
-        const producto = new ProductoOrm();
-        producto.id = af.id;
-        producto.codigo = af.codigo;
-        producto.descripcion = af.descripcion;
-        producto.descripcionCorta = af.descripcion;
-        producto.isBloqueado = false;
-        producto.precioSugerido = af.precioSugerido;
-        producto.clase = TIPOS.ACTIVO_FIJO as any;
-        producto.claseCode = TIPOS.ACTIVO_FIJO.getCode() as any;
-        producto.tipoCode = TIPOS.ACTIVO_FIJO.getCode() as any;
-        return producto;
-      });
-
-      dimProductos.push(...productosFromBd);
-      dimProductos.push(...prods);
-
-      cotizacion.detalle.map(dt => {
-        if (dt.item.productoId) {
-          const af = dimProductos.filter(
-            acf => acf.id === dt.item.productoId && acf.tipoCode === dt.item.tipoCode
-          )[0];
-          try {
-            if (dt.item && dt.item.marca) af.marca = dt.item.marca;
-          } catch (error: any) {}
-          dt.item.producto = af;
-        }
-      });
-
-      if (solicitud.wasRejected()) {
-        throw new Error('Esta solicitud ya fue rechazada');
-      }
-
-      const kwTO = this.keyWordsTipoOrden(solicitud.tipoCode);
-
-      payload.consecutivo = consecutivosServices.autocomplete(payload.consecutivo);
-
-      const documento = await documentoRp.findOne({
-        where: { consecutivo: payload.consecutivo, tipoCode: kwTO.tipoDocumento },
-        relations: ['creadoPor'],
-      });
-
-      if (!documento) throw new Error(`No existe orden de ${kwTO.tipoOrden} con este consecutivo`);
-
-      const cotizacionesWithSameDocumento = await cotizacionRp.find({
-        where: { cotDocumentoId: documento.id },
-      });
-
-      if (cotizacionesWithSameDocumento.length) {
-        throw new Error(`Hay una o mas cotizaciones con esta ${kwTO.tipoOrdenAbr}`);
-      }
-
-      const productos = await detalleOrdenRp.find({ where: { ordenId: documento.id } });
-      const activosFijos = await detalleOrdenActivoRp.find({ where: { ordenId: documento.id } });
-
-      productos.push(...(activosFijos as any));
-
-      if (itemsAprobados.length !== productos.length) {
-        throw new Error('La cantidad de productos en la OC no coincide con los de la cotización');
-      }
-
+      // Proceso de creación de pagos
       const pagosOrdenados = orderBy(payload.cuotas, 'noCuota', 'asc');
-
       let valorTotal = 0;
 
       cotizacion.detalle.forEach(el => {
@@ -150,63 +144,69 @@ export class AddOCImpl extends CentralComprasSource {
         }
       });
 
-      itemsAprobados.forEach(itemAprobado => {
-        let productoEnOC: DetalleOrdenCompraOrm[];
+      // Verificación de coincidencia de los items de la OC vs items de cotización
+      itemsAprobados.forEach(itemAprob => {
+        let prodInOC: DetalleOrdenCompraOrm;
+        const item = itemAprob.item;
+        const nomItem = item.producto
+          ? item.producto.descripcionCorta
+          : (item.nombre ?? item.descripcion);
+        const errExt = `en la ${kwForOC.tipoOrdenAbr}`;
 
-        if (kwTO.tipoDocumento === 0) {
-          productoEnOC = productos.filter(pro => pro.productoId === itemAprobado.item.productoId);
+        if (kwForOC.tipoDocumento === TIPOS_DOCUMENTO.ORDEN_COMPRA.getCode()) {
+          prodInOC = allProds.find(pro => pro.productoId === item.productoId);
         } else {
-          productoEnOC = productos.filter(
+          prodInOC = allProds.find(
             pro =>
-              pro.cantidad === itemAprobado.item.cantidad &&
-              pro.valorCOP - itemAprobado.valorUnitario <= 100 &&
-              pro.valorCOP - itemAprobado.valorUnitario >= -100
+              pro.cantidad === item.cantidad &&
+              pro.valorCOP - itemAprob.valorUnitario <= 100 &&
+              pro.valorCOP - itemAprob.valorUnitario >= -100 &&
+              pro.porcDescuento === itemAprob.descuento &&
+              pro.porcIVA === itemAprob.IVA
           );
+          if (!prodInOC) throw new Error(`No existe item compatible con ${nomItem} ${errExt}`);
         }
 
-        if (productoEnOC.length) {
-          if (itemAprobado.item.cantidad !== productoEnOC[0].cantidad) {
-            throw new Error(
-              `La cantidad del item ${itemAprobado.item.descripcion} no es la misma en la ${kwTO.tipoOrdenAbr}`
-            );
-          }
-
-          const diffPrecios = itemAprobado.valorUnitario - productoEnOC[0].valorCOP;
-
-          if (diffPrecios < -100 || diffPrecios > 100) {
-            throw new Error(
-              `El precio del item ${itemAprobado.item.descripcion} no es el mismo en la ${kwTO.tipoOrdenAbr}`
-            );
-          }
+        if (prodInOC) {
+          const IVACoincide = prodInOC.porcIVA === itemAprob.IVA;
+          const descCoincide = prodInOC.porcDescuento !== itemAprob.descuento;
+          const cantCoincide = item.cantidad !== prodInOC.cantidad;
+          const diffPrecios = itemAprob.valorUnitario - prodInOC.valorCOP;
+          const diffIsSafe = diffPrecios > -100 || diffPrecios < 100;
+          if (!IVACoincide) throw new Error(`El IVA de ${nomItem} no es el mismo ${errExt}`);
+          if (descCoincide) throw new Error(`El descuento de ${nomItem} no es el mismo ${errExt}`);
+          if (cantCoincide) throw new Error(`La cantidad de ${nomItem} no es la misma ${errExt}`);
+          if (!diffIsSafe) throw new Error(`El precio de ${nomItem} no es el mismo ${errExt}`);
         } else {
-          if (kwTO.tipoDocumento === 0) {
-            throw new Error(
-              `El producto ${itemAprobado.item.descripcion} no existe en la ${kwTO.tipoOrdenAbr}`
-            );
+          if (kwForOC.tipoDocumento === 0) {
+            throw new Error(`El producto ${nomItem} no existe ${errExt}`);
           }
         }
       });
 
+      // Crear cambio de estado y documento de cotización
       const estado = await this.createCambioEstado(qr, {
         solicitud,
         estado: SOL_ESTADOS.SOL_ULTIMOS_PASOS,
         entidadRelacionadaId: cotizacion.id,
         estadoEspecifico: SOL_ESTADOS_ESPECIFICOS.COTI_OC_AGREGADA,
-        informacionAdicional: `${kwTO.tipoOrdenAbr} ${documento.consecutivo} agregada a cot. #${cotizacion.id}`,
+        informacionAdicional: `${kwForOC.tipoOrdenAbr} ${documento.consecutivo} agregada a cot. #${cotizacion.id}`,
       });
 
-      const newCotDocumento = new DocumentoCotizacionOrm();
-      newCotDocumento.cotizacionId = cotizacion.id;
-      newCotDocumento.documentoId = documento.id;
-      newCotDocumento.estadoId = estado.id;
-      newCotDocumento.tipoPagoCode = payload.tipoPago;
-      const cotDocumentoStored = await cotDocumentoRp.save(newCotDocumento);
+      // Crear documento de cotización
+      const newCotDoc = new DocumentoCotizacionOrm();
+      newCotDoc.cotizacionId = cotizacion.id;
+      newCotDoc.documentoId = documento.id;
+      newCotDoc.estadoId = estado.id;
+      newCotDoc.tipoPagoCode = payload.tipoPago;
+      const cotDocStored = await cotDocumentoRp.save(newCotDoc);
 
+      // Crear pagos
       const newPagos: PagoOrm[] = [];
       pagosOrdenados.forEach((el, i) => {
         const newPago = new PagoOrm();
         newPago.cotizacionId = cotizacion.id;
-        newPago.cotDocumentoId = cotDocumentoStored.id;
+        newPago.cotDocumentoId = cotDocStored.id;
         if (i === pagosOrdenados.length - 1) newPago.pagarAlFinTrabajo = el.alFinalizarTrabajo;
         else newPago.pagarAlFinTrabajo = false;
         newPago.porcentaje = el.porcentaje;
@@ -215,13 +215,14 @@ export class AddOCImpl extends CentralComprasSource {
         newPago.fechaOrdenCompra = documento.fechaCreacion;
         newPagos.push(newPago);
       });
-
       await pagoRp.save(newPagos);
 
-      cotizacion.cotDocumentoId = cotDocumentoStored.id;
+      // Modificar cotización
+      cotizacion.cotDocumentoId = cotDocStored.id;
       cotizacion.recibida = null;
       await cotizacionRp.save(cotizacion);
 
+      // Desligar rechazo previo (si existe)
       const rechazoPrevio = await cambioEstadoRp.findOne({
         where: {
           solicitudId: solicitud.id,
