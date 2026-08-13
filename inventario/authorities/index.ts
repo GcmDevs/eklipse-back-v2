@@ -9,6 +9,7 @@ import { PRODUCTOS_AUTHS } from './_productos';
 import { RECEPCION_TECNICA_AUTHS } from './_recepcion-tecnica';
 import { SERVICIO_TECNICO_AUTHS } from './_servicio-tecnico';
 import { SUMINISTROS_PACIENTE_AUTHS } from './_suministros-paciente';
+import { SOLICITUD_PEDIDO_AUTHS } from './_solicitud-pedido';
 
 export const INN_AUTHORITIES = {
   CODE: INN_MODULES.CODE,
@@ -22,4 +23,5 @@ export const INN_AUTHORITIES = {
   SERVICIO_TECNICO: SERVICIO_TECNICO_AUTHS,
   EQUIPOS: EQUIPOS_AUTHS,
   CENTRAL_MEZCLAS: CTMZ_AUTHS,
+  SOLICITUD_PEDIDO: SOLICITUD_PEDIDO_AUTHS,
 };

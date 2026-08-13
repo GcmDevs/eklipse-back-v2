@@ -6,6 +6,7 @@ import { MAOSModule } from './maos/module';
 import { CentralMezclasModule } from './central-mezclas/module';
 import { PollaMundialistaModule } from './polla-mundialista/module';
 import { CentralComprasModule } from './central-compras/module';
+import { SolicitudPedidoModule } from './solicitud-pedido/solicitud-pedido.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { CentralComprasModule } from './central-compras/module';
     MAOSModule,
     CentralMezclasModule,
     PollaMundialistaModule,
+    SolicitudPedidoModule,
   ],
 })
 export class AppModule implements OnModuleInit {
