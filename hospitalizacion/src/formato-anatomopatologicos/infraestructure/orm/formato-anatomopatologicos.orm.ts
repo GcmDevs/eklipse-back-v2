@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 import { DetalleMuestraCupsOrm } from './detalle-cups.orm';
 
-@Entity({ name: 'formatomuestrasanatomopatologicas' })
+@Entity({ name: 'EKHPNANATOMOPATOLOGICOS' })
 @Index('idxmuestrafechatoma', ['fechaTomaMuestra'])
 @Index('idxmuestranumerocaso', ['numeroCaso'])
 @Index('idxmuestradocumento', ['numeroDocumento'])
@@ -47,8 +47,9 @@ export class FormatoMuestraAnatomopatologicaOrm {
   @Column({
     name: 'INGRESO',
     type: 'bigint',
+    nullable: true,
   })
-  ingreso: number;
+  ingreso?: number | null;
 
   /**
    * Snapshot de la información del paciente.
@@ -82,10 +83,8 @@ export class FormatoMuestraAnatomopatologicaOrm {
   })
   diagnostico: string;
 
-  @Column({
-    name: 'PRESTADOREXTERNO',
-  })
-  prestadorExterno: boolean;
+  @Column({ name: 'PRESTADOREXTERNO', type: 'varchar', length: 200, default: '' })
+  prestadorExterno: string;
 
   @Column({
     name: 'INSTITUCIONORIGEN',
