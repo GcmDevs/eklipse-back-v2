@@ -3,7 +3,7 @@
 import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { FormatoMuestraAnatomopatologicaOrm } from './formato-anatomopatologicos.orm';
 
-@Entity({ name: 'formatomuestrasanatomopatologicascups' })
+@Entity({ name: 'EKHPNANATOMOPATOLOGICOSCUPS' })
 @Index('idxdetallemuestraregistro', ['registroId'])
 @Index('idxdetallemuestracups', ['codigoCups'])
 export class DetalleMuestraCupsOrm {
@@ -20,7 +20,7 @@ export class DetalleMuestraCupsOrm {
     nullable: false,
     onDelete: 'RESTRICT',
   })
-  @JoinColumn({ name: 'registroid' })
+  @JoinColumn({ name: 'REGISTROID' })
   registro: FormatoMuestraAnatomopatologicaOrm;
 
   /**
@@ -32,13 +32,6 @@ export class DetalleMuestraCupsOrm {
     length: 20,
   })
   codigoCups: string;
-
-  @Column({
-    name: 'DESCRIPCIONCUPS',
-    type: 'varchar',
-    length: 500,
-  })
-  descripcionCups: string;
 
   @Column({
     name: 'TIPOCUPS',
@@ -60,8 +53,6 @@ export class DetalleMuestraCupsOrm {
   })
   especimen: string;
 
-  @Column({
-    name: 'SOSPECHOSO',
-  })
-  sospechoso: boolean;
+  @Column({ name: 'SOSPECHOSO', type: 'varchar', length: 250, default: '' })
+  sospechoso: string;
 }
