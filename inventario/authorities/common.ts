@@ -14,5 +14,6 @@ export const INN_MODULES = {
     SERVICIO_TECNICO: `${inn}009`,
     EQUIPOS: `${inn}010`,
     CENTRAL_MEZCLAS: `${inn}011`,
+    SOLICITUD_PEDIDO: `${inn}012`,
   },
 };
