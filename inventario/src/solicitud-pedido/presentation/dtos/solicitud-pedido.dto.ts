@@ -31,6 +31,11 @@ export class CreateSolicitudPedidoPayload {
   @ValidateNested({ each: true })
   @Type(() => CreateSolicitudPedidoProductoPayload)
   productos: CreateSolicitudPedidoProductoPayload[];
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  observacion?: string;
 }
 
 export class CreateSolicitudPedidoProductoPayload {

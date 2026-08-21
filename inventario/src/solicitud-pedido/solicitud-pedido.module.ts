@@ -3,20 +3,14 @@ import { SolicitudPedidoController } from './presentation/controllers/solicitud-
 import {
   ActualizarDespachoSolicitudPedidoImpl,
   BuscarProductoImpl,
-  CheckVistoSolicitudPedidoImpl,
-  ConciliarSolicitudPedidoImpl,
   CreateSolicitudPedidoImpl,
   FetchSolicitudPedidosImpl,
-  RechazarSolicitudPedidoImpl,
 } from './infraestructure/services';
 
 @Module({
   controllers: [SolicitudPedidoController],
   providers: [
-    CheckVistoSolicitudPedidoImpl,
     FetchSolicitudPedidosImpl,
-    RechazarSolicitudPedidoImpl,
-    ConciliarSolicitudPedidoImpl,
     CreateSolicitudPedidoImpl,
     BuscarProductoImpl,
     ActualizarDespachoSolicitudPedidoImpl,

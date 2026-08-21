@@ -60,6 +60,9 @@ export class ActualizarDespachoSolicitudPedidoImpl extends BaseSource {
             `El producto de solicitud ${productoPayload.solicitudPedidoProductoId} no pertenece a esta solicitud`
           );
         }
+        if (detalle.estadoDespachoCode === ESTADOS_DESPACHO_PRODUCTO.FACTURADO.getCode()) {
+          throw new Error(`El producto ${detalle.producto.codigo} ya se encuentra facturado`);
+        }
 
         const cantidadSolicitada = Number(detalle.cantidad);
         const cantidadDespachada = Number(productoPayload.cantidadEnviada);
@@ -128,7 +131,18 @@ export class ActualizarDespachoSolicitudPedidoImpl extends BaseSource {
         productos: solicitudPedido.productos.map(detalle => {
           const cantidadSolicitada = Number(detalle.cantidad);
           const cantidadEnviada = Number(detalle.cantidadEnviada ?? 0);
-          const despacho = calcularEstadoDespachoProducto(cantidadSolicitada, cantidadEnviada);
+          const productoFacturado =
+            detalle.estadoDespachoCode === ESTADOS_DESPACHO_PRODUCTO.FACTURADO.getCode();
+          const despachoCalculado = calcularEstadoDespachoProducto(
+            cantidadSolicitada,
+            cantidadEnviada
+          );
+          const despacho = productoFacturado
+            ? {
+                estadoCode: ESTADOS_DESPACHO_PRODUCTO.FACTURADO.getCode(),
+                porcentaje: 100,
+              }
+            : despachoCalculado;
 
           return {
             id: detalle.id,
@@ -136,7 +150,9 @@ export class ActualizarDespachoSolicitudPedidoImpl extends BaseSource {
             codigo: detalle.producto.codigo,
             cantidadSolicitada,
             cantidadEnviada,
-            cantidadPendiente: Math.max(0, cantidadSolicitada - cantidadEnviada),
+            cantidadPendiente: productoFacturado
+              ? 0
+              : Math.max(0, cantidadSolicitada - cantidadEnviada),
             porcentajeDespachado: despacho.porcentaje,
             estadoDespachoCode: despacho.estadoCode,
             estadoDespacho: estadoDespachoProductoTypeFactory(despacho.estadoCode).getForHumans(),
