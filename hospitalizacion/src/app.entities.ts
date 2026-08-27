@@ -5,6 +5,7 @@ import { ORM_PAC_TRAZ_ENTITIES } from './pacientes/infrastructure/orm/pacientes-
 import { ESTANCIASPROLONGADAS_ENTITIES } from '@orm/hpn/estancias-prolongadas';
 import { ROTULO_MEDICAMENTOS_ENTITIES } from './rotulo-medicamentos/infraestructure/orm/rotulo-medicamentos';
 import { FORMATO_MUESTRAS_ANATOMOPATOLOGICAS_ENTITIES } from './formato-anatomopatologicos/infraestructure/orm';
+import { SEGUIMIENTO_QUIRURGICO_ENTITIES } from './seguimiento-quirurgico/infraestructure/orm';
 
 export const ENTITIES = [
   ...ORM_ADN_ENTITIES,
@@ -14,4 +15,5 @@ export const ENTITIES = [
   ...ESTANCIASPROLONGADAS_ENTITIES,
   ...ROTULO_MEDICAMENTOS_ENTITIES,
   ...FORMATO_MUESTRAS_ANATOMOPATOLOGICAS_ENTITIES,
+  ...SEGUIMIENTO_QUIRURGICO_ENTITIES,
 ];
