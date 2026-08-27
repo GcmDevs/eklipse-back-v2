@@ -3,20 +3,24 @@ export interface ChatUser {
   name: string;
 }
 
+export interface RegisteredChatUser extends ChatUser {
+  id: number;
+}
+
 export interface ChatContact extends ChatUser {
   online: boolean;
 }
 
 export interface ChatMessage {
-  id: string;
-  conversationId: string;
+  id: number;
+  conversationId: number;
   content: string;
   createdAt: string;
   sender: ChatUser;
 }
 
 export interface ChatConversationSummary {
-  id: string;
+  id: number;
   contact: ChatContact;
   lastMessage: ChatMessage | null;
   updatedAt: string;
@@ -45,7 +49,7 @@ export interface SearchChatUsersPayload {
 }
 
 export interface OpenConversationPayload {
-  conversationId?: unknown;
+  conversationId?: number | undefined;
 }
 
 export interface SendChatMessagePayload extends OpenConversationPayload {
