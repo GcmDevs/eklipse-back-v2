@@ -1,0 +1,7 @@
+/* Ejecutar una única vez. Registra el cierre auditado de avisos de sala de espera. */
+IF NOT EXISTS (SELECT 1 FROM EKHPNCIREST WHERE CODIGO = 'RETIRAR_ALERTA')
+BEGIN
+  INSERT INTO EKHPNCIREST (CODIGO, NOMBRE, ORDEN, ESALTERNATIVO, ESEVENTO, ESTERMINAL, ACTIVO)
+  VALUES ('RETIRAR_ALERTA', 'Retirar alerta', 93, 1, 1, 0, 1);
+END;
+GO
