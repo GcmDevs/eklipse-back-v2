@@ -4,6 +4,7 @@ import { NestExpressApplication } from '@nestjs/platform-express';
 import { ENVIRONMENTS, VALID_HOSTS } from './app.environments';
 import { initSwagger } from './app.swagger';
 import { AppModule } from './app.module';
+import { FILE_PUBLIC_ROOT } from './file-server.locations';
 import * as fs from 'fs';
 
 async function bootstrap() {
@@ -24,7 +25,7 @@ async function bootstrap() {
     })
   );
 
-  app.useStaticAssets('../public', {
+  app.useStaticAssets(FILE_PUBLIC_ROOT, {
     prefix: '/public',
     index: false,
   });

@@ -3,6 +3,7 @@ import { LessThan } from 'typeorm';
 import { GCM_CONTEXTS } from '@common/domain/types';
 import { switchConn } from '@common/infrastructure/services';
 import { ChatConversationOrm } from './orm/conversation.orm';
+import { ChatMessageAttachmentOrm } from './orm/message-attachment.orm';
 import { ChatMessageOrm } from './orm/message.orm';
 import type {
   ChatConversationDetails,
@@ -13,6 +14,7 @@ import type {
   RegisteredChatUser,
 } from './chat.types';
 import { normalizeDocument } from './chat.types';
+import { FILE_PATHS } from '@gen/file-server.locations';
 
 @Injectable()
 export class ChatStoreService {
@@ -75,11 +77,13 @@ export class ChatStoreService {
   async addMessage(
     conversationId: number,
     currentUser: RegisteredChatUser,
-    content: string
+    content: string,
+    attachments: string[]
   ): Promise<ChatMessage | undefined> {
     return this.sharedConn.transaction(async manager => {
       const conversationRepository = manager.getRepository(ChatConversationOrm);
       const messageRepository = manager.getRepository(ChatMessageOrm);
+      const attachmentRepository = manager.getRepository(ChatMessageAttachmentOrm);
       const conversation = await conversationRepository.findOne({
         where: { id: conversationId },
         relations: ['firstUser', 'secondUser'],
@@ -95,17 +99,32 @@ export class ChatStoreService {
           conversationId,
           senderUserId: currentUser.id,
           recipientUserId: recipient.id,
-          content,
+          content: content ? content : null,
           createdAt,
         })
       );
+
+      message.attachments = attachments.length
+        ? await attachmentRepository.save(
+            attachments.map(path =>
+              attachmentRepository.create({
+                messageId: message.id,
+                path: path.split('/').at(-1),
+              })
+            )
+          )
+        : [];
 
       conversation.lastMessageId = message.id;
       conversation.lastSenderUserId = currentUser.id;
       conversation.updatedAt = createdAt;
       await conversationRepository.save(conversation);
 
-      return this.toChatMessage(message, currentUser);
+      return this.toChatMessage(
+        message,
+        currentUser,
+        attachments.length ? attachments[0].split('/').at(-2) : null
+      );
     });
   }
 
@@ -115,7 +134,13 @@ export class ChatStoreService {
   ): Promise<ChatConversationSummary[]> {
     const conversations = await this.sharedConn.getRepository(ChatConversationOrm).find({
       where: [{ firstUserId: userId }, { secondUserId: userId }],
-      relations: ['firstUser', 'secondUser', 'lastMessage', 'lastSenderUser'],
+      relations: [
+        'firstUser',
+        'secondUser',
+        'lastMessage',
+        'lastMessage.attachments',
+        'lastSenderUser',
+      ],
       order: { updatedAt: 'DESC' },
     });
 
@@ -167,7 +192,7 @@ export class ChatStoreService {
       : { conversationId };
     const persistedMessages = await this.sharedConn.getRepository(ChatMessageOrm).find({
       where,
-      relations: ['senderUser'],
+      relations: ['senderUser', 'attachments'],
       order: { id: 'DESC' },
       take: ChatStoreService.MESSAGES_PAGE_SIZE + 1,
     });
@@ -175,7 +200,9 @@ export class ChatStoreService {
     const messages = persistedMessages.slice(0, ChatStoreService.MESSAGES_PAGE_SIZE);
 
     return {
-      messages: messages.reverse().map(message => this.toChatMessage(message)),
+      messages: messages.reverse().map(message => {
+        return this.toChatMessage(message, undefined, message.senderUser.document);
+      }),
       hasMoreMessages,
     };
   }
@@ -194,6 +221,7 @@ export class ChatStoreService {
             id: conversation.lastMessageId,
             conversationId: conversation.id,
             content: conversation.lastMessage.content,
+            attachments: this.toAttachmentPaths(conversation.lastMessage.attachments),
             createdAt: this.toIsoString(conversation.lastMessage.createdAt),
             sender: this.toChatUser(conversation.lastSenderUser),
           }
@@ -239,7 +267,13 @@ export class ChatStoreService {
   private findConversationById(id: number): Promise<ChatConversationOrm | null> {
     return this.sharedConn.getRepository(ChatConversationOrm).findOne({
       where: { id },
-      relations: ['firstUser', 'secondUser', 'lastMessage', 'lastSenderUser'],
+      relations: [
+        'firstUser',
+        'secondUser',
+        'lastMessage',
+        'lastMessage.attachments',
+        'lastSenderUser',
+      ],
     });
   }
 
@@ -262,7 +296,11 @@ export class ChatStoreService {
     };
   }
 
-  private toChatMessage(message: ChatMessageOrm, sender?: RegisteredChatUser): ChatMessage {
+  private toChatMessage(
+    message: ChatMessageOrm,
+    sender?: RegisteredChatUser,
+    document?: string
+  ): ChatMessage {
     const publicSender = sender
       ? { document: sender.document, name: sender.name }
       : this.toChatUser(message.senderUser);
@@ -271,9 +309,19 @@ export class ChatStoreService {
       id: message.id,
       conversationId: message.conversationId,
       content: message.content,
+      attachments: this.toAttachmentPaths(message.attachments, document),
       createdAt: this.toIsoString(message.createdAt),
       sender: publicSender,
     };
+  }
+
+  private toAttachmentPaths(attachments?: ChatMessageAttachmentOrm[], document?: string): string[] {
+    return [...(attachments ?? [])]
+      .sort((left, right) => left.id - right.id)
+      .map(
+        attachment =>
+          `public/${FILE_PATHS.chat.files}/${document ? `${document}/` : ''}${attachment.path}`
+      );
   }
 
   private toIsoString(value: Date): string {

@@ -36,6 +36,15 @@ import type {
   StartConversationPayload,
 } from './chat.types';
 import { normalizeDocument } from './chat.types';
+import { promises as fs } from 'fs';
+import {
+  FILE_PATHS,
+  MAX_CHAT_FILES_PER_MESSAGE,
+  isManagedStoredFilePath,
+  normalizeStoredFilePath,
+  resolveStoredPublicFile,
+} from '../file-server.locations';
+import { FileServerRegistry } from '../file-server.registry';
 
 @WebSocketGateway({
   namespace: '/chat',
@@ -52,7 +61,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   constructor(
     private readonly directory: ChatDirectoryService,
-    private readonly store: ChatStoreService
+    private readonly store: ChatStoreService,
+    private readonly fileRegistry: FileServerRegistry
   ) {}
 
   afterInit(server: Namespace): void {
@@ -242,48 +252,80 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @MessageBody() payload: SendChatMessagePayload
   ): Promise<ChatActionAck<ChatMessage>> {
     const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
-    if (!currentUser) return this.unauthorized();
+    if (!currentUser) return this.rejectedMessage('No fue posible identificar tu sesión.');
 
     const content = typeof payload?.content === 'string' ? payload.content.trim() : '';
+    const rawAttachments = payload?.attachments;
+    const attachments = Array.isArray(rawAttachments)
+      ? rawAttachments.map(value =>
+          typeof value === 'string' ? normalizeStoredFilePath(value) : ''
+        )
+      : [];
 
-    if (!payload.conversationId) return { ok: false, error: 'Selecciona una conversación.' };
-    if (!content) return { ok: false, error: 'Escribe un mensaje antes de enviarlo.' };
+    if (!payload.conversationId) return this.rejectedMessage('Selecciona una conversación.');
+    if (rawAttachments !== undefined && !Array.isArray(rawAttachments)) {
+      return this.rejectedMessage('Los archivos adjuntos no son válidos.');
+    }
+    if (attachments.length > MAX_CHAT_FILES_PER_MESSAGE) {
+      return this.rejectedMessage(
+        `Solo puedes enviar hasta ${MAX_CHAT_FILES_PER_MESSAGE} archivos por mensaje.`
+      );
+    }
+    if (
+      attachments.some(path => !isManagedStoredFilePath(path, FILE_PATHS.chat.files)) ||
+      new Set(attachments).size !== attachments.length
+    ) {
+      return this.rejectedMessage('Los archivos adjuntos no son válidos.');
+    }
+    if (!content && attachments.length === 0) {
+      return this.rejectedMessage('Escribe un mensaje o adjunta un archivo antes de enviarlo.');
+    }
     if (content.length > ChatGateway.MAX_MESSAGE_LENGTH) {
-      return {
-        ok: false,
-        error: `El mensaje no puede superar ${ChatGateway.MAX_MESSAGE_LENGTH} caracteres.`,
-      };
+      return this.rejectedMessage(
+        `El mensaje no puede superar ${ChatGateway.MAX_MESSAGE_LENGTH} caracteres.`
+      );
     }
 
     try {
+      await Promise.all(attachments.map(path => fs.access(resolveStoredPublicFile(path))));
+
       const participants = await this.store.participants(payload.conversationId);
       if (!participants.some(participant => participant.id === currentUser.id)) {
-        return { ok: false, error: 'No tienes acceso a esta conversación.' };
+        return this.rejectedMessage('No tienes acceso a esta conversación.');
       }
 
       const registeredParticipants = await this.directory.findByIds(
         participants.map(participant => participant.id)
       );
       if (registeredParticipants.length !== 2) {
-        return {
-          ok: false,
-          error: 'No se puede enviar el mensaje porque uno de los usuarios ya no está registrado.',
-        };
+        return this.rejectedMessage(
+          'No se puede enviar el mensaje porque uno de los usuarios ya no está registrado.'
+        );
       }
 
       const registeredCurrentUser = registeredParticipants.find(
         participant => participant.id === currentUser.id
       );
       if (!registeredCurrentUser || registeredCurrentUser.document !== currentUser.document) {
-        return { ok: false, error: 'Tu usuario ya no está registrado para utilizar el chat.' };
+        return this.rejectedMessage('Tu usuario ya no está registrado para utilizar el chat.');
+      }
+
+      if (attachments.length && !this.fileRegistry.reserve(attachments, currentUser.document)) {
+        return this.rejectedMessage('Los archivos adjuntos ya no están disponibles.');
       }
 
       const message = await this.store.addMessage(
         payload.conversationId,
         registeredCurrentUser,
-        content
+        content,
+        attachments
       );
-      if (!message) return { ok: false, error: 'No tienes acceso a esta conversación.' };
+      if (!message) {
+        this.fileRegistry.release(attachments, currentUser.document);
+        return this.rejectedMessage('No tienes acceso a esta conversación.');
+      }
+
+      this.fileRegistry.complete(attachments, currentUser.document);
 
       for (const participant of registeredParticipants) {
         this.server.to(this.userRoom(participant.document)).emit(CHAT_EVENTS.message, message);
@@ -292,8 +334,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
       return { ok: true, data: message };
     } catch (error) {
+      this.fileRegistry.release(attachments, currentUser.document);
       this.logPersistenceError('guardar un mensaje', error);
-      return { ok: false, error: 'No fue posible guardar el mensaje. Intenta nuevamente.' };
+      return this.rejectedMessage('No fue posible guardar el mensaje. Intenta nuevamente.');
     }
   }
 
@@ -381,6 +424,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   private unauthorized<T>(): ChatActionAck<T> {
     return { ok: false, error: 'No fue posible identificar tu sesión.' };
+  }
+
+  private rejectedMessage(error: string): ChatActionAck<ChatMessage> {
+    return { ok: false, error, cleanupAttachments: true };
   }
 
   private logPersistenceError(action: string, error: unknown): void {

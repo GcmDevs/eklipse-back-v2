@@ -1,4 +1,5 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { ChatMessageAttachmentOrm } from './message-attachment.orm';
 import { ChatUserOrm } from './user.orm';
 
 @Entity('CHATMENSAJE')
@@ -25,6 +26,9 @@ export class ChatMessageOrm {
 
   @Column({ name: 'CONTENIDO', length: 1000 })
   content: string;
+
+  @OneToMany(() => ChatMessageAttachmentOrm, attachment => attachment.message)
+  attachments: ChatMessageAttachmentOrm[];
 
   @Column({ name: 'FECCRE' })
   createdAt: Date;

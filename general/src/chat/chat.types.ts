@@ -15,6 +15,7 @@ export interface ChatMessage {
   id: number;
   conversationId: number;
   content: string;
+  attachments: string[];
   createdAt: string;
   sender: ChatUser;
 }
@@ -62,12 +63,14 @@ export interface LoadPreviousChatMessagesPayload extends OpenConversationPayload
 
 export interface SendChatMessagePayload extends OpenConversationPayload {
   content?: unknown;
+  attachments?: unknown;
 }
 
 export interface ChatActionAck<T = undefined> {
   ok: boolean;
   data?: T;
   error?: string;
+  cleanupAttachments?: boolean;
 }
 
 export const normalizeDocument = (value: unknown): string =>
