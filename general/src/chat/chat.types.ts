@@ -40,11 +40,16 @@ export interface ChatConversationDetails extends ChatMessagePage {
 
 export interface ChatBootstrap {
   conversations: ChatConversationSummary[];
+  onlineUsersCount?: number;
 }
 
 export interface ChatPresence {
   document: string;
   online: boolean;
+}
+
+export interface ChatOnlineUsersCount {
+  count: number;
 }
 
 export interface StartConversationPayload {

@@ -26,6 +26,7 @@ import type {
   ChatConversationSummary,
   ChatMessage,
   ChatMessagePage,
+  ChatOnlineUsersCount,
   ChatPresence,
   ChatUser,
   LoadPreviousChatMessagesPayload,
@@ -45,6 +46,8 @@ import {
   resolveStoredPublicFile,
 } from '../file-server.locations';
 import { FileServerRegistry } from '../file-server.registry';
+
+const ONLINE_USERS_COUNT_ALLOWED_DOCUMENTS = new Set(['1065819503', '7574298']);
 
 @WebSocketGateway({
   namespace: '/chat',
@@ -94,6 +97,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     const user = client.data.chatUser as RegisteredChatUser;
     client.join(this.userRoom(user.document));
     this.changeConnectionCount(user.document, 1);
+    this.emitOnlineUsersCount();
 
     let conversations: ChatConversationSummary[] = [];
     try {
@@ -105,7 +109,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       });
     }
 
-    const bootstrap: ChatBootstrap = { conversations };
+    const bootstrap: ChatBootstrap = {
+      conversations,
+      ...(this.canViewOnlineUsersCount(user.document)
+        ? { onlineUsersCount: this.connectedUsers.size }
+        : {}),
+    };
     client.emit(CHAT_EVENTS.bootstrap, bootstrap);
     void this.emitPresence(user);
   }
@@ -145,6 +154,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     if (!user) return;
 
     this.changeConnectionCount(user.document, -1);
+    this.emitOnlineUsersCount();
     void this.emitPresence(user);
   }
 
@@ -444,6 +454,20 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   private isOnline(document: string): boolean {
     return (this.connectedUsers.get(normalizeDocument(document)) ?? 0) > 0;
+  }
+
+  private emitOnlineUsersCount(): void {
+    const payload: ChatOnlineUsersCount = { count: this.connectedUsers.size };
+
+    for (const document of ONLINE_USERS_COUNT_ALLOWED_DOCUMENTS) {
+      if (this.isOnline(document)) {
+        this.server.to(this.userRoom(document)).emit(CHAT_EVENTS.onlineUsersCount, payload);
+      }
+    }
+  }
+
+  private canViewOnlineUsersCount(document: string): boolean {
+    return ONLINE_USERS_COUNT_ALLOWED_DOCUMENTS.has(normalizeDocument(document));
   }
 
   private changeConnectionCount(document: string, difference: number): void {

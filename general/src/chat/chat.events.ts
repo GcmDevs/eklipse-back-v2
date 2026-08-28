@@ -3,6 +3,7 @@ export const CHAT_EVENTS = {
   conversationUpdated: 'chat:conversation:updated',
   message: 'chat:message:new',
   presence: 'chat:contact:presence',
+  onlineUsersCount: 'chat:users:online-count',
   searchUsers: 'chat:users:search',
   startConversation: 'chat:conversation:start',
   openConversation: 'chat:conversation:open',
