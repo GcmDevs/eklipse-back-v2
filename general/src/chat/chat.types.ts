@@ -24,6 +24,8 @@ export interface ChatConversationSummary {
   id: number;
   contact: ChatContact;
   lastMessage: ChatMessage | null;
+  lastReadMessageId: number | null;
+  unreadCount: number;
   updatedAt: string;
 }
 
@@ -55,6 +57,7 @@ export interface SearchChatUsersPayload {
 
 export interface OpenConversationPayload {
   conversationId?: number | undefined;
+  markAsRead?: unknown;
 }
 
 export interface LoadPreviousChatMessagesPayload extends OpenConversationPayload {

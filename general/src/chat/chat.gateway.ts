@@ -200,15 +200,51 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     if (!payload.conversationId) return { ok: false, error: 'La conversación no es válida.' };
 
     try {
-      const details = await this.store.open(payload.conversationId, currentUser, document =>
-        this.isOnline(document)
+      const markAsRead = payload.markAsRead !== false;
+      const details = await this.store.open(
+        payload.conversationId,
+        currentUser,
+        document => this.isOnline(document),
+        markAsRead
       );
       if (!details) return { ok: false, error: 'No tienes acceso a esta conversación.' };
+
+      if (markAsRead) this.emitSummaryToUser(currentUser.document, details.conversation);
 
       return { ok: true, data: details };
     } catch (error) {
       this.logPersistenceError('abrir una conversación', error);
       return { ok: false, error: 'No fue posible cargar los mensajes guardados.' };
+    }
+  }
+
+  @SubscribeMessage(CHAT_EVENTS.markConversationRead)
+  async markConversationRead(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: OpenConversationPayload
+  ): Promise<ChatActionAck<ChatConversationSummary>> {
+    const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
+    if (!currentUser) return this.unauthorized();
+
+    const conversationId = Number(payload?.conversationId);
+    if (!Number.isSafeInteger(conversationId) || conversationId <= 0) {
+      return { ok: false, error: 'La conversación no es válida.' };
+    }
+
+    try {
+      const marked = await this.store.markConversationRead(conversationId, currentUser);
+      if (!marked) return { ok: false, error: 'No tienes acceso a esta conversación.' };
+
+      const summary = (
+        await this.store.listFor(currentUser.id, document => this.isOnline(document))
+      ).find(conversation => conversation.id === conversationId);
+      if (!summary) return { ok: false, error: 'La conversación ya no está disponible.' };
+
+      this.emitSummaryToUser(currentUser.document, summary);
+      return { ok: true, data: summary };
+    } catch (error) {
+      this.logPersistenceError('marcar una conversación como leída', error);
+      return { ok: false, error: 'No fue posible actualizar la lectura de la conversación.' };
     }
   }
 
@@ -327,10 +363,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
       this.fileRegistry.complete(attachments, currentUser.document);
 
+      await this.emitConversationUpdate(payload.conversationId);
       for (const participant of registeredParticipants) {
         this.server.to(this.userRoom(participant.document)).emit(CHAT_EVENTS.message, message);
       }
-      void this.emitConversationUpdate(payload.conversationId);
 
       return { ok: true, data: message };
     } catch (error) {

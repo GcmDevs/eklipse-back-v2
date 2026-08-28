@@ -7,7 +7,7 @@ export class ChatMessageOrm {
   @PrimaryGeneratedColumn({ name: 'OID' })
   id: number;
 
-  @Column({ name: 'CONVERSACION' })
+  @Column({ name: 'CHATCONVERSACION' })
   conversationId: number;
 
   @Column({ name: 'CHATUSUREG1' })

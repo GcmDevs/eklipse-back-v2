@@ -6,6 +6,7 @@ export const CHAT_EVENTS = {
   searchUsers: 'chat:users:search',
   startConversation: 'chat:conversation:start',
   openConversation: 'chat:conversation:open',
+  markConversationRead: 'chat:conversation:read',
   loadPreviousMessages: 'chat:messages:previous',
   sendMessage: 'chat:message:send',
 } as const;

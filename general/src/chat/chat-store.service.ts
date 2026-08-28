@@ -3,6 +3,7 @@ import { LessThan } from 'typeorm';
 import { GCM_CONTEXTS } from '@common/domain/types';
 import { switchConn } from '@common/infrastructure/services';
 import { ChatConversationOrm } from './orm/conversation.orm';
+import { ChatConversationReadOrm } from './orm/conversation-read.orm';
 import { ChatMessageAttachmentOrm } from './orm/message-attachment.orm';
 import { ChatMessageOrm } from './orm/message.orm';
 import type {
@@ -15,6 +16,11 @@ import type {
 } from './chat.types';
 import { normalizeDocument } from './chat.types';
 import { FILE_PATHS } from '@gen/file-server.locations';
+
+interface ChatUnreadState {
+  lastReadMessageId: number | null;
+  unreadCount: number;
+}
 
 @Injectable()
 export class ChatStoreService {
@@ -50,17 +56,31 @@ export class ChatStoreService {
     const conversation = await this.findConversationById(conversationId);
 
     if (!conversation) throw new Error('Conversation was not persisted');
+    await this.markConversationReadFor(conversation, currentUser.id);
     return this.detailsFor(conversation, currentUser.id, isOnline);
   }
 
   async open(
     conversationId: number,
     currentUser: RegisteredChatUser,
-    isOnline: (document: string) => boolean
+    isOnline: (document: string) => boolean,
+    markAsRead = true
   ): Promise<ChatConversationDetails | undefined> {
     const conversation = await this.findConversationById(conversationId);
     if (!conversation || !this.hasParticipant(conversation, currentUser.id)) return undefined;
+    if (markAsRead) await this.markConversationReadFor(conversation, currentUser.id);
     return this.detailsFor(conversation, currentUser.id, isOnline);
+  }
+
+  async markConversationRead(
+    conversationId: number,
+    currentUser: RegisteredChatUser
+  ): Promise<boolean | undefined> {
+    const conversation = await this.findConversationById(conversationId);
+    if (!conversation || !this.hasParticipant(conversation, currentUser.id)) return undefined;
+
+    await this.markConversationReadFor(conversation, currentUser.id);
+    return true;
   }
 
   async loadPreviousMessages(
@@ -144,7 +164,19 @@ export class ChatStoreService {
       order: { updatedAt: 'DESC' },
     });
 
-    return conversations.map(conversation => this.summaryFor(conversation, userId, isOnline));
+    const conversationIds = conversations.map(conversation => conversation.id);
+    const unreadStates = await this.unreadStatesFor(userId, conversationIds);
+
+    return conversations.map(conversation => {
+      const unreadState = unreadStates.get(conversation.id);
+      return this.summaryFor(
+        conversation,
+        userId,
+        isOnline,
+        unreadState?.unreadCount ?? 0,
+        unreadState?.lastReadMessageId ?? null
+      );
+    });
   }
 
   async participants(conversationId: number): Promise<RegisteredChatUser[]> {
@@ -175,10 +207,20 @@ export class ChatStoreService {
     userId: number,
     isOnline: (contactDocument: string) => boolean
   ): Promise<ChatConversationDetails> {
-    const messagePage = await this.messagePage(conversation.id);
+    const [messagePage, unreadStates] = await Promise.all([
+      this.messagePage(conversation.id),
+      this.unreadStatesFor(userId, [conversation.id]),
+    ]);
+    const unreadState = unreadStates.get(conversation.id);
 
     return {
-      conversation: this.summaryFor(conversation, userId, isOnline),
+      conversation: this.summaryFor(
+        conversation,
+        userId,
+        isOnline,
+        unreadState?.unreadCount ?? 0,
+        unreadState?.lastReadMessageId ?? null
+      ),
       ...messagePage,
     };
   }
@@ -210,7 +252,9 @@ export class ChatStoreService {
   private summaryFor(
     conversation: ChatConversationOrm,
     userId: number,
-    isOnline: (contactDocument: string) => boolean
+    isOnline: (contactDocument: string) => boolean,
+    unreadCount: number,
+    lastReadMessageId: number | null
   ): ChatConversationSummary {
     const contact = this.otherParticipant(conversation, userId);
     if (!contact) throw new Error('Conversation without a contact');
@@ -235,8 +279,82 @@ export class ChatStoreService {
         online: isOnline(contact.document),
       },
       lastMessage,
+      lastReadMessageId,
+      unreadCount,
       updatedAt: this.toIsoString(conversation.updatedAt),
     };
+  }
+
+  private async markConversationReadFor(
+    conversation: ChatConversationOrm,
+    userId: number
+  ): Promise<void> {
+    const lastMessageId = Number(conversation.lastMessageId ?? 0);
+    if (!lastMessageId) return;
+
+    await this.sharedConn.transaction('SERIALIZABLE', async manager => {
+      const repository = manager.getRepository(ChatConversationReadOrm);
+      const existing = await repository.findOne({
+        where: { conversationId: conversation.id, userId },
+      });
+      if (Number(existing?.lastReadMessageId ?? 0) >= lastMessageId) return;
+
+      await repository.save(
+        repository.create({
+          ...existing,
+          conversationId: conversation.id,
+          userId,
+          lastReadMessageId: lastMessageId,
+          updatedAt: new Date(),
+        })
+      );
+    });
+  }
+
+  private async unreadStatesFor(
+    userId: number,
+    conversationIds: number[]
+  ): Promise<Map<number, ChatUnreadState>> {
+    if (!conversationIds.length) return new Map();
+
+    const rows = await this.sharedConn
+      .getRepository(ChatConversationOrm)
+      .createQueryBuilder('conversation')
+      .leftJoin(
+        ChatConversationReadOrm,
+        'reading',
+        'reading.CHATCONVERSACION = conversation.OID AND reading.CHATUSUREG = :userId',
+        { userId }
+      )
+      .leftJoin(
+        ChatMessageOrm,
+        'unreadMessage',
+        `unreadMessage.CHATCONVERSACION = conversation.OID
+          AND unreadMessage.CHATUSUREG2 = :userId
+          AND unreadMessage.OID > COALESCE(reading.CHATMENSAJE, 0)`,
+        { userId }
+      )
+      .select('conversation.OID', 'conversationId')
+      .addSelect('reading.CHATMENSAJE', 'lastReadMessageId')
+      .addSelect('COUNT(unreadMessage.OID)', 'unreadCount')
+      .where('conversation.OID IN (:...conversationIds)', { conversationIds })
+      .groupBy('conversation.OID')
+      .addGroupBy('reading.CHATMENSAJE')
+      .getRawMany<{
+        conversationId: number | string;
+        lastReadMessageId: number | string | null;
+        unreadCount: number | string;
+      }>();
+
+    return new Map(
+      rows.map(row => [
+        Number(row.conversationId),
+        {
+          lastReadMessageId: row.lastReadMessageId == null ? null : Number(row.lastReadMessageId),
+          unreadCount: Number(row.unreadCount),
+        },
+      ])
+    );
   }
 
   private participantsFrom(conversation: ChatConversationOrm): RegisteredChatUser[] {
