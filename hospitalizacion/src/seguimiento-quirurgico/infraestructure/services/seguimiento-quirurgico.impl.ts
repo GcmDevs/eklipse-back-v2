@@ -98,6 +98,7 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
           const alertaActiva = alertasActivas.get(item.id);
           return {
             id: item.id,
+            sede: item.sede,
             identificadorPublico: item.identificadorPublico,
             nombrePublico: this.enmascararNombre(item.paciente.nombreCompleto),
             estadoActual: item.estadoActual,
@@ -110,7 +111,11 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
     }
   }
   private enmascararNombre(nombre: string): string {
-    return nombre.split(/\s+/).filter(Boolean).map(parte => `${parte.charAt(0)}${'*'.repeat(Math.max(parte.length - 1, 1))}`).join(' ');
+    return nombre
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((parte) => `${parte.charAt(0).toUpperCase()}.`)
+      .join(' ');
   }
   private async obtenerAlertasActivas(qr: QueryRunner) {
     const [estados, historial] = await Promise.all([
@@ -250,7 +255,60 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
   }
   private async obtenerCirugias(qr: QueryRunner, quirofanoId?: string) {
     const rows = await qr.query(
-      `SELECT CAST(CAST(P.PSCONSEC AS BIGINT) AS VARCHAR(50)) id, LTRIM(RTRIM(S.SALCODIGO)) salaCodigo, S.SALNOMBRE salaNombre, G.PACNUMDOC documento, LTRIM(RTRIM(ISNULL(G.PACPRINOM,'')+' '+ISNULL(G.PACSEGNOM,'')+' '+ISNULL(G.PACPRIAPE,'')+' '+ISNULL(G.PACSEGAPE,''))) nombrePaciente, CONVERT(varchar(10),P.PSFECINP,23) fecha, CONVERT(varchar(5),P.PSFECINP,108) hora, A.AINCONSEC ingreso, ISNULL(T.ESTADOACTUAL,'PROGRAMADO') estadoCodigo, ISNULL(T.UPDATEDAT,P.PSFECINP) fechaActualizacion FROM PCNPROSAL P LEFT JOIN GENPACIEN G ON G.OID=P.GENPACIEN LEFT JOIN ADNINGRESO A ON A.OID=P.ADNINGRESO LEFT JOIN PCNSALAS S ON S.OID=P.PSSALA LEFT JOIN EKHPNCIRSEG T ON T.PCNCONSEC=CAST(CAST(P.PSCONSEC AS BIGINT) AS VARCHAR(50)) WHERE P.PSFECINP>=CONVERT(date,GETDATE()) AND P.PSFECINP<DATEADD(day,1,CONVERT(date,GETDATE())) AND P.PSESTADO IN (0,1,3) ${quirofanoId ? 'AND LTRIM(RTRIM(S.SALCODIGO))=@0' : ''} ORDER BY P.PSFECINP`,
+      `SELECT
+        CASE
+          WHEN S.SALCODIGO LIKE 'AC%' THEN 'Clinica Alta Complejidad del Caribe'
+          WHEN S.SALCODIGO LIKE 'CM%' THEN 'Clinica Medicos'
+        END sede,
+        CAST(CAST(P.PSCONSEC AS BIGINT) AS VARCHAR(50)) id,
+        LTRIM(RTRIM(S.SALCODIGO)) salaCodigo,
+        S.SALNOMBRE salaNombre,
+        G.PACNUMDOC documento,
+        LTRIM(RTRIM(ISNULL(G.PACPRINOM, '') + ' ' + ISNULL(G.PACSEGNOM, '') + ' ' + ISNULL(G.PACPRIAPE, '') + ' ' + ISNULL(G.PACSEGAPE, ''))) nombrePaciente,
+        CASE P.PSESTADO
+          WHEN 0 THEN 'PROGRAMADA'
+          WHEN 1 THEN 'CUMPLIDO'
+          WHEN 2 THEN 'CANCELADO'
+          WHEN 3 THEN 'REPROGRAMADO'
+          WHEN 4 THEN 'INCUMPLIDO'
+          WHEN 5 THEN 'ANULADO'
+          ELSE 'NO REGISTRADA'
+        END estadoProgramacion,
+        CONVERT(varchar(10), P.PSFECINP, 23) fecha,
+        CONVERT(varchar(5), P.PSFECINP, 108) hora,
+        ISNULL(CUPS.SIPDESCUP, '') procedimiento,
+        A.AINCONSEC ingreso,
+        M.GMECODIGO codigoMedico,
+        ISNULL(M.GMENOMCOM, '') cirujano,
+        ISNULL(E.GEEDESCRI, '') especialidad,
+        ISNULL(T.ESTADOACTUAL, 'PROGRAMADO') estadoCodigo,
+        ISNULL(T.UPDATEDAT, P.PSFECINP) fechaActualizacion
+      FROM PCNPROSAL P
+      LEFT JOIN GENPACIEN G ON G.OID = P.GENPACIEN
+      LEFT JOIN ADNINGRESO A ON A.OID = P.ADNINGRESO
+      LEFT JOIN PCNSALAS S ON S.OID = P.PSSALA
+      LEFT JOIN PCNPSDMED PM ON PM.PCNPROSAL = P.OID AND PM.PCNMEDPRIN = 1
+      LEFT JOIN GENMEDICO M ON M.OID = PM.GENMEDICO
+      LEFT JOIN GENESPMED EM ON EM.MEDICOS = M.OID AND EM.GEMPRINCIPAL = 1
+      LEFT JOIN GENESPECI E ON E.OID = EM.ESPECIALIDADES
+      LEFT JOIN (
+        SELECT PCNPROSAL, SIPDESCUP
+        FROM (
+          SELECT
+            D.PCNPROSAL,
+            I.SIPDESCUP,
+            ROW_NUMBER() OVER (PARTITION BY D.PCNPROSAL ORDER BY I.OID DESC) rn
+          FROM PCNPSDPRC D
+          INNER JOIN GENSERIPS I ON I.OID = D.GENSERIPS
+        ) procedimientos
+        WHERE rn = 1
+      ) CUPS ON CUPS.PCNPROSAL = P.OID
+      LEFT JOIN EKHPNCIRSEG T ON T.PCNCONSEC = CAST(CAST(P.PSCONSEC AS BIGINT) AS VARCHAR(50))
+      WHERE P.PSFECINP >= CONVERT(date, GETDATE())
+        AND P.PSFECINP < DATEADD(day, 1, CONVERT(date, GETDATE()))
+        AND P.PSESTADO IN (0, 1, 3)
+        ${quirofanoId ? 'AND LTRIM(RTRIM(S.SALCODIGO)) = @0' : ''}
+      ORDER BY P.PSFECINP`,
       quirofanoId ? [quirofanoId] : []
     );
     const estados = await qr.manager
@@ -261,9 +319,15 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
       const publico = `QX-${String(row.id).padStart(4, '0')}`;
       return {
         id: row.id,
+        pcnConsec: row.id,
+        sede: row.sede,
         fecha: row.fecha,
+        fechaQx: row.fecha,
         horaProgramada: row.hora,
+        salaQx: row.salaCodigo,
+        nomSalaQx: row.salaNombre,
         pacienteId: row.documento,
+        idPaciente: row.documento,
         identificadorPublico: publico,
         paciente: {
           id: row.documento,
@@ -277,9 +341,14 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
           nombre: row.salaNombre,
           activo: true,
         },
-        procedimiento: '',
-        especialidad: '',
-        cirujano: '',
+        procedimiento: row.procedimiento,
+        procedimientoQx: row.procedimiento,
+        especialidad: row.especialidad,
+        especialidadMedico: row.especialidad,
+        cirujano: row.cirujano,
+        nomMedico: row.cirujano,
+        codigoMedico: row.codigoMedico,
+        estadoProgramacion: row.estadoProgramacion,
         estadoActual: estado,
         fechaActualizacion: row.fechaActualizacion,
         ingreso: row.ingreso,
