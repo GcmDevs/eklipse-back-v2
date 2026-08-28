@@ -1,172 +1,448 @@
-import { createHash, randomUUID } from 'crypto';
 import { Injectable } from '@nestjs/common';
+import { LessThan } from 'typeorm';
+import { GCM_CONTEXTS } from '@common/domain/types';
+import { switchConn } from '@common/infrastructure/services';
+import { ChatConversationOrm } from './orm/conversation.orm';
+import { ChatConversationReadOrm } from './orm/conversation-read.orm';
+import { ChatMessageAttachmentOrm } from './orm/message-attachment.orm';
+import { ChatMessageOrm } from './orm/message.orm';
 import type {
   ChatConversationDetails,
   ChatConversationSummary,
   ChatMessage,
+  ChatMessagePage,
   ChatUser,
+  RegisteredChatUser,
 } from './chat.types';
 import { normalizeDocument } from './chat.types';
+import { FILE_PATHS } from '@gen/file-server.locations';
 
-interface StoredConversation {
-  id: string;
-  participants: [ChatUser, ChatUser];
-  messages: ChatMessage[];
-  updatedAt: string;
+interface ChatUnreadState {
+  lastReadMessageId: number | null;
+  unreadCount: number;
 }
 
 @Injectable()
 export class ChatStoreService {
-  private static readonly MAX_MESSAGES = 500;
-  private readonly conversations = new Map<string, StoredConversation>();
+  private static readonly MESSAGES_PAGE_SIZE = 30;
+  private readonly sharedConn = switchConn(GCM_CONTEXTS.EKLIPSE);
 
-  start(
-    currentUser: ChatUser,
-    contact: ChatUser,
-    isOnline: (document: string) => boolean,
-  ): ChatConversationDetails {
-    const id = this.createConversationId(currentUser.document, contact.document);
-    let stored = this.conversations.get(id);
-
-    if (!stored) {
-      stored = {
-        id,
-        participants: [this.copyUser(currentUser), this.copyUser(contact)],
-        messages: [],
-        updatedAt: new Date().toISOString(),
-      };
-      this.conversations.set(id, stored);
-    } else {
-      this.refreshParticipant(stored, currentUser);
-      this.refreshParticipant(stored, contact);
-    }
-
-    return this.detailsFor(stored, currentUser.document, isOnline);
-  }
-
-  open(
-    conversationId: string,
-    currentUser: ChatUser,
-    isOnline: (document: string) => boolean,
-  ): ChatConversationDetails | undefined {
-    const stored = this.conversations.get(conversationId);
-    if (!stored || !this.hasParticipant(stored, currentUser.document)) return undefined;
-
-    this.refreshParticipant(stored, currentUser);
-    return this.detailsFor(stored, currentUser.document, isOnline);
-  }
-
-  addMessage(
-    conversationId: string,
-    currentUser: ChatUser,
-    content: string,
-  ): ChatMessage | undefined {
-    const stored = this.conversations.get(conversationId);
-    if (!stored || !this.hasParticipant(stored, currentUser.document)) return undefined;
-
-    this.refreshParticipant(stored, currentUser);
-    const message: ChatMessage = {
-      id: randomUUID(),
-      conversationId,
-      content,
-      createdAt: new Date().toISOString(),
-      sender: this.copyUser(currentUser),
-    };
-
-    stored.messages = [...stored.messages, message].slice(-ChatStoreService.MAX_MESSAGES);
-    stored.updatedAt = message.createdAt;
-    return { ...message, sender: this.copyUser(message.sender) };
-  }
-
-  listFor(
-    document: string,
-    isOnline: (contactDocument: string) => boolean,
-  ): ChatConversationSummary[] {
-    return [...this.conversations.values()]
-      .filter((stored) => this.hasParticipant(stored, document))
-      .map((stored) => this.summaryFor(stored, document, isOnline))
-      .sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
-  }
-
-  participants(conversationId: string): ChatUser[] {
-    return (this.conversations.get(conversationId)?.participants ?? []).map((user) =>
-      this.copyUser(user),
+  async start(
+    currentUser: RegisteredChatUser,
+    contact: RegisteredChatUser,
+    isOnline: (document: string) => boolean
+  ): Promise<ChatConversationDetails> {
+    const [firstUser, secondUser] = [currentUser, contact].sort(
+      (left, right) => left.id - right.id
     );
+    const conversationId = await this.sharedConn.transaction('SERIALIZABLE', async manager => {
+      const repository = manager.getRepository(ChatConversationOrm);
+      const existing = await repository.findOne({
+        where: { firstUserId: firstUser.id, secondUserId: secondUser.id },
+      });
+      if (existing) return existing.id;
+
+      const now = new Date();
+      const saved = await repository.save(
+        repository.create({
+          firstUserId: firstUser.id,
+          secondUserId: secondUser.id,
+          createdAt: now,
+          updatedAt: now,
+        })
+      );
+      return saved.id;
+    });
+    const conversation = await this.findConversationById(conversationId);
+
+    if (!conversation) throw new Error('Conversation was not persisted');
+    await this.markConversationReadFor(conversation, currentUser.id);
+    return this.detailsFor(conversation, currentUser.id, isOnline);
   }
 
-  peersFor(document: string): ChatUser[] {
-    const normalized = normalizeDocument(document);
-    const peers = new Map<string, ChatUser>();
+  async open(
+    conversationId: number,
+    currentUser: RegisteredChatUser,
+    isOnline: (document: string) => boolean,
+    markAsRead = true
+  ): Promise<ChatConversationDetails | undefined> {
+    const conversation = await this.findConversationById(conversationId);
+    if (!conversation || !this.hasParticipant(conversation, currentUser.id)) return undefined;
+    if (markAsRead) await this.markConversationReadFor(conversation, currentUser.id);
+    return this.detailsFor(conversation, currentUser.id, isOnline);
+  }
 
-    for (const conversation of this.conversations.values()) {
-      if (!this.hasParticipant(conversation, normalized)) continue;
-      for (const participant of conversation.participants) {
-        if (participant.document !== normalized) {
-          peers.set(participant.document, this.copyUser(participant));
-        }
-      }
+  async markConversationRead(
+    conversationId: number,
+    currentUser: RegisteredChatUser
+  ): Promise<boolean | undefined> {
+    const conversation = await this.findConversationById(conversationId);
+    if (!conversation || !this.hasParticipant(conversation, currentUser.id)) return undefined;
+
+    await this.markConversationReadFor(conversation, currentUser.id);
+    return true;
+  }
+
+  async loadPreviousMessages(
+    conversationId: number,
+    currentUser: RegisteredChatUser,
+    beforeMessageId: number
+  ): Promise<ChatMessagePage | undefined> {
+    const conversation = await this.findConversationById(conversationId);
+    if (!conversation || !this.hasParticipant(conversation, currentUser.id)) return undefined;
+
+    return this.messagePage(conversationId, beforeMessageId);
+  }
+
+  async addMessage(
+    conversationId: number,
+    currentUser: RegisteredChatUser,
+    content: string,
+    attachments: string[]
+  ): Promise<ChatMessage | undefined> {
+    return this.sharedConn.transaction(async manager => {
+      const conversationRepository = manager.getRepository(ChatConversationOrm);
+      const messageRepository = manager.getRepository(ChatMessageOrm);
+      const attachmentRepository = manager.getRepository(ChatMessageAttachmentOrm);
+      const conversation = await conversationRepository.findOne({
+        where: { id: conversationId },
+        relations: ['firstUser', 'secondUser'],
+      });
+      if (!conversation || !this.hasParticipant(conversation, currentUser.id)) return undefined;
+
+      const recipient = this.otherParticipant(conversation, currentUser.id);
+      if (!recipient) return undefined;
+
+      const createdAt = new Date();
+      const message = await messageRepository.save(
+        messageRepository.create({
+          conversationId,
+          senderUserId: currentUser.id,
+          recipientUserId: recipient.id,
+          content: content ? content : null,
+          createdAt,
+        })
+      );
+
+      message.attachments = attachments.length
+        ? await attachmentRepository.save(
+            attachments.map(path =>
+              attachmentRepository.create({
+                messageId: message.id,
+                path: path.split('/').at(-1),
+              })
+            )
+          )
+        : [];
+
+      conversation.lastMessageId = message.id;
+      conversation.lastSenderUserId = currentUser.id;
+      conversation.updatedAt = createdAt;
+      await conversationRepository.save(conversation);
+
+      return this.toChatMessage(
+        message,
+        currentUser,
+        attachments.length ? attachments[0].split('/').at(-2) : null
+      );
+    });
+  }
+
+  async listFor(
+    userId: number,
+    isOnline: (contactDocument: string) => boolean
+  ): Promise<ChatConversationSummary[]> {
+    const conversations = await this.sharedConn.getRepository(ChatConversationOrm).find({
+      where: [{ firstUserId: userId }, { secondUserId: userId }],
+      relations: [
+        'firstUser',
+        'secondUser',
+        'lastMessage',
+        'lastMessage.attachments',
+        'lastSenderUser',
+      ],
+      order: { updatedAt: 'DESC' },
+    });
+
+    const conversationIds = conversations.map(conversation => conversation.id);
+    const unreadStates = await this.unreadStatesFor(userId, conversationIds);
+
+    return conversations.map(conversation => {
+      const unreadState = unreadStates.get(conversation.id);
+      return this.summaryFor(
+        conversation,
+        userId,
+        isOnline,
+        unreadState?.unreadCount ?? 0,
+        unreadState?.lastReadMessageId ?? null
+      );
+    });
+  }
+
+  async participants(conversationId: number): Promise<RegisteredChatUser[]> {
+    const conversation = await this.sharedConn.getRepository(ChatConversationOrm).findOne({
+      where: { id: conversationId },
+      relations: ['firstUser', 'secondUser'],
+    });
+    return conversation ? this.participantsFrom(conversation) : [];
+  }
+
+  async peersFor(userId: number): Promise<RegisteredChatUser[]> {
+    const conversations = await this.sharedConn.getRepository(ChatConversationOrm).find({
+      where: [{ firstUserId: userId }, { secondUserId: userId }],
+      relations: ['firstUser', 'secondUser'],
+    });
+    const peers = new Map<number, RegisteredChatUser>();
+
+    for (const conversation of conversations) {
+      const peer = this.otherParticipant(conversation, userId);
+      if (peer) peers.set(peer.id, peer);
     }
 
     return [...peers.values()];
   }
 
-  private detailsFor(
-    stored: StoredConversation,
-    document: string,
-    isOnline: (contactDocument: string) => boolean,
-  ): ChatConversationDetails {
+  private async detailsFor(
+    conversation: ChatConversationOrm,
+    userId: number,
+    isOnline: (contactDocument: string) => boolean
+  ): Promise<ChatConversationDetails> {
+    const [messagePage, unreadStates] = await Promise.all([
+      this.messagePage(conversation.id),
+      this.unreadStatesFor(userId, [conversation.id]),
+    ]);
+    const unreadState = unreadStates.get(conversation.id);
+
     return {
-      conversation: this.summaryFor(stored, document, isOnline),
-      messages: stored.messages.map((message) => ({
-        ...message,
-        sender: this.copyUser(message.sender),
-      })),
+      conversation: this.summaryFor(
+        conversation,
+        userId,
+        isOnline,
+        unreadState?.unreadCount ?? 0,
+        unreadState?.lastReadMessageId ?? null
+      ),
+      ...messagePage,
+    };
+  }
+
+  private async messagePage(
+    conversationId: number,
+    beforeMessageId?: number
+  ): Promise<ChatMessagePage> {
+    const where = beforeMessageId
+      ? { conversationId, id: LessThan(beforeMessageId) }
+      : { conversationId };
+    const persistedMessages = await this.sharedConn.getRepository(ChatMessageOrm).find({
+      where,
+      relations: ['senderUser', 'attachments'],
+      order: { id: 'DESC' },
+      take: ChatStoreService.MESSAGES_PAGE_SIZE + 1,
+    });
+    const hasMoreMessages = persistedMessages.length > ChatStoreService.MESSAGES_PAGE_SIZE;
+    const messages = persistedMessages.slice(0, ChatStoreService.MESSAGES_PAGE_SIZE);
+
+    return {
+      messages: messages.reverse().map(message => {
+        return this.toChatMessage(message, undefined, message.senderUser.document);
+      }),
+      hasMoreMessages,
     };
   }
 
   private summaryFor(
-    stored: StoredConversation,
-    document: string,
+    conversation: ChatConversationOrm,
+    userId: number,
     isOnline: (contactDocument: string) => boolean,
+    unreadCount: number,
+    lastReadMessageId: number | null
   ): ChatConversationSummary {
-    const normalized = normalizeDocument(document);
-    const contact = stored.participants.find((participant) => participant.document !== normalized);
-
+    const contact = this.otherParticipant(conversation, userId);
     if (!contact) throw new Error('Conversation without a contact');
 
-    const lastMessage = stored.messages.at(-1);
+    const lastMessage =
+      conversation.lastMessageId && conversation.lastMessage && conversation.lastSenderUser
+        ? {
+            id: conversation.lastMessageId,
+            conversationId: conversation.id,
+            content: conversation.lastMessage.content,
+            attachments: this.toAttachmentPaths(conversation.lastMessage.attachments),
+            createdAt: this.toIsoString(conversation.lastMessage.createdAt),
+            sender: this.toChatUser(conversation.lastSenderUser),
+          }
+        : null;
+
     return {
-      id: stored.id,
-      contact: { ...this.copyUser(contact), online: isOnline(contact.document) },
-      lastMessage: lastMessage
-        ? { ...lastMessage, sender: this.copyUser(lastMessage.sender) }
-        : null,
-      updatedAt: stored.updatedAt,
+      id: conversation.id,
+      contact: {
+        document: contact.document,
+        name: contact.name,
+        online: isOnline(contact.document),
+      },
+      lastMessage,
+      lastReadMessageId,
+      unreadCount,
+      updatedAt: this.toIsoString(conversation.updatedAt),
     };
   }
 
-  private refreshParticipant(stored: StoredConversation, user: ChatUser): void {
-    const normalized = normalizeDocument(user.document);
-    const index = stored.participants.findIndex((participant) => participant.document === normalized);
-    if (index >= 0) stored.participants[index] = this.copyUser(user);
+  private async markConversationReadFor(
+    conversation: ChatConversationOrm,
+    userId: number
+  ): Promise<void> {
+    const lastMessageId = Number(conversation.lastMessageId ?? 0);
+    if (!lastMessageId) return;
+
+    await this.sharedConn.transaction('SERIALIZABLE', async manager => {
+      const repository = manager.getRepository(ChatConversationReadOrm);
+      const existing = await repository.findOne({
+        where: { conversationId: conversation.id, userId },
+      });
+      if (Number(existing?.lastReadMessageId ?? 0) >= lastMessageId) return;
+
+      await repository.save(
+        repository.create({
+          ...existing,
+          conversationId: conversation.id,
+          userId,
+          lastReadMessageId: lastMessageId,
+          updatedAt: new Date(),
+        })
+      );
+    });
   }
 
-  private hasParticipant(stored: StoredConversation, document: string): boolean {
-    const normalized = normalizeDocument(document);
-    return stored.participants.some((participant) => participant.document === normalized);
+  private async unreadStatesFor(
+    userId: number,
+    conversationIds: number[]
+  ): Promise<Map<number, ChatUnreadState>> {
+    if (!conversationIds.length) return new Map();
+
+    const rows = await this.sharedConn
+      .getRepository(ChatConversationOrm)
+      .createQueryBuilder('conversation')
+      .leftJoin(
+        ChatConversationReadOrm,
+        'reading',
+        'reading.CHATCONVERSACION = conversation.OID AND reading.CHATUSUREG = :userId',
+        { userId }
+      )
+      .leftJoin(
+        ChatMessageOrm,
+        'unreadMessage',
+        `unreadMessage.CHATCONVERSACION = conversation.OID
+          AND unreadMessage.CHATUSUREG2 = :userId
+          AND unreadMessage.OID > COALESCE(reading.CHATMENSAJE, 0)`,
+        { userId }
+      )
+      .select('conversation.OID', 'conversationId')
+      .addSelect('reading.CHATMENSAJE', 'lastReadMessageId')
+      .addSelect('COUNT(unreadMessage.OID)', 'unreadCount')
+      .where('conversation.OID IN (:...conversationIds)', { conversationIds })
+      .groupBy('conversation.OID')
+      .addGroupBy('reading.CHATMENSAJE')
+      .getRawMany<{
+        conversationId: number | string;
+        lastReadMessageId: number | string | null;
+        unreadCount: number | string;
+      }>();
+
+    return new Map(
+      rows.map(row => [
+        Number(row.conversationId),
+        {
+          lastReadMessageId: row.lastReadMessageId == null ? null : Number(row.lastReadMessageId),
+          unreadCount: Number(row.unreadCount),
+        },
+      ])
+    );
   }
 
-  private createConversationId(firstDocument: string, secondDocument: string): string {
-    const pair = [normalizeDocument(firstDocument), normalizeDocument(secondDocument)]
-      .sort()
-      .join(':');
-    return createHash('sha256').update(pair).digest('hex').slice(0, 24);
+  private participantsFrom(conversation: ChatConversationOrm): RegisteredChatUser[] {
+    if (!conversation.firstUser || !conversation.secondUser) {
+      throw new Error('Conversation users were not loaded');
+    }
+
+    return [
+      this.toRegisteredChatUser(conversation.firstUser),
+      this.toRegisteredChatUser(conversation.secondUser),
+    ];
   }
 
-  private copyUser(user: ChatUser): ChatUser {
+  private otherParticipant(
+    conversation: ChatConversationOrm,
+    userId: number
+  ): RegisteredChatUser | undefined {
+    const participants = this.participantsFrom(conversation);
+    if (conversation.firstUserId === userId) return participants[1];
+    if (conversation.secondUserId === userId) return participants[0];
+    return undefined;
+  }
+
+  private hasParticipant(conversation: ChatConversationOrm, userId: number): boolean {
+    return conversation.firstUserId === userId || conversation.secondUserId === userId;
+  }
+
+  private findConversationById(id: number): Promise<ChatConversationOrm | null> {
+    return this.sharedConn.getRepository(ChatConversationOrm).findOne({
+      where: { id },
+      relations: [
+        'firstUser',
+        'secondUser',
+        'lastMessage',
+        'lastMessage.attachments',
+        'lastSenderUser',
+      ],
+    });
+  }
+
+  private toRegisteredChatUser(user: {
+    id: number;
+    document: string;
+    fullName: string;
+  }): RegisteredChatUser {
     return {
-      document: normalizeDocument(user.document),
-      name: user.name.trim(),
+      id: Number(user.id),
+      document: normalizeDocument(String(user.document ?? '')),
+      name: String(user.fullName ?? '').trim(),
     };
+  }
+
+  private toChatUser(user: { document: string; fullName: string }): ChatUser {
+    return {
+      document: normalizeDocument(String(user.document ?? '')),
+      name: String(user.fullName ?? '').trim(),
+    };
+  }
+
+  private toChatMessage(
+    message: ChatMessageOrm,
+    sender?: RegisteredChatUser,
+    document?: string
+  ): ChatMessage {
+    const publicSender = sender
+      ? { document: sender.document, name: sender.name }
+      : this.toChatUser(message.senderUser);
+
+    return {
+      id: message.id,
+      conversationId: message.conversationId,
+      content: message.content,
+      attachments: this.toAttachmentPaths(message.attachments, document),
+      createdAt: this.toIsoString(message.createdAt),
+      sender: publicSender,
+    };
+  }
+
+  private toAttachmentPaths(attachments?: ChatMessageAttachmentOrm[], document?: string): string[] {
+    return [...(attachments ?? [])]
+      .sort((left, right) => left.id - right.id)
+      .map(
+        attachment =>
+          `public/${FILE_PATHS.chat.files}/${document ? `${document}/` : ''}${attachment.path}`
+      );
+  }
+
+  private toIsoString(value: Date): string {
+    return new Date(value).toISOString();
   }
 }

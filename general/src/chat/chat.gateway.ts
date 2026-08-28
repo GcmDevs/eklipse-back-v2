@@ -1,6 +1,7 @@
 import { createHash } from 'crypto';
 import * as jwt from 'jsonwebtoken';
 import type { JwtPayload } from 'jsonwebtoken';
+import { Logger } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -24,14 +25,29 @@ import type {
   ChatConversationDetails,
   ChatConversationSummary,
   ChatMessage,
+  ChatMessagePage,
+  ChatOnlineUsersCount,
   ChatPresence,
   ChatUser,
+  LoadPreviousChatMessagesPayload,
   OpenConversationPayload,
+  RegisteredChatUser,
   SearchChatUsersPayload,
   SendChatMessagePayload,
   StartConversationPayload,
 } from './chat.types';
 import { normalizeDocument } from './chat.types';
+import { promises as fs } from 'fs';
+import {
+  FILE_PATHS,
+  MAX_CHAT_FILES_PER_MESSAGE,
+  isManagedStoredFilePath,
+  normalizeStoredFilePath,
+  resolveStoredPublicFile,
+} from '../file-server.locations';
+import { FileServerRegistry } from '../file-server.registry';
+
+const ONLINE_USERS_COUNT_ALLOWED_DOCUMENTS = new Set(['1065819503', '7574298']);
 
 @WebSocketGateway({
   namespace: '/chat',
@@ -39,6 +55,7 @@ import { normalizeDocument } from './chat.types';
 })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   private static readonly MAX_MESSAGE_LENGTH = 1000;
+  private readonly logger = new Logger(ChatGateway.name);
 
   @WebSocketServer()
   private server: Namespace;
@@ -48,38 +65,66 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   constructor(
     private readonly directory: ChatDirectoryService,
     private readonly store: ChatStoreService,
+    private readonly fileRegistry: FileServerRegistry
   ) {}
 
   afterInit(server: Namespace): void {
-    server.use((client, next) => {
+    server.use(async (client, next) => {
+      let tokenUser: ChatUser;
       try {
-        client.data.chatUser = this.authenticate(client);
-        next();
+        tokenUser = this.authenticate(client);
       } catch {
         next(new Error('Tu sesión no es válida. Inicia sesión nuevamente.'));
+        return;
+      }
+
+      try {
+        const registeredUser = await this.directory.findByDocument(tokenUser.document);
+        if (!registeredUser) {
+          next(new Error('Tu usuario no está registrado para utilizar el chat.'));
+          return;
+        }
+
+        client.data.chatUser = registeredUser;
+        next();
+      } catch {
+        next(new Error('No fue posible validar tu acceso al chat. Intenta nuevamente.'));
       }
     });
   }
 
-  handleConnection(client: Socket): void {
-    const user = client.data.chatUser as ChatUser;
+  async handleConnection(client: Socket): Promise<void> {
+    const user = client.data.chatUser as RegisteredChatUser;
     client.join(this.userRoom(user.document));
     this.changeConnectionCount(user.document, 1);
+    this.emitOnlineUsersCount();
+
+    let conversations: ChatConversationSummary[] = [];
+    try {
+      conversations = await this.store.listFor(user.id, document => this.isOnline(document));
+    } catch (error) {
+      this.logPersistenceError('cargar conversaciones', error);
+      client.emit('exception', {
+        message: 'No fue posible cargar tus conversaciones guardadas.',
+      });
+    }
 
     const bootstrap: ChatBootstrap = {
-      conversations: this.store.listFor(user.document, (document) => this.isOnline(document)),
+      conversations,
+      ...(this.canViewOnlineUsersCount(user.document)
+        ? { onlineUsersCount: this.connectedUsers.size }
+        : {}),
     };
-
     client.emit(CHAT_EVENTS.bootstrap, bootstrap);
-    void this.emitPresence(user.document);
+    void this.emitPresence(user);
   }
 
   @SubscribeMessage(CHAT_EVENTS.searchUsers)
   async searchUsers(
     @ConnectedSocket() client: Socket,
-    @MessageBody() payload: SearchChatUsersPayload,
+    @MessageBody() payload: SearchChatUsersPayload
   ): Promise<ChatActionAck<ChatContact[]>> {
-    const currentUser = client.data.chatUser as ChatUser | undefined;
+    const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
     if (!currentUser) return this.unauthorized();
 
     const query = typeof payload?.query === 'string' ? payload.query.trim() : '';
@@ -89,8 +134,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
 
     try {
-      const contacts = (await this.directory.search(query, currentUser.document))
-        .map(user => ({ ...user, online: this.isOnline(user.document) }));
+      const contacts = (await this.directory.search(query, currentUser.document)).map(user => ({
+        document: user.document,
+        name: user.name,
+        online: this.isOnline(user.document),
+      }));
 
       return { ok: true, data: contacts };
     } catch {
@@ -102,90 +150,240 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   }
 
   handleDisconnect(client: Socket): void {
-    const user = client.data.chatUser as ChatUser | undefined;
+    const user = client.data.chatUser as RegisteredChatUser | undefined;
     if (!user) return;
 
     this.changeConnectionCount(user.document, -1);
-    void this.emitPresence(user.document);
+    this.emitOnlineUsersCount();
+    void this.emitPresence(user);
   }
 
   @SubscribeMessage(CHAT_EVENTS.startConversation)
   async startConversation(
     @ConnectedSocket() client: Socket,
-    @MessageBody() payload: StartConversationPayload,
+    @MessageBody() payload: StartConversationPayload
   ): Promise<ChatActionAck<ChatConversationDetails>> {
-    const currentUser = client.data.chatUser as ChatUser | undefined;
+    const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
     if (!currentUser) return this.unauthorized();
 
-    let contact: ChatUser | undefined;
+    let registeredCurrentUser: RegisteredChatUser | undefined;
+    let contact: RegisteredChatUser | undefined;
     try {
-      contact = await this.directory.findByDocument(payload?.document);
+      [registeredCurrentUser, contact] = await Promise.all([
+        this.directory.findByDocument(currentUser.document),
+        this.directory.findByDocument(payload?.document),
+      ]);
     } catch {
       return {
         ok: false,
         error: 'No fue posible consultar el directorio de usuarios. Intenta nuevamente.',
       };
     }
+    if (!registeredCurrentUser || registeredCurrentUser.id !== currentUser.id) {
+      return { ok: false, error: 'Tu usuario ya no está registrado para utilizar el chat.' };
+    }
     if (!contact) return { ok: false, error: 'No encontramos un usuario con ese documento.' };
-    if (contact.document === currentUser.document) {
+    if (contact.id === registeredCurrentUser.id) {
       return { ok: false, error: 'No puedes iniciar una conversación contigo mismo.' };
     }
 
-    const details = this.store.start(currentUser, contact, (document) => this.isOnline(document));
-    this.emitConversationUpdate(details.conversation.id);
-    return { ok: true, data: details };
+    try {
+      const details = await this.store.start(registeredCurrentUser, contact, document =>
+        this.isOnline(document)
+      );
+      void this.emitConversationUpdate(details.conversation.id);
+      return { ok: true, data: details };
+    } catch (error) {
+      this.logPersistenceError('crear una conversación', error);
+      return { ok: false, error: 'No fue posible guardar la conversación.' };
+    }
   }
 
   @SubscribeMessage(CHAT_EVENTS.openConversation)
-  openConversation(
+  async openConversation(
     @ConnectedSocket() client: Socket,
-    @MessageBody() payload: OpenConversationPayload,
-  ): ChatActionAck<ChatConversationDetails> {
-    const currentUser = client.data.chatUser as ChatUser | undefined;
+    @MessageBody() payload: OpenConversationPayload
+  ): Promise<ChatActionAck<ChatConversationDetails>> {
+    const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
     if (!currentUser) return this.unauthorized();
 
-    const conversationId =
-      typeof payload?.conversationId === 'string' ? payload.conversationId.trim() : '';
-    if (!conversationId) return { ok: false, error: 'La conversación no es válida.' };
+    if (!payload.conversationId) return { ok: false, error: 'La conversación no es válida.' };
 
-    const details = this.store.open(conversationId, currentUser, (document) =>
-      this.isOnline(document),
-    );
-    if (!details) return { ok: false, error: 'No tienes acceso a esta conversación.' };
+    try {
+      const markAsRead = payload.markAsRead !== false;
+      const details = await this.store.open(
+        payload.conversationId,
+        currentUser,
+        document => this.isOnline(document),
+        markAsRead
+      );
+      if (!details) return { ok: false, error: 'No tienes acceso a esta conversación.' };
 
-    return { ok: true, data: details };
+      if (markAsRead) this.emitSummaryToUser(currentUser.document, details.conversation);
+
+      return { ok: true, data: details };
+    } catch (error) {
+      this.logPersistenceError('abrir una conversación', error);
+      return { ok: false, error: 'No fue posible cargar los mensajes guardados.' };
+    }
+  }
+
+  @SubscribeMessage(CHAT_EVENTS.markConversationRead)
+  async markConversationRead(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: OpenConversationPayload
+  ): Promise<ChatActionAck<ChatConversationSummary>> {
+    const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
+    if (!currentUser) return this.unauthorized();
+
+    const conversationId = Number(payload?.conversationId);
+    if (!Number.isSafeInteger(conversationId) || conversationId <= 0) {
+      return { ok: false, error: 'La conversación no es válida.' };
+    }
+
+    try {
+      const marked = await this.store.markConversationRead(conversationId, currentUser);
+      if (!marked) return { ok: false, error: 'No tienes acceso a esta conversación.' };
+
+      const summary = (
+        await this.store.listFor(currentUser.id, document => this.isOnline(document))
+      ).find(conversation => conversation.id === conversationId);
+      if (!summary) return { ok: false, error: 'La conversación ya no está disponible.' };
+
+      this.emitSummaryToUser(currentUser.document, summary);
+      return { ok: true, data: summary };
+    } catch (error) {
+      this.logPersistenceError('marcar una conversación como leída', error);
+      return { ok: false, error: 'No fue posible actualizar la lectura de la conversación.' };
+    }
+  }
+
+  @SubscribeMessage(CHAT_EVENTS.loadPreviousMessages)
+  async loadPreviousMessages(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: LoadPreviousChatMessagesPayload
+  ): Promise<ChatActionAck<ChatMessagePage>> {
+    const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
+    if (!currentUser) return this.unauthorized();
+
+    const conversationId = payload?.conversationId;
+    const beforeMessageId = payload?.beforeMessageId;
+    if (
+      !Number.isSafeInteger(conversationId) ||
+      Number(conversationId) <= 0 ||
+      !Number.isSafeInteger(beforeMessageId) ||
+      Number(beforeMessageId) <= 0
+    ) {
+      return { ok: false, error: 'No fue posible identificar los mensajes anteriores.' };
+    }
+
+    try {
+      const page = await this.store.loadPreviousMessages(
+        Number(conversationId),
+        currentUser,
+        Number(beforeMessageId)
+      );
+      if (!page) return { ok: false, error: 'No tienes acceso a esta conversación.' };
+
+      return { ok: true, data: page };
+    } catch (error) {
+      this.logPersistenceError('cargar mensajes anteriores', error);
+      return { ok: false, error: 'No fue posible cargar los mensajes anteriores.' };
+    }
   }
 
   @SubscribeMessage(CHAT_EVENTS.sendMessage)
-  sendMessage(
+  async sendMessage(
     @ConnectedSocket() client: Socket,
-    @MessageBody() payload: SendChatMessagePayload,
-  ): ChatActionAck<ChatMessage> {
-    const currentUser = client.data.chatUser as ChatUser | undefined;
-    if (!currentUser) return this.unauthorized();
+    @MessageBody() payload: SendChatMessagePayload
+  ): Promise<ChatActionAck<ChatMessage>> {
+    const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
+    if (!currentUser) return this.rejectedMessage('No fue posible identificar tu sesión.');
 
-    const conversationId =
-      typeof payload?.conversationId === 'string' ? payload.conversationId.trim() : '';
     const content = typeof payload?.content === 'string' ? payload.content.trim() : '';
+    const rawAttachments = payload?.attachments;
+    const attachments = Array.isArray(rawAttachments)
+      ? rawAttachments.map(value =>
+          typeof value === 'string' ? normalizeStoredFilePath(value) : ''
+        )
+      : [];
 
-    if (!conversationId) return { ok: false, error: 'Selecciona una conversación.' };
-    if (!content) return { ok: false, error: 'Escribe un mensaje antes de enviarlo.' };
+    if (!payload.conversationId) return this.rejectedMessage('Selecciona una conversación.');
+    if (rawAttachments !== undefined && !Array.isArray(rawAttachments)) {
+      return this.rejectedMessage('Los archivos adjuntos no son válidos.');
+    }
+    if (attachments.length > MAX_CHAT_FILES_PER_MESSAGE) {
+      return this.rejectedMessage(
+        `Solo puedes enviar hasta ${MAX_CHAT_FILES_PER_MESSAGE} archivos por mensaje.`
+      );
+    }
+    if (
+      attachments.some(path => !isManagedStoredFilePath(path, FILE_PATHS.chat.files)) ||
+      new Set(attachments).size !== attachments.length
+    ) {
+      return this.rejectedMessage('Los archivos adjuntos no son válidos.');
+    }
+    if (!content && attachments.length === 0) {
+      return this.rejectedMessage('Escribe un mensaje o adjunta un archivo antes de enviarlo.');
+    }
     if (content.length > ChatGateway.MAX_MESSAGE_LENGTH) {
-      return {
-        ok: false,
-        error: `El mensaje no puede superar ${ChatGateway.MAX_MESSAGE_LENGTH} caracteres.`,
-      };
+      return this.rejectedMessage(
+        `El mensaje no puede superar ${ChatGateway.MAX_MESSAGE_LENGTH} caracteres.`
+      );
     }
 
-    const message = this.store.addMessage(conversationId, currentUser, content);
-    if (!message) return { ok: false, error: 'No tienes acceso a esta conversación.' };
+    try {
+      await Promise.all(attachments.map(path => fs.access(resolveStoredPublicFile(path))));
 
-    for (const participant of this.store.participants(conversationId)) {
-      this.server.to(this.userRoom(participant.document)).emit(CHAT_EVENTS.message, message);
+      const participants = await this.store.participants(payload.conversationId);
+      if (!participants.some(participant => participant.id === currentUser.id)) {
+        return this.rejectedMessage('No tienes acceso a esta conversación.');
+      }
+
+      const registeredParticipants = await this.directory.findByIds(
+        participants.map(participant => participant.id)
+      );
+      if (registeredParticipants.length !== 2) {
+        return this.rejectedMessage(
+          'No se puede enviar el mensaje porque uno de los usuarios ya no está registrado.'
+        );
+      }
+
+      const registeredCurrentUser = registeredParticipants.find(
+        participant => participant.id === currentUser.id
+      );
+      if (!registeredCurrentUser || registeredCurrentUser.document !== currentUser.document) {
+        return this.rejectedMessage('Tu usuario ya no está registrado para utilizar el chat.');
+      }
+
+      if (attachments.length && !this.fileRegistry.reserve(attachments, currentUser.document)) {
+        return this.rejectedMessage('Los archivos adjuntos ya no están disponibles.');
+      }
+
+      const message = await this.store.addMessage(
+        payload.conversationId,
+        registeredCurrentUser,
+        content,
+        attachments
+      );
+      if (!message) {
+        this.fileRegistry.release(attachments, currentUser.document);
+        return this.rejectedMessage('No tienes acceso a esta conversación.');
+      }
+
+      this.fileRegistry.complete(attachments, currentUser.document);
+
+      await this.emitConversationUpdate(payload.conversationId);
+      for (const participant of registeredParticipants) {
+        this.server.to(this.userRoom(participant.document)).emit(CHAT_EVENTS.message, message);
+      }
+
+      return { ok: true, data: message };
+    } catch (error) {
+      this.fileRegistry.release(attachments, currentUser.document);
+      this.logPersistenceError('guardar un mensaje', error);
+      return this.rejectedMessage('No fue posible guardar el mensaje. Intenta nuevamente.');
     }
-    this.emitConversationUpdate(conversationId);
-
-    return { ok: true, data: message };
   }
 
   private authenticate(client: Socket): ChatUser {
@@ -211,12 +409,19 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     return { document, name };
   }
 
-  private emitConversationUpdate(conversationId: string): void {
-    for (const participant of this.store.participants(conversationId)) {
-      const summary = this.store
-        .listFor(participant.document, (document) => this.isOnline(document))
-        .find((conversation) => conversation.id === conversationId);
-      if (summary) this.emitSummaryToUser(participant.document, summary);
+  private async emitConversationUpdate(conversationId: number): Promise<void> {
+    try {
+      const participants = await this.store.participants(conversationId);
+      await Promise.all(
+        participants.map(async participant => {
+          const summary = (
+            await this.store.listFor(participant.id, document => this.isOnline(document))
+          ).find(conversation => conversation.id === conversationId);
+          if (summary) this.emitSummaryToUser(participant.document, summary);
+        })
+      );
+    } catch {
+      // El mensaje ya quedó persistido; la bandeja se recuperará al reconectar.
     }
   }
 
@@ -224,19 +429,20 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     this.server.to(this.userRoom(document)).emit(CHAT_EVENTS.conversationUpdated, summary);
   }
 
-  private async emitPresence(document: string): Promise<void> {
+  private async emitPresence(user: RegisteredChatUser): Promise<void> {
     const presence: ChatPresence = {
-      document: normalizeDocument(document),
-      online: this.isOnline(document),
+      document: normalizeDocument(user.document),
+      online: this.isOnline(user.document),
     };
-    let recipients = this.store.peersFor(document).map(peer => peer.document);
+    let recipients: string[] = [];
 
     try {
-      if (await this.directory.findByDocument(document)) {
+      recipients = (await this.store.peersFor(user.id)).map(peer => peer.document);
+      if ((await this.directory.findByIds([user.id])).length === 1) {
         recipients = [...this.connectedUsers.keys()];
       }
     } catch {
-      // Las conversaciones existentes todavía reciben el cambio de presencia.
+      // La presencia se recuperará en la próxima conexión satisfactoria.
     }
 
     for (const recipient of new Set(recipients)) {
@@ -248,6 +454,20 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   private isOnline(document: string): boolean {
     return (this.connectedUsers.get(normalizeDocument(document)) ?? 0) > 0;
+  }
+
+  private emitOnlineUsersCount(): void {
+    const payload: ChatOnlineUsersCount = { count: this.connectedUsers.size };
+
+    for (const document of ONLINE_USERS_COUNT_ALLOWED_DOCUMENTS) {
+      if (this.isOnline(document)) {
+        this.server.to(this.userRoom(document)).emit(CHAT_EVENTS.onlineUsersCount, payload);
+      }
+    }
+  }
+
+  private canViewOnlineUsersCount(document: string): boolean {
+    return ONLINE_USERS_COUNT_ALLOWED_DOCUMENTS.has(normalizeDocument(document));
   }
 
   private changeConnectionCount(document: string, difference: number): void {
@@ -264,5 +484,14 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   private unauthorized<T>(): ChatActionAck<T> {
     return { ok: false, error: 'No fue posible identificar tu sesión.' };
+  }
+
+  private rejectedMessage(error: string): ChatActionAck<ChatMessage> {
+    return { ok: false, error, cleanupAttachments: true };
+  }
+
+  private logPersistenceError(action: string, error: unknown): void {
+    const trace = error instanceof Error ? error.stack : String(error);
+    this.logger.error(`Error al ${action} del chat`, trace);
   }
 }

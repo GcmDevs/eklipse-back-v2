@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { In } from 'typeorm';
 import { GCM_CONTEXTS } from '@common/domain/types';
 import { switchConn } from '@common/infrastructure/services';
-import { ChatUserOrm } from './chat-user.orm';
-import type { ChatUser } from './chat.types';
+import { ChatUserOrm } from './orm/user.orm';
+import type { RegisteredChatUser } from './chat.types';
 import { normalizeDocument } from './chat.types';
 
 @Injectable()
@@ -10,7 +11,7 @@ export class ChatDirectoryService {
   private static readonly MAX_SEARCH_RESULTS = 20;
   private readonly sharedConn = switchConn(GCM_CONTEXTS.EKLIPSE);
 
-  async search(query: string, excludeDocument = ''): Promise<ChatUser[]> {
+  async search(query: string, excludeDocument = ''): Promise<RegisteredChatUser[]> {
     const term = query.trim().slice(0, 80);
     if (!term) return [];
 
@@ -24,7 +25,7 @@ export class ChatDirectoryService {
       .orderBy('chatUser.USUDESCRI', 'ASC')
       .take(ChatDirectoryService.MAX_SEARCH_RESULTS)
       .getMany();
-    const usersByDocument = new Map<string, ChatUser>();
+    const usersByDocument = new Map<string, RegisteredChatUser>();
     const excluded = normalizeDocument(excludeDocument);
 
     for (const record of records) {
@@ -35,7 +36,7 @@ export class ChatDirectoryService {
     return [...usersByDocument.values()];
   }
 
-  async findByDocument(document: unknown): Promise<ChatUser | undefined> {
+  async findByDocument(document: unknown): Promise<RegisteredChatUser | undefined> {
     const normalized = normalizeDocument(document);
     if (!normalized) return undefined;
 
@@ -45,9 +46,20 @@ export class ChatDirectoryService {
     return record ? this.toChatUser(record) : undefined;
   }
 
-  private toChatUser(record: ChatUserOrm): ChatUser | undefined {
+  async findByIds(ids: number[]): Promise<RegisteredChatUser[]> {
+    const uniqueIds = [...new Set(ids.filter(id => Number.isInteger(id) && id > 0))];
+    if (!uniqueIds.length) return [];
+
+    const records = await this.sharedConn.getRepository(ChatUserOrm).find({
+      where: { id: In(uniqueIds) },
+    });
+    return records.map(record => this.toChatUser(record)).filter(user => user !== undefined);
+  }
+
+  private toChatUser(record: ChatUserOrm): RegisteredChatUser | undefined {
+    const id = Number(record.id);
     const document = normalizeDocument(String(record.document ?? ''));
     const name = String(record.fullName ?? '').trim();
-    return document && name ? { document, name } : undefined;
+    return Number.isInteger(id) && id > 0 && document && name ? { id, document, name } : undefined;
   }
 }
