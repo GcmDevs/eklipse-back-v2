@@ -25,8 +25,10 @@ import type {
   ChatConversationDetails,
   ChatConversationSummary,
   ChatMessage,
+  ChatMessagePage,
   ChatPresence,
   ChatUser,
+  LoadPreviousChatMessagesPayload,
   OpenConversationPayload,
   RegisteredChatUser,
   SearchChatUsersPayload,
@@ -197,6 +199,40 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     } catch (error) {
       this.logPersistenceError('abrir una conversación', error);
       return { ok: false, error: 'No fue posible cargar los mensajes guardados.' };
+    }
+  }
+
+  @SubscribeMessage(CHAT_EVENTS.loadPreviousMessages)
+  async loadPreviousMessages(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: LoadPreviousChatMessagesPayload
+  ): Promise<ChatActionAck<ChatMessagePage>> {
+    const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
+    if (!currentUser) return this.unauthorized();
+
+    const conversationId = payload?.conversationId;
+    const beforeMessageId = payload?.beforeMessageId;
+    if (
+      !Number.isSafeInteger(conversationId) ||
+      Number(conversationId) <= 0 ||
+      !Number.isSafeInteger(beforeMessageId) ||
+      Number(beforeMessageId) <= 0
+    ) {
+      return { ok: false, error: 'No fue posible identificar los mensajes anteriores.' };
+    }
+
+    try {
+      const page = await this.store.loadPreviousMessages(
+        Number(conversationId),
+        currentUser,
+        Number(beforeMessageId)
+      );
+      if (!page) return { ok: false, error: 'No tienes acceso a esta conversación.' };
+
+      return { ok: true, data: page };
+    } catch (error) {
+      this.logPersistenceError('cargar mensajes anteriores', error);
+      return { ok: false, error: 'No fue posible cargar los mensajes anteriores.' };
     }
   }
 

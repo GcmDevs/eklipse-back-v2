@@ -26,9 +26,13 @@ export interface ChatConversationSummary {
   updatedAt: string;
 }
 
-export interface ChatConversationDetails {
-  conversation: ChatConversationSummary;
+export interface ChatMessagePage {
   messages: ChatMessage[];
+  hasMoreMessages: boolean;
+}
+
+export interface ChatConversationDetails extends ChatMessagePage {
+  conversation: ChatConversationSummary;
 }
 
 export interface ChatBootstrap {
@@ -50,6 +54,10 @@ export interface SearchChatUsersPayload {
 
 export interface OpenConversationPayload {
   conversationId?: number | undefined;
+}
+
+export interface LoadPreviousChatMessagesPayload extends OpenConversationPayload {
+  beforeMessageId?: number | undefined;
 }
 
 export interface SendChatMessagePayload extends OpenConversationPayload {

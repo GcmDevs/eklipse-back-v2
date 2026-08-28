@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { LessThan } from 'typeorm';
 import { GCM_CONTEXTS } from '@common/domain/types';
 import { switchConn } from '@common/infrastructure/services';
 import { ChatConversationOrm } from './orm/conversation.orm';
@@ -7,6 +8,7 @@ import type {
   ChatConversationDetails,
   ChatConversationSummary,
   ChatMessage,
+  ChatMessagePage,
   ChatUser,
   RegisteredChatUser,
 } from './chat.types';
@@ -14,7 +16,7 @@ import { normalizeDocument } from './chat.types';
 
 @Injectable()
 export class ChatStoreService {
-  private static readonly MAX_MESSAGES_PER_OPEN = 500;
+  private static readonly MESSAGES_PAGE_SIZE = 30;
   private readonly sharedConn = switchConn(GCM_CONTEXTS.EKLIPSE);
 
   async start(
@@ -57,6 +59,17 @@ export class ChatStoreService {
     const conversation = await this.findConversationById(conversationId);
     if (!conversation || !this.hasParticipant(conversation, currentUser.id)) return undefined;
     return this.detailsFor(conversation, currentUser.id, isOnline);
+  }
+
+  async loadPreviousMessages(
+    conversationId: number,
+    currentUser: RegisteredChatUser,
+    beforeMessageId: number
+  ): Promise<ChatMessagePage | undefined> {
+    const conversation = await this.findConversationById(conversationId);
+    if (!conversation || !this.hasParticipant(conversation, currentUser.id)) return undefined;
+
+    return this.messagePage(conversationId, beforeMessageId);
   }
 
   async addMessage(
@@ -137,16 +150,33 @@ export class ChatStoreService {
     userId: number,
     isOnline: (contactDocument: string) => boolean
   ): Promise<ChatConversationDetails> {
-    const persistedMessages = await this.sharedConn.getRepository(ChatMessageOrm).find({
-      where: { conversationId: conversation.id },
-      relations: ['senderUser'],
-      order: { createdAt: 'DESC' },
-      take: ChatStoreService.MAX_MESSAGES_PER_OPEN,
-    });
+    const messagePage = await this.messagePage(conversation.id);
 
     return {
       conversation: this.summaryFor(conversation, userId, isOnline),
-      messages: persistedMessages.reverse().map(message => this.toChatMessage(message)),
+      ...messagePage,
+    };
+  }
+
+  private async messagePage(
+    conversationId: number,
+    beforeMessageId?: number
+  ): Promise<ChatMessagePage> {
+    const where = beforeMessageId
+      ? { conversationId, id: LessThan(beforeMessageId) }
+      : { conversationId };
+    const persistedMessages = await this.sharedConn.getRepository(ChatMessageOrm).find({
+      where,
+      relations: ['senderUser'],
+      order: { id: 'DESC' },
+      take: ChatStoreService.MESSAGES_PAGE_SIZE + 1,
+    });
+    const hasMoreMessages = persistedMessages.length > ChatStoreService.MESSAGES_PAGE_SIZE;
+    const messages = persistedMessages.slice(0, ChatStoreService.MESSAGES_PAGE_SIZE);
+
+    return {
+      messages: messages.reverse().map(message => this.toChatMessage(message)),
+      hasMoreMessages,
     };
   }
 
