@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { In } from 'typeorm';
 import { GCM_CONTEXTS } from '@common/domain/types';
 import { switchConn } from '@common/infrastructure/services';
-import { ChatUserOrm } from './chat-user.orm';
+import { ChatUserOrm } from './orm/user.orm';
 import type { RegisteredChatUser } from './chat.types';
 import { normalizeDocument } from './chat.types';
 

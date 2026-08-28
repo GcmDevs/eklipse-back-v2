@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { ChatUserOrm } from './chat-user.orm';
-import { ChatMessageOrm } from './chat-message.orm';
+import { ChatUserOrm } from './user.orm';
+import { ChatMessageOrm } from './message.orm';
 
 @Entity('CHATCONVERSACION')
 export class ChatConversationOrm {

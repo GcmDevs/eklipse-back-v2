@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { ChatUserOrm } from './chat-user.orm';
+import { ChatUserOrm } from './user.orm';
 
 @Entity('CHATMENSAJE')
 export class ChatMessageOrm {

@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { GCM_CONTEXTS } from '@common/domain/types';
 import { switchConn } from '@common/infrastructure/services';
-import { ChatConversationOrm } from './chat-conversation.orm';
-import { ChatMessageOrm } from './chat-message.orm';
+import { ChatConversationOrm } from './orm/conversation.orm';
+import { ChatMessageOrm } from './orm/message.orm';
 import type {
   ChatConversationDetails,
   ChatConversationSummary,
@@ -20,9 +20,11 @@ export class ChatStoreService {
   async start(
     currentUser: RegisteredChatUser,
     contact: RegisteredChatUser,
-    isOnline: (document: string) => boolean,
+    isOnline: (document: string) => boolean
   ): Promise<ChatConversationDetails> {
-    const [firstUser, secondUser] = [currentUser, contact].sort((left, right) => left.id - right.id);
+    const [firstUser, secondUser] = [currentUser, contact].sort(
+      (left, right) => left.id - right.id
+    );
     const conversationId = await this.sharedConn.transaction('SERIALIZABLE', async manager => {
       const repository = manager.getRepository(ChatConversationOrm);
       const existing = await repository.findOne({
@@ -37,7 +39,7 @@ export class ChatStoreService {
           secondUserId: secondUser.id,
           createdAt: now,
           updatedAt: now,
-        }),
+        })
       );
       return saved.id;
     });
@@ -50,7 +52,7 @@ export class ChatStoreService {
   async open(
     conversationId: number,
     currentUser: RegisteredChatUser,
-    isOnline: (document: string) => boolean,
+    isOnline: (document: string) => boolean
   ): Promise<ChatConversationDetails | undefined> {
     const conversation = await this.findConversationById(conversationId);
     if (!conversation || !this.hasParticipant(conversation, currentUser.id)) return undefined;
@@ -60,7 +62,7 @@ export class ChatStoreService {
   async addMessage(
     conversationId: number,
     currentUser: RegisteredChatUser,
-    content: string,
+    content: string
   ): Promise<ChatMessage | undefined> {
     return this.sharedConn.transaction(async manager => {
       const conversationRepository = manager.getRepository(ChatConversationOrm);
@@ -82,7 +84,7 @@ export class ChatStoreService {
           recipientUserId: recipient.id,
           content,
           createdAt,
-        }),
+        })
       );
 
       conversation.lastMessageId = message.id;
@@ -96,7 +98,7 @@ export class ChatStoreService {
 
   async listFor(
     userId: number,
-    isOnline: (contactDocument: string) => boolean,
+    isOnline: (contactDocument: string) => boolean
   ): Promise<ChatConversationSummary[]> {
     const conversations = await this.sharedConn.getRepository(ChatConversationOrm).find({
       where: [{ firstUserId: userId }, { secondUserId: userId }],
@@ -133,7 +135,7 @@ export class ChatStoreService {
   private async detailsFor(
     conversation: ChatConversationOrm,
     userId: number,
-    isOnline: (contactDocument: string) => boolean,
+    isOnline: (contactDocument: string) => boolean
   ): Promise<ChatConversationDetails> {
     const persistedMessages = await this.sharedConn.getRepository(ChatMessageOrm).find({
       where: { conversationId: conversation.id },
@@ -151,7 +153,7 @@ export class ChatStoreService {
   private summaryFor(
     conversation: ChatConversationOrm,
     userId: number,
-    isOnline: (contactDocument: string) => boolean,
+    isOnline: (contactDocument: string) => boolean
   ): ChatConversationSummary {
     const contact = this.otherParticipant(conversation, userId);
     if (!contact) throw new Error('Conversation without a contact');
@@ -184,12 +186,15 @@ export class ChatStoreService {
       throw new Error('Conversation users were not loaded');
     }
 
-    return [this.toRegisteredChatUser(conversation.firstUser), this.toRegisteredChatUser(conversation.secondUser)];
+    return [
+      this.toRegisteredChatUser(conversation.firstUser),
+      this.toRegisteredChatUser(conversation.secondUser),
+    ];
   }
 
   private otherParticipant(
     conversation: ChatConversationOrm,
-    userId: number,
+    userId: number
   ): RegisteredChatUser | undefined {
     const participants = this.participantsFrom(conversation);
     if (conversation.firstUserId === userId) return participants[1];
@@ -208,7 +213,11 @@ export class ChatStoreService {
     });
   }
 
-  private toRegisteredChatUser(user: { id: number; document: string; fullName: string }): RegisteredChatUser {
+  private toRegisteredChatUser(user: {
+    id: number;
+    document: string;
+    fullName: string;
+  }): RegisteredChatUser {
     return {
       id: Number(user.id),
       document: normalizeDocument(String(user.document ?? '')),

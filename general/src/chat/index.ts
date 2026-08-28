@@ -1,4 +1,4 @@
-export * from './chat-conversation.orm';
-export * from './chat-message.orm';
+export * from './orm/conversation.orm';
+export * from './orm/message.orm';
 export * from './chat.module';
-export * from './chat-user.orm';
+export * from './orm/user.orm';
