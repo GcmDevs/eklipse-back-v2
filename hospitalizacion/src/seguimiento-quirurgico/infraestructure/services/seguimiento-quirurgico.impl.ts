@@ -110,7 +110,11 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
     }
   }
   private enmascararNombre(nombre: string): string {
-    return nombre.split(/\s+/).filter(Boolean).map(parte => `${parte.charAt(0)}${'*'.repeat(Math.max(parte.length - 1, 1))}`).join(' ');
+    return nombre
+      .split(/\s+/)
+      .filter(Boolean)
+      .map((parte) => `${parte.charAt(0).toUpperCase()}.`)
+      .join(' ');
   }
   private async obtenerAlertasActivas(qr: QueryRunner) {
     const [estados, historial] = await Promise.all([
