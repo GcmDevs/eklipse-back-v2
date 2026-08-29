@@ -41,6 +41,23 @@ export interface ChatConversationDetails extends ChatMessagePage {
 export interface ChatBootstrap {
   conversations: ChatConversationSummary[];
   onlineUsersCount?: number;
+  notifications: ChatNotificationState;
+  security: ChatSecurityState;
+}
+
+export interface ChatNotificationState {
+  unreadCount: number;
+}
+
+export interface ChatSecurityState {
+  enabled: boolean;
+  locked: boolean;
+  lockAfterMinutes: number;
+}
+
+export interface ChatSecurityUnlockDetails {
+  security: ChatSecurityState;
+  bootstrap: ChatBootstrap;
 }
 
 export interface ChatPresence {
@@ -74,11 +91,17 @@ export interface SendChatMessagePayload extends OpenConversationPayload {
   attachments?: unknown;
 }
 
+export interface ChatPinPayload {
+  pin?: unknown;
+}
+
 export interface ChatActionAck<T = undefined> {
   ok: boolean;
   data?: T;
   error?: string;
   cleanupAttachments?: boolean;
+  requiresPin?: boolean;
+  retryAfterSeconds?: number;
 }
 
 export const normalizeDocument = (value: unknown): string =>

@@ -179,6 +179,25 @@ export class ChatStoreService {
     });
   }
 
+  async unreadCountFor(userId: number): Promise<number> {
+    const row = await this.sharedConn
+      .getRepository(ChatMessageOrm)
+      .createQueryBuilder('message')
+      .leftJoin(
+        ChatConversationReadOrm,
+        'reading',
+        'reading.CHATCONVERSACION = message.CHATCONVERSACION AND reading.CHATUSUREG = :userId',
+        { userId }
+      )
+      .select('COUNT(message.OID)', 'unreadCount')
+      .where('message.CHATUSUREG2 = :userId', { userId })
+      .andWhere('message.OID > COALESCE(reading.CHATMENSAJE, 0)')
+      .getRawOne<{ unreadCount: number | string }>();
+
+    const unreadCount = Number(row?.unreadCount ?? 0);
+    return Number.isSafeInteger(unreadCount) && unreadCount > 0 ? unreadCount : 0;
+  }
+
   async participants(conversationId: number): Promise<RegisteredChatUser[]> {
     const conversation = await this.sharedConn.getRepository(ChatConversationOrm).findOne({
       where: { id: conversationId },
