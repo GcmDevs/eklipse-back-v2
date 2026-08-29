@@ -11,16 +11,31 @@ import type {
   ChatConversationSummary,
   ChatMessage,
   ChatMessagePage,
+  ChatMessageReply,
   ChatUser,
   RegisteredChatUser,
 } from './chat.types';
-import { normalizeDocument } from './chat.types';
+import { CHAT_MESSAGE_MUTATION_WINDOW_MS, normalizeDocument } from './chat.types';
 import { FILE_PATHS } from '@gen/file-server.locations';
+import { cryptoChatServices } from '@common/application/services';
 
 interface ChatUnreadState {
   lastReadMessageId: number | null;
   unreadCount: number;
 }
+
+export class ChatReplyMessageNotFoundError extends Error {
+  constructor() {
+    super('Reply message not found in conversation');
+    this.name = 'ChatReplyMessageNotFoundError';
+  }
+}
+
+export type ChatMessageMutationError = 'not-found' | 'forbidden' | 'expired' | 'deleted' | 'empty';
+
+export type ChatMessageMutationResult =
+  | { ok: true; message: ChatMessage }
+  | { ok: false; error: ChatMessageMutationError };
 
 @Injectable()
 export class ChatStoreService {
@@ -98,7 +113,8 @@ export class ChatStoreService {
     conversationId: number,
     currentUser: RegisteredChatUser,
     content: string,
-    attachments: string[]
+    attachments: string[],
+    replyToMessageId?: number
   ): Promise<ChatMessage | undefined> {
     return this.sharedConn.transaction(async manager => {
       const conversationRepository = manager.getRepository(ChatConversationOrm);
@@ -113,13 +129,24 @@ export class ChatStoreService {
       const recipient = this.otherParticipant(conversation, currentUser.id);
       if (!recipient) return undefined;
 
+      const replyToMessage = replyToMessageId
+        ? await messageRepository.findOne({
+            where: { id: replyToMessageId, conversationId },
+            relations: ['senderUser', 'attachments'],
+          })
+        : null;
+      if (replyToMessageId && (!replyToMessage || replyToMessage.deletedAt)) {
+        throw new ChatReplyMessageNotFoundError();
+      }
+
       const createdAt = new Date();
       const message = await messageRepository.save(
         messageRepository.create({
           conversationId,
           senderUserId: currentUser.id,
           recipientUserId: recipient.id,
-          content: content ? content : null,
+          content: content ? cryptoChatServices.encrypt(content) : null,
+          replyToMessageId: replyToMessage?.id ?? null,
           createdAt,
         })
       );
@@ -134,6 +161,7 @@ export class ChatStoreService {
             )
           )
         : [];
+      message.replyToMessage = replyToMessage;
 
       conversation.lastMessageId = message.id;
       conversation.lastSenderUserId = currentUser.id;
@@ -148,6 +176,67 @@ export class ChatStoreService {
     });
   }
 
+  async editMessage(
+    messageId: number,
+    currentUser: RegisteredChatUser,
+    content: string
+  ): Promise<ChatMessageMutationResult> {
+    return this.sharedConn.transaction('SERIALIZABLE', async manager => {
+      const repository = manager.getRepository(ChatMessageOrm);
+      const message = await repository.findOne({
+        where: { id: messageId },
+        relations: [
+          'senderUser',
+          'attachments',
+          'replyToMessage',
+          'replyToMessage.senderUser',
+          'replyToMessage.attachments',
+        ],
+      });
+      const error = this.messageMutationErrorFor(message, currentUser.id);
+      if (error) return { ok: false, error };
+      if (!content && !message.attachments.length) return { ok: false, error: 'empty' };
+
+      message.content = content ? cryptoChatServices.encrypt(content) : null;
+      message.editedAt = new Date();
+      await repository.save(message);
+
+      return {
+        ok: true,
+        message: this.toChatMessage(message, currentUser, currentUser.document),
+      };
+    });
+  }
+
+  async deleteMessage(
+    messageId: number,
+    currentUser: RegisteredChatUser
+  ): Promise<ChatMessageMutationResult> {
+    return this.sharedConn.transaction('SERIALIZABLE', async manager => {
+      const repository = manager.getRepository(ChatMessageOrm);
+      const message = await repository.findOne({
+        where: { id: messageId },
+        relations: [
+          'senderUser',
+          'attachments',
+          'replyToMessage',
+          'replyToMessage.senderUser',
+          'replyToMessage.attachments',
+        ],
+      });
+      const error = this.messageMutationErrorFor(message, currentUser.id);
+      if (error) return { ok: false, error };
+
+      message.deletedAt = new Date();
+      await repository.save(message);
+
+      return {
+        ok: true,
+        message: this.toChatMessage(message, currentUser, currentUser.document),
+      };
+    });
+  }
+
   async listFor(
     userId: number,
     isOnline: (contactDocument: string) => boolean
@@ -159,6 +248,9 @@ export class ChatStoreService {
         'secondUser',
         'lastMessage',
         'lastMessage.attachments',
+        'lastMessage.replyToMessage',
+        'lastMessage.replyToMessage.senderUser',
+        'lastMessage.replyToMessage.attachments',
         'lastSenderUser',
       ],
       order: { updatedAt: 'DESC' },
@@ -177,6 +269,26 @@ export class ChatStoreService {
         unreadState?.lastReadMessageId ?? null
       );
     });
+  }
+
+  async unreadCountFor(userId: number): Promise<number> {
+    const row = await this.sharedConn
+      .getRepository(ChatMessageOrm)
+      .createQueryBuilder('message')
+      .leftJoin(
+        ChatConversationReadOrm,
+        'reading',
+        'reading.CHATCONVERSACION = message.CHATCONVERSACION AND reading.CHATUSUREG = :userId',
+        { userId }
+      )
+      .select('COUNT(message.OID)', 'unreadCount')
+      .where('message.CHATUSUREG2 = :userId', { userId })
+      .andWhere('message.OID > COALESCE(reading.CHATMENSAJE, 0)')
+      .andWhere('message.FECELI IS NULL')
+      .getRawOne<{ unreadCount: number | string }>();
+
+    const unreadCount = Number(row?.unreadCount ?? 0);
+    return Number.isSafeInteger(unreadCount) && unreadCount > 0 ? unreadCount : 0;
   }
 
   async participants(conversationId: number): Promise<RegisteredChatUser[]> {
@@ -234,7 +346,13 @@ export class ChatStoreService {
       : { conversationId };
     const persistedMessages = await this.sharedConn.getRepository(ChatMessageOrm).find({
       where,
-      relations: ['senderUser', 'attachments'],
+      relations: [
+        'senderUser',
+        'attachments',
+        'replyToMessage',
+        'replyToMessage.senderUser',
+        'replyToMessage.attachments',
+      ],
       order: { id: 'DESC' },
       take: ChatStoreService.MESSAGES_PAGE_SIZE + 1,
     });
@@ -264,8 +382,17 @@ export class ChatStoreService {
         ? {
             id: conversation.lastMessageId,
             conversationId: conversation.id,
-            content: conversation.lastMessage.content,
-            attachments: this.toAttachmentPaths(conversation.lastMessage.attachments),
+            content: conversation.lastMessage.deletedAt
+              ? ''
+              : this.decryptMessageContent(conversation.lastMessage),
+            attachments: conversation.lastMessage.deletedAt
+              ? []
+              : this.toAttachmentPaths(conversation.lastMessage.attachments),
+            replyTo: conversation.lastMessage.deletedAt
+              ? null
+              : this.toChatMessageReply(conversation.lastMessage.replyToMessage),
+            editedAt: this.toNullableIsoString(conversation.lastMessage.editedAt),
+            deletedAt: this.toNullableIsoString(conversation.lastMessage.deletedAt),
             createdAt: this.toIsoString(conversation.lastMessage.createdAt),
             sender: this.toChatUser(conversation.lastSenderUser),
           }
@@ -331,6 +458,7 @@ export class ChatStoreService {
         'unreadMessage',
         `unreadMessage.CHATCONVERSACION = conversation.OID
           AND unreadMessage.CHATUSUREG2 = :userId
+          AND unreadMessage.FECELI IS NULL
           AND unreadMessage.OID > COALESCE(reading.CHATMENSAJE, 0)`,
         { userId }
       )
@@ -382,6 +510,22 @@ export class ChatStoreService {
     return conversation.firstUserId === userId || conversation.secondUserId === userId;
   }
 
+  private messageMutationErrorFor(
+    message: ChatMessageOrm | null,
+    currentUserId: number
+  ): ChatMessageMutationError | undefined {
+    if (!message) return 'not-found';
+    if (message.senderUserId !== currentUserId) return 'forbidden';
+    if (message.deletedAt) return 'deleted';
+
+    const createdAt = new Date(message.createdAt).getTime();
+    if (!Number.isFinite(createdAt) || Date.now() - createdAt > CHAT_MESSAGE_MUTATION_WINDOW_MS) {
+      return 'expired';
+    }
+
+    return undefined;
+  }
+
   private findConversationById(id: number): Promise<ChatConversationOrm | null> {
     return this.sharedConn.getRepository(ChatConversationOrm).findOne({
       where: { id },
@@ -390,6 +534,9 @@ export class ChatStoreService {
         'secondUser',
         'lastMessage',
         'lastMessage.attachments',
+        'lastMessage.replyToMessage',
+        'lastMessage.replyToMessage.senderUser',
+        'lastMessage.replyToMessage.attachments',
         'lastSenderUser',
       ],
     });
@@ -426,11 +573,32 @@ export class ChatStoreService {
     return {
       id: message.id,
       conversationId: message.conversationId,
-      content: message.content,
-      attachments: this.toAttachmentPaths(message.attachments, document),
+      content: message.deletedAt ? '' : this.decryptMessageContent(message),
+      attachments: message.deletedAt ? [] : this.toAttachmentPaths(message.attachments, document),
+      replyTo: message.deletedAt ? null : this.toChatMessageReply(message.replyToMessage),
+      editedAt: this.toNullableIsoString(message.editedAt),
+      deletedAt: this.toNullableIsoString(message.deletedAt),
       createdAt: this.toIsoString(message.createdAt),
       sender: publicSender,
     };
+  }
+
+  private toChatMessageReply(message?: ChatMessageOrm | null): ChatMessageReply | null {
+    if (!message?.senderUser) return null;
+
+    return {
+      id: message.id,
+      content: message.deletedAt ? '' : this.decryptMessageContent(message),
+      attachments: message.deletedAt
+        ? []
+        : this.toAttachmentPaths(message.attachments, message.senderUser.document),
+      deletedAt: this.toNullableIsoString(message.deletedAt),
+      sender: this.toChatUser(message.senderUser),
+    };
+  }
+
+  private decryptMessageContent(message: ChatMessageOrm): string {
+    return cryptoChatServices.decrypt(message.content);
   }
 
   private toAttachmentPaths(attachments?: ChatMessageAttachmentOrm[], document?: string): string[] {
@@ -444,5 +612,9 @@ export class ChatStoreService {
 
   private toIsoString(value: Date): string {
     return new Date(value).toISOString();
+  }
+
+  private toNullableIsoString(value?: Date | null): string | null {
+    return value ? this.toIsoString(value) : null;
   }
 }

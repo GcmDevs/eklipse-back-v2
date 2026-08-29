@@ -13,6 +13,7 @@ export const ENVIRONMENTS = {
   port,
   apiUrl: production ? `${apiUrlBase}:${port}` : `${apiUrlBase}:${port}`,
   apiUrlBase,
+  chatEncryptionKey: processEnv.CHAT_ENCRYPTION_KEY,
 };
 
 export const VALID_HOSTS = GLOBAL_VALID_HOSTS;

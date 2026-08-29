@@ -17,17 +17,28 @@ import { processEnv } from '@env';
 import { VALID_HOSTS } from '@gen/app.environments';
 import { ChatDirectoryService } from './chat-directory.service';
 import { CHAT_EVENTS } from './chat.events';
-import { ChatStoreService } from './chat-store.service';
+import {
+  ChatReplyMessageNotFoundError,
+  ChatStoreService,
+  type ChatMessageMutationError,
+} from './chat-store.service';
+import { ChatSecurityService } from './chat-security.service';
 import type {
   ChatActionAck,
   ChatBootstrap,
   ChatContact,
   ChatConversationDetails,
   ChatConversationSummary,
+  DeleteChatMessagePayload,
+  EditChatMessagePayload,
   ChatMessage,
   ChatMessagePage,
+  ChatNotificationState,
   ChatOnlineUsersCount,
+  ChatPinPayload,
   ChatPresence,
+  ChatSecurityState,
+  ChatSecurityUnlockDetails,
   ChatUser,
   LoadPreviousChatMessagesPayload,
   OpenConversationPayload,
@@ -48,22 +59,26 @@ import {
 import { FileServerRegistry } from '../file-server.registry';
 
 const ONLINE_USERS_COUNT_ALLOWED_DOCUMENTS = new Set(['1065819503', '7574298']);
+const CHAT_SECURITY_LOCK_DELAY_MS = 10 * 60 * 1000;
 
 @WebSocketGateway({
   namespace: '/chat',
   cors: { origin: VALID_HOSTS },
 })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-  private static readonly MAX_MESSAGE_LENGTH = 1000;
+  private static readonly MAX_MESSAGE_LENGTH = 10000;
   private readonly logger = new Logger(ChatGateway.name);
 
   @WebSocketServer()
   private server: Namespace;
 
   private readonly connectedUsers = new Map<string, number>();
+  private readonly connectedClients = new Map<string, Set<Socket>>();
+  private readonly securityLockTimeouts = new Map<string, NodeJS.Timeout>();
 
   constructor(
     private readonly directory: ChatDirectoryService,
+    private readonly security: ChatSecurityService,
     private readonly store: ChatStoreService,
     private readonly fileRegistry: FileServerRegistry
   ) {}
@@ -95,28 +110,152 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   async handleConnection(client: Socket): Promise<void> {
     const user = client.data.chatUser as RegisteredChatUser;
+    client.data.chatSecurityEnabled = true;
+    client.data.chatSecurityUnlocked = false;
     client.join(this.userRoom(user.document));
+    this.registerClient(user.document, client);
     this.changeConnectionCount(user.document, 1);
     this.emitOnlineUsersCount();
 
-    let conversations: ChatConversationSummary[] = [];
     try {
-      conversations = await this.store.listFor(user.id, document => this.isOnline(document));
+      const securityEnabled = await this.security.isEnabled(user.id);
+      client.data.chatSecurityEnabled = securityEnabled;
+      client.data.chatSecurityUnlocked = !securityEnabled;
+      await this.emitBootstrap(client, user);
     } catch (error) {
-      this.logPersistenceError('cargar conversaciones', error);
+      client.data.chatSecurityEnabled = true;
+      client.data.chatSecurityUnlocked = false;
+      this.logPersistenceError('cargar la seguridad y las conversaciones', error);
       client.emit('exception', {
-        message: 'No fue posible cargar tus conversaciones guardadas.',
+        message: 'No fue posible validar la seguridad del chat.',
       });
+      client.emit(CHAT_EVENTS.bootstrap, {
+        conversations: [],
+        notifications: { unreadCount: 0 },
+        security: this.securityStateFor(client),
+      } satisfies ChatBootstrap);
+    }
+    void this.emitPresence(user);
+  }
+
+  @SubscribeMessage(CHAT_EVENTS.enableSecurity)
+  async enableSecurity(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: ChatPinPayload
+  ): Promise<ChatActionAck<ChatSecurityState>> {
+    const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
+    if (!currentUser) return this.unauthorized();
+
+    const pin = typeof payload?.pin === 'string' ? payload.pin : '';
+    if (!this.security.isValidPin(pin)) {
+      return { ok: false, error: 'El PIN debe contener exactamente 4 números.' };
     }
 
-    const bootstrap: ChatBootstrap = {
-      conversations,
-      ...(this.canViewOnlineUsersCount(user.document)
-        ? { onlineUsersCount: this.connectedUsers.size }
-        : {}),
-    };
-    client.emit(CHAT_EVENTS.bootstrap, bootstrap);
-    void this.emitPresence(user);
+    try {
+      if ((await this.security.isEnabled(currentUser.id)) && this.isChatLocked(client)) {
+        return this.chatLocked();
+      }
+      await this.security.enable(currentUser.id, pin);
+      client.data.chatSecurityEnabled = true;
+      client.data.chatSecurityUnlocked = true;
+      this.touchSecurityActivity(client);
+      this.syncSecurityWithOtherClients(client, currentUser, true);
+      return { ok: true, data: this.securityStateFor(client) };
+    } catch (error) {
+      this.logPersistenceError('activar la seguridad del chat', error);
+      return { ok: false, error: 'No fue posible activar la protección del chat.' };
+    }
+  }
+
+  @SubscribeMessage(CHAT_EVENTS.unlockSecurity)
+  async unlockSecurity(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: ChatPinPayload
+  ): Promise<ChatActionAck<ChatSecurityUnlockDetails>> {
+    const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
+    if (!currentUser) return this.unauthorized();
+
+    try {
+      if (!(await this.security.isEnabled(currentUser.id))) {
+        client.data.chatSecurityEnabled = false;
+        client.data.chatSecurityUnlocked = true;
+      } else {
+        const pin = typeof payload?.pin === 'string' ? payload.pin : '';
+        const verification = await this.security.verify(currentUser.id, pin);
+        if (!verification.valid) {
+          return {
+            ok: false,
+            error: verification.retryAfterSeconds
+              ? `Demasiados intentos. Espera ${verification.retryAfterSeconds} segundos.`
+              : 'El PIN no es correcto.',
+            retryAfterSeconds: verification.retryAfterSeconds,
+          };
+        }
+        client.data.chatSecurityEnabled = true;
+        client.data.chatSecurityUnlocked = true;
+        this.touchSecurityActivity(client);
+      }
+
+      const bootstrap = await this.bootstrapFor(client, currentUser);
+      return {
+        ok: true,
+        data: { security: this.securityStateFor(client), bootstrap },
+      };
+    } catch (error) {
+      this.logPersistenceError('desbloquear el chat', error);
+      return { ok: false, error: 'No fue posible validar el PIN.' };
+    }
+  }
+
+  @SubscribeMessage(CHAT_EVENTS.disableSecurity)
+  async disableSecurity(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: ChatPinPayload
+  ): Promise<ChatActionAck<ChatSecurityState>> {
+    const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
+    if (!currentUser) return this.unauthorized();
+
+    const pin = typeof payload?.pin === 'string' ? payload.pin : '';
+    try {
+      const verification = await this.security.disable(currentUser.id, pin);
+      if (!verification.valid) {
+        return {
+          ok: false,
+          error: verification.retryAfterSeconds
+            ? `Demasiados intentos. Espera ${verification.retryAfterSeconds} segundos.`
+            : 'El PIN no es correcto.',
+          retryAfterSeconds: verification.retryAfterSeconds,
+        };
+      }
+
+      client.data.chatSecurityEnabled = false;
+      client.data.chatSecurityUnlocked = true;
+      this.clearSecurityTimeout(client.id);
+      this.syncSecurityWithOtherClients(client, currentUser, false);
+      return { ok: true, data: this.securityStateFor(client) };
+    } catch (error) {
+      this.logPersistenceError('quitar la seguridad del chat', error);
+      return { ok: false, error: 'No fue posible quitar la protección del chat.' };
+    }
+  }
+
+  @SubscribeMessage(CHAT_EVENTS.lockSecurity)
+  lockSecurity(@ConnectedSocket() client: Socket): ChatActionAck<ChatSecurityState> {
+    const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
+    if (!currentUser) return this.unauthorized();
+
+    this.lockClient(client);
+    return { ok: true, data: this.securityStateFor(client) };
+  }
+
+  @SubscribeMessage(CHAT_EVENTS.securityActivity)
+  securityActivity(@ConnectedSocket() client: Socket): ChatActionAck<ChatSecurityState> {
+    const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
+    if (!currentUser) return this.unauthorized();
+    if (this.isChatLocked(client)) return this.chatLocked();
+
+    this.touchSecurityActivity(client);
+    return { ok: true, data: this.securityStateFor(client) };
   }
 
   @SubscribeMessage(CHAT_EVENTS.searchUsers)
@@ -126,6 +265,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   ): Promise<ChatActionAck<ChatContact[]>> {
     const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
     if (!currentUser) return this.unauthorized();
+    if (this.isChatLocked(client)) return this.chatLocked();
+    this.touchSecurityActivity(client);
 
     const query = typeof payload?.query === 'string' ? payload.query.trim() : '';
     if (!query) return { ok: true, data: [] };
@@ -153,6 +294,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     const user = client.data.chatUser as RegisteredChatUser | undefined;
     if (!user) return;
 
+    this.unregisterClient(user.document, client);
+    this.clearSecurityTimeout(client.id);
     this.changeConnectionCount(user.document, -1);
     this.emitOnlineUsersCount();
     void this.emitPresence(user);
@@ -165,6 +308,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   ): Promise<ChatActionAck<ChatConversationDetails>> {
     const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
     if (!currentUser) return this.unauthorized();
+    if (this.isChatLocked(client)) return this.chatLocked();
+    this.touchSecurityActivity(client);
 
     let registeredCurrentUser: RegisteredChatUser | undefined;
     let contact: RegisteredChatUser | undefined;
@@ -206,6 +351,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   ): Promise<ChatActionAck<ChatConversationDetails>> {
     const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
     if (!currentUser) return this.unauthorized();
+    if (this.isChatLocked(client)) return this.chatLocked();
+    this.touchSecurityActivity(client);
 
     if (!payload.conversationId) return { ok: false, error: 'La conversación no es válida.' };
 
@@ -219,7 +366,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       );
       if (!details) return { ok: false, error: 'No tienes acceso a esta conversación.' };
 
-      if (markAsRead) this.emitSummaryToUser(currentUser.document, details.conversation);
+      if (markAsRead) {
+        void Promise.all([
+          this.emitSummaryToUser(currentUser.document, details.conversation),
+          this.emitNotificationState(currentUser),
+        ]).catch(error => this.logPersistenceError('actualizar las notificaciones', error));
+      }
 
       return { ok: true, data: details };
     } catch (error) {
@@ -235,6 +387,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   ): Promise<ChatActionAck<ChatConversationSummary>> {
     const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
     if (!currentUser) return this.unauthorized();
+    if (this.isChatLocked(client)) return this.chatLocked();
+    this.touchSecurityActivity(client);
 
     const conversationId = Number(payload?.conversationId);
     if (!Number.isSafeInteger(conversationId) || conversationId <= 0) {
@@ -250,7 +404,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       ).find(conversation => conversation.id === conversationId);
       if (!summary) return { ok: false, error: 'La conversación ya no está disponible.' };
 
-      this.emitSummaryToUser(currentUser.document, summary);
+      void Promise.all([
+        this.emitSummaryToUser(currentUser.document, summary),
+        this.emitNotificationState(currentUser),
+      ]).catch(error => this.logPersistenceError('actualizar las notificaciones', error));
       return { ok: true, data: summary };
     } catch (error) {
       this.logPersistenceError('marcar una conversación como leída', error);
@@ -265,6 +422,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   ): Promise<ChatActionAck<ChatMessagePage>> {
     const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
     if (!currentUser) return this.unauthorized();
+    if (this.isChatLocked(client)) return this.chatLocked();
+    this.touchSecurityActivity(client);
 
     const conversationId = payload?.conversationId;
     const beforeMessageId = payload?.beforeMessageId;
@@ -299,6 +458,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
   ): Promise<ChatActionAck<ChatMessage>> {
     const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
     if (!currentUser) return this.rejectedMessage('No fue posible identificar tu sesión.');
+    if (this.isChatLocked(client)) return this.chatLocked(true);
+    this.touchSecurityActivity(client);
 
     const content = typeof payload?.content === 'string' ? payload.content.trim() : '';
     const rawAttachments = payload?.attachments;
@@ -307,6 +468,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           typeof value === 'string' ? normalizeStoredFilePath(value) : ''
         )
       : [];
+    const rawReplyToMessageId = payload?.replyToMessageId;
+    const replyToMessageId =
+      rawReplyToMessageId === undefined || rawReplyToMessageId === null
+        ? undefined
+        : Number(rawReplyToMessageId);
 
     if (!payload.conversationId) return this.rejectedMessage('Selecciona una conversación.');
     if (rawAttachments !== undefined && !Array.isArray(rawAttachments)) {
@@ -322,6 +488,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       new Set(attachments).size !== attachments.length
     ) {
       return this.rejectedMessage('Los archivos adjuntos no son válidos.');
+    }
+    if (
+      replyToMessageId !== undefined &&
+      (!Number.isSafeInteger(replyToMessageId) || replyToMessageId <= 0)
+    ) {
+      return this.rejectedMessage('El mensaje que intentas responder no es válido.');
     }
     if (!content && attachments.length === 0) {
       return this.rejectedMessage('Escribe un mensaje o adjunta un archivo antes de enviarlo.');
@@ -364,7 +536,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         payload.conversationId,
         registeredCurrentUser,
         content,
-        attachments
+        attachments,
+        replyToMessageId
       );
       if (!message) {
         this.fileRegistry.release(attachments, currentUser.document);
@@ -374,15 +547,86 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       this.fileRegistry.complete(attachments, currentUser.document);
 
       await this.emitConversationUpdate(payload.conversationId);
-      for (const participant of registeredParticipants) {
-        this.server.to(this.userRoom(participant.document)).emit(CHAT_EVENTS.message, message);
-      }
+      await Promise.all(
+        registeredParticipants.map(participant =>
+          this.emitToUnlockedUser(participant.document, CHAT_EVENTS.message, message)
+        )
+      );
 
       return { ok: true, data: message };
     } catch (error) {
       this.fileRegistry.release(attachments, currentUser.document);
+      if (error instanceof ChatReplyMessageNotFoundError) {
+        return this.rejectedMessage(
+          'El mensaje que intentas responder ya no está disponible en esta conversación.'
+        );
+      }
       this.logPersistenceError('guardar un mensaje', error);
       return this.rejectedMessage('No fue posible guardar el mensaje. Intenta nuevamente.');
+    }
+  }
+
+  @SubscribeMessage(CHAT_EVENTS.editMessage)
+  async editMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: EditChatMessagePayload
+  ): Promise<ChatActionAck<ChatMessage>> {
+    const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
+    if (!currentUser) return this.unauthorized();
+    if (this.isChatLocked(client)) return this.chatLocked();
+    this.touchSecurityActivity(client);
+
+    const messageId = Number(payload?.messageId);
+    const content = typeof payload?.content === 'string' ? payload.content.trim() : '';
+    if (!Number.isSafeInteger(messageId) || messageId <= 0) {
+      return this.rejectedMutation('No fue posible identificar el mensaje.');
+    }
+    if (content.length > ChatGateway.MAX_MESSAGE_LENGTH) {
+      return this.rejectedMutation(
+        `El mensaje no puede superar ${ChatGateway.MAX_MESSAGE_LENGTH} caracteres.`
+      );
+    }
+
+    try {
+      const result = await this.store.editMessage(messageId, currentUser, content);
+      if (result.ok === false) {
+        return this.rejectedMutation(this.messageMutationError(result.error));
+      }
+
+      await this.emitMessageMutation(result.message);
+      return { ok: true, data: result.message };
+    } catch (error) {
+      this.logPersistenceError('editar un mensaje', error);
+      return this.rejectedMutation('No fue posible editar el mensaje. Intenta nuevamente.');
+    }
+  }
+
+  @SubscribeMessage(CHAT_EVENTS.deleteMessage)
+  async deleteMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: DeleteChatMessagePayload
+  ): Promise<ChatActionAck<ChatMessage>> {
+    const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
+    if (!currentUser) return this.unauthorized();
+    if (this.isChatLocked(client)) return this.chatLocked();
+    this.touchSecurityActivity(client);
+
+    const messageId = Number(payload?.messageId);
+    if (!Number.isSafeInteger(messageId) || messageId <= 0) {
+      return this.rejectedMutation('No fue posible identificar el mensaje.');
+    }
+
+    try {
+      const result = await this.store.deleteMessage(messageId, currentUser);
+      if (result.ok === false) {
+        return this.rejectedMutation(this.messageMutationError(result.error));
+      }
+
+      await this.emitMessageMutation(result.message);
+      return { ok: true, data: result.message };
+    } catch (error) {
+      this.logPersistenceError('eliminar un mensaje', error);
+      return this.rejectedMutation('No fue posible eliminar el mensaje. Intenta nuevamente.');
     }
   }
 
@@ -409,15 +653,136 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     return { document, name };
   }
 
+  private async bootstrapFor(client: Socket, user: RegisteredChatUser): Promise<ChatBootstrap> {
+    const [conversations, unreadCount] = await Promise.all([
+      this.isChatLocked(client)
+        ? Promise.resolve([])
+        : this.store.listFor(user.id, document => this.isOnline(document)),
+      this.store.unreadCountFor(user.id),
+    ]);
+
+    return {
+      conversations,
+      notifications: { unreadCount },
+      security: this.securityStateFor(client),
+      ...(this.canViewOnlineUsersCount(user.document)
+        ? { onlineUsersCount: this.connectedUsers.size }
+        : {}),
+    };
+  }
+
+  private async emitBootstrap(client: Socket, user: RegisteredChatUser): Promise<void> {
+    client.emit(CHAT_EVENTS.bootstrap, await this.bootstrapFor(client, user));
+  }
+
+  private securityStateFor(client: Socket): ChatSecurityState {
+    const enabled = client.data.chatSecurityEnabled !== false;
+    return {
+      enabled,
+      locked: enabled && client.data.chatSecurityUnlocked !== true,
+      lockAfterMinutes: CHAT_SECURITY_LOCK_DELAY_MS / 60_000,
+    };
+  }
+
+  private isChatLocked(client: Socket): boolean {
+    return this.securityStateFor(client).locked;
+  }
+
+  private touchSecurityActivity(client: Socket): void {
+    if (client.data.chatSecurityEnabled !== true || this.isChatLocked(client)) return;
+
+    this.clearSecurityTimeout(client.id);
+    this.securityLockTimeouts.set(
+      client.id,
+      setTimeout(() => this.lockClient(client), CHAT_SECURITY_LOCK_DELAY_MS)
+    );
+  }
+
+  private lockClient(client: Socket): void {
+    if (client.data.chatSecurityEnabled !== true) return;
+
+    this.clearSecurityTimeout(client.id);
+    client.data.chatSecurityUnlocked = false;
+    client.emit(CHAT_EVENTS.securityState, this.securityStateFor(client));
+  }
+
+  private clearSecurityTimeout(clientId: string): void {
+    const timeout = this.securityLockTimeouts.get(clientId);
+    if (timeout) clearTimeout(timeout);
+    this.securityLockTimeouts.delete(clientId);
+  }
+
+  private syncSecurityWithOtherClients(
+    source: Socket,
+    user: RegisteredChatUser,
+    enabled: boolean
+  ): void {
+    const clients = this.connectedClients.get(normalizeDocument(user.document));
+    if (!clients) return;
+
+    for (const client of clients) {
+      if (client.id === source.id) continue;
+
+      client.data.chatSecurityEnabled = enabled;
+      client.data.chatSecurityUnlocked = !enabled;
+      this.clearSecurityTimeout(client.id);
+      client.emit(CHAT_EVENTS.securityState, this.securityStateFor(client));
+      if (!enabled) void this.emitBootstrap(client, user);
+    }
+  }
+
+  private registerClient(document: string, client: Socket): void {
+    const normalized = normalizeDocument(document);
+    const clients = this.connectedClients.get(normalized) ?? new Set<Socket>();
+    clients.add(client);
+    this.connectedClients.set(normalized, clients);
+  }
+
+  private unregisterClient(document: string, client: Socket): void {
+    const normalized = normalizeDocument(document);
+    const clients = this.connectedClients.get(normalized);
+    if (!clients) return;
+
+    clients.delete(client);
+    if (!clients.size) this.connectedClients.delete(normalized);
+  }
+
+  private async emitToUnlockedUser(
+    document: string,
+    event: string,
+    payload: unknown
+  ): Promise<void> {
+    const clients = this.connectedClients.get(normalizeDocument(document));
+    if (!clients) return;
+
+    for (const client of clients) {
+      if (!this.isChatLocked(client)) client.emit(event, payload);
+    }
+  }
+
+  private async emitNotificationState(user: RegisteredChatUser): Promise<void> {
+    const payload: ChatNotificationState = {
+      unreadCount: await this.store.unreadCountFor(user.id),
+    };
+    const clients = this.connectedClients.get(normalizeDocument(user.document));
+    if (!clients) return;
+
+    for (const client of clients) client.emit(CHAT_EVENTS.notificationState, payload);
+  }
+
   private async emitConversationUpdate(conversationId: number): Promise<void> {
     try {
       const participants = await this.store.participants(conversationId);
       await Promise.all(
         participants.map(async participant => {
-          const summary = (
-            await this.store.listFor(participant.id, document => this.isOnline(document))
-          ).find(conversation => conversation.id === conversationId);
-          if (summary) this.emitSummaryToUser(participant.document, summary);
+          const conversations = await this.store.listFor(participant.id, document =>
+            this.isOnline(document)
+          );
+          const summary = conversations.find(conversation => conversation.id === conversationId);
+          await Promise.all([
+            summary ? this.emitSummaryToUser(participant.document, summary) : Promise.resolve(),
+            this.emitNotificationState(participant),
+          ]);
         })
       );
     } catch {
@@ -425,8 +790,22 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
   }
 
-  private emitSummaryToUser(document: string, summary: ChatConversationSummary): void {
-    this.server.to(this.userRoom(document)).emit(CHAT_EVENTS.conversationUpdated, summary);
+  private async emitMessageMutation(message: ChatMessage): Promise<void> {
+    try {
+      const participants = await this.store.participants(message.conversationId);
+      await Promise.all([
+        this.emitConversationUpdate(message.conversationId),
+        ...participants.map(participant =>
+          this.emitToUnlockedUser(participant.document, CHAT_EVENTS.messageUpdated, message)
+        ),
+      ]);
+    } catch {
+      // El cambio ya quedó persistido; el estado se recuperará al reconectar.
+    }
+  }
+
+  private emitSummaryToUser(document: string, summary: ChatConversationSummary): Promise<void> {
+    return this.emitToUnlockedUser(document, CHAT_EVENTS.conversationUpdated, summary);
   }
 
   private async emitPresence(user: RegisteredChatUser): Promise<void> {
@@ -447,7 +826,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
     for (const recipient of new Set(recipients)) {
       if (recipient !== presence.document) {
-        this.server.to(this.userRoom(recipient)).emit(CHAT_EVENTS.presence, presence);
+        await this.emitToUnlockedUser(recipient, CHAT_EVENTS.presence, presence);
       }
     }
   }
@@ -486,8 +865,34 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     return { ok: false, error: 'No fue posible identificar tu sesión.' };
   }
 
+  private chatLocked<T>(cleanupAttachments = false): ChatActionAck<T> {
+    return {
+      ok: false,
+      error: 'El chat está bloqueado. Ingresa tu PIN para continuar.',
+      requiresPin: true,
+      ...(cleanupAttachments ? { cleanupAttachments: true } : {}),
+    };
+  }
+
   private rejectedMessage(error: string): ChatActionAck<ChatMessage> {
     return { ok: false, error, cleanupAttachments: true };
+  }
+
+  private rejectedMutation(error: string): ChatActionAck<ChatMessage> {
+    return { ok: false, error };
+  }
+
+  private messageMutationError(error: ChatMessageMutationError): string {
+    switch (error) {
+      case 'expired':
+        return 'Solo puedes editar o eliminar un mensaje durante los 10 minutos posteriores a su envío.';
+      case 'deleted':
+        return 'El mensaje ya fue eliminado.';
+      case 'empty':
+        return 'El mensaje debe conservar texto o al menos un archivo adjunto.';
+      default:
+        return 'No puedes modificar este mensaje.';
+    }
   }
 
   private logPersistenceError(action: string, error: unknown): void {
