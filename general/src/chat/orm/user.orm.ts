@@ -1,6 +1,7 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('CHATUSUREG', { schema: 'dbo' })
+@Index('UQ_CHATUSUREG_USUDOCUME', ['document'], { unique: true })
 export class ChatUserOrm {
   @PrimaryGeneratedColumn({ name: 'OID' })
   id: number;

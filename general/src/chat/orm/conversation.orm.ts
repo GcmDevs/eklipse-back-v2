@@ -1,8 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, Index, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { ChatUserOrm } from './user.orm';
 import { ChatMessageOrm } from './message.orm';
 
-@Entity('CHATCONVERSACION')
+@Entity('CHATCONVERSACION', { schema: 'dbo' })
+@Index('UQ_CHATCONVERSACION_PARTICIPANTES', ['firstUserId', 'secondUserId'], { unique: true })
+@Index('IX_CHATCONVERSACION_USUARIO1_ULTMOV', ['firstUserId', 'updatedAt'])
+@Index('IX_CHATCONVERSACION_USUARIO2_ULTMOV', ['secondUserId', 'updatedAt'])
 export class ChatConversationOrm {
   @PrimaryGeneratedColumn({ name: 'OID' })
   id: number;
