@@ -11,6 +11,7 @@ import type {
   ChatConversationSummary,
   ChatMessage,
   ChatMessagePage,
+  ChatMessageReply,
   ChatUser,
   RegisteredChatUser,
 } from './chat.types';
@@ -20,6 +21,13 @@ import { FILE_PATHS } from '@gen/file-server.locations';
 interface ChatUnreadState {
   lastReadMessageId: number | null;
   unreadCount: number;
+}
+
+export class ChatReplyMessageNotFoundError extends Error {
+  constructor() {
+    super('Reply message not found in conversation');
+    this.name = 'ChatReplyMessageNotFoundError';
+  }
 }
 
 @Injectable()
@@ -98,7 +106,8 @@ export class ChatStoreService {
     conversationId: number,
     currentUser: RegisteredChatUser,
     content: string,
-    attachments: string[]
+    attachments: string[],
+    replyToMessageId?: number
   ): Promise<ChatMessage | undefined> {
     return this.sharedConn.transaction(async manager => {
       const conversationRepository = manager.getRepository(ChatConversationOrm);
@@ -113,6 +122,14 @@ export class ChatStoreService {
       const recipient = this.otherParticipant(conversation, currentUser.id);
       if (!recipient) return undefined;
 
+      const replyToMessage = replyToMessageId
+        ? await messageRepository.findOne({
+            where: { id: replyToMessageId, conversationId },
+            relations: ['senderUser', 'attachments'],
+          })
+        : null;
+      if (replyToMessageId && !replyToMessage) throw new ChatReplyMessageNotFoundError();
+
       const createdAt = new Date();
       const message = await messageRepository.save(
         messageRepository.create({
@@ -120,6 +137,7 @@ export class ChatStoreService {
           senderUserId: currentUser.id,
           recipientUserId: recipient.id,
           content: content ? content : null,
+          replyToMessageId: replyToMessage?.id ?? null,
           createdAt,
         })
       );
@@ -134,6 +152,7 @@ export class ChatStoreService {
             )
           )
         : [];
+      message.replyToMessage = replyToMessage;
 
       conversation.lastMessageId = message.id;
       conversation.lastSenderUserId = currentUser.id;
@@ -159,6 +178,9 @@ export class ChatStoreService {
         'secondUser',
         'lastMessage',
         'lastMessage.attachments',
+        'lastMessage.replyToMessage',
+        'lastMessage.replyToMessage.senderUser',
+        'lastMessage.replyToMessage.attachments',
         'lastSenderUser',
       ],
       order: { updatedAt: 'DESC' },
@@ -253,7 +275,13 @@ export class ChatStoreService {
       : { conversationId };
     const persistedMessages = await this.sharedConn.getRepository(ChatMessageOrm).find({
       where,
-      relations: ['senderUser', 'attachments'],
+      relations: [
+        'senderUser',
+        'attachments',
+        'replyToMessage',
+        'replyToMessage.senderUser',
+        'replyToMessage.attachments',
+      ],
       order: { id: 'DESC' },
       take: ChatStoreService.MESSAGES_PAGE_SIZE + 1,
     });
@@ -285,6 +313,7 @@ export class ChatStoreService {
             conversationId: conversation.id,
             content: conversation.lastMessage.content,
             attachments: this.toAttachmentPaths(conversation.lastMessage.attachments),
+            replyTo: this.toChatMessageReply(conversation.lastMessage.replyToMessage),
             createdAt: this.toIsoString(conversation.lastMessage.createdAt),
             sender: this.toChatUser(conversation.lastSenderUser),
           }
@@ -409,6 +438,9 @@ export class ChatStoreService {
         'secondUser',
         'lastMessage',
         'lastMessage.attachments',
+        'lastMessage.replyToMessage',
+        'lastMessage.replyToMessage.senderUser',
+        'lastMessage.replyToMessage.attachments',
         'lastSenderUser',
       ],
     });
@@ -445,10 +477,22 @@ export class ChatStoreService {
     return {
       id: message.id,
       conversationId: message.conversationId,
-      content: message.content,
+      content: String(message.content ?? ''),
       attachments: this.toAttachmentPaths(message.attachments, document),
+      replyTo: this.toChatMessageReply(message.replyToMessage),
       createdAt: this.toIsoString(message.createdAt),
       sender: publicSender,
+    };
+  }
+
+  private toChatMessageReply(message?: ChatMessageOrm | null): ChatMessageReply | null {
+    if (!message?.senderUser) return null;
+
+    return {
+      id: message.id,
+      content: String(message.content ?? ''),
+      attachments: this.toAttachmentPaths(message.attachments, message.senderUser.document),
+      sender: this.toChatUser(message.senderUser),
     };
   }
 

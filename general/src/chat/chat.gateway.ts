@@ -17,7 +17,7 @@ import { processEnv } from '@env';
 import { VALID_HOSTS } from '@gen/app.environments';
 import { ChatDirectoryService } from './chat-directory.service';
 import { CHAT_EVENTS } from './chat.events';
-import { ChatStoreService } from './chat-store.service';
+import { ChatReplyMessageNotFoundError, ChatStoreService } from './chat-store.service';
 import { ChatSecurityService } from './chat-security.service';
 import type {
   ChatActionAck,
@@ -462,6 +462,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           typeof value === 'string' ? normalizeStoredFilePath(value) : ''
         )
       : [];
+    const rawReplyToMessageId = payload?.replyToMessageId;
+    const replyToMessageId =
+      rawReplyToMessageId === undefined || rawReplyToMessageId === null
+        ? undefined
+        : Number(rawReplyToMessageId);
 
     if (!payload.conversationId) return this.rejectedMessage('Selecciona una conversación.');
     if (rawAttachments !== undefined && !Array.isArray(rawAttachments)) {
@@ -477,6 +482,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       new Set(attachments).size !== attachments.length
     ) {
       return this.rejectedMessage('Los archivos adjuntos no son válidos.');
+    }
+    if (
+      replyToMessageId !== undefined &&
+      (!Number.isSafeInteger(replyToMessageId) || replyToMessageId <= 0)
+    ) {
+      return this.rejectedMessage('El mensaje que intentas responder no es válido.');
     }
     if (!content && attachments.length === 0) {
       return this.rejectedMessage('Escribe un mensaje o adjunta un archivo antes de enviarlo.');
@@ -519,7 +530,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         payload.conversationId,
         registeredCurrentUser,
         content,
-        attachments
+        attachments,
+        replyToMessageId
       );
       if (!message) {
         this.fileRegistry.release(attachments, currentUser.document);
@@ -538,6 +550,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       return { ok: true, data: message };
     } catch (error) {
       this.fileRegistry.release(attachments, currentUser.document);
+      if (error instanceof ChatReplyMessageNotFoundError) {
+        return this.rejectedMessage(
+          'El mensaje que intentas responder ya no está disponible en esta conversación.'
+        );
+      }
       this.logPersistenceError('guardar un mensaje', error);
       return this.rejectedMessage('No fue posible guardar el mensaje. Intenta nuevamente.');
     }
@@ -693,9 +710,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
           );
           const summary = conversations.find(conversation => conversation.id === conversationId);
           await Promise.all([
-            summary
-              ? this.emitSummaryToUser(participant.document, summary)
-              : Promise.resolve(),
+            summary ? this.emitSummaryToUser(participant.document, summary) : Promise.resolve(),
             this.emitNotificationState(participant),
           ]);
         })

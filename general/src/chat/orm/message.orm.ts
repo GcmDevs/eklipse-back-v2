@@ -1,4 +1,12 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Index,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { ChatMessageAttachmentOrm } from './message-attachment.orm';
 import { ChatUserOrm } from './user.orm';
 
@@ -24,11 +32,19 @@ export class ChatMessageOrm {
   @JoinColumn({ name: 'CHATUSUREG2' })
   recipientUser: ChatUserOrm;
 
-  @Column({ name: 'CONTENIDO', length: 1000 })
+  @Column({ name: 'CONTENIDO' })
   content: string;
 
   @OneToMany(() => ChatMessageAttachmentOrm, attachment => attachment.message)
   attachments: ChatMessageAttachmentOrm[];
+
+  @Column({ name: 'CHATMENRESPUESTA', nullable: true })
+  @Index('IX_CHATMENSAJE_CHATMENRESPUESTA')
+  replyToMessageId?: number | null;
+
+  @ManyToOne(() => ChatMessageOrm, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn({ name: 'CHATMENRESPUESTA' })
+  replyToMessage?: ChatMessageOrm | null;
 
   @Column({ name: 'FECCRE' })
   createdAt: Date;

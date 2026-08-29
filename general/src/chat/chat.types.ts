@@ -11,11 +11,19 @@ export interface ChatContact extends ChatUser {
   online: boolean;
 }
 
+export interface ChatMessageReply {
+  id: number;
+  content: string;
+  attachments: string[];
+  sender: ChatUser;
+}
+
 export interface ChatMessage {
   id: number;
   conversationId: number;
   content: string;
   attachments: string[];
+  replyTo: ChatMessageReply | null;
   createdAt: string;
   sender: ChatUser;
 }
@@ -89,6 +97,7 @@ export interface LoadPreviousChatMessagesPayload extends OpenConversationPayload
 export interface SendChatMessagePayload extends OpenConversationPayload {
   content?: unknown;
   attachments?: unknown;
+  replyToMessageId?: unknown;
 }
 
 export interface ChatPinPayload {
