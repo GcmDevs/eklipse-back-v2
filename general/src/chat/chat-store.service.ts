@@ -17,6 +17,7 @@ import type {
 } from './chat.types';
 import { normalizeDocument } from './chat.types';
 import { FILE_PATHS } from '@gen/file-server.locations';
+import { cryptoChatServices } from '@common/application/services';
 
 interface ChatUnreadState {
   lastReadMessageId: number | null;
@@ -136,7 +137,7 @@ export class ChatStoreService {
           conversationId,
           senderUserId: currentUser.id,
           recipientUserId: recipient.id,
-          content: content ? content : null,
+          content: content ? cryptoChatServices.encrypt(content) : null,
           replyToMessageId: replyToMessage?.id ?? null,
           createdAt,
         })
@@ -311,7 +312,7 @@ export class ChatStoreService {
         ? {
             id: conversation.lastMessageId,
             conversationId: conversation.id,
-            content: conversation.lastMessage.content,
+            content: cryptoChatServices.decrypt(conversation.lastMessage.content),
             attachments: this.toAttachmentPaths(conversation.lastMessage.attachments),
             replyTo: this.toChatMessageReply(conversation.lastMessage.replyToMessage),
             createdAt: this.toIsoString(conversation.lastMessage.createdAt),
@@ -477,7 +478,7 @@ export class ChatStoreService {
     return {
       id: message.id,
       conversationId: message.conversationId,
-      content: String(message.content ?? ''),
+      content: String(message.content ? cryptoChatServices.decrypt(message.content) : ''),
       attachments: this.toAttachmentPaths(message.attachments, document),
       replyTo: this.toChatMessageReply(message.replyToMessage),
       createdAt: this.toIsoString(message.createdAt),

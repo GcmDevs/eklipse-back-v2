@@ -32,8 +32,8 @@ export class ChatMessageOrm {
   @JoinColumn({ name: 'CHATUSUREG2' })
   recipientUser: ChatUserOrm;
 
-  @Column({ name: 'CONTENIDO' })
-  content: string;
+  @Column({ name: 'CONTENIDO', type: 'varbinary', length: 'max' })
+  content: Buffer;
 
   @OneToMany(() => ChatMessageAttachmentOrm, attachment => attachment.message)
   attachments: ChatMessageAttachmentOrm[];

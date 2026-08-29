@@ -60,7 +60,7 @@ const CHAT_SECURITY_LOCK_DELAY_MS = 10 * 60 * 1000;
   cors: { origin: VALID_HOSTS },
 })
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-  private static readonly MAX_MESSAGE_LENGTH = 1000;
+  private static readonly MAX_MESSAGE_LENGTH = 10000;
   private readonly logger = new Logger(ChatGateway.name);
 
   @WebSocketServer()
