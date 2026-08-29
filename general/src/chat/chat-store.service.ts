@@ -15,7 +15,7 @@ import type {
   ChatUser,
   RegisteredChatUser,
 } from './chat.types';
-import { normalizeDocument } from './chat.types';
+import { CHAT_MESSAGE_MUTATION_WINDOW_MS, normalizeDocument } from './chat.types';
 import { FILE_PATHS } from '@gen/file-server.locations';
 import { cryptoChatServices } from '@common/application/services';
 
@@ -30,6 +30,12 @@ export class ChatReplyMessageNotFoundError extends Error {
     this.name = 'ChatReplyMessageNotFoundError';
   }
 }
+
+export type ChatMessageMutationError = 'not-found' | 'forbidden' | 'expired' | 'deleted' | 'empty';
+
+export type ChatMessageMutationResult =
+  | { ok: true; message: ChatMessage }
+  | { ok: false; error: ChatMessageMutationError };
 
 @Injectable()
 export class ChatStoreService {
@@ -129,7 +135,9 @@ export class ChatStoreService {
             relations: ['senderUser', 'attachments'],
           })
         : null;
-      if (replyToMessageId && !replyToMessage) throw new ChatReplyMessageNotFoundError();
+      if (replyToMessageId && (!replyToMessage || replyToMessage.deletedAt)) {
+        throw new ChatReplyMessageNotFoundError();
+      }
 
       const createdAt = new Date();
       const message = await messageRepository.save(
@@ -165,6 +173,67 @@ export class ChatStoreService {
         currentUser,
         attachments.length ? attachments[0].split('/').at(-2) : null
       );
+    });
+  }
+
+  async editMessage(
+    messageId: number,
+    currentUser: RegisteredChatUser,
+    content: string
+  ): Promise<ChatMessageMutationResult> {
+    return this.sharedConn.transaction('SERIALIZABLE', async manager => {
+      const repository = manager.getRepository(ChatMessageOrm);
+      const message = await repository.findOne({
+        where: { id: messageId },
+        relations: [
+          'senderUser',
+          'attachments',
+          'replyToMessage',
+          'replyToMessage.senderUser',
+          'replyToMessage.attachments',
+        ],
+      });
+      const error = this.messageMutationErrorFor(message, currentUser.id);
+      if (error) return { ok: false, error };
+      if (!content && !message.attachments.length) return { ok: false, error: 'empty' };
+
+      message.content = content ? cryptoChatServices.encrypt(content) : null;
+      message.editedAt = new Date();
+      await repository.save(message);
+
+      return {
+        ok: true,
+        message: this.toChatMessage(message, currentUser, currentUser.document),
+      };
+    });
+  }
+
+  async deleteMessage(
+    messageId: number,
+    currentUser: RegisteredChatUser
+  ): Promise<ChatMessageMutationResult> {
+    return this.sharedConn.transaction('SERIALIZABLE', async manager => {
+      const repository = manager.getRepository(ChatMessageOrm);
+      const message = await repository.findOne({
+        where: { id: messageId },
+        relations: [
+          'senderUser',
+          'attachments',
+          'replyToMessage',
+          'replyToMessage.senderUser',
+          'replyToMessage.attachments',
+        ],
+      });
+      const error = this.messageMutationErrorFor(message, currentUser.id);
+      if (error) return { ok: false, error };
+
+      message.deletedAt = new Date();
+      await repository.save(message);
+
+      return {
+        ok: true,
+        message: this.toChatMessage(message, currentUser, currentUser.document),
+      };
     });
   }
 
@@ -215,6 +284,7 @@ export class ChatStoreService {
       .select('COUNT(message.OID)', 'unreadCount')
       .where('message.CHATUSUREG2 = :userId', { userId })
       .andWhere('message.OID > COALESCE(reading.CHATMENSAJE, 0)')
+      .andWhere('message.FECELI IS NULL')
       .getRawOne<{ unreadCount: number | string }>();
 
     const unreadCount = Number(row?.unreadCount ?? 0);
@@ -312,9 +382,17 @@ export class ChatStoreService {
         ? {
             id: conversation.lastMessageId,
             conversationId: conversation.id,
-            content: cryptoChatServices.decrypt(conversation.lastMessage.content),
-            attachments: this.toAttachmentPaths(conversation.lastMessage.attachments),
-            replyTo: this.toChatMessageReply(conversation.lastMessage.replyToMessage),
+            content: conversation.lastMessage.deletedAt
+              ? ''
+              : this.decryptMessageContent(conversation.lastMessage),
+            attachments: conversation.lastMessage.deletedAt
+              ? []
+              : this.toAttachmentPaths(conversation.lastMessage.attachments),
+            replyTo: conversation.lastMessage.deletedAt
+              ? null
+              : this.toChatMessageReply(conversation.lastMessage.replyToMessage),
+            editedAt: this.toNullableIsoString(conversation.lastMessage.editedAt),
+            deletedAt: this.toNullableIsoString(conversation.lastMessage.deletedAt),
             createdAt: this.toIsoString(conversation.lastMessage.createdAt),
             sender: this.toChatUser(conversation.lastSenderUser),
           }
@@ -380,6 +458,7 @@ export class ChatStoreService {
         'unreadMessage',
         `unreadMessage.CHATCONVERSACION = conversation.OID
           AND unreadMessage.CHATUSUREG2 = :userId
+          AND unreadMessage.FECELI IS NULL
           AND unreadMessage.OID > COALESCE(reading.CHATMENSAJE, 0)`,
         { userId }
       )
@@ -431,6 +510,22 @@ export class ChatStoreService {
     return conversation.firstUserId === userId || conversation.secondUserId === userId;
   }
 
+  private messageMutationErrorFor(
+    message: ChatMessageOrm | null,
+    currentUserId: number
+  ): ChatMessageMutationError | undefined {
+    if (!message) return 'not-found';
+    if (message.senderUserId !== currentUserId) return 'forbidden';
+    if (message.deletedAt) return 'deleted';
+
+    const createdAt = new Date(message.createdAt).getTime();
+    if (!Number.isFinite(createdAt) || Date.now() - createdAt > CHAT_MESSAGE_MUTATION_WINDOW_MS) {
+      return 'expired';
+    }
+
+    return undefined;
+  }
+
   private findConversationById(id: number): Promise<ChatConversationOrm | null> {
     return this.sharedConn.getRepository(ChatConversationOrm).findOne({
       where: { id },
@@ -478,9 +573,11 @@ export class ChatStoreService {
     return {
       id: message.id,
       conversationId: message.conversationId,
-      content: String(message.content ? cryptoChatServices.decrypt(message.content) : ''),
-      attachments: this.toAttachmentPaths(message.attachments, document),
-      replyTo: this.toChatMessageReply(message.replyToMessage),
+      content: message.deletedAt ? '' : this.decryptMessageContent(message),
+      attachments: message.deletedAt ? [] : this.toAttachmentPaths(message.attachments, document),
+      replyTo: message.deletedAt ? null : this.toChatMessageReply(message.replyToMessage),
+      editedAt: this.toNullableIsoString(message.editedAt),
+      deletedAt: this.toNullableIsoString(message.deletedAt),
       createdAt: this.toIsoString(message.createdAt),
       sender: publicSender,
     };
@@ -491,10 +588,17 @@ export class ChatStoreService {
 
     return {
       id: message.id,
-      content: String(message.content ?? ''),
-      attachments: this.toAttachmentPaths(message.attachments, message.senderUser.document),
+      content: message.deletedAt ? '' : this.decryptMessageContent(message),
+      attachments: message.deletedAt
+        ? []
+        : this.toAttachmentPaths(message.attachments, message.senderUser.document),
+      deletedAt: this.toNullableIsoString(message.deletedAt),
       sender: this.toChatUser(message.senderUser),
     };
+  }
+
+  private decryptMessageContent(message: ChatMessageOrm): string {
+    return cryptoChatServices.decrypt(message.content);
   }
 
   private toAttachmentPaths(attachments?: ChatMessageAttachmentOrm[], document?: string): string[] {
@@ -508,5 +612,9 @@ export class ChatStoreService {
 
   private toIsoString(value: Date): string {
     return new Date(value).toISOString();
+  }
+
+  private toNullableIsoString(value?: Date | null): string | null {
+    return value ? this.toIsoString(value) : null;
   }
 }

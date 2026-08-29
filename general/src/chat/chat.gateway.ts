@@ -17,7 +17,11 @@ import { processEnv } from '@env';
 import { VALID_HOSTS } from '@gen/app.environments';
 import { ChatDirectoryService } from './chat-directory.service';
 import { CHAT_EVENTS } from './chat.events';
-import { ChatReplyMessageNotFoundError, ChatStoreService } from './chat-store.service';
+import {
+  ChatReplyMessageNotFoundError,
+  ChatStoreService,
+  type ChatMessageMutationError,
+} from './chat-store.service';
 import { ChatSecurityService } from './chat-security.service';
 import type {
   ChatActionAck,
@@ -25,6 +29,8 @@ import type {
   ChatContact,
   ChatConversationDetails,
   ChatConversationSummary,
+  DeleteChatMessagePayload,
+  EditChatMessagePayload,
   ChatMessage,
   ChatMessagePage,
   ChatNotificationState,
@@ -560,6 +566,70 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
   }
 
+  @SubscribeMessage(CHAT_EVENTS.editMessage)
+  async editMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: EditChatMessagePayload
+  ): Promise<ChatActionAck<ChatMessage>> {
+    const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
+    if (!currentUser) return this.unauthorized();
+    if (this.isChatLocked(client)) return this.chatLocked();
+    this.touchSecurityActivity(client);
+
+    const messageId = Number(payload?.messageId);
+    const content = typeof payload?.content === 'string' ? payload.content.trim() : '';
+    if (!Number.isSafeInteger(messageId) || messageId <= 0) {
+      return this.rejectedMutation('No fue posible identificar el mensaje.');
+    }
+    if (content.length > ChatGateway.MAX_MESSAGE_LENGTH) {
+      return this.rejectedMutation(
+        `El mensaje no puede superar ${ChatGateway.MAX_MESSAGE_LENGTH} caracteres.`
+      );
+    }
+
+    try {
+      const result = await this.store.editMessage(messageId, currentUser, content);
+      if (result.ok === false) {
+        return this.rejectedMutation(this.messageMutationError(result.error));
+      }
+
+      await this.emitMessageMutation(result.message);
+      return { ok: true, data: result.message };
+    } catch (error) {
+      this.logPersistenceError('editar un mensaje', error);
+      return this.rejectedMutation('No fue posible editar el mensaje. Intenta nuevamente.');
+    }
+  }
+
+  @SubscribeMessage(CHAT_EVENTS.deleteMessage)
+  async deleteMessage(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() payload: DeleteChatMessagePayload
+  ): Promise<ChatActionAck<ChatMessage>> {
+    const currentUser = client.data.chatUser as RegisteredChatUser | undefined;
+    if (!currentUser) return this.unauthorized();
+    if (this.isChatLocked(client)) return this.chatLocked();
+    this.touchSecurityActivity(client);
+
+    const messageId = Number(payload?.messageId);
+    if (!Number.isSafeInteger(messageId) || messageId <= 0) {
+      return this.rejectedMutation('No fue posible identificar el mensaje.');
+    }
+
+    try {
+      const result = await this.store.deleteMessage(messageId, currentUser);
+      if (result.ok === false) {
+        return this.rejectedMutation(this.messageMutationError(result.error));
+      }
+
+      await this.emitMessageMutation(result.message);
+      return { ok: true, data: result.message };
+    } catch (error) {
+      this.logPersistenceError('eliminar un mensaje', error);
+      return this.rejectedMutation('No fue posible eliminar el mensaje. Intenta nuevamente.');
+    }
+  }
+
   private authenticate(client: Socket): ChatUser {
     const tokenFromAuth = client.handshake.auth?.token;
     const authorization = client.handshake.headers.authorization;
@@ -720,6 +790,20 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     }
   }
 
+  private async emitMessageMutation(message: ChatMessage): Promise<void> {
+    try {
+      const participants = await this.store.participants(message.conversationId);
+      await Promise.all([
+        this.emitConversationUpdate(message.conversationId),
+        ...participants.map(participant =>
+          this.emitToUnlockedUser(participant.document, CHAT_EVENTS.messageUpdated, message)
+        ),
+      ]);
+    } catch {
+      // El cambio ya quedó persistido; el estado se recuperará al reconectar.
+    }
+  }
+
   private emitSummaryToUser(document: string, summary: ChatConversationSummary): Promise<void> {
     return this.emitToUnlockedUser(document, CHAT_EVENTS.conversationUpdated, summary);
   }
@@ -792,6 +876,23 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
   private rejectedMessage(error: string): ChatActionAck<ChatMessage> {
     return { ok: false, error, cleanupAttachments: true };
+  }
+
+  private rejectedMutation(error: string): ChatActionAck<ChatMessage> {
+    return { ok: false, error };
+  }
+
+  private messageMutationError(error: ChatMessageMutationError): string {
+    switch (error) {
+      case 'expired':
+        return 'Solo puedes editar o eliminar un mensaje durante los 10 minutos posteriores a su envío.';
+      case 'deleted':
+        return 'El mensaje ya fue eliminado.';
+      case 'empty':
+        return 'El mensaje debe conservar texto o al menos un archivo adjunto.';
+      default:
+        return 'No puedes modificar este mensaje.';
+    }
   }
 
   private logPersistenceError(action: string, error: unknown): void {

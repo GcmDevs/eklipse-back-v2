@@ -15,6 +15,7 @@ export interface ChatMessageReply {
   id: number;
   content: string;
   attachments: string[];
+  deletedAt: string | null;
   sender: ChatUser;
 }
 
@@ -24,6 +25,8 @@ export interface ChatMessage {
   content: string;
   attachments: string[];
   replyTo: ChatMessageReply | null;
+  editedAt: string | null;
+  deletedAt: string | null;
   createdAt: string;
   sender: ChatUser;
 }
@@ -100,6 +103,15 @@ export interface SendChatMessagePayload extends OpenConversationPayload {
   replyToMessageId?: unknown;
 }
 
+export interface EditChatMessagePayload {
+  messageId?: unknown;
+  content?: unknown;
+}
+
+export interface DeleteChatMessagePayload {
+  messageId?: unknown;
+}
+
 export interface ChatPinPayload {
   pin?: unknown;
 }
@@ -115,3 +127,5 @@ export interface ChatActionAck<T = undefined> {
 
 export const normalizeDocument = (value: unknown): string =>
   typeof value === 'string' ? value.trim().toUpperCase() : '';
+
+export const CHAT_MESSAGE_MUTATION_WINDOW_MS = 10 * 60 * 1000;

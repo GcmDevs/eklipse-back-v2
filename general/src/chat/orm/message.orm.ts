@@ -46,6 +46,12 @@ export class ChatMessageOrm {
   @JoinColumn({ name: 'CHATMENRESPUESTA' })
   replyToMessage?: ChatMessageOrm | null;
 
+  @Column({ name: 'FECMOD', nullable: true })
+  editedAt?: Date | null;
+
+  @Column({ name: 'FECELI', nullable: true })
+  deletedAt?: Date | null;
+
   @Column({ name: 'FECCRE' })
   createdAt: Date;
 }

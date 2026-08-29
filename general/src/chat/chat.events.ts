@@ -2,6 +2,7 @@ export const CHAT_EVENTS = {
   bootstrap: 'chat:bootstrap',
   conversationUpdated: 'chat:conversation:updated',
   message: 'chat:message:new',
+  messageUpdated: 'chat:message:updated',
   presence: 'chat:contact:presence',
   onlineUsersCount: 'chat:users:online-count',
   notificationState: 'chat:notifications:state',
@@ -17,4 +18,6 @@ export const CHAT_EVENTS = {
   markConversationRead: 'chat:conversation:read',
   loadPreviousMessages: 'chat:messages:previous',
   sendMessage: 'chat:message:send',
+  editMessage: 'chat:message:edit',
+  deleteMessage: 'chat:message:delete',
 } as const;

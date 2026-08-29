@@ -26,6 +26,7 @@ const encrypt = (text: string): Buffer => {
 };
 
 const decrypt = (data: Buffer): string => {
+  if ((data as any) === null) return '';
   const iv = data.subarray(0, 12);
   const authTag = data.subarray(12, 28);
   const encrypted = data.subarray(28);
