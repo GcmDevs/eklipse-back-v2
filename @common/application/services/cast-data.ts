@@ -18,7 +18,17 @@ function stringArrayForSqlQueries(value: string | string[]): string {
   return data;
 }
 
+export function capitalizeFirstLetter(str: string): string {
+  if (str) {
+    str = str.toLowerCase();
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  } else {
+    return str;
+  }
+}
+
 export const castDataServices = {
   enumToString,
   stringArrayForSqlQueries,
+  capitalizeFirstLetter,
 };

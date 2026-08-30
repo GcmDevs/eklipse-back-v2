@@ -24,11 +24,17 @@
       "@inn/authorities": ["./authorities"],
       "@inn/types/*": ["./@types/*"],
       "@inn/orm/*": ["./@orm/*"],
-      "@inn/*": ["./src/*"]
+      "@inn/*": ["./src/*"],
+      "@inn/lgc/ctc/*": ["./legacy/central-compras/*"],
+      "@inn/lgc/ctc/types/*": ["./legacy/central-compras/@types/*"],
+      "@inn/lgc/ctc/types": ["./legacy/central-compras/@types"],
+      "@inn/lgc/ctc/orm/*": ["./legacy/central-compras/@orm/*"],
+      "@inn/lgc/ctc/orm": ["./legacy/central-compras/@orm"]
     }
   },
   "include": [
     "src/**/*",
+    "legacy/**/*",
     "@common/**/*",
     "@types/**/*",
     "@orm/**/*",

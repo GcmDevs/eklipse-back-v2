@@ -3,8 +3,10 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { SumPacModule } from './documentos/suministros-paciente/module';
 import { MAOSModule } from './maos/module';
 import { CentralMezclasModule } from './central-mezclas/module';
+import { LgcCtcModule } from '../legacy/central-compras/module';
 
 const config = [
+  { name: 'Central de compras (lgc)', url: 'docs/lgctc', version: `1.0`, modules: [LgcCtcModule] },
   { name: 'Central de mezclas', url: 'docs/ctmz', version: `1.0`, modules: [CentralMezclasModule] },
   { name: 'Materiales osteosintesis', url: 'docs/maos', version: `1.0`, modules: [MAOSModule] },
   { name: 'Suministros paciente', url: 'docs/sumpac', version: `1.0`, modules: [SumPacModule] },
