@@ -9,11 +9,13 @@ const PERIFERICA = new ViaType(2, 'PERIFERICA');
 
 export function viaTypeFactory(code: ViaCode): ViaType {
   switch (code) {
-    case 1: return CENTRAL;
-    case 2: return PERIFERICA;
+    case 1:
+      return CENTRAL;
+    case 2:
+      return PERIFERICA;
   }
 }
 
-export const VIAS = {CENTRAL, PERIFERICA};
+export const VIAS = { CENTRAL, PERIFERICA };
 
 export const VIAS_VALUES = Object.values(VIAS);

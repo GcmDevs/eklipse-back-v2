@@ -13,9 +13,12 @@ export const tipoProductoTypeFactory = (
   throwErr = true
 ): TipoProductoType => {
   switch (code) {
-    case 0: return NINGUNO;
-    case 1: return SUMINISTRO;
-    case 2: return MEDICAMENTO;
+    case 0:
+      return NINGUNO;
+    case 1:
+      return SUMINISTRO;
+    case 2:
+      return MEDICAMENTO;
     default: {
       if ([null, undefined].indexOf(code) >= 0) return null;
       else if (throwErr) throw new Error('No existe tipo de producto con este codigo');
