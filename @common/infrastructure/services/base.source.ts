@@ -7,6 +7,25 @@ import { GCM_CONTEXTS, GcmContextType } from '../../domain/types';
 import { _PrivSecUserOrm } from '../orm/user.orm';
 import { fetchAuthsByUser } from './authorities';
 import { switchConn } from './connections';
+import { RolDependenciaCode } from '../orm/dependence.orm';
+import { _PrivSecUserDependenceOrm } from '../orm/user-dependence.orm';
+
+export interface UserDependenceI {
+  user: {
+    id: number;
+    document: string;
+    fullName: string;
+  };
+  dependence: {
+    id: number;
+    code: string;
+    name: string;
+  };
+  role: {
+    code: RolDependenciaCode;
+    name: string;
+  };
+}
 
 @Injectable()
 export class BaseSource {
@@ -27,7 +46,7 @@ export class BaseSource {
       const id = tkDecoded.user.id;
       const user = tkDecoded.user;
       const context = tkDecoded.context;
-      const isDim = tkDecoded.isDim;
+      const isDim = tkDecoded.isDim === undefined ? true : tkDecoded.isDim;
       const tipoUsuExt = tkDecoded.tipoUsuExt;
 
       return { id, user, context, isDim, tipoUsuExt };
@@ -110,6 +129,44 @@ export class BaseSource {
       const user = await userRp.findOne({ where: { document: userDocument } });
       delete user.password;
       return user;
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  }
+
+  protected async fetchUserDependences(
+    userId: number,
+    ctx: GcmContextType
+  ): Promise<UserDependenceI[]> {
+    try {
+      const conn = switchConn(ctx);
+      const userDependenceRp = conn.getRepository(_PrivSecUserDependenceOrm);
+      const dependencesByUser = await userDependenceRp
+        .createQueryBuilder('usuDep')
+        .leftJoinAndSelect('usuDep.user', 'user')
+        .leftJoinAndSelect('usuDep.dependence', 'dependence')
+        .where('usuDep.user.id = :id', { id: userId })
+        .getMany();
+
+      return dependencesByUser.map(dbu => {
+        dbu.setTypes();
+        return {
+          user: {
+            id: dbu.user.id,
+            document: dbu.user.document,
+            fullName: dbu.user.fullName,
+          },
+          dependence: {
+            id: dbu.dependence.id,
+            code: dbu.dependence.code,
+            name: dbu.dependence.name,
+          },
+          role: {
+            code: dbu.role.getCode(),
+            name: dbu.role.getForHumans(),
+          },
+        };
+      });
     } catch (error: any) {
       throw new Error(error.message);
     }
