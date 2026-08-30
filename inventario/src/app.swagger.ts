@@ -3,10 +3,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { SumPacModule } from './documentos/suministros-paciente/module';
 import { MAOSModule } from './maos/module';
 import { CentralMezclasModule } from './central-mezclas/module';
-import { CentralComprasModule } from './central-compras/module';
 
 const config = [
-  { name: 'Central de compras', url: 'docs/ctc', version: `1.0`, modules: [CentralComprasModule] },
   { name: 'Central de mezclas', url: 'docs/ctmz', version: `1.0`, modules: [CentralMezclasModule] },
   { name: 'Materiales osteosintesis', url: 'docs/maos', version: `1.0`, modules: [MAOSModule] },
   { name: 'Suministros paciente', url: 'docs/sumpac', version: `1.0`, modules: [SumPacModule] },
