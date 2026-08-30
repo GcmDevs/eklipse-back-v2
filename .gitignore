@@ -11,6 +11,7 @@ skills-lock.json
 /private
 /public
 /dist
+/.cursor
 /general/dist
 /hospitalizacion/dist
 /historia-clinica/dist
