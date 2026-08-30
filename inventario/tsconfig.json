@@ -36,7 +36,13 @@
       "@inn/lgc/afn/types/*": ["./legacy/activos-fijos/@types/*"],
       "@inn/lgc/afn/types": ["./legacy/activos-fijos/@types"],
       "@inn/lgc/afn/orm/*": ["./legacy/activos-fijos/@orm/*"],
-      "@inn/lgc/afn/orm": ["./legacy/activos-fijos/@orm"]
+      "@inn/lgc/afn/orm": ["./legacy/activos-fijos/@orm"],
+      // Recepciones tecnicas (lgc)
+      "@inn/lgc/rct/*": ["./legacy/recepciones-tecnicas/*"],
+      "@inn/lgc/rct/types/*": ["./legacy/recepciones-tecnicas/@types/*"],
+      "@inn/lgc/rct/types": ["./legacy/recepciones-tecnicas/@types"],
+      "@inn/lgc/rct/orm/*": ["./legacy/recepciones-tecnicas/@orm/*"],
+      "@inn/lgc/rct/orm": ["./legacy/recepciones-tecnicas/@orm"]
     }
   },
   "include": [

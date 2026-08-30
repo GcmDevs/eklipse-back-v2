@@ -1,14 +1,16 @@
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { SumPacModule } from './documentos/suministros-paciente/module';
-import { MAOSModule } from './maos/module';
-import { CentralMezclasModule } from './central-mezclas/module';
 import { LgcCtcModule } from '../legacy/central-compras/module';
 import { LgcAfnModule } from '@inn/lgc/afn/activos-fijos.module';
+import { LgcRctModule } from '@inn/lgc/rct/recepcion-tecnica.module';
+import { CentralMezclasModule } from './central-mezclas/module';
+import { MAOSModule } from './maos/module';
+import { SumPacModule } from './documentos/suministros-paciente/module';
 
 const config = [
   { name: 'Central de compras (lgc)', url: 'docs/lgctc', version: `1.0`, modules: [LgcCtcModule] },
   { name: 'Activos fijos (lgc)', url: 'docs/afnlgc', version: `1.0`, modules: [LgcAfnModule] },
+  { name: 'Rec. tecnicas (lgc)', url: 'docs/rrecteclgc', version: `1.0`, modules: [LgcRctModule] },
   { name: 'Central de mezclas', url: 'docs/ctmz', version: `1.0`, modules: [CentralMezclasModule] },
   { name: 'Materiales osteosintesis', url: 'docs/maos', version: `1.0`, modules: [MAOSModule] },
   { name: 'Suministros paciente', url: 'docs/sumpac', version: `1.0`, modules: [SumPacModule] },
