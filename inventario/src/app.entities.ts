@@ -1,4 +1,6 @@
+import { JustForVerifyOrm } from '@common/infrastructure/services';
 import { LGC_CTC_ENTITIES } from '@inn/lgc/ctc/@orm';
+import { LGC_AFN_ENTITIES } from '@inn/lgc/afn/@orm';
 import { ORM_ADN_ENTITIES } from '@inn/orm/adn';
 import { ORM_GEN_ENTITIES } from '@inn/orm/gen';
 import { ORM_HPN_ENTITIES } from '@inn/orm/hpn';
@@ -6,8 +8,9 @@ import { ORM_INN_ENTITIES } from '@inn/orm/inn';
 import { ORM_SHARED_ENTITIES } from '@inn/orm/shared-bd';
 
 export const ENTITIES = [
-  // --- AVOID NOWRAP --- //
+  JustForVerifyOrm,
   ...LGC_CTC_ENTITIES,
+  ...LGC_AFN_ENTITIES,
   ...ORM_ADN_ENTITIES,
   ...ORM_GEN_ENTITIES,
   ...ORM_HPN_ENTITIES,

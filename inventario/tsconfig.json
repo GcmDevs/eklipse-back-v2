@@ -25,11 +25,18 @@
       "@inn/types/*": ["./@types/*"],
       "@inn/orm/*": ["./@orm/*"],
       "@inn/*": ["./src/*"],
+      // Central de compras (lgc)
       "@inn/lgc/ctc/*": ["./legacy/central-compras/*"],
       "@inn/lgc/ctc/types/*": ["./legacy/central-compras/@types/*"],
       "@inn/lgc/ctc/types": ["./legacy/central-compras/@types"],
       "@inn/lgc/ctc/orm/*": ["./legacy/central-compras/@orm/*"],
-      "@inn/lgc/ctc/orm": ["./legacy/central-compras/@orm"]
+      "@inn/lgc/ctc/orm": ["./legacy/central-compras/@orm"],
+      // Activos fijos (lgc)
+      "@inn/lgc/afn/*": ["./legacy/activos-fijos/*"],
+      "@inn/lgc/afn/types/*": ["./legacy/activos-fijos/@types/*"],
+      "@inn/lgc/afn/types": ["./legacy/activos-fijos/@types"],
+      "@inn/lgc/afn/orm/*": ["./legacy/activos-fijos/@orm/*"],
+      "@inn/lgc/afn/orm": ["./legacy/activos-fijos/@orm"]
     }
   },
   "include": [
