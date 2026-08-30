@@ -3,7 +3,6 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { SumPacModule } from './documentos/suministros-paciente/module';
 import { MAOSModule } from './maos/module';
 import { CentralMezclasModule } from './central-mezclas/module';
-import { PollaMundialistaModule } from './polla-mundialista/module';
 import { CentralComprasModule } from './central-compras/module';
 
 const config = [
@@ -11,12 +10,6 @@ const config = [
   { name: 'Central de mezclas', url: 'docs/ctmz', version: `1.0`, modules: [CentralMezclasModule] },
   { name: 'Materiales osteosintesis', url: 'docs/maos', version: `1.0`, modules: [MAOSModule] },
   { name: 'Suministros paciente', url: 'docs/sumpac', version: `1.0`, modules: [SumPacModule] },
-  {
-    name: 'Polla mundialista',
-    url: 'docs/polla-mundialista',
-    version: `1.0`,
-    modules: [PollaMundialistaModule],
-  },
 ];
 
 export const initSwagger = (app: INestApplication) => {
