@@ -12,8 +12,10 @@ export function claseProductoTypeFactory(
   throwErr = true
 ): ClaseProductoType {
   switch (code) {
-    case 0: return PRODUCTOS;
-    case 1: return SERVICIOS;
+    case 0:
+      return PRODUCTOS;
+    case 1:
+      return SERVICIOS;
     default: {
       if ([null, undefined].indexOf(code) >= 0) return null;
       else if (throwErr) throw new Error('No existe clase de producto con este codigo');

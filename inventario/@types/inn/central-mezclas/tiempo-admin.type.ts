@@ -9,11 +9,13 @@ const HORAS = new TiempoAdminType(2, 'HORAS');
 
 export function tiempoAdminTypeFactory(code: TiempoAdminCode): TiempoAdminType {
   switch (code) {
-    case 1: return MINUTOS;
-    case 2: return HORAS;
+    case 1:
+      return MINUTOS;
+    case 2:
+      return HORAS;
   }
 }
 
-export const TIEMPOS_ADMIN = {MINUTOS, HORAS};
+export const TIEMPOS_ADMIN = { MINUTOS, HORAS };
 
 export const TIEMPOS_ADMIN_VALUES = Object.values(TIEMPOS_ADMIN);

@@ -1,6 +1,4 @@
-import { Column, Entity, ManyToMany, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
-import { ItemCotizadoOrm } from '../central-compras/item-cotizado.orm';
-import { SetOrm } from '../central-compras/set.orm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { ClaseProductoCode, ClaseProductoType, TipoProductoCode } from '@inn/types/inn/productos';
 
 @Entity('INNPRODUC')
@@ -34,12 +32,6 @@ export class ProductoOrm {
 
   @Column({ name: 'IPRCOSTPE', type: 'decimal', precision: 4 })
   precioSugerido: number;
-
-  @OneToMany(() => ItemCotizadoOrm, detalle => detalle.producto)
-  ofertas: ItemCotizadoOrm[];
-
-  @ManyToMany(() => SetOrm, set => set.productos)
-  sets: SetOrm[];
 
   clase: ClaseProductoType;
   descripcion: string;

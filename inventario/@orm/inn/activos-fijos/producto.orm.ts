@@ -1,5 +1,4 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { TIPOS } from '@inn/types/inn/central-compras/solicitudes';
 import { GrupoOrm } from './grupo.orm';
 
 @Entity('AFNPRODUC')
@@ -22,6 +21,4 @@ export class ProductoOrm {
 
   @Column({ name: 'APRCOSPRO', type: 'decimal' })
   precioSugerido: number;
-
-  clase = TIPOS.ACTIVO_FIJO;
 }

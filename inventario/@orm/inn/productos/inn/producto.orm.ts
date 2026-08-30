@@ -20,7 +20,6 @@ import {
   tipoProductoTypeFactory,
 } from '@inn/types/inn/productos';
 import { ExistenciaOrm } from './existencia.orm';
-import { ItemCotizadoOrm, SetOrm } from '../../central-compras';
 
 export interface ExistenciaActualI {
   cantidad: number;
@@ -95,9 +94,6 @@ export class ProductoOrm {
   @OneToMany(() => ExistenciaOrm, existencia => existencia.producto)
   existencias: ExistenciaOrm[];
 
-  @OneToMany(() => ItemCotizadoOrm, detalle => detalle.producto)
-  ofertas: ItemCotizadoOrm[];
-
   clase: ClaseProductoType;
   tipo: TipoProductoType;
   // riesgo: RiesgoProductoType;
@@ -116,9 +112,6 @@ export class ProductoOrm {
       // delete this.riesgoSanitarioCode;
     }
   }
-
-  @ManyToMany(() => SetOrm, set => set.productos)
-  sets: SetOrm[];
 
   existenciaActual?: ExistenciaActualI;
   codigoAgrupamiento?: string;

@@ -1,12 +1,37 @@
 import { Request } from 'express';
 import { REQUEST } from '@nestjs/core';
-import { DataSource, QueryRunner } from 'typeorm';
+import { DataSource, Entity, PrimaryGeneratedColumn, QueryRunner } from 'typeorm';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ITokenDecoded, JWTServices } from '../../application/services';
 import { GCM_CONTEXTS, GcmContextType } from '../../domain/types';
 import { _PrivSecUserOrm } from '../orm/user.orm';
 import { fetchAuthsByUser } from './authorities';
 import { switchConn } from './connections';
+import { RolDependenciaCode } from '../orm/dependence.orm';
+import { _PrivSecUserDependenceOrm } from '../orm/user-dependence.orm';
+
+@Entity('UNNAMED')
+export class JustForVerifyOrm {
+  @PrimaryGeneratedColumn({ name: 'OID' })
+  id: number;
+}
+
+export interface UserDependenceI {
+  user: {
+    id: number;
+    document: string;
+    fullName: string;
+  };
+  dependence: {
+    id: number;
+    code: string;
+    name: string;
+  };
+  role: {
+    code: RolDependenciaCode;
+    name: string;
+  };
+}
 
 @Injectable()
 export class BaseSource {
@@ -113,6 +138,51 @@ export class BaseSource {
     } catch (error: any) {
       throw new Error(error.message);
     }
+  }
+
+  protected async fetchUserDependences(
+    userId: number,
+    ctx: GcmContextType
+  ): Promise<UserDependenceI[]> {
+    try {
+      const conn = switchConn(ctx);
+      const userDependenceRp = conn.getRepository(_PrivSecUserDependenceOrm);
+      const dependencesByUser = await userDependenceRp
+        .createQueryBuilder('usuDep')
+        .leftJoinAndSelect('usuDep.user', 'user')
+        .leftJoinAndSelect('usuDep.dependence', 'dependence')
+        .where('usuDep.user.id = :id', { id: userId })
+        .getMany();
+
+      return dependencesByUser.map(dbu => {
+        dbu.setTypes();
+        return {
+          user: {
+            id: dbu.user.id,
+            document: dbu.user.document,
+            fullName: dbu.user.fullName,
+          },
+          dependence: {
+            id: dbu.dependence.id,
+            code: dbu.dependence.code,
+            name: dbu.dependence.name,
+          },
+          role: {
+            code: dbu.role.getCode(),
+            name: dbu.role.getForHumans(),
+          },
+        };
+      });
+    } catch (error: any) {
+      throw new Error(error.message);
+    }
+  }
+
+  protected async verifyEntityExist(tablePath: string, id: number) {
+    const rp = this.conn.getRepository(JustForVerifyOrm);
+    rp.metadata.tablePath = tablePath;
+    const result = await rp.findOne({ where: { id } });
+    if (!result) throw new Error(`No existe ${tablePath} con este id`);
   }
 
   protected getToken(): string {

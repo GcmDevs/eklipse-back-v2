@@ -1,12 +1,10 @@
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { SecurityModule } from '@gen/security/module';
-import { FileSaverModule } from './file-server';
 
 const config = [
   // --- AVOID NOWRAP --- //
   { name: 'Security', url: 'docs/security', version: `1.0`, modules: [SecurityModule] },
-  { name: 'File Saver', url: 'docs/file-saver', version: `1.0`, modules: [FileSaverModule] },
 ];
 
 export const initSwagger = (app: INestApplication) => {
