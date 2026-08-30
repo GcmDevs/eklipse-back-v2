@@ -10,6 +10,7 @@ import {
 import { _PrivSecRoleOrm } from './role.orm';
 import { _PrivSecAuthOrm } from './authority.orm';
 import { RSAServices } from '../../application/services';
+import { _PrivSecDependenceOrm } from './dependence.orm';
 
 @Entity('GENUSUARIO')
 export class _PrivSecUserOrm {
@@ -42,6 +43,14 @@ export class _PrivSecUserOrm {
     inverseJoinColumn: { name: 'IDMODULO', referencedColumnName: 'id' },
   })
   authorities: _PrivSecAuthOrm[];
+
+  @ManyToMany(() => _PrivSecDependenceOrm, dependencia => dependencia.users)
+  @JoinTable({
+    name: 'EKGENUSUARIODEPEND',
+    joinColumn: { name: 'GENUSUARIO', referencedColumnName: 'id' },
+    inverseJoinColumn: { name: 'GENDEPEND', referencedColumnName: 'id' },
+  })
+  dependences: _PrivSecDependenceOrm[];
 
   public encryptId() {
     this.id = RSAServices.encryptId(this.id) as any;

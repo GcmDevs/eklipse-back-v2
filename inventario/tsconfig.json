@@ -24,11 +24,30 @@
       "@inn/authorities": ["./authorities"],
       "@inn/types/*": ["./@types/*"],
       "@inn/orm/*": ["./@orm/*"],
-      "@inn/*": ["./src/*"]
+      "@inn/*": ["./src/*"],
+      // Central de compras (lgc)
+      "@inn/lgc/ctc/*": ["./legacy/central-compras/*"],
+      "@inn/lgc/ctc/types/*": ["./legacy/central-compras/@types/*"],
+      "@inn/lgc/ctc/types": ["./legacy/central-compras/@types"],
+      "@inn/lgc/ctc/orm/*": ["./legacy/central-compras/@orm/*"],
+      "@inn/lgc/ctc/orm": ["./legacy/central-compras/@orm"],
+      // Activos fijos (lgc)
+      "@inn/lgc/afn/*": ["./legacy/activos-fijos/*"],
+      "@inn/lgc/afn/types/*": ["./legacy/activos-fijos/@types/*"],
+      "@inn/lgc/afn/types": ["./legacy/activos-fijos/@types"],
+      "@inn/lgc/afn/orm/*": ["./legacy/activos-fijos/@orm/*"],
+      "@inn/lgc/afn/orm": ["./legacy/activos-fijos/@orm"],
+      // Recepciones tecnicas (lgc)
+      "@inn/lgc/rct/*": ["./legacy/recepciones-tecnicas/*"],
+      "@inn/lgc/rct/types/*": ["./legacy/recepciones-tecnicas/@types/*"],
+      "@inn/lgc/rct/types": ["./legacy/recepciones-tecnicas/@types"],
+      "@inn/lgc/rct/orm/*": ["./legacy/recepciones-tecnicas/@orm/*"],
+      "@inn/lgc/rct/orm": ["./legacy/recepciones-tecnicas/@orm"]
     }
   },
   "include": [
     "src/**/*",
+    "legacy/**/*",
     "@common/**/*",
     "@types/**/*",
     "@orm/**/*",
