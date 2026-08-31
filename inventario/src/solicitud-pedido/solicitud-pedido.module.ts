@@ -4,7 +4,12 @@ import {
   ActualizarDespachoSolicitudPedidoImpl,
   BuscarProductoImpl,
   CreateSolicitudPedidoImpl,
+  ExistenciasDinamicaImpl,
+  FetchDetalleSolicitudPedidoImpl,
   FetchSolicitudPedidosImpl,
+  ImpactoSobrepedidoImpl,
+  ReporteSolicitudPedidoImpl,
+  RechazarSolicitudPedidoImpl,
 } from './infraestructure/services';
 
 @Module({
@@ -14,6 +19,11 @@ import {
     CreateSolicitudPedidoImpl,
     BuscarProductoImpl,
     ActualizarDespachoSolicitudPedidoImpl,
+    ExistenciasDinamicaImpl,
+    FetchDetalleSolicitudPedidoImpl,
+    RechazarSolicitudPedidoImpl,
+    ImpactoSobrepedidoImpl,
+    ReporteSolicitudPedidoImpl,
   ],
 })
 export class SolicitudPedidoModule {}

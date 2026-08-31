@@ -5,6 +5,7 @@ import { EstadoDespachoProductoCode, EstadoProductosCode } from '@inn/types/inn/
 import { SolicitudPedidoOrm } from './solicitud-pedido.orm';
 import { UsuarioOrm } from '@inn/orm/gen';
 import { SolicitudPedidoProductoDespachoOrm } from './solicitud-pedido-producto-despacho.orm';
+import { SolicitudPedidoSobrepedidoOrm } from './solicitud-pedido-sobrepedido.orm';
 
 @Entity('EKINNSOLPEPROD')
 export class SolicitudPedidoProductoOrm {
@@ -37,8 +38,42 @@ export class SolicitudPedidoProductoOrm {
   @Column({ name: 'ESTADODESPACHO', default: 1 })
   estadoDespachoCode: EstadoDespachoProductoCode;
 
+  @Column({
+    name: 'CANTIDADRECHAZADA',
+    type: 'decimal',
+    precision: 10,
+    scale: 4,
+    default: 0,
+  })
+  cantidadRechazada: number;
+
+  @Column({
+    name: 'CANTIDADSOBREPEDIDO',
+    type: 'decimal',
+    precision: 10,
+    scale: 4,
+    default: 0,
+  })
+  cantidadSobrepedido: number;
+
+  @Column({ name: 'OBSERVACIONRECHAZO', length: 1000, nullable: true })
+  observacionRechazo?: string;
+
+  @Column({ name: 'FECHARECHAZO', nullable: true })
+  fechaRechazo?: Date;
+
+  @Column({ name: 'GENUSRECHAZO', nullable: true })
+  usuarioRechazoId?: number;
+
+  @ManyToOne(() => UsuarioOrm)
+  @JoinColumn([{ name: 'GENUSRECHAZO', referencedColumnName: 'id' }])
+  usuarioRechazo?: UsuarioOrm;
+
   @OneToMany(() => SolicitudPedidoProductoDespachoOrm, despacho => despacho.solicitudPedidoProducto)
   despachos: SolicitudPedidoProductoDespachoOrm[];
+
+  @OneToMany(() => SolicitudPedidoSobrepedidoOrm, cierre => cierre.productoAnterior)
+  cierresSobrepedido: SolicitudPedidoSobrepedidoOrm[];
 
   @ManyToOne(() => UsuarioOrm)
   @JoinColumn([{ name: 'GENUSDELETE', referencedColumnName: 'id' }])

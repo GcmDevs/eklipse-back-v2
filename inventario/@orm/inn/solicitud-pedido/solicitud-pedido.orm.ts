@@ -14,6 +14,7 @@ import { UsuarioOrm } from '@inn/orm/gen';
 import { CentroOrm } from '@inn/orm/adn';
 import { EstadoSolicitudPedidoCode } from '@inn/types/inn/solicitud-pedido';
 import { SolicitudPedidoProductoOrm } from './solicitud-pedido-producto.orm';
+import { SolicitudPedidoSobrepedidoOrm } from './solicitud-pedido-sobrepedido.orm';
 
 @Entity('EKINNSOLPE')
 export class SolicitudPedidoOrm {
@@ -55,6 +56,12 @@ export class SolicitudPedidoOrm {
 
   @OneToMany(() => SolicitudPedidoProductoOrm, producto => producto.solicitudPedido)
   productos: SolicitudPedidoProductoOrm[];
+
+  @OneToMany(() => SolicitudPedidoSobrepedidoOrm, cierre => cierre.solicitudAnterior)
+  cierresSobrepedido: SolicitudPedidoSobrepedidoOrm[];
+
+  @OneToMany(() => SolicitudPedidoSobrepedidoOrm, cierre => cierre.solicitudNueva)
+  origenesSobrepedido: SolicitudPedidoSobrepedidoOrm[];
 
   context: GcmContextType;
 }

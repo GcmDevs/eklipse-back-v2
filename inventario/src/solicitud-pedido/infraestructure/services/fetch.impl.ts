@@ -1,10 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { Between, In, IsNull, Not } from 'typeorm';
+import { Inject, Injectable } from '@nestjs/common';
+import { Between, IsNull, Not } from 'typeorm';
 
 import { GCM_CONTEXTS, GcmContextType } from '@common/domain/types';
 import { BaseSource } from '@common/infrastructure/services';
 import { SolicitudPedidoOrm } from '@inn/orm/inn/solicitud-pedido';
-import { ProductoOrm as ProductoExistenciaOrm } from '@inn/orm/inn/productos/inn';
 import {
   calcularEstadoDespachoProducto,
   esSolicitudPedidoCerrada,
@@ -13,15 +12,29 @@ import {
   EstadoSolicitudPedidoCode,
   estadoSolicitudPedidoTypeFactory,
   ESTADOS_DESPACHO_PRODUCTO,
+  ESTADOS_SOLICITUD_PEDIDO,
 } from '@inn/types/inn/solicitud-pedido';
 import { INN_AUTHORITIES } from '@inn/authorities';
+import {
+  ExistenciaDinamica,
+  ExistenciasDinamicaImpl,
+  normalizarCodigoProducto,
+} from './existencias-dinamica.impl';
+import {
+  agregarReferenciasProductosEnOtrasSedes,
+  SolicitudProductoOtraSedeReferencia,
+  SolicitudProductoOtraSedeResponse,
+} from './otras-sedes';
 
 @Injectable()
 export class FetchSolicitudPedidosImpl extends BaseSource {
+  @Inject(ExistenciasDinamicaImpl)
+  private readonly _existenciasDinamica: ExistenciasDinamicaImpl;
+
   public async execute(fechaInicio: Date, fechaFin: Date) {
-    const showAllContext = await this.hasAnyAuthority([
+    const showAllContext = false; /* await this.hasAnyAuthority([
       INN_AUTHORITIES.SOLICITUD_PEDIDO.FACTURAR_PEDIDO,
-    ]);
+    ]);*/
 
     const ctxs = showAllContext
       ? [
@@ -31,8 +44,6 @@ export class FetchSolicitudPedidosImpl extends BaseSource {
           GCM_CONTEXTS.AGUACHICA,
         ]
       : [this.auth.context];
-
-    const CTX_AMMEDICAL = GCM_CONTEXTS.AMMEDICAL;
 
     const response: ReturnType<typeof transformToResponse> = [];
 
@@ -60,6 +71,16 @@ export class FetchSolicitudPedidosImpl extends BaseSource {
             'productos.producto',
             'productos.despachos',
             'productos.despachos.usuario',
+            'productos.usuarioRechazo',
+            'productos.cierresSobrepedido',
+            'productos.cierresSobrepedido.solicitudNueva',
+            'productos.cierresSobrepedido.usuario',
+            'cierresSobrepedido',
+            'cierresSobrepedido.solicitudNueva',
+            'cierresSobrepedido.usuario',
+            'origenesSobrepedido',
+            'origenesSobrepedido.solicitudAnterior',
+            'origenesSobrepedido.usuario',
           ],
           order: { fechaCreacion: 'DESC', historial: { fechaCambio: 'DESC' } },
         });
@@ -79,10 +100,8 @@ export class FetchSolicitudPedidosImpl extends BaseSource {
         )
       ),
     ].filter(Boolean);
-    const existenciasAmmedical = await this.fetchExistenciasAmmedical(
-      codigosProductos,
-      CTX_AMMEDICAL
-    );
+    const existenciasAmmedical =
+      await this._existenciasDinamica.obtenerPorCodigos(codigosProductos);
 
     agregarExistenciasAmmedical(response, existenciasAmmedical);
     agregarSolicitudesEnOtrasSedes(response);
@@ -93,77 +112,11 @@ export class FetchSolicitudPedidosImpl extends BaseSource {
         new Date(primeraSolicitud.fechaCreacion).getTime()
     );
   }
-
-  private async fetchExistenciasAmmedical(
-    codigosProductos: string[],
-    context: GcmContextType
-  ): Promise<Map<string, ExistenciaAmmedical>> {
-    const existencias = new Map<string, ExistenciaAmmedical>();
-    if (!codigosProductos.length) return existencias;
-
-    const qr = this.dynamicQR(context);
-
-    try {
-      await qr.connect();
-
-      // SQL Server permite como maximo 2.100 parametros por consulta.
-      const cantidadPorLote = 1000;
-      for (let inicio = 0; inicio < codigosProductos.length; inicio += cantidadPorLote) {
-        const codigosLote = codigosProductos.slice(inicio, inicio + cantidadPorLote);
-        const productos = await qr.manager.getRepository(ProductoExistenciaOrm).find({
-          where: { codigo: In(codigosLote) },
-          relations: { existencias: true },
-        });
-
-        productos.forEach(producto => {
-          const codigo = normalizarCodigoProducto(producto.codigo);
-          const cantidad = (producto.existencias ?? []).reduce(
-            (total, existencia) => total + Number(existencia.cantidad ?? 0),
-            0
-          );
-          const existenciaActual = existencias.get(codigo);
-
-          existencias.set(codigo, {
-            cantidad: (existenciaActual?.cantidad ?? 0) + cantidad,
-            productoEncontrado: true,
-          });
-        });
-      }
-
-      return existencias;
-    } catch (error: any) {
-      throw new Error(`Error consultando existencias en ${context.getCode()}: ${error.message}`);
-    } finally {
-      await qr.release();
-    }
-  }
 }
 
-interface ExistenciaAmmedical {
-  cantidad: number;
-  productoEncontrado: boolean;
-}
-
-export interface SolicitudProductoOtraSedeResponse {
-  solicitudPedidoId: number;
-  numeroSolicitud: string;
-  contextCode: string;
-  sede: {
-    id: number;
-    codigo: string;
-    nombre: string;
-  };
-  cantidadSolicitada: number;
-  cantidadEnviada: number;
-  cantidadPendiente: number;
-  estadoDespachoCode: number;
-}
-
-const normalizarCodigoProducto = (codigo: string): string => codigo?.trim().toUpperCase() ?? '';
-
-const agregarExistenciasAmmedical = (
+export const agregarExistenciasAmmedical = (
   solicitudes: ReturnType<typeof transformToResponse>,
-  existencias: Map<string, ExistenciaAmmedical>
+  existencias: Map<string, ExistenciaDinamica>
 ): void => {
   solicitudes.forEach(solicitud => {
     solicitud.productos.forEach(producto => {
@@ -177,10 +130,7 @@ const agregarExistenciasAmmedical = (
 export const agregarSolicitudesEnOtrasSedes = (
   solicitudes: ReturnType<typeof transformToResponse>
 ): void => {
-  const solicitudesPorProducto = new Map<
-    string,
-    Array<SolicitudProductoOtraSedeResponse & { sedeKey: string }>
-  >();
+  const referencias: SolicitudProductoOtraSedeReferencia[] = [];
 
   solicitudes.forEach(solicitud => {
     if (esSolicitudPedidoCerrada(solicitud.estadoCode)) return;
@@ -198,8 +148,8 @@ export const agregarSolicitudesEnOtrasSedes = (
       const codigo = normalizarCodigoProducto(producto.codigo);
       if (!codigo) return;
 
-      const referencias = solicitudesPorProducto.get(codigo) ?? [];
       referencias.push({
+        codigo,
         solicitudPedidoId: solicitud.id,
         numeroSolicitud: solicitud.numeroSolicitud,
         contextCode: solicitud.contextCode,
@@ -214,48 +164,118 @@ export const agregarSolicitudesEnOtrasSedes = (
         estadoDespachoCode: producto.estadoDespachoCode,
         sedeKey,
       });
-      solicitudesPorProducto.set(codigo, referencias);
     });
   });
 
-  solicitudes.forEach(solicitud => {
-    const solicitudCerrada = esSolicitudPedidoCerrada(solicitud.estadoCode);
-    const sedeKey = `${solicitud.contextCode}:${solicitud.sede.id}`;
-
-    solicitud.productos.forEach(producto => {
-      const productoCerrado =
-        solicitudCerrada ||
-        producto.cantidadPendiente <= 0 ||
-        producto.estadoDespachoCode === ESTADOS_DESPACHO_PRODUCTO.FACTURADO.getCode();
-
-      if (productoCerrado) {
-        producto.solicitadoEnOtrasSedes = false;
-        producto.cantidadPendienteOtrasSedes = 0;
-        producto.solicitudesOtrasSedes = [];
-        return;
-      }
-
-      const codigo = normalizarCodigoProducto(producto.codigo);
-      const solicitudesOtrasSedes = (solicitudesPorProducto.get(codigo) ?? [])
-        .filter(referencia => referencia.sedeKey !== sedeKey)
-        .map(({ sedeKey: _sedeKey, ...referencia }) => referencia);
-
-      producto.solicitadoEnOtrasSedes = solicitudesOtrasSedes.length > 0;
-      producto.cantidadPendienteOtrasSedes = solicitudesOtrasSedes.reduce(
-        (total, referencia) => total + referencia.cantidadPendiente,
-        0
-      );
-      producto.solicitudesOtrasSedes = solicitudesOtrasSedes;
-    });
-
-    solicitud.tieneProductosSolicitadosEnOtrasSedes = solicitud.productos.some(
-      producto => producto.solicitadoEnOtrasSedes
-    );
-  });
+  agregarReferenciasProductosEnOtrasSedes(solicitudes, referencias);
 };
 
-const transformToResponse = (data: SolicitudPedidoOrm[], context: GcmContextType) => {
+export const transformToResponse = (data: SolicitudPedidoOrm[], context: GcmContextType) => {
   const response = data.map(item => {
+    const productos = item.productos.map(detalle => {
+      const cantidadSolicitada = Number(detalle.cantidad);
+      const cantidadEnviada = Number(detalle.cantidadEnviada ?? 0);
+      const cantidadRechazada = Number(detalle.cantidadRechazada ?? 0);
+      const cantidadSobrepedido = Number(detalle.cantidadSobrepedido ?? 0);
+      const productoFacturado =
+        detalle.estadoDespachoCode === ESTADOS_DESPACHO_PRODUCTO.FACTURADO.getCode();
+      const productoRechazado =
+        detalle.estadoDespachoCode === ESTADOS_DESPACHO_PRODUCTO.RECHAZADO.getCode();
+      const productoSobrepedido =
+        detalle.estadoDespachoCode === ESTADOS_DESPACHO_PRODUCTO.SOBREPEDIDO.getCode();
+      const despachoCalculado = calcularEstadoDespachoProducto(cantidadSolicitada, cantidadEnviada);
+      const despacho = productoFacturado
+        ? {
+            estadoCode: ESTADOS_DESPACHO_PRODUCTO.FACTURADO.getCode(),
+            porcentaje: 100,
+          }
+        : productoRechazado || productoSobrepedido
+          ? {
+              estadoCode: detalle.estadoDespachoCode,
+              porcentaje: Number(((cantidadEnviada / cantidadSolicitada) * 100).toFixed(2)),
+            }
+          : despachoCalculado;
+
+      return {
+        id: detalle.id,
+        productoId: detalle.productoId,
+        codigo: detalle.producto.codigo,
+        descripcion: detalle.producto.descripcionLarga,
+        prioridadCode: detalle.estadoCode,
+        prioridad: estadoProductosTypeFactory(detalle.estadoCode).getForHumans(),
+        cantidadSolicitada,
+        cantidadEnviada,
+        cantidadRechazada,
+        cantidadSobrepedido,
+        cantidadPendiente:
+          productoFacturado || productoRechazado || productoSobrepedido
+            ? 0
+            : Math.max(
+                0,
+                cantidadSolicitada - cantidadEnviada - cantidadRechazada - cantidadSobrepedido
+              ),
+        porcentajeDespachado: despacho.porcentaje,
+        estadoDespachoCode: despacho.estadoCode,
+        estadoDespacho: estadoDespachoProductoTypeFactory(despacho.estadoCode).getForHumans(),
+        existenciaAmmedical: 0,
+        productoExisteEnAmmedical: false,
+        observacionRechazo: detalle.observacionRechazo?.trim() || null,
+        fechaRechazo: detalle.fechaRechazo ?? null,
+        usuarioRechazo: detalle.usuarioRechazo ?? null,
+        cierreSobrepedido: detalle.cierresSobrepedido?.[0]
+          ? {
+              tipoCierre: detalle.cierresSobrepedido[0].tipoCierre,
+              cantidadCerrada: Number(detalle.cierresSobrepedido[0].cantidadCerrada),
+              observacion: detalle.cierresSobrepedido[0].observacion,
+              fechaCreacion: detalle.cierresSobrepedido[0].fechaCreacion,
+              usuario: detalle.cierresSobrepedido[0].usuario ?? null,
+              solicitudRelacionada: {
+                id: detalle.cierresSobrepedido[0].solicitudNueva.id,
+                numeroSolicitud: detalle.cierresSobrepedido[0].solicitudNueva.numeroSolicitud,
+              },
+            }
+          : null,
+        solicitadoEnOtrasSedes: false,
+        cantidadPendienteOtrasSedes: 0,
+        solicitudesOtrasSedes: [] as SolicitudProductoOtraSedeResponse[],
+        // Compatibilidad temporal con el contrato anterior.
+        estadoCode: detalle.estadoCode,
+        cantidad: cantidadSolicitada,
+        despachos: [...(detalle.despachos ?? [])]
+          .sort(
+            (primerDespacho, segundoDespacho) =>
+              segundoDespacho.fechaCreacion.getTime() - primerDespacho.fechaCreacion.getTime()
+          )
+          .map(movimiento => ({
+            id: movimiento.id,
+            cantidadEnviada: Number(movimiento.cantidad),
+            cantidadAcumulada: Number(movimiento.cantidadAcumulada),
+            estadoDespachoCode: movimiento.estadoDespachoCode,
+            estadoDespacho: estadoDespachoProductoTypeFactory(
+              movimiento.estadoDespachoCode
+            ).getForHumans(),
+            observacion: movimiento.observacion ?? null,
+            fechaCreacion: movimiento.fechaCreacion,
+            usuario: movimiento.usuario,
+          })),
+      };
+    });
+    const tieneRechazos = productos.some(
+      producto => producto.estadoDespachoCode === ESTADOS_DESPACHO_PRODUCTO.RECHAZADO.getCode()
+    );
+    const cierreSobrepedido = item.cierresSobrepedido?.[0];
+    const solicitudesAnteriores = [
+      ...new Map(
+        (item.origenesSobrepedido ?? []).map(origen => [
+          origen.solicitudAnteriorId,
+          {
+            id: origen.solicitudAnteriorId,
+            numeroSolicitud: origen.solicitudAnterior.numeroSolicitud,
+          },
+        ])
+      ).values(),
+    ];
+
     return {
       id: item.id,
       numeroSolicitud: item.numeroSolicitud,
@@ -267,68 +287,29 @@ const transformToResponse = (data: SolicitudPedidoOrm[], context: GcmContextType
       ).getForHumans(),
       hasVisto: item.hasVisto,
       obervacionRechazo: item.obervacionRechazo,
+      observacionRechazo: item.obervacionRechazo,
+      tieneRechazos,
+      sobrepedido: {
+        nuevaSolicitud: cierreSobrepedido
+          ? {
+              id: cierreSobrepedido.solicitudNuevaId,
+              numeroSolicitud: cierreSobrepedido.solicitudNueva.numeroSolicitud,
+            }
+          : null,
+        solicitudesAnteriores,
+        observacion:
+          cierreSobrepedido?.observacion ?? item.origenesSobrepedido?.[0]?.observacion ?? null,
+        fecha:
+          cierreSobrepedido?.fechaCreacion ?? item.origenesSobrepedido?.[0]?.fechaCreacion ?? null,
+        usuario: cierreSobrepedido?.usuario ?? item.origenesSobrepedido?.[0]?.usuario ?? null,
+        esRegistroHeredado:
+          item.estadoCode === ESTADOS_SOLICITUD_PEDIDO.SOBREPEDIDO.getCode() && !cierreSobrepedido,
+      },
       sede: item.sede,
       creadoPor: item.creadoPor,
       historial: item.historial,
       tieneProductosSolicitadosEnOtrasSedes: false,
-      productos: item.productos.map(detalle => {
-        const cantidadSolicitada = Number(detalle.cantidad);
-        const cantidadEnviada = Number(detalle.cantidadEnviada ?? 0);
-        const productoFacturado =
-          detalle.estadoDespachoCode === ESTADOS_DESPACHO_PRODUCTO.FACTURADO.getCode();
-        const despachoCalculado = calcularEstadoDespachoProducto(
-          cantidadSolicitada,
-          cantidadEnviada
-        );
-        const despacho = productoFacturado
-          ? {
-              estadoCode: ESTADOS_DESPACHO_PRODUCTO.FACTURADO.getCode(),
-              porcentaje: 100,
-            }
-          : despachoCalculado;
-
-        return {
-          id: detalle.id,
-          productoId: detalle.productoId,
-          codigo: detalle.producto.codigo,
-          descripcion: detalle.producto.descripcionLarga,
-          prioridadCode: detalle.estadoCode,
-          prioridad: estadoProductosTypeFactory(detalle.estadoCode).getForHumans(),
-          cantidadSolicitada,
-          cantidadEnviada,
-          cantidadPendiente: productoFacturado
-            ? 0
-            : Math.max(0, cantidadSolicitada - cantidadEnviada),
-          porcentajeDespachado: despacho.porcentaje,
-          estadoDespachoCode: despacho.estadoCode,
-          estadoDespacho: estadoDespachoProductoTypeFactory(despacho.estadoCode).getForHumans(),
-          existenciaAmmedical: 0,
-          productoExisteEnAmmedical: false,
-          solicitadoEnOtrasSedes: false,
-          cantidadPendienteOtrasSedes: 0,
-          solicitudesOtrasSedes: [] as SolicitudProductoOtraSedeResponse[],
-          // Compatibilidad temporal con el contrato anterior.
-          estadoCode: detalle.estadoCode,
-          cantidad: cantidadSolicitada,
-          despachos: [...(detalle.despachos ?? [])]
-            .sort(
-              (primerDespacho, segundoDespacho) =>
-                segundoDespacho.fechaCreacion.getTime() - primerDespacho.fechaCreacion.getTime()
-            )
-            .map(movimiento => ({
-              id: movimiento.id,
-              cantidadEnviada: Number(movimiento.cantidad),
-              cantidadAcumulada: Number(movimiento.cantidadAcumulada),
-              estadoDespachoCode: movimiento.estadoDespachoCode,
-              estadoDespacho: estadoDespachoProductoTypeFactory(
-                movimiento.estadoDespachoCode
-              ).getForHumans(),
-              observacion: movimiento.observacion ?? null,
-              fechaCreacion: movimiento.fechaCreacion,
-              usuario: movimiento.usuario,
-            })),
-        };
-      }),
+      productos,
     };
   });
 
