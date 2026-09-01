@@ -2,10 +2,7 @@ import { BaseSource } from '@common/infrastructure/services';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PacienteOrm } from '@orm/gen/pacientes';
 import { GuardarRegistroMuestraDto } from '@hpn/formato-anatomopatologicos/presentation/dto';
-import {
-  DetalleMuestraCupsOrm,
-  FormatoMuestraAnatomopatologicaOrm,
-} from '../orm';
+import { DetalleMuestraCupsOrm, FormatoMuestraAnatomopatologicaOrm } from '../orm';
 import { QueryRunner } from 'typeorm';
 
 export interface RegistroMuestraRes {
@@ -42,10 +39,11 @@ export class FormatoMuestrasAnatomopatologicasImpl extends BaseSource {
         where: { numeroDoc: documento },
         relations: { ingresos: true, detalleContrato: true },
       });
-      if (!paciente) throw new NotFoundException(`No se encontró paciente con documento ${documento}`);
+      if (!paciente)
+        throw new NotFoundException(`No se encontró paciente con documento ${documento}`);
 
       const ingreso = paciente.ingresos.sort(
-        (a, b) => b.fechaIngreso.getTime() - a.fechaIngreso.getTime(),
+        (a, b) => b.fechaIngreso.getTime() - a.fechaIngreso.getTime()
       )[0];
       return {
         numeroDocumento: paciente.numeroDoc,
@@ -63,7 +61,7 @@ export class FormatoMuestrasAnatomopatologicasImpl extends BaseSource {
     try {
       const rows = await qr.query(
         'SELECT TOP 1 SIPCODIGO AS cups, SIPNOMBRE AS descripcion FROM GENSERIPS WHERE SIPCODIGO = @0',
-        [codigo.trim()],
+        [codigo.trim()]
       );
       return rows[0] ?? null;
     } finally {
@@ -117,12 +115,12 @@ export class FormatoMuestrasAnatomopatologicasImpl extends BaseSource {
           tipoCups: 'ANATOMOPATOLOGICO',
           especimen: item.especimen.trim(),
           sospechoso: item.sospechoso?.trim() ?? '',
-        }),
+        })
       );
       saved.cups = await detalleRp.save(cups);
       await qr.commitTransaction();
       return this.toResponse(saved);
-    } catch (error) {
+    } catch (error: any) {
       await qr.rollbackTransaction();
       throw error;
     } finally {
@@ -155,14 +153,14 @@ export class FormatoMuestrasAnatomopatologicasImpl extends BaseSource {
             tipoCups: 'ANATOMOPATOLOGICO',
             especimen: item.especimen.trim(),
             sospechoso: item.sospechoso?.trim() ?? '',
-          }),
-        ),
+          })
+        )
       );
       registro.cups = cups;
       const saved = await registroRp.save(registro);
       await qr.commitTransaction();
       return this.toResponse(saved);
-    } catch (error) {
+    } catch (error: any) {
       await qr.rollbackTransaction();
       throw error;
     } finally {
@@ -175,9 +173,10 @@ export class FormatoMuestrasAnatomopatologicasImpl extends BaseSource {
       where: { numeroDoc: documento.trim() },
       relations: { ingresos: true, detalleContrato: true },
     });
-    if (!paciente) throw new NotFoundException(`No se encontró paciente con documento ${documento}`);
+    if (!paciente)
+      throw new NotFoundException(`No se encontró paciente con documento ${documento}`);
     const ingreso = paciente.ingresos.sort(
-      (a, b) => b.fechaIngreso.getTime() - a.fechaIngreso.getTime(),
+      (a, b) => b.fechaIngreso.getTime() - a.fechaIngreso.getTime()
     )[0];
     return {
       numeroDocumento: paciente.numeroDoc,
@@ -195,7 +194,7 @@ export class FormatoMuestrasAnatomopatologicasImpl extends BaseSource {
       numeroCaso: registro.numeroCaso || String(registro.id),
       fechaTomaMuestra: fechaToma,
       mesToma: new Intl.DateTimeFormat('es-CO', { month: 'long', year: 'numeric' }).format(
-        new Date(`${fechaToma}T00:00:00`),
+        new Date(`${fechaToma}T00:00:00`)
       ),
       fechaRecepcionLabPatologia: this.dateOnly(registro.fechaRecepcionLaboratorio),
       paciente: {

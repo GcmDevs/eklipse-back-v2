@@ -1,9 +1,10 @@
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { LgcTasModule } from '@hpn/lgc/tas/traslados-asistenciales.module';
 import { PacientesModule } from './pacientes/module';
 
 const config = [
-  // --- AVOID NOWRAP --- //
+  { name: 'Trasl. Asistenciales', url: 'docs/traslaci', version: `1.0`, modules: [LgcTasModule] },
   { name: 'Pacientes', url: 'docs/pacientes', version: `1.0`, modules: [PacientesModule] },
 ];
 
