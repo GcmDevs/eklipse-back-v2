@@ -167,6 +167,7 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
           return {
             id: item.id,
             sede: item.sede,
+            salaQx: item.quirofano.id,
             identificadorPublico: item.identificadorPublico,
             nombrePublico: this.enmascararNombre(item.paciente.nombreCompleto),
             estadoActual: item.estadoActual,
