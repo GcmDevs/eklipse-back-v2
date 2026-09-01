@@ -26,4 +26,7 @@ export class _PrivSecEkUserOrm {
 
   @Column({ name: 'TIPOUSU' })
   tipoUsuarioExternoCode: UsuExtCode;
+
+  @Column({ name: 'CONTEXT' })
+  contextCode: number;
 }

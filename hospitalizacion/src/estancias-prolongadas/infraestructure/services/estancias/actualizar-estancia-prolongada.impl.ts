@@ -170,7 +170,7 @@ export class ActualizarEstanciaProlongadaImpl extends BaseSource {
         message: 'Estancia actualizada satisfactoriamente',
         data,
       };
-    } catch (error) {
+    } catch (error: any) {
       if (transactionStarted) await this.qr.rollbackTransaction();
       throw error;
     } finally {

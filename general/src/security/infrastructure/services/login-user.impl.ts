@@ -5,23 +5,38 @@ import {
   EstadoUsuarioCode,
   estadoUsuarioTypeFactory,
 } from '@gen/security/domain/types/gen/usuarios';
-import { cryptoServices, IAuthToken, RSAServices } from '@common/application/services';
+import { cryptoServices as crypto, IAuthToken, RSAServices } from '@common/application/services';
 import { _PrivSecEkUserOrm } from '@common/infrastructure/orm/ek-user.orm';
 import { _PrivSecUserOrm } from '@common/infrastructure/orm/user.orm';
-import { gcmContextFactory, GcmContexts, usuExtTypeFactory, USU_EXTS } from '@common/domain/types';
+import {
+  gcmContextFactory,
+  GcmContexts,
+  usuExtTypeFactory,
+  USU_EXTS,
+  AuthenticatedAs,
+} from '@common/domain/types';
 import { LoginUserDto } from '@gen/security/presentation/dtos';
-import { LastAuthOrm } from '@gen/security/infrastructure/orm';
+import { LastAuthOrm, PacienteOrm } from '@gen/security/infrastructure/orm';
 import { switchConn } from '@common/infrastructure/services';
 import { ENVIRONMENTS } from '@gen/app.environments';
 import { processEnv } from '@env';
+import { dataToUsuExtOrm } from '../orm/factories';
 
 @Injectable()
 export class LoginUserImpl {
-  public async execute(payload: LoginUserDto, fromMobile: boolean, expiredSuperFast: boolean) {
-    const errorMsg = 'Usuario y/o clave incorrecta';
-    const { username, password, context } = payload;
+  public async execute(body: LoginUserDto, fromMobile: boolean, expiredSuperFast: boolean) {
+    if (body.authenticatedAs === AuthenticatedAs.USUARIO) {
+      return await this._executeAsUser(body, fromMobile, expiredSuperFast);
+    } else {
+      return await this._executeAsPaciente(body, fromMobile, expiredSuperFast);
+    }
+  }
 
-    const conn = switchConn(gcmContextFactory(payload.context));
+  private async _executeAsUser(body: LoginUserDto, fromMobile: boolean, expiredSuperFast: boolean) {
+    const errorMsg = 'Usuario y/o clave incorrecta';
+    const { username, password } = body;
+    const context = gcmContextFactory(body.context);
+    const conn = switchConn(context);
     const ekConn = switchConn(gcmContextFactory(GcmContexts.EKLIPSE));
 
     const qr = conn.createQueryRunner();
@@ -67,11 +82,15 @@ export class LoginUserImpl {
             lastAuth: true,
             passwordIsReset: true,
             tipoUsuarioExternoCode: true,
+            contextCode: true,
           },
         });
         if (user) isDimUser = false;
         if (user.tipoUsuarioExternoCode) {
           tipoUsuExtCode = usuExtTypeFactory(user.tipoUsuarioExternoCode).getCode();
+        }
+        if (user.contextCode && user.contextCode !== context.getEkKey()) {
+          throw new Error(`Usuario no pertenece al contexto ${body.context}`);
         }
       }
 
@@ -83,11 +102,8 @@ export class LoginUserImpl {
         );
       }
 
-      if (isDimUser) {
-        matchingPasswords = await cryptoServices.compareDimPassword(password, user.password);
-      } else {
-        matchingPasswords = await cryptoServices.compare(password, user.password);
-      }
+      if (isDimUser) matchingPasswords = await crypto.compareDimPassword(password, user.password);
+      else matchingPasswords = await crypto.compare(password, user.password);
 
       const passwordIsReset = !isDimUser ? (user as any).passwordIsReset : false;
 
@@ -98,7 +114,7 @@ export class LoginUserImpl {
           dcm: user.document,
           fnm: user.fullName,
           dim: isDimUser,
-          sub: context,
+          sub: body.context,
           tue: tipoUsuExtCode,
         };
 
@@ -141,6 +157,11 @@ export class LoginUserImpl {
           }
         }
 
+        if (!isDimUser) {
+          user.lastAuth = new Date();
+          await ekUserRp.save(user);
+        }
+
         await qr.commitTransaction();
         await ekQr.commitTransaction();
 
@@ -148,6 +169,94 @@ export class LoginUserImpl {
       } else {
         throw new Error(errorMsg);
       }
+    } catch (error: any) {
+      await qr.rollbackTransaction();
+      await ekQr.rollbackTransaction();
+      throw new Error(error.message);
+    } finally {
+      await qr.release();
+      await ekQr.release();
+    }
+  }
+
+  private async _executeAsPaciente(
+    body: LoginUserDto,
+    fromMobile: boolean,
+    expiredSuperFast: boolean
+  ) {
+    const errorMsg = 'Usuario y/o clave incorrecta';
+    const { username, password } = body;
+    const context = gcmContextFactory(body.context);
+    const conn = switchConn(context);
+    const ekConn = switchConn(gcmContextFactory(GcmContexts.EKLIPSE));
+
+    const qr = conn.createQueryRunner();
+    const ekQr = ekConn.createQueryRunner();
+
+    await qr.connect();
+    await ekQr.connect();
+    try {
+      await qr.startTransaction();
+      await ekQr.startTransaction();
+
+      const pacienteRp = qr.manager.getRepository(PacienteOrm);
+      const ekPacienteRp = ekQr.manager.getRepository(_PrivSecEkUserOrm);
+
+      const paciente = await pacienteRp.findOne({ where: { documento: username } });
+      if (!paciente) throw new Error('El paciente no ha sido atendido en esta clinica');
+
+      let pacAsUser = await ekPacienteRp.findOne({
+        where: { document: username },
+        select: {
+          id: true,
+          document: true,
+          fullName: true,
+          password: true,
+          statusCode: true,
+          passwordIsReset: true,
+        },
+      });
+
+      if (!pacAsUser) {
+        pacAsUser = await dataToUsuExtOrm(paciente);
+        pacAsUser = await ekPacienteRp.save(pacAsUser);
+      }
+
+      if (pacAsUser.statusCode !== ESTADOS_USUARIO.ACTIVO.getCode()) {
+        throw new Error(
+          `Su usuario está en estado ${estadoUsuarioTypeFactory(pacAsUser.statusCode as EstadoUsuarioCode).getForHumans()}`
+        );
+      }
+
+      if (!pacAsUser.passwordIsReset) {
+        const matchingPass = await crypto.compare(password, pacAsUser.password);
+        if (!matchingPass) throw new Error(errorMsg);
+      }
+
+      const payload: IAuthToken = {
+        jti: RSAServices.encryptId(pacAsUser.id),
+        rst: pacAsUser.passwordIsReset,
+        dcm: paciente.documento,
+        fnm: paciente.nombreCompleto,
+        dim: false,
+        sub: body.context,
+        tue: USU_EXTS.GENPACIEN.getCode(),
+      };
+
+      const token = jwt.sign(payload, processEnv.JWT_SECRET_KEY, {
+        expiresIn: expiredSuperFast || pacAsUser.passwordIsReset ? '1h' : fromMobile ? '30d' : '7d',
+        algorithm: 'HS512',
+      });
+
+      if (!pacAsUser.passwordIsReset) {
+        pacAsUser.lastAuth = new Date();
+        await ekPacienteRp.save(pacAsUser);
+      }
+
+      await qr.commitTransaction();
+      await ekQr.commitTransaction();
+
+      return { token, passwordIsReset: pacAsUser.passwordIsReset };
     } catch (error: any) {
       await qr.rollbackTransaction();
       await ekQr.rollbackTransaction();
