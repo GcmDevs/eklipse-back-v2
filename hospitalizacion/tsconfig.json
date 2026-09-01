@@ -24,11 +24,18 @@
       "@authorities": ["./authorities"],
       "@ctypes/*": ["./@types/*"],
       "@orm/*": ["./@orm/*"],
-      "@hpn/*": ["./src/*"]
+      "@hpn/*": ["./src/*"],
+      // Traslados asistenciales (lgc)
+      "@hpn/lgc/tas/*": ["./legacy/traslados-asistenciales/*"],
+      "@hpn/lgc/tas/types/*": ["./legacy/traslados-asistenciales/@types/*"],
+      "@hpn/lgc/tas/types": ["./legacy/traslados-asistenciales/@types"],
+      "@hpn/lgc/tas/orm/*": ["./legacy/traslados-asistenciales/@orm/*"],
+      "@hpn/lgc/tas/orm": ["./legacy/traslados-asistenciales/@orm"]
     }
   },
   "include": [
     "src/**/*",
+    "legacy/**/*",
     "@common/**/*",
     "@types/**/*",
     "@orm/**/*",
