@@ -2,7 +2,12 @@ import { BaseSource } from '@common/infrastructure/services';
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { QueryRunner } from 'typeorm';
 import { CambiarEstadoCirugiaDto } from '../../presentation/dto/cambiar-estado-cirugia.dto';
-import { AsignacionQuirofanoUsuarioOrm, EstadoCirugiaOrm, HistorialEstadoCirugiaOrm, SeguimientoCirugiaOrm } from '../orm';
+import {
+  AsignacionQuirofanoUsuarioOrm,
+  EstadoCirugiaOrm,
+  HistorialEstadoCirugiaOrm,
+  SeguimientoCirugiaOrm,
+} from '../orm';
 
 @Injectable()
 export class SeguimientoQuirurgicoImpl extends BaseSource {
@@ -13,16 +18,19 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
         where: { usuarioDocumento, activo: true },
         order: { esPredeterminado: 'DESC', salaQx: 'ASC' },
       });
-    } finally { await qr.release(); }
+    } finally {
+      await qr.release();
+    }
   }
   async guardarAsignacionesUsuario(
     usuarioDocumentoRuta: string,
-    datos: { salaQx: string; usuarioDocumento?: string },
+    datos: { salaQx: string; usuarioDocumento?: string }
   ) {
     const usuarioDocumento = datos.usuarioDocumento?.trim() || usuarioDocumentoRuta.trim();
     if (!usuarioDocumento) throw new ConflictException('Debe indicar el documento del usuario.');
     const qr = this.dynamicQR(this.auth.context);
-    await qr.connect(); await qr.startTransaction();
+    await qr.connect();
+    await qr.startTransaction();
     try {
       const repo = qr.manager.getRepository(AsignacionQuirofanoUsuarioOrm);
       await repo.update({ usuarioDocumento }, { activo: false, esPredeterminado: false });
@@ -34,7 +42,7 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
       await repo.save(asignacion);
       await qr.commitTransaction();
       return await repo.find({ where: { usuarioDocumento, activo: true } });
-    } catch (error) {
+    } catch (error: any) {
       if (qr.isTransactionActive) {
         try {
           await qr.rollbackTransaction();
@@ -43,7 +51,9 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
         }
       }
       throw error;
-    } finally { await qr.release(); }
+    } finally {
+      await qr.release();
+    }
   }
   async estados() {
     const qr = this.dynamicQR(this.auth.context);
@@ -74,7 +84,7 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
     const qr = this.dynamicQR(this.auth.context);
     try {
       return await qr.query(
-        `SELECT LTRIM(RTRIM(SALCODIGO)) id, LTRIM(RTRIM(SALCODIGO)) codigo, SALNOMBRE nombre, CAST(1 AS bit) activo FROM PCNSALAS WHERE SALCODIGO IS NOT NULL ORDER BY SALNOMBRE`,
+        `SELECT LTRIM(RTRIM(SALCODIGO)) id, LTRIM(RTRIM(SALCODIGO)) codigo, SALNOMBRE nombre, CAST(1 AS bit) activo FROM PCNSALAS WHERE SALCODIGO IS NOT NULL ORDER BY SALNOMBRE`
       );
     } finally {
       await qr.release();
@@ -91,8 +101,8 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
         .filter(
           (item: any) =>
             !['PROGRAMADO', 'SALIDA_PACIENTE', 'CIRUGIA_SUSPENDIDA'].includes(
-              item.estadoActual.codigo,
-            ),
+              item.estadoActual.codigo
+            )
         )
         .map((item: any) => {
           const alertaActiva = alertasActivas.get(item.id);
@@ -114,28 +124,26 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
     return nombre
       .split(/\s+/)
       .filter(Boolean)
-      .map((parte) => `${parte.charAt(0).toUpperCase()}.`)
+      .map(parte => `${parte.charAt(0).toUpperCase()}.`)
       .join(' ');
   }
   private async obtenerAlertasActivas(qr: QueryRunner) {
     const [estados, historial] = await Promise.all([
       qr.manager.getRepository(EstadoCirugiaOrm).find({ where: { activo: true } }),
-      qr.manager
-        .getRepository(HistorialEstadoCirugiaOrm)
-        .find({ order: { fechaHora: 'DESC' } }),
+      qr.manager.getRepository(HistorialEstadoCirugiaOrm).find({ order: { fechaHora: 'DESC' } }),
     ]);
     const eventos = new Map(
       estados
         .filter(
-          (estado) =>
+          estado =>
             (estado.esEvento || estado.codigo === 'CIRUGIA_SUSPENDIDA') &&
-            estado.codigo !== 'RETIRAR_ALERTA',
+            estado.codigo !== 'RETIRAR_ALERTA'
         )
-        .map((estado) => [estado.codigo, estado]),
+        .map(estado => [estado.codigo, estado])
     );
     const resueltas = new Set<string>();
     const activas = new Map<string, { codigo: string; nombre: string; fechaHora: string }>();
-    historial.forEach((registro) => {
+    historial.forEach(registro => {
       if (resueltas.has(registro.pcnConsec)) return;
       if (registro.estadoNuevo === 'RETIRAR_ALERTA') {
         resueltas.add(registro.pcnConsec);
@@ -206,7 +214,7 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
       if (!result) throw new NotFoundException('Cirugía no encontrada');
       await qr.commitTransaction();
       return result;
-    } catch (error) {
+    } catch (error: any) {
       await qr.rollbackTransaction();
       throw error;
     } finally {
@@ -219,7 +227,8 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
       const evento = await qr.manager
         .getRepository(EstadoCirugiaOrm)
         .findOne({ where: { codigo: codigoEvento, activo: true } });
-      if (!evento || (!evento.esEvento && evento.codigo !== 'CIRUGIA_SUSPENDIDA')) throw new NotFoundException('Evento no válido.');
+      if (!evento || (!evento.esEvento && evento.codigo !== 'CIRUGIA_SUSPENDIDA'))
+        throw new NotFoundException('Evento no válido.');
       const seguimiento = await qr.manager
         .getRepository(SeguimientoCirugiaOrm)
         .findOne({ where: { pcnConsec: id } });
@@ -228,10 +237,13 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
           where: { pcnConsec: id },
           order: { fechaHora: 'DESC' },
         });
-        const ultimoAviso = historial.find((registro) =>
-          ['CIRUGIA_SUSPENDIDA', 'ACERCARSE_INFORMACION', 'ACERCARSE_FACTURACION', 'RETIRAR_ALERTA'].includes(
-            registro.estadoNuevo,
-          ),
+        const ultimoAviso = historial.find(registro =>
+          [
+            'CIRUGIA_SUSPENDIDA',
+            'ACERCARSE_INFORMACION',
+            'ACERCARSE_FACTURACION',
+            'RETIRAR_ALERTA',
+          ].includes(registro.estadoNuevo)
         );
         if (!ultimoAviso || ultimoAviso.estadoNuevo === 'RETIRAR_ALERTA') {
           throw new ConflictException('La cirugía no tiene una alerta vigente para retirar.');
