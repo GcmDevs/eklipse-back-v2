@@ -2,10 +2,73 @@ import { BaseSource } from '@common/infrastructure/services';
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { QueryRunner } from 'typeorm';
 import { CambiarEstadoCirugiaDto } from '../../presentation/dto/cambiar-estado-cirugia.dto';
-import { AsignacionQuirofanoUsuarioOrm, EstadoCirugiaOrm, HistorialEstadoCirugiaOrm, SeguimientoCirugiaOrm } from '../orm';
+import { AgrupadorSalaQuirurgicaOrm, AgrupadorSalasQuirurgicasOrm, AsignacionQuirofanoUsuarioOrm, EstadoCirugiaOrm, HistorialEstadoCirugiaOrm, SeguimientoCirugiaOrm } from '../orm';
 
 @Injectable()
 export class SeguimientoQuirurgicoImpl extends BaseSource {
+  async agrupadoresSalas() {
+    const qr = this.dynamicQR(this.auth.context);
+    try {
+      const agrupadores = await qr.manager.getRepository(AgrupadorSalasQuirurgicasOrm).find({
+        where: { activo: true },
+        relations: { salas: true },
+        order: { nombre: 'ASC' },
+      });
+      return agrupadores.map(agrupador => ({
+        id: agrupador.id,
+        nombre: agrupador.nombre,
+        salas: agrupador.salas.map(sala => sala.salaQx),
+      }));
+    } finally { await qr.release(); }
+  }
+  async crearAgrupadorSalas(datos: { nombre: string; salas: string[] }) {
+    const nombre = datos.nombre?.trim();
+    const salas = [...new Set((datos.salas ?? []).map(sala => sala.trim()).filter(Boolean))];
+    if (!nombre) throw new ConflictException('Debe indicar el nombre de la especialidad.');
+    if (!salas.length) throw new ConflictException('Debe seleccionar al menos una sala.');
+    const qr = this.dynamicQR(this.auth.context);
+    await qr.connect(); await qr.startTransaction();
+    try {
+      const agrupadores = qr.manager.getRepository(AgrupadorSalasQuirurgicasOrm);
+      const salasRepo = qr.manager.getRepository(AgrupadorSalaQuirurgicaOrm);
+      const existente = await agrupadores.findOne({ where: { nombre } });
+      if (existente) throw new ConflictException('Ya existe un agrupador con este nombre.');
+      const agrupador = await agrupadores.save(agrupadores.create({ nombre, activo: true }));
+      await salasRepo.save(salas.map(salaQx => salasRepo.create({ agrupadorId: agrupador.id, salaQx })));
+      await qr.commitTransaction();
+      return { id: agrupador.id, nombre: agrupador.nombre, salas };
+    } catch (error) {
+      if (qr.isTransactionActive) await qr.rollbackTransaction();
+      throw error;
+    } finally { await qr.release(); }
+  }
+  async actualizarAgrupadorSalas(id: number, datos: { nombre: string; salas: string[] }) {
+    const nombre = datos.nombre?.trim();
+    const salas = [...new Set((datos.salas ?? []).map(sala => sala.trim()).filter(Boolean))];
+    if (!nombre) throw new ConflictException('Debe indicar el nombre de la especialidad.');
+    if (!salas.length) throw new ConflictException('Debe seleccionar al menos una sala.');
+    const qr = this.dynamicQR(this.auth.context);
+    await qr.connect(); await qr.startTransaction();
+    try {
+      const agrupadores = qr.manager.getRepository(AgrupadorSalasQuirurgicasOrm);
+      const salasRepo = qr.manager.getRepository(AgrupadorSalaQuirurgicaOrm);
+      const agrupador = await agrupadores.findOne({ where: { id, activo: true } });
+      if (!agrupador) throw new NotFoundException('No existe el agrupador de salas.');
+      const conMismoNombre = await agrupadores.findOne({ where: { nombre } });
+      if (conMismoNombre && conMismoNombre.id !== id) {
+        throw new ConflictException('Ya existe un agrupador con este nombre.');
+      }
+      agrupador.nombre = nombre;
+      await agrupadores.save(agrupador);
+      await salasRepo.delete({ agrupadorId: id });
+      await salasRepo.save(salas.map(salaQx => salasRepo.create({ agrupadorId: id, salaQx })));
+      await qr.commitTransaction();
+      return { id: agrupador.id, nombre: agrupador.nombre, salas };
+    } catch (error) {
+      if (qr.isTransactionActive) await qr.rollbackTransaction();
+      throw error;
+    } finally { await qr.release(); }
+  }
   async asignacionesUsuario(usuarioDocumento: string) {
     const qr = this.dynamicQR(this.auth.context);
     try {
