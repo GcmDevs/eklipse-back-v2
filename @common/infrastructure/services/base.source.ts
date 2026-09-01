@@ -1,6 +1,6 @@
 import { Request } from 'express';
 import { REQUEST } from '@nestjs/core';
-import { DataSource, QueryRunner } from 'typeorm';
+import { DataSource, Entity, PrimaryGeneratedColumn, QueryRunner } from 'typeorm';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ITokenDecoded, JWTServices } from '../../application/services';
 import { GCM_CONTEXTS, GcmContextType } from '../../domain/types';
@@ -9,6 +9,12 @@ import { fetchAuthsByUser } from './authorities';
 import { switchConn } from './connections';
 import { RolDependenciaCode } from '../orm/dependence.orm';
 import { _PrivSecUserDependenceOrm } from '../orm/user-dependence.orm';
+
+@Entity('UNNAMED')
+export class JustForVerifyOrm {
+  @PrimaryGeneratedColumn({ name: 'OID' })
+  id: number;
+}
 
 export interface UserDependenceI {
   user: {
@@ -170,6 +176,13 @@ export class BaseSource {
     } catch (error: any) {
       throw new Error(error.message);
     }
+  }
+
+  protected async verifyEntityExist(tablePath: string, id: number) {
+    const rp = this.conn.getRepository(JustForVerifyOrm);
+    rp.metadata.tablePath = tablePath;
+    const result = await rp.findOne({ where: { id } });
+    if (!result) throw new Error(`No existe ${tablePath} con este id`);
   }
 
   protected getToken(): string {
