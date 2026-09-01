@@ -195,4 +195,39 @@ export const TABLE_NAMES = {
       },
     },
   },
+  hpn: {
+    documentos: 'CRNDOCUME',
+    estancias: {
+      index: 'HPNESTANC',
+    },
+    auditoria: {
+      index: 'EKHPNAUDITORIA',
+      medicamentosTrazadores: 'EKHPNAUDIMEDTRAZ',
+      internaciones: 'EKHPNAUDINTERN',
+      estudiosDx: 'EKHPNAUDIESTUDX',
+      estanciasInactivas: 'EKHPNAUDIESTANINACT',
+      eventoSeguridadClinica: 'EKHPNAUDIEVENSEGCRIT',
+    },
+    entregaTurno: {
+      index: 'EKHPNENTREGATURNO',
+      pacienteTurno: 'EKHPNENTREGATURNOPACIEN',
+      registroClinico: 'EKHPNENTREGATURNOREGCLINICO',
+      combioTurno: 'EKHPNENTREGATURNOCAMBIOTURNO',
+      pacienteEvolucion: 'EKHPNENTREGATURNOPACIENEVOLUCION',
+      prealta: 'EKHPNENTREGATURNOPREALTA',
+    },
+    trasladosAsistenciales: {
+      index: 'EKHPNTRASLADO',
+      asignacion: 'EKHPNTRASLASIGNACION',
+      evolucion: 'EKHPNTRASLEVOLUCION',
+      signoVital: 'EKHPNTRASLSIGNOVITAL',
+    },
+  },
+  hcn: {
+    folios: {
+      index: 'HCNFOLIO',
+      tipoHistoria: 'HCNTIPHIS',
+      diagPaciente: 'HCNDIAPAC',
+    },
+  },
 };

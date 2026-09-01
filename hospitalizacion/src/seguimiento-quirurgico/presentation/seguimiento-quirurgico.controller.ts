@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
 import { CommonGuards } from '@common/presentation/decorators';
 import { CambiarEstadoCirugiaDto } from './dto/cambiar-estado-cirugia.dto';
 import { RegistrarEventoCirugiaDto } from './dto/registrar-evento-cirugia.dto';
@@ -13,6 +13,18 @@ export class SeguimientoQuirurgicoController {
   }
   @Get('quirofanos') quirofanos() {
     return this.service.quirofanos();
+  }
+  @Get('agrupadores-salas') agrupadoresSalas() {
+    return this.service.agrupadoresSalas();
+  }
+  @Post('agrupadores-salas') crearAgrupadorSalas(@Body() datos: { nombre: string; salas: string[] }) {
+    return this.service.crearAgrupadorSalas(datos);
+  }
+  @Patch('agrupadores-salas/:id') actualizarAgrupadorSalas(
+    @Param('id') id: string,
+    @Body() datos: { nombre: string; salas: string[] },
+  ) {
+    return this.service.actualizarAgrupadorSalas(Number(id), datos);
   }
   @Get('publicas') publicas() {
     return this.service.publicas();

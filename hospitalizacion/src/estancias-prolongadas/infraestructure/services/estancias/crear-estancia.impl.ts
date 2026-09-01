@@ -221,7 +221,7 @@ export class CrearEstanciasProlongadasImpl extends BaseSource {
       });
 
       return data;
-    } catch (error) {
+    } catch (error: any) {
       if (transactionStarted) await this.qr.rollbackTransaction();
       throw error;
     } finally {
