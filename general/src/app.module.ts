@@ -10,7 +10,7 @@ import { ENTITIES } from './app.entities';
   ],
 })
 export class AppModule implements OnModuleInit {
-  public onModuleInit(): void {
+  public async onModuleInit(): Promise<void> {
     initializeSources(ENTITIES);
   }
 }

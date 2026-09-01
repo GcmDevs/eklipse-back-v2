@@ -3,3 +3,5 @@
 dist
 node_modules
 @common/application/enabled-modules
+@common/domain/types
+general/@types
