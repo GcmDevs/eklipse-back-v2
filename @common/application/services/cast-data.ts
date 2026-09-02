@@ -27,8 +27,13 @@ export function capitalizeFirstLetter(str: string): string {
   }
 }
 
+export function trim(value: string): string {
+  return value.trim();
+}
+
 export const castDataServices = {
   enumToString,
   stringArrayForSqlQueries,
   capitalizeFirstLetter,
+  trim,
 };

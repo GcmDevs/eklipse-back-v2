@@ -1,5 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ESTADOS_ASISTENCIA, PRIMARIO, SECUNDARIO } from '@hpn/lgc/tas/types/gcn/traslados-asistenciales';
+import {
+  ESTADOS_ASISTENCIA,
+  PRIMARIO,
+  SECUNDARIO,
+} from '@hpn/lgc/tas/types/gcn/traslados-asistenciales';
 import { generateTrasladoPrimarioPdf } from '@hpn/lgc/tas/presentation/pdf/traslado-primario.pdf-generator';
 import { generateTrasladoSecundarioPdf } from '@hpn/lgc/tas/presentation/pdf/traslado-secundario.pdf-generator';
 import { GcmContextCode } from '@common/domain/types';

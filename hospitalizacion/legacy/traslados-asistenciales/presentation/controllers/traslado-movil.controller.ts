@@ -7,7 +7,7 @@ import { HPN_AUTHORITIES } from '@authorities';
 @ApiTags('Traslados Asistenciales')
 @ApiBearerAuth()
 @CommonGuards()
-@Controller('v4/gestion-clinica/traslados-asistenciales/movil')
+@Controller('v1/hpn/traslados-asistenciales/movil')
 export class TrasladoMovilController {
   constructor(private _source: TrasladoCrudSource) {}
 

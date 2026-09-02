@@ -1,9 +1,11 @@
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { LgcTasModule } from '@hpn/lgc/tas/traslados-asistenciales.module';
+import { LgcAudModule } from '@hpn/lgc/aud/auditoria.module';
 import { PacientesModule } from './pacientes/module';
 
 const config = [
+  { name: 'Auditoria', url: 'docs/audi', version: `1.0`, modules: [LgcAudModule] },
   { name: 'Trasl. Asistenciales', url: 'docs/traslaci', version: `1.0`, modules: [LgcTasModule] },
   { name: 'Pacientes', url: 'docs/pacientes', version: `1.0`, modules: [PacientesModule] },
 ];

@@ -15,7 +15,7 @@ import { TrasladosRealtimeGateway } from '../gateways/traslados-realtime.gateway
 @ApiTags('Traslados Asistenciales')
 @ApiBearerAuth()
 @CommonGuards()
-@Controller('v4/gestion-clinica/traslados-asistenciales')
+@Controller('v1/hpn/traslados-asistenciales')
 export class SeguimientoTrasladoController {
   constructor(
     private _source: SeguimientoTrasladoImpl,

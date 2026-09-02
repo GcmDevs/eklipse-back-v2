@@ -1,5 +1,15 @@
 import { Entity, PrimaryGeneratedColumn, Column, JoinColumn, ManyToOne } from 'typeorm';
-import { ClasificacionCamaCode, EstadoCamaCode, MotivoBloqueoCode } from '@ctypes/hpn/camas';
+import {
+  ClasificacionCamaCode,
+  ClasificacionCamaType,
+  clasificacionCamaTypeFactory,
+  EstadoCamaCode,
+  EstadoCamaType,
+  estadoCamaTypeFactory,
+  MotivoBloqueoCode,
+  MotivoBloqueoType,
+  motivoBloqueoTypeFactory,
+} from '@ctypes/hpn/camas';
 import { IngresoOrm } from '@orm/adn/ingreso.orm';
 import { SubgrupoOrm } from './subgrupo.orm';
 import { TipoCamaOrm } from './tipo.orm';
@@ -60,4 +70,24 @@ export class CamaOrm {
   @ManyToOne(() => IngresoOrm)
   @JoinColumn([{ name: 'ADNINGRESO', referencedColumnName: 'id' }])
   ingreso: IngresoOrm;
+
+  /** @deprecated Usada en LgcAuditoriaModule */
+  estado: EstadoCamaType;
+  /** @deprecated Usada en LgcAuditoriaModule */
+  motivoBloqueo: MotivoBloqueoType;
+  /** @deprecated Usada en LgcAuditoriaModule */
+  clasificacion: ClasificacionCamaType;
+
+  /** @deprecated Usada en LgcAuditoriaModule */
+  setTypes(removeTypeCodes?: boolean) {
+    this.estado = estadoCamaTypeFactory(this.estadoCode);
+    this.motivoBloqueo = motivoBloqueoTypeFactory(this.motivoBloqueoCode);
+    this.clasificacion = clasificacionCamaTypeFactory(this.clasificacionCode);
+
+    if (removeTypeCodes) {
+      delete this.estadoCode;
+      delete this.motivoBloqueoCode;
+      delete this.clasificacionCode;
+    }
+  }
 }

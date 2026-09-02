@@ -13,7 +13,7 @@ import { LGC_TAS_LOCATIONS } from '../../application/constants';
 @ApiTags('Traslados Asistenciales')
 @ApiBearerAuth()
 @CommonGuards()
-@Controller('v4/gestion-clinica/traslados-asistenciales/evolucion')
+@Controller('v1/hpn/traslados-asistenciales/evolucion')
 export class TrasladoEvolucionController {
   constructor(
     private _source: TrasladoEvolucionImpl,

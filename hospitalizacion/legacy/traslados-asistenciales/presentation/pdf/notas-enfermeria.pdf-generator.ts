@@ -26,14 +26,14 @@ const findImageFromContext = (contexto: GcmContexts) => {
     contexto === GcmContexts.ALTACENTRO
       ? 'alta-centro.jpg'
       : contexto === GcmContexts.AGUACHICA
-      ? 'aguachica.jpg'
-      : contexto === GcmContexts.AMMEDICAL
-      ? 'ammedical.png'
-      : contexto === GcmContexts.SANJUAN
-      ? 'sanjuan.jpg'
-      : contexto === GcmContexts.VALLEDUPAR
-      ? 'valledupar.jpg'
-      : 'undefined.jpg'
+        ? 'aguachica.jpg'
+        : contexto === GcmContexts.AMMEDICAL
+          ? 'ammedical.png'
+          : contexto === GcmContexts.SANJUAN
+            ? 'sanjuan.jpg'
+            : contexto === GcmContexts.VALLEDUPAR
+              ? 'valledupar.jpg'
+              : 'undefined.jpg'
   }`;
 };
 
@@ -63,7 +63,6 @@ function getFirmaBufferFromCedula(cedula?: string): { buffer: any; ext: string }
   } catch (e) {}
   return null;
 }
-
 
 function drawOfficialHeader(
   doc: jsPDF,

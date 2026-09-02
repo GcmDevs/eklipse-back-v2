@@ -16,7 +16,7 @@ import { GcmContextCode } from '@common/domain/types';
 @ApiTags('Traslados Asistenciales')
 @ApiBearerAuth()
 @CommonGuards()
-@Controller('v4/gestion-clinica/traslados-asistenciales/monitoreo')
+@Controller('v1/hpn/traslados-asistenciales/monitoreo')
 export class TrasladoMonitoreoController {
   constructor(private _source: TrasladoEvolucionImpl) {}
 
