@@ -1,11 +1,10 @@
-export type GrupoSanguineoTypeCode =
-  | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export type GrupoSanguineoTypeCode = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
 export class GrupoSanguineoType {
   constructor(
     private code: GrupoSanguineoTypeCode,
     private forHumans: string
-  ) { }
+  ) {}
 
   public getCode(): GrupoSanguineoTypeCode {
     return this.code;
@@ -29,14 +28,22 @@ export const AB_NEGATIVO = new GrupoSanguineoType(8, 'AB-');
 // Factory
 export function grupoSanguineoFactory(code: GrupoSanguineoTypeCode): GrupoSanguineoType {
   switch (code) {
-    case 1: return O_POSITIVO;
-    case 2: return O_NEGATIVO;
-    case 3: return A_POSITIVO;
-    case 4: return A_NEGATIVO;
-    case 5: return B_POSITIVO;
-    case 6: return B_NEGATIVO;
-    case 7: return AB_POSITIVO;
-    case 8: return AB_NEGATIVO;
+    case 1:
+      return O_POSITIVO;
+    case 2:
+      return O_NEGATIVO;
+    case 3:
+      return A_POSITIVO;
+    case 4:
+      return A_NEGATIVO;
+    case 5:
+      return B_POSITIVO;
+    case 6:
+      return B_NEGATIVO;
+    case 7:
+      return AB_POSITIVO;
+    case 8:
+      return AB_NEGATIVO;
   }
 }
 

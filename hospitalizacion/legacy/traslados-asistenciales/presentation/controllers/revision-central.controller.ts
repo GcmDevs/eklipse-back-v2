@@ -9,7 +9,7 @@ import { TrasladosRealtimeGateway } from '../gateways/traslados-realtime.gateway
 @ApiTags('Traslados Asistenciales')
 @ApiBearerAuth()
 @CommonGuards()
-@Controller('v4/gestion-clinica/traslados-asistenciales/revision-central')
+@Controller('v1/hpn/traslados-asistenciales/revision-central')
 export class TrasladoRevisionCentralController {
   constructor(
     private _source: TrasladoRevisionCentralImpl,

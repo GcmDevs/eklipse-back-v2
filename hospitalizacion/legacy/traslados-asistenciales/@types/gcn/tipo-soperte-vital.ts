@@ -4,7 +4,7 @@ export class TipoSoporteVitalType {
   constructor(
     private code: TipoSoporteVitalTypeCode,
     private forHumans: string
-  ) { }
+  ) {}
 
   public getCode(): TipoSoporteVitalTypeCode {
     return this.code;
@@ -35,7 +35,6 @@ export function tipoSoportesVitalesTypeFactory(
       return OXIGENO;
     case 5:
       return INCUBADORA;
-
   }
 }
 

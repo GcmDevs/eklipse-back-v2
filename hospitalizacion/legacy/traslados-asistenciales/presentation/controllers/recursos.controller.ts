@@ -7,7 +7,7 @@ import { TipoEmpleadoCode } from '@hpn/lgc/tas/types/gcn';
 @ApiTags('Traslados Asistenciales')
 @ApiBearerAuth()
 @CommonGuards()
-@Controller('v4/gestion-clinica/traslados-asistenciales/recursos')
+@Controller('v1/hpn/traslados-asistenciales/recursos')
 export class TrasladoRecursosController {
   constructor(private _trasladoService: TrasladoRecursosImpl) {}
 

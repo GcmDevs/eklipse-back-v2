@@ -4,7 +4,7 @@ export class AsistenciaTipoType {
   constructor(
     private _code: AsistenciaTipoCode,
     private _forHumans: string
-  ) { }
+  ) {}
 
   public getCode(): AsistenciaTipoCode {
     return this._code;

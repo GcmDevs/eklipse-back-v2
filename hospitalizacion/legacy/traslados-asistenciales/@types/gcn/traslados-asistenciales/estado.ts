@@ -1,7 +1,10 @@
 export type EstadoTrasladoTypeCode = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
 export class EstadoTrasladoType {
-  constructor(private _code: EstadoTrasladoTypeCode, private _forHumans: string) {}
+  constructor(
+    private _code: EstadoTrasladoTypeCode,
+    private _forHumans: string
+  ) {}
 
   public getCode(): EstadoTrasladoTypeCode {
     return this._code;
