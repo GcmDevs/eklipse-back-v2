@@ -30,7 +30,13 @@
       "@hpn/lgc/tas/types/*": ["./legacy/traslados-asistenciales/@types/*"],
       "@hpn/lgc/tas/types": ["./legacy/traslados-asistenciales/@types"],
       "@hpn/lgc/tas/orm/*": ["./legacy/traslados-asistenciales/@orm/*"],
-      "@hpn/lgc/tas/orm": ["./legacy/traslados-asistenciales/@orm"]
+      "@hpn/lgc/tas/orm": ["./legacy/traslados-asistenciales/@orm"],
+      // Auditoria (lgc)
+      "@hpn/lgc/aud/*": ["./legacy/auditoria/*"],
+      "@hpn/lgc/aud/types/*": ["./legacy/auditoria/@types/*"],
+      "@hpn/lgc/aud/types": ["./legacy/auditoria/@types"],
+      "@hpn/lgc/aud/orm/*": ["./legacy/auditoria/@orm/*"],
+      "@hpn/lgc/aud/orm": ["./legacy/auditoria/@orm"]
     }
   },
   "include": [

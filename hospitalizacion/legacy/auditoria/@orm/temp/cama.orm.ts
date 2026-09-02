@@ -1,20 +1,19 @@
 import { Entity, PrimaryGeneratedColumn, Column, JoinColumn, ManyToOne } from 'typeorm';
+import { GrupoOrm } from './grupo.orm';
+import { SubgrupoOrm } from './subgrupo.orm';
+import { TipoCamaOrm } from './tipo-cama.orm';
+import { CtmType } from '@common/domain/types';
+import { IngresoOrm } from '@hpn/lgc/aud/orm/gen';
 import {
   ClasificacionCamaCode,
-  ClasificacionCamaType,
   clasificacionCamaTypeFactory,
   EstadoCamaCode,
-  EstadoCamaType,
   estadoCamaTypeFactory,
   MotivoBloqueoCode,
-  MotivoBloqueoType,
   motivoBloqueoTypeFactory,
-} from '@ctypes/hpn/camas';
-import { IngresoOrm } from '@orm/adn/ingreso.orm';
-import { SubgrupoOrm } from './subgrupo.orm';
-import { TipoCamaOrm } from './tipo.orm';
-import { GrupoOrm } from './grupo.orm';
-import { CentroOrm } from '@orm/adn';
+} from '@hpn/lgc/aud/types/temp';
+import { CentroOrm } from '@hpn/lgc/aud/orm/adn';
+import { TABLE_NAMES } from '@common/application/constants';
 
 @Entity('HPNDEFCAM')
 export class CamaOrm {
@@ -27,6 +26,20 @@ export class CamaOrm {
   @Column({ name: 'HCANOMBRE' })
   nombre: string;
 
+  @ManyToOne(() => TipoCamaOrm)
+  @JoinColumn({ name: 'HPNTIPOCA', referencedColumnName: 'id' })
+  tipo: TipoCamaOrm;
+
+  @Column({ name: 'HPNTIPOCA' })
+  tipoId: string;
+
+  @ManyToOne(() => CentroOrm)
+  @JoinColumn({ name: TABLE_NAMES.adn.centros, referencedColumnName: 'id' })
+  centro: CentroOrm;
+
+  @Column({ name: TABLE_NAMES.adn.centros })
+  centroId: string;
+
   @Column({ name: 'HCAESTADO' })
   estadoCode: EstadoCamaCode;
 
@@ -36,49 +49,31 @@ export class CamaOrm {
   @Column({ name: 'HCABLOPOR' })
   motivoBloqueoCode: MotivoBloqueoCode;
 
-  @Column({ name: 'ADNCENATE' })
-  centroId: string;
-
-  @ManyToOne(() => CentroOrm)
-  @JoinColumn({ name: 'ADNCENATE', referencedColumnName: 'id' })
-  centro: CentroOrm;
-
-  @Column({ name: 'HPNTIPOCA' })
-  tipoId: string;
-
-  @ManyToOne(() => TipoCamaOrm)
-  @JoinColumn({ name: 'HPNTIPOCA', referencedColumnName: 'id' })
-  tipo: TipoCamaOrm;
-
-  @Column({ name: 'HPNGRUPOS' })
-  grupoId: number;
-
   @ManyToOne(() => GrupoOrm)
   @JoinColumn({ name: 'HPNGRUPOS', referencedColumnName: 'id' })
   grupo: GrupoOrm;
 
-  @Column({ name: 'HPNSUBGRU' })
-  subGrupoId: number;
+  @Column({ name: 'HPNGRUPOS' })
+  grupoId: number;
 
   @ManyToOne(() => SubgrupoOrm)
   @JoinColumn({ name: 'HPNSUBGRU', referencedColumnName: 'id' })
   subgrupo: SubgrupoOrm;
 
-  @Column({ name: 'ADNINGRESO' })
-  ingresoId: number;
+  @Column({ name: 'HPNSUBGRU' })
+  subGrupoId: number;
 
   @ManyToOne(() => IngresoOrm)
   @JoinColumn([{ name: 'ADNINGRESO', referencedColumnName: 'id' }])
   ingreso: IngresoOrm;
 
-  /** @deprecated Usada en LgcAuditoriaModule */
-  estado: EstadoCamaType;
-  /** @deprecated Usada en LgcAuditoriaModule */
-  motivoBloqueo: MotivoBloqueoType;
-  /** @deprecated Usada en LgcAuditoriaModule */
-  clasificacion: ClasificacionCamaType;
+  @Column({ name: 'ADNINGRESO' })
+  ingresoId: number;
 
-  /** @deprecated Usada en LgcAuditoriaModule */
+  estado: CtmType<EstadoCamaCode>;
+  motivoBloqueo: CtmType<MotivoBloqueoCode>;
+  clasificacion: CtmType<ClasificacionCamaCode>;
+
   setTypes(removeTypeCodes?: boolean) {
     this.estado = estadoCamaTypeFactory(this.estadoCode);
     this.motivoBloqueo = motivoBloqueoTypeFactory(this.motivoBloqueoCode);
