@@ -30,4 +30,13 @@ export class PacTrazEncuestaOrm {
 
   @Column({ name: 'FINALIZADA' })
   isFinalizada: boolean;
+
+  @Column({ name: 'AUDITORLIDER', type: 'nvarchar', length: 250, nullable: true })
+  auditorLider: string;
+
+  @Column({ name: 'EQUIPOAUDITOR', type: 'nvarchar', length: 'MAX', nullable: true })
+  equipoAuditor: string;
+
+  @Column({ name: 'RESPONSABLESHALLAZGOS', type: 'nvarchar', length: 'MAX', nullable: true })
+  responsablesHallazgos: string;
 }

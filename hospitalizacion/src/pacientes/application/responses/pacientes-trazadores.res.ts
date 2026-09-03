@@ -95,4 +95,10 @@ export class PacTrazAvancesEncuestaRes {
   encuestador: PacTrazEncuestadorRes;
   @ApiProperty({ type: PacTrazRespuestaRes, isArray: true })
   respuestas: PacTrazRespuestaRes[];
+  @ApiProperty({ required: false })
+  auditorLider: string;
+  @ApiProperty({ required: false, isArray: true })
+  equipoAuditor: string[];
+  @ApiProperty({ required: false })
+  responsablesHallazgos: Record<string, string>;
 }
