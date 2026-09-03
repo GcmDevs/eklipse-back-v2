@@ -36,9 +36,18 @@ export class PacTrazRealizarEncuestaImpl extends BaseSource {
         encuesta.isFinalizada = body.isFinalizada;
         encuesta.fechaCreacion = new Date();
         encuesta.observacion = null;
+        encuesta.auditorLider = null;
+        encuesta.equipoAuditor = null;
+        encuesta.responsablesHallazgos = null;
       }
 
       encuesta.fechaActualizacion = new Date();
+
+      if (body.auditorLider !== undefined) encuesta.auditorLider = body.auditorLider || null;
+      if (body.equipoAuditor !== undefined) encuesta.equipoAuditor = body.equipoAuditor || null;
+      if (body.responsablesHallazgos !== undefined) {
+        encuesta.responsablesHallazgos = body.responsablesHallazgos || null;
+      }
 
       if (body.isFinalizada) {
         encuesta.isFinalizada = true;

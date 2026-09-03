@@ -4,6 +4,8 @@ import {
   FetchPacientesHospitalizadosImpl,
   PacTrazRealizarEncuestaImpl,
   PacTrazFetchPacientesPreAltaImpl,
+  PacTrazListarAuditoresImpl,
+  PacTrazGenerarInformePdfImpl,
 } from './infrastructure/services';
 import { EncuestaController, RecursosController } from './presentation/controllers';
 
@@ -14,6 +16,8 @@ import { EncuestaController, RecursosController } from './presentation/controlle
     FetchPacientesHospitalizadosImpl,
     PacTrazAvancesEncuestaImpl,
     PacTrazRealizarEncuestaImpl,
+    PacTrazListarAuditoresImpl,
+    PacTrazGenerarInformePdfImpl,
   ],
 })
 export class PacientesModule {}

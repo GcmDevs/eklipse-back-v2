@@ -34,4 +34,19 @@ export class RespuestaPacienteTrazadorDto {
   @IsBoolean()
   @IsOptional()
   isFinalizada: boolean;
+
+  @ApiProperty({ required: false })
+  @IsString()
+  @IsOptional()
+  auditorLider: string;
+
+  @ApiProperty({ required: false, description: 'Integrantes del equipo auditor serializados en JSON.' })
+  @IsString()
+  @IsOptional()
+  equipoAuditor: string;
+
+  @ApiProperty({ required: false, description: 'Responsables de hallazgos serializados en JSON.' })
+  @IsString()
+  @IsOptional()
+  responsablesHallazgos: string;
 }

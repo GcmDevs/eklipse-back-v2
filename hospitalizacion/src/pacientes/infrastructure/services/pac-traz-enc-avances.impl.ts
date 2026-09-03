@@ -21,6 +21,10 @@ export class PacTrazAvancesEncuestaImpl extends BaseSource {
         where: { pacienteId, ingresoId },
         relations: ['usuario'],
       });
+      if (!encuesta) {
+        return { encuestador: null, respuestas: [], auditorLider: null, equipoAuditor: [], responsablesHallazgos: {} };
+      }
+
       const resFromBack = await respuestaRp.find({
         where: { encuestaId: encuesta.id },
         relations: ['pregunta'],
@@ -49,9 +53,24 @@ export class PacTrazAvancesEncuestaImpl extends BaseSource {
           nombreCompleto: encuesta.usuario.nombreCompleto,
         },
         respuestas,
+        auditorLider: encuesta.auditorLider,
+        equipoAuditor: this.parseJson<string[]>(encuesta.equipoAuditor, []),
+        responsablesHallazgos: this.parseJson<Record<string, string>>(
+          encuesta.responsablesHallazgos,
+          {}
+        ),
       };
     } catch (error: any) {
       throw new BadRequestException(error.message);
+    }
+  }
+
+  private parseJson<T>(value: string, fallback: T): T {
+    if (!value) return fallback;
+    try {
+      return JSON.parse(value) as T;
+    } catch {
+      return fallback;
     }
   }
 }

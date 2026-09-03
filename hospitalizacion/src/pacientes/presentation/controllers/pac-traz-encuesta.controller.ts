@@ -1,4 +1,5 @@
-import { BadRequestException, Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Query, Res } from '@nestjs/common';
+import { Response } from 'express';
 import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { CommonGuards } from '@common/presentation/decorators';
 import {
@@ -11,6 +12,8 @@ import {
   PacTrazAvancesEncuestaImpl,
   PacTrazFetchPacientesPreAltaImpl,
   PacTrazRealizarEncuestaImpl,
+  PacTrazListarAuditoresImpl,
+  PacTrazGenerarInformePdfImpl,
 } from '@hpn/pacientes/infrastructure/services';
 
 @Controller('v1/hpn/paciente-trazador')
@@ -19,7 +22,9 @@ export class EncuestaController {
   constructor(
     private _fetchPacientesPreAlta: PacTrazFetchPacientesPreAltaImpl,
     private _realizarEncuesta: PacTrazRealizarEncuestaImpl,
-    private _avancesEncuesta: PacTrazAvancesEncuestaImpl
+    private _avancesEncuesta: PacTrazAvancesEncuestaImpl,
+    private _listarAuditores: PacTrazListarAuditoresImpl,
+    private _generarInformePdf: PacTrazGenerarInformePdfImpl
   ) {}
 
   @ApiOperation({ summary: 'Busca los pacientes que están pre alta.' })
@@ -31,6 +36,25 @@ export class EncuestaController {
     } catch (error: any) {
       throw new BadRequestException(error.message);
     }
+  }
+
+  @ApiOperation({ summary: 'Lista usuarios activos disponibles para conformar el equipo auditor.' })
+  @Get('auditores')
+  async listarAuditores() {
+    return this._listarAuditores.execute();
+  }
+
+  @ApiOperation({ summary: 'Genera el informe PDF de la auditoría del paciente trazador.' })
+  @Get('encuesta/informe/:pacienteId/:ingresoId/pdf')
+  async generarInformePdf(
+    @Param('pacienteId') pacienteId: number,
+    @Param('ingresoId') ingresoId: number,
+    @Res() response: Response
+  ): Promise<void> {
+    const pdf = await this._generarInformePdf.execute(+pacienteId, +ingresoId);
+    response.setHeader('Content-Type', 'application/pdf');
+    response.setHeader('Content-Disposition', `attachment; filename="paciente-trazador-${pacienteId}.pdf"`);
+    response.send(pdf);
   }
 
   @ApiOperation({ summary: 'Registra las respuestas de la encuesta uno por uno.' })
