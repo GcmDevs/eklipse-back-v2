@@ -67,7 +67,7 @@ function resolveBackendResource(relativePath: string): string {
   const cleanPath = relativePath.replace(/^(\.\.[\/\\])+/, '');
   const isSubdir = /[\\\/]\d+$/.test(process.cwd());
   const backendRoot = isSubdir ? path.resolve(process.cwd(), '..') : process.cwd();
-  return path.resolve(backendRoot, cleanPath);
+  return path.resolve(backendRoot.replace('\hospitalizacion', ''), cleanPath);
 }
 
 /** Carga una imagen local para jsPDF usando fs.readFileSync directamente */
@@ -95,7 +95,7 @@ function getFirmaBufferFromCedula(cedula?: string): { buffer: any; ext: string }
   if (!cedula) return null;
   try {
     const targetCedula = String(cedula).trim();
-    const folderPath = resolveBackendResource('private/gen/trasl');
+    const folderPath = resolveBackendResource('private/gen/trasl/firma');
     if (fs.existsSync(folderPath)) {
       const files = fs.readdirSync(folderPath);
       const matchedFile = files.find(f => f.includes(targetCedula));
