@@ -515,9 +515,7 @@ export class RecursosCompartidosSource extends BaseSource {
   public resolveEstadoPacienteCode(value: string): EstadoPacienteCode {
     const normalized = `${value ?? ''}`.trim().toUpperCase();
 
-    if (!normalized) {
-      throw new Error('El estadoPaciente es obligatorio');
-    }
+    if (!normalized) throw new Error('El estadoPaciente es obligatorio');
 
     if (normalized === `${ESTADOS_PACIENTE.VIVO.getCode()}` || normalized === 'VIVO') {
       return ESTADOS_PACIENTE.VIVO.getCode();
