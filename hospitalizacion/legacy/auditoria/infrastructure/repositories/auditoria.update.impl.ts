@@ -149,7 +149,7 @@ export class UpdateAuditoriaImpl extends BaseSource {
 
       return saved;
     } catch (error: any) {
-      await this.qr.rollbackTransaction();
+      if (this.qr.isTransactionActive) await this.qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
       await this.qr.release();
