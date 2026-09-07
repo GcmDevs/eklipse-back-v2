@@ -1,12 +1,14 @@
 import { CtmType, DEFAULT_TYPE } from '@common/domain/types';
 
-export type EstadoDespachoProductoCode = 1 | 2 | 3;
+export type EstadoDespachoProductoCode = 1 | 2 | 3 | 4 | 5;
 
 export class EstadoDespachoProductoType extends CtmType<EstadoDespachoProductoCode> {}
 
 const PENDIENTE = new EstadoDespachoProductoType(1, 'PENDIENTE');
 const PARCIAL = new EstadoDespachoProductoType(2, 'PARCIAL');
 const FACTURADO = new EstadoDespachoProductoType(3, 'FACTURADO');
+const SOBREPEDIDO = new EstadoDespachoProductoType(4, 'SOBREPEDIDO');
+const RECHAZADO = new EstadoDespachoProductoType(5, 'RECHAZADO');
 
 export function estadoDespachoProductoTypeFactory(
   code: EstadoDespachoProductoCode,
@@ -19,6 +21,10 @@ export function estadoDespachoProductoTypeFactory(
       return PARCIAL;
     case 3:
       return FACTURADO;
+    case 4:
+      return SOBREPEDIDO;
+    case 5:
+      return RECHAZADO;
     default: {
       if ([null, undefined].includes(code)) return null;
       if (throwErr) throw new Error('No existe estado de despacho con este codigo');
@@ -31,6 +37,8 @@ export const ESTADOS_DESPACHO_PRODUCTO = {
   PENDIENTE,
   PARCIAL,
   FACTURADO,
+  SOBREPEDIDO,
+  RECHAZADO,
 };
 
 export const calcularEstadoDespachoProducto = (

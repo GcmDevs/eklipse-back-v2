@@ -1,6 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
-import { gcmContextFactory } from '@common/domain/types';
 import { BaseSource } from '@common/infrastructure/services';
 import {
   SolicitudPedidoHistorialOrm,
@@ -10,16 +9,26 @@ import {
 } from '@inn/orm/inn/solicitud-pedido';
 import {
   calcularEstadoDespachoProducto,
+  esSolicitudPedidoCerrada,
   estadoDespachoProductoTypeFactory,
   ESTADOS_DESPACHO_PRODUCTO,
   ESTADOS_SOLICITUD_PEDIDO,
 } from '@inn/types/inn/solicitud-pedido';
 import { ActualizarDespachoSolicitudPedidoPayload } from '@inn/solicitud-pedido/presentation/dtos';
+import { contextoSolicitudPedidoFactory } from './contexto-solicitud-pedido.util';
+import { ExistenciasDinamicaImpl, normalizarCodigoProducto } from './existencias-dinamica.impl';
+import {
+  calcularEstadoSolicitudPedido,
+  validarExistenciasDespacho,
+} from './solicitud-pedido-rules';
 
 @Injectable()
 export class ActualizarDespachoSolicitudPedidoImpl extends BaseSource {
+  @Inject(ExistenciasDinamicaImpl)
+  private readonly _existenciasDinamica: ExistenciasDinamicaImpl;
+
   public async execute(payload: ActualizarDespachoSolicitudPedidoPayload) {
-    const ctx = gcmContextFactory(payload.contextCode);
+    const ctx = contextoSolicitudPedidoFactory(payload.contextCode);
     const qr = this.dynamicQR(ctx);
     await qr.connect();
 
@@ -40,6 +49,9 @@ export class ActualizarDespachoSolicitudPedidoImpl extends BaseSource {
       if (!solicitudPedido) {
         throw new Error('No existe solicitud de pedido con este id');
       }
+      if (esSolicitudPedidoCerrada(solicitudPedido.estadoCode)) {
+        throw new Error('La solicitud ya se encuentra cerrada y no admite nuevos despachos');
+      }
       if (!Array.isArray(payload.productos) || payload.productos.length === 0) {
         throw new Error('Debe enviar al menos un producto para despachar');
       }
@@ -49,8 +61,7 @@ export class ActualizarDespachoSolicitudPedidoImpl extends BaseSource {
         throw new Error('No puede enviar el mismo producto mas de una vez');
       }
 
-      const ahora = new Date();
-      const despachos = payload.productos.map(productoPayload => {
+      const detallesPayload = payload.productos.map(productoPayload => {
         const detalle = solicitudPedido.productos.find(
           producto => producto.id === productoPayload.solicitudPedidoProductoId
         );
@@ -63,37 +74,83 @@ export class ActualizarDespachoSolicitudPedidoImpl extends BaseSource {
         if (detalle.estadoDespachoCode === ESTADOS_DESPACHO_PRODUCTO.FACTURADO.getCode()) {
           throw new Error(`El producto ${detalle.producto.codigo} ya se encuentra facturado`);
         }
+        if (detalle.estadoDespachoCode === ESTADOS_DESPACHO_PRODUCTO.RECHAZADO.getCode()) {
+          throw new Error(`El producto ${detalle.producto.codigo} se encuentra rechazado`);
+        }
+        if (detalle.estadoDespachoCode === ESTADOS_DESPACHO_PRODUCTO.SOBREPEDIDO.getCode()) {
+          throw new Error(`El producto ${detalle.producto.codigo} fue cerrado por sobrepedido`);
+        }
 
         const cantidadSolicitada = Number(detalle.cantidad);
         const cantidadDespachada = Number(productoPayload.cantidadEnviada);
         const cantidadEnviadaAnterior = Number(detalle.cantidadEnviada ?? 0);
+        const cantidadRechazada = Number(detalle.cantidadRechazada ?? 0);
+        const cantidadSobrepedido = Number(detalle.cantidadSobrepedido ?? 0);
         const cantidadEnviadaAcumulada = cantidadEnviadaAnterior + cantidadDespachada;
-        const cantidadPendiente = cantidadSolicitada - cantidadEnviadaAnterior;
+        const cantidadPendiente = Math.max(
+          0,
+          cantidadSolicitada - cantidadEnviadaAnterior - cantidadRechazada - cantidadSobrepedido
+        );
 
         if (!Number.isFinite(cantidadDespachada) || cantidadDespachada <= 0) {
           throw new Error('La cantidad enviada debe ser un numero mayor a cero');
         }
-        if (cantidadEnviadaAcumulada > cantidadSolicitada) {
+        if (cantidadDespachada > cantidadPendiente) {
           throw new Error(
             `La cantidad enviada del producto ${detalle.producto.codigo} no puede superar la cantidad pendiente (${cantidadPendiente})`
           );
         }
 
-        const estado = calcularEstadoDespachoProducto(cantidadSolicitada, cantidadEnviadaAcumulada);
-        detalle.cantidadEnviada = cantidadEnviadaAcumulada;
-        detalle.estadoDespachoCode = estado.estadoCode;
-        detalle.usuarioId = this.auth.id;
-
-        return despachoRp.create({
-          solicitudPedidoProductoId: detalle.id,
-          cantidad: cantidadDespachada,
-          cantidadAcumulada: cantidadEnviadaAcumulada,
-          estadoDespachoCode: estado.estadoCode,
-          observacion: productoPayload.observacion?.trim() || null,
-          fechaCreacion: ahora,
-          usuarioId: this.auth.id,
-        });
+        return {
+          detalle,
+          productoPayload,
+          cantidadSolicitada,
+          cantidadDespachada,
+          cantidadEnviadaAcumulada,
+        };
       });
+
+      const cantidadesPorCodigo = new Map<string, number>();
+      detallesPayload.forEach(({ detalle, cantidadDespachada }) => {
+        const codigo = normalizarCodigoProducto(detalle.producto.codigo);
+        cantidadesPorCodigo.set(
+          codigo,
+          (cantidadesPorCodigo.get(codigo) ?? 0) + cantidadDespachada
+        );
+      });
+      const existencias = await this._existenciasDinamica.obtenerPorCodigos([
+        ...cantidadesPorCodigo.keys(),
+      ]);
+      validarExistenciasDespacho(cantidadesPorCodigo, existencias);
+
+      const ahora = new Date();
+      const despachos = detallesPayload.map(
+        ({
+          detalle,
+          productoPayload,
+          cantidadSolicitada,
+          cantidadDespachada,
+          cantidadEnviadaAcumulada,
+        }) => {
+          const estado = calcularEstadoDespachoProducto(
+            cantidadSolicitada,
+            cantidadEnviadaAcumulada
+          );
+          detalle.cantidadEnviada = cantidadEnviadaAcumulada;
+          detalle.estadoDespachoCode = estado.estadoCode;
+          detalle.usuarioId = this.auth.id;
+
+          return despachoRp.create({
+            solicitudPedidoProductoId: detalle.id,
+            cantidad: cantidadDespachada,
+            cantidadAcumulada: cantidadEnviadaAcumulada,
+            estadoDespachoCode: estado.estadoCode,
+            observacion: productoPayload.observacion?.trim() || null,
+            fechaCreacion: ahora,
+            usuarioId: this.auth.id,
+          });
+        }
+      );
 
       const estadoAnterior = solicitudPedido.estadoCode;
       solicitudPedido.estadoCode = this._calcularEstadoSolicitud(solicitudPedido);
@@ -152,7 +209,13 @@ export class ActualizarDespachoSolicitudPedidoImpl extends BaseSource {
             cantidadEnviada,
             cantidadPendiente: productoFacturado
               ? 0
-              : Math.max(0, cantidadSolicitada - cantidadEnviada),
+              : Math.max(
+                  0,
+                  cantidadSolicitada -
+                    cantidadEnviada -
+                    Number(detalle.cantidadRechazada ?? 0) -
+                    Number(detalle.cantidadSobrepedido ?? 0)
+                ),
             porcentajeDespachado: despacho.porcentaje,
             estadoDespachoCode: despacho.estadoCode,
             estadoDespacho: estadoDespachoProductoTypeFactory(despacho.estadoCode).getForHumans(),
@@ -168,14 +231,8 @@ export class ActualizarDespachoSolicitudPedidoImpl extends BaseSource {
   }
 
   private _calcularEstadoSolicitud(solicitudPedido: SolicitudPedidoOrm) {
-    const estados = solicitudPedido.productos.map(producto => producto.estadoDespachoCode);
-
-    if (estados.every(estado => estado === ESTADOS_DESPACHO_PRODUCTO.FACTURADO.getCode())) {
-      return ESTADOS_SOLICITUD_PEDIDO.FACTURADO.getCode();
-    }
-    if (estados.every(estado => estado === ESTADOS_DESPACHO_PRODUCTO.PENDIENTE.getCode())) {
-      return ESTADOS_SOLICITUD_PEDIDO.PENDIENTE.getCode();
-    }
-    return ESTADOS_SOLICITUD_PEDIDO.PARCIAL.getCode();
+    return calcularEstadoSolicitudPedido(
+      solicitudPedido.productos.map(producto => producto.estadoDespachoCode)
+    );
   }
 }

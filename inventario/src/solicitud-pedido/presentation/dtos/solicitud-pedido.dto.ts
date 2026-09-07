@@ -1,9 +1,5 @@
 import { GcmContextCode } from '@common/domain/types';
-import {
-  EstadoProductosCode,
-  ESTADOS_PRODUCTOS_CODES,
-  EstadoSolicitudPedidoCode,
-} from '@inn/types/inn/solicitud-pedido';
+import { EstadoProductosCode, ESTADOS_PRODUCTOS_CODES } from '@inn/types/inn/solicitud-pedido';
 import { Type } from 'class-transformer';
 import {
   ArrayNotEmpty,
@@ -16,6 +12,7 @@ import {
   IsString,
   MaxLength,
   Min,
+  MinLength,
   ValidateNested,
 } from 'class-validator';
 
@@ -36,6 +33,29 @@ export class CreateSolicitudPedidoPayload {
   @IsString()
   @MaxLength(1000)
   observacion?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  confirmarSobrepedido?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(64)
+  versionImpactoSobrepedido?: string;
+}
+
+export class ImpactoSobrepedidoPayload {
+  @IsString()
+  contextCode: GcmContextCode;
+
+  @IsInt()
+  @Min(1)
+  sedeId: number;
+
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsInt({ each: true })
+  productoIds: number[];
 }
 
 export class CreateSolicitudPedidoProductoPayload {
@@ -110,21 +130,28 @@ export class RechazarSolicitudPedidoPayload {
   @IsNumber()
   solicitudPedidoId: number;
 
+  @IsIn(['PEDIDO', 'PRODUCTOS'])
+  alcance: 'PEDIDO' | 'PRODUCTOS';
+
+  @IsOptional()
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsInt({ each: true })
+  solicitudPedidoProductoIds?: number[];
+
   @IsString()
+  @MinLength(1)
+  @MaxLength(1000)
   observacionRechazo: string;
 }
 
-export class GenerateReporteSolicitudPedidoPayoad {
+export class ReporteSolicitudPedidoQuery {
   @IsString()
+  @MinLength(1)
   contextCode: GcmContextCode;
 
-  @IsNumber()
-  solicitudPedidoId: number;
-
-  @IsNumber()
-  estadoCode: EstadoSolicitudPedidoCode;
-
-  @IsString()
-  @IsOptional()
-  observacion: string;
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  sedeId: number;
 }

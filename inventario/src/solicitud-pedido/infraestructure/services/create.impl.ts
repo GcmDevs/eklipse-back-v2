@@ -1,225 +1,294 @@
 import { Injectable } from '@nestjs/common';
-import { In, Not, Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
-import { GCM_CONTEXTS, GcmContextType, gcmContextFactory } from '@common/domain/types';
+import { GCM_CONTEXTS, GcmContextType } from '@common/domain/types';
 import { BaseSource } from '@common/infrastructure/services';
 import { CreateSolicitudPedidoPayload } from '@inn/solicitud-pedido/presentation/dtos';
 import {
   SolicitudPedidoHistorialOrm,
   SolicitudPedidoOrm,
   SolicitudPedidoProductoOrm,
+  SolicitudPedidoSobrepedidoOrm,
+  TipoCierreSobrepedido,
 } from '@inn/orm/inn/solicitud-pedido';
 import {
   estadoProductosTypeFactory,
   ESTADOS_DESPACHO_PRODUCTO,
   ESTADOS_SOLICITUD_PEDIDO,
-  ESTADOS_SOLICITUD_PEDIDO_CERRADOS_CODES,
 } from '@inn/types/inn/solicitud-pedido';
 import { ProductoOrm } from '@inn/orm/inn/productos';
 import { CentroOrm } from '@inn/orm/adn';
+import { contextoSolicitudPedidoFactory } from './contexto-solicitud-pedido.util';
+import {
+  buscarSolicitudesImpactadas,
+  calcularCantidadPendienteProducto,
+  construirImpactoSobrepedido,
+  ImpactoSobrepedidoDesactualizadoError,
+  ImpactoSobrepedidoResponse,
+} from './sobrepedido-impacto';
+
+const OBSERVACION_AUTOMATICA_SOBREPEDIDO =
+  'Cierre automático por sobrepedido al reemplazar productos en una nueva solicitud.';
 
 @Injectable()
 export class CreateSolicitudPedidoImpl extends BaseSource {
   public async execute(body: CreateSolicitudPedidoPayload) {
-    const ctx = gcmContextFactory(body.contextCode);
+    const ctx = contextoSolicitudPedidoFactory(body.contextCode);
     const qr = this.dynamicQR(ctx);
     await qr.connect();
 
     try {
       await qr.startTransaction('SERIALIZABLE');
+      this._validarPayload(body);
 
-      if (!Number.isInteger(body.sedeId) || body.sedeId <= 0) {
-        throw new Error('Debe enviar una sede valida');
-      }
-      if (!Array.isArray(body.productos) || body.productos.length === 0) {
-        throw new Error('Debe enviar al menos un producto');
-      }
-      body.productos.forEach(producto => {
-        if (!Number.isInteger(producto.productoId) || producto.productoId <= 0) {
-          throw new Error('Todos los productos deben tener un productoId valido');
-        }
-        if (!Number.isFinite(producto.cantidad) || producto.cantidad <= 0) {
-          throw new Error('Todos los productos deben tener una cantidad mayor a cero');
-        }
-        estadoProductosTypeFactory(producto.estadoCode);
-      });
-
-      const productoIdsPayload = body.productos.map(producto => producto.productoId);
-      if (new Set(productoIdsPayload).size !== productoIdsPayload.length) {
-        throw new Error('No puede enviar el mismo producto mas de una vez');
-      }
-
-      const solicitudPedidoRp = qr.manager.getRepository(SolicitudPedidoOrm);
-      const solicitudPedidoHistRp = qr.manager.getRepository(SolicitudPedidoHistorialOrm);
-      const solicitudPedidoProductoRp = qr.manager.getRepository(SolicitudPedidoProductoOrm);
+      const solicitudRp = qr.manager.getRepository(SolicitudPedidoOrm);
+      const historialRp = qr.manager.getRepository(SolicitudPedidoHistorialOrm);
+      const productoSolicitudRp = qr.manager.getRepository(SolicitudPedidoProductoOrm);
+      const sobrepedidoRp = qr.manager.getRepository(SolicitudPedidoSobrepedidoOrm);
       const productoRp = qr.manager.getRepository(ProductoOrm);
       const sedeRp = qr.manager.getRepository(CentroOrm);
 
-      const sedeExists = await sedeRp.existsBy({ id: body.sedeId });
-      if (!sedeExists) throw new Error('No existe la sede enviada');
-
-      const productoIds = [...new Set(productoIdsPayload)];
-      const productosStored = await productoRp.findBy({ id: In(productoIds) });
-      if (productosStored.length !== productoIds.length) {
-        throw new Error('Uno o mas productos no existen');
+      if (!(await sedeRp.existsBy({ id: body.sedeId }))) {
+        throw new Error('No existe la sede enviada');
       }
 
-      const productosPendientes = await this._buscarProductosPendientes(
-        solicitudPedidoProductoRp,
+      const productoIds = body.productos.map(producto => producto.productoId);
+      const productosStored = await productoRp.findBy({ id: In(productoIds) });
+      if (productosStored.length !== productoIds.length) {
+        throw new Error('Uno o más productos no existen');
+      }
+
+      const solicitudesImpactadas = await buscarSolicitudesImpactadas(
+        solicitudRp,
+        productoSolicitudRp,
         body.sedeId,
-        productoIds
+        productoIds,
+        true
       );
-      this._validarObservacionPendientes(productosPendientes, body.observacion);
+      const impacto = construirImpactoSobrepedido(solicitudesImpactadas, productoIds);
+      this._validarConfirmacionSobrepedido(body, impacto);
+      const observacionSobrepedido = solicitudesImpactadas.length
+        ? body.observacion?.trim() || OBSERVACION_AUTOMATICA_SOBREPEDIDO
+        : body.observacion?.trim() || null;
 
-      const hoy = new Date();
-
-      const newSolicitudPedido = new SolicitudPedidoOrm();
-      newSolicitudPedido.estadoCode = ESTADOS_SOLICITUD_PEDIDO.PENDIENTE.getCode();
-      newSolicitudPedido.fechaCreacion = hoy;
-      newSolicitudPedido.creadoPorId = this.auth.id;
-      newSolicitudPedido.sedeId = body.sedeId;
-      newSolicitudPedido.numeroSolicitud = await this._consecutivoSolicitudPedido(
-        solicitudPedidoRp,
-        ctx,
-        body.sedeId
-      );
-
-      const solicitudPedidoStored = await solicitudPedidoRp.save(newSolicitudPedido);
-
-      const productos = body.productos.map(producto =>
-        solicitudPedidoProductoRp.create({
-          solicitudPedidoId: solicitudPedidoStored.id,
-          productoId: producto.productoId,
-          estadoCode: producto.estadoCode,
-          cantidad: this._redondearCantidad(producto.cantidad),
-          cantidadEnviada: 0,
-          estadoDespachoCode: ESTADOS_DESPACHO_PRODUCTO.PENDIENTE.getCode(),
+      const ahora = new Date();
+      const solicitudStored = await solicitudRp.save(
+        solicitudRp.create({
+          estadoCode: ESTADOS_SOLICITUD_PEDIDO.PENDIENTE.getCode(),
+          fechaCreacion: ahora,
+          creadoPorId: this.auth.id,
+          sedeId: body.sedeId,
+          numeroSolicitud: await this._consecutivoSolicitudPedido(solicitudRp, ctx, body.sedeId),
         })
       );
 
-      await solicitudPedidoProductoRp.save(productos);
-
-      await this._marcarSolicitudesSobrepedido(
-        productosPendientes,
-        solicitudPedidoStored.numeroSolicitud,
-        hoy,
-        solicitudPedidoRp,
-        solicitudPedidoHistRp
+      const productosNuevos = await productoSolicitudRp.save(
+        body.productos.map(producto =>
+          productoSolicitudRp.create({
+            solicitudPedidoId: solicitudStored.id,
+            productoId: producto.productoId,
+            estadoCode: producto.estadoCode,
+            cantidad: this._redondearCantidad(producto.cantidad),
+            cantidadEnviada: 0,
+            cantidadRechazada: 0,
+            cantidadSobrepedido: 0,
+            estadoDespachoCode: ESTADOS_DESPACHO_PRODUCTO.PENDIENTE.getCode(),
+          })
+        )
       );
 
-      const historial = new SolicitudPedidoHistorialOrm();
-      historial.solicitudPedidoId = solicitudPedidoStored.id;
-      historial.estadoCode = ESTADOS_SOLICITUD_PEDIDO.PENDIENTE.getCode();
-      historial.fechaCambio = hoy;
-      historial.usuarioId = this.auth.id;
+      const cierres = await this._cerrarSolicitudesSobrepedido(
+        solicitudesImpactadas,
+        solicitudStored,
+        productosNuevos,
+        observacionSobrepedido || '',
+        ahora,
+        solicitudRp,
+        productoSolicitudRp,
+        historialRp,
+        sobrepedidoRp
+      );
 
-      historial.sedeId = body.sedeId;
-      historial.observacion = body.observacion;
-
-      await solicitudPedidoHistRp.save(historial);
+      await historialRp.save(
+        historialRp.create({
+          solicitudPedidoId: solicitudStored.id,
+          estadoCode: ESTADOS_SOLICITUD_PEDIDO.PENDIENTE.getCode(),
+          fechaCambio: ahora,
+          usuarioId: this.auth.id,
+          sedeId: body.sedeId,
+          observacion: solicitudesImpactadas.length
+            ? `Creada por sobrepedido de ${solicitudesImpactadas
+                .map(solicitud => solicitud.numeroSolicitud)
+                .join(', ')}. Motivo: ${observacionSobrepedido}`
+            : observacionSobrepedido,
+        })
+      );
 
       await qr.commitTransaction();
-      return true;
-    } catch (error: any) {
-      await qr.rollbackTransaction();
-      throw new Error(error.message);
+      return {
+        nuevaSolicitud: {
+          id: solicitudStored.id,
+          numeroSolicitud: solicitudStored.numeroSolicitud,
+          contextCode: body.contextCode,
+          sedeId: solicitudStored.sedeId,
+          estadoCode: solicitudStored.estadoCode,
+          fechaCreacion: solicitudStored.fechaCreacion,
+        },
+        solicitudesCerradas: solicitudesImpactadas.map(solicitud => ({
+          id: solicitud.id,
+          numeroSolicitud: solicitud.numeroSolicitud,
+          estadoCode: ESTADOS_SOLICITUD_PEDIDO.SOBREPEDIDO.getCode(),
+        })),
+        productosReemplazados: cierres.filter(cierre => cierre.tipoCierre === 'REEMPLAZADO'),
+        productosCerradosSinTraslado: cierres.filter(
+          cierre => cierre.tipoCierre === 'CERRADO_SIN_TRASLADO'
+        ),
+      };
+    } catch (error: unknown) {
+      if (qr.isTransactionActive) {
+        try {
+          await qr.rollbackTransaction();
+        } catch {
+          // SQL Server puede abortar la transacción antes del rollback. Se conserva el error real.
+        }
+      }
+      if (error instanceof ImpactoSobrepedidoDesactualizadoError) throw error;
+      if (error instanceof Error) throw error;
+      throw new Error('No fue posible crear la solicitud');
     } finally {
       await qr.release();
     }
   }
 
-  private async _buscarProductosPendientes(
-    solicitudPedidoProductoRp: Repository<SolicitudPedidoProductoOrm>,
-    sedeId: number,
-    productoIds: number[]
-  ): Promise<SolicitudPedidoProductoOrm[]> {
-    const productosPendientes = await solicitudPedidoProductoRp.find({
-      where: {
-        productoId: In(productoIds),
-        estadoDespachoCode: Not(ESTADOS_DESPACHO_PRODUCTO.FACTURADO.getCode()),
-        solicitudPedido: {
-          sedeId,
-          estadoCode: Not(In(ESTADOS_SOLICITUD_PEDIDO_CERRADOS_CODES)),
-        },
-      },
-      relations: ['solicitudPedido', 'producto'],
-      order: {
-        solicitudPedido: { fechaCreacion: 'ASC' },
-        producto: { codigo: 'ASC' },
-      },
-      lock: { mode: 'pessimistic_write' },
+  private _validarPayload(body: CreateSolicitudPedidoPayload): void {
+    if (!Number.isInteger(body.sedeId) || body.sedeId <= 0) {
+      throw new Error('Debe enviar una sede válida');
+    }
+    if (!Array.isArray(body.productos) || body.productos.length === 0) {
+      throw new Error('Debe enviar al menos un producto');
+    }
+    body.productos.forEach(producto => {
+      if (!Number.isInteger(producto.productoId) || producto.productoId <= 0) {
+        throw new Error('Todos los productos deben tener un productoId válido');
+      }
+      if (!Number.isFinite(producto.cantidad) || producto.cantidad <= 0) {
+        throw new Error('Todos los productos deben tener una cantidad mayor a cero');
+      }
+      estadoProductosTypeFactory(producto.estadoCode);
     });
-
-    return productosPendientes.filter(
-      detalle => Number(detalle.cantidad) - Number(detalle.cantidadEnviada ?? 0) > 0
-    );
+    const productoIds = body.productos.map(producto => producto.productoId);
+    if (new Set(productoIds).size !== productoIds.length) {
+      throw new Error('No puede enviar el mismo producto más de una vez');
+    }
   }
 
-  private _validarObservacionPendientes(
-    productosPendientes: SolicitudPedidoProductoOrm[],
-    observacion?: string
+  private _validarConfirmacionSobrepedido(
+    body: CreateSolicitudPedidoPayload,
+    impacto: ImpactoSobrepedidoResponse
   ): void {
-    if (productosPendientes.length === 0) return;
-
-    if (!observacion || !observacion.trim()) {
-      const solicitudes = new Map<string, Set<string>>();
-
-      productosPendientes.forEach(detalle => {
-        const numeroSolicitud =
-          detalle.solicitudPedido.numeroSolicitud || `#${detalle.solicitudPedido.id}`;
-        const producto = `${detalle.producto.codigo} - ${detalle.producto.descripcionLarga}`;
-        const productos = solicitudes.get(numeroSolicitud) ?? new Set<string>();
-
-        productos.add(producto);
-        solicitudes.set(numeroSolicitud, productos);
-      });
-
-      const detalleSolicitudes = [...solicitudes.entries()]
-        .map(([numeroSolicitud, productos]) => `${numeroSolicitud}: ${[...productos].join(', ')}`)
-        .join('; ');
-
-      throw new Error(
-        `Existen productos pendientes para esta sede en las siguientes solicitudes: ${detalleSolicitudes}. Debe enviar una observacion obligatoria para crear la nueva solicitud`
-      );
+    if (!impacto.versionImpactoSobrepedido) {
+      if (body.versionImpactoSobrepedido) {
+        throw new ImpactoSobrepedidoDesactualizadoError(impacto);
+      }
+      return;
     }
+
+    if (!body.confirmarSobrepedido) {
+      throw new Error('Debe confirmar el cierre por sobrepedido');
+    }
+    if (body.versionImpactoSobrepedido !== impacto.versionImpactoSobrepedido) {
+      throw new ImpactoSobrepedidoDesactualizadoError(impacto);
+    }
+  }
+
+  private async _cerrarSolicitudesSobrepedido(
+    solicitudes: SolicitudPedidoOrm[],
+    nuevaSolicitud: SolicitudPedidoOrm,
+    productosNuevos: SolicitudPedidoProductoOrm[],
+    observacion: string,
+    fecha: Date,
+    solicitudRp: Repository<SolicitudPedidoOrm>,
+    productoRp: Repository<SolicitudPedidoProductoOrm>,
+    historialRp: Repository<SolicitudPedidoHistorialOrm>,
+    sobrepedidoRp: Repository<SolicitudPedidoSobrepedidoOrm>
+  ) {
+    if (!solicitudes.length) return [];
+    const nuevosPorProducto = new Map(
+      productosNuevos.map(producto => [producto.productoId, producto])
+    );
+    const productosACerrar: SolicitudPedidoProductoOrm[] = [];
+    const cierres: SolicitudPedidoSobrepedidoOrm[] = [];
+
+    solicitudes.forEach(solicitud => {
+      solicitud.productos.forEach(producto => {
+        const cantidadPendiente = calcularCantidadPendienteProducto(producto);
+        if (cantidadPendiente <= 0) return;
+
+        const productoNuevo = nuevosPorProducto.get(producto.productoId);
+        const tipoCierre: TipoCierreSobrepedido = productoNuevo
+          ? 'REEMPLAZADO'
+          : 'CERRADO_SIN_TRASLADO';
+        producto.cantidadSobrepedido = cantidadPendiente;
+        producto.estadoDespachoCode = ESTADOS_DESPACHO_PRODUCTO.SOBREPEDIDO.getCode();
+        producto.usuarioId = this.auth.id;
+        productosACerrar.push(producto);
+        cierres.push(
+          sobrepedidoRp.create({
+            solicitudAnteriorId: solicitud.id,
+            productoAnteriorId: producto.id,
+            solicitudNuevaId: nuevaSolicitud.id,
+            productoNuevoId: productoNuevo?.id,
+            tipoCierre,
+            cantidadCerrada: cantidadPendiente,
+            observacion,
+            fechaCreacion: fecha,
+            usuarioId: this.auth.id,
+          })
+        );
+      });
+      solicitud.estadoCode = ESTADOS_SOLICITUD_PEDIDO.SOBREPEDIDO.getCode();
+    });
+
+    await productoRp.save(productosACerrar);
+    await solicitudRp.save(solicitudes);
+    const cierresStored = await sobrepedidoRp.save(cierres);
+    await historialRp.save(
+      solicitudes.map(solicitud => {
+        const productos = cierres
+          .filter(cierre => cierre.solicitudAnteriorId === solicitud.id)
+          .map(cierre => {
+            const producto = solicitud.productos.find(
+              item => item.id === cierre.productoAnteriorId
+            );
+            return `${producto?.producto.codigo.trim()} (${Number(cierre.cantidadCerrada)})`;
+          });
+        return historialRp.create({
+          solicitudPedidoId: solicitud.id,
+          estadoCode: ESTADOS_SOLICITUD_PEDIDO.SOBREPEDIDO.getCode(),
+          fechaCambio: fecha,
+          usuarioId: this.auth.id,
+          sedeId: solicitud.sedeId,
+          observacion: `Cerrada como SOBREPEDIDO al crear la solicitud ${nuevaSolicitud.numeroSolicitud}. Saldos cerrados: ${productos.join(', ')}. Motivo: ${observacion}`,
+        });
+      })
+    );
+
+    return cierresStored.map(cierre => {
+      const solicitud = solicitudes.find(item => item.id === cierre.solicitudAnteriorId)!;
+      const producto = solicitud.productos.find(item => item.id === cierre.productoAnteriorId)!;
+      return {
+        solicitudPedidoId: solicitud.id,
+        numeroSolicitud: solicitud.numeroSolicitud,
+        solicitudPedidoProductoId: producto.id,
+        codigo: producto.producto.codigo,
+        cantidadCerrada: Number(cierre.cantidadCerrada),
+        tipoCierre: cierre.tipoCierre,
+      };
+    });
   }
 
   private _redondearCantidad(cantidad: number): number {
     return Number(cantidad.toFixed(4));
-  }
-
-  private async _marcarSolicitudesSobrepedido(
-    productosPendientes: SolicitudPedidoProductoOrm[],
-    nuevaSolicitudNumero: string,
-    fechaCambio: Date,
-    solicitudPedidoRp: Repository<SolicitudPedidoOrm>,
-    solicitudPedidoHistRp: Repository<SolicitudPedidoHistorialOrm>
-  ): Promise<void> {
-    const ESTADO_SOBREPEDIDO = ESTADOS_SOLICITUD_PEDIDO.SOBREPEDIDO.getCode();
-    const solicitudesAnteriores = [
-      ...new Map(
-        productosPendientes.map(detalle => [detalle.solicitudPedido.id, detalle.solicitudPedido])
-      ).values(),
-    ].filter(solicitud => solicitud.estadoCode !== ESTADO_SOBREPEDIDO);
-
-    if (solicitudesAnteriores.length === 0) return;
-
-    solicitudesAnteriores.forEach(solicitud => {
-      solicitud.estadoCode = ESTADO_SOBREPEDIDO;
-    });
-    await solicitudPedidoRp.save(solicitudesAnteriores);
-
-    const historiales = solicitudesAnteriores.map(solicitud =>
-      solicitudPedidoHistRp.create({
-        solicitudPedidoId: solicitud.id,
-        estadoCode: ESTADO_SOBREPEDIDO,
-        fechaCambio,
-        usuarioId: this.auth.id,
-        sedeId: solicitud.sedeId,
-        observacion: `Estado actualizado a SOBREPEDIDO por creación de la solicitud ${nuevaSolicitudNumero}`,
-      })
-    );
-    await solicitudPedidoHistRp.save(historiales);
   }
 
   private async _consecutivoSolicitudPedido(
@@ -228,9 +297,7 @@ export class CreateSolicitudPedidoImpl extends BaseSource {
     sedeId: number
   ): Promise<string> {
     const prefijo = this._prefijoSolicitudPedido(ctx, sedeId);
-    const cantidadDigitos = 10;
-    const longitudConsecutivo = prefijo.length + cantidadDigitos;
-
+    const longitudConsecutivo = prefijo.length + 10;
     const ultimaSolicitud = await solicitudPedidoRp
       .createQueryBuilder('solicitud')
       .setLock('pessimistic_write')
@@ -240,17 +307,12 @@ export class CreateSolicitudPedidoImpl extends BaseSource {
       })
       .orderBy('solicitud.numeroSolicitud', 'DESC')
       .getOne();
-
-    const ultimoNumero = ultimaSolicitud
-      ? Number(ultimaSolicitud.numeroSolicitud.slice(prefijo.length))
-      : 0;
-    const siguienteNumero = ultimoNumero + 1;
-
+    const siguienteNumero =
+      (ultimaSolicitud ? Number(ultimaSolicitud.numeroSolicitud.slice(prefijo.length)) : 0) + 1;
     if (!Number.isSafeInteger(siguienteNumero) || siguienteNumero > 9_999_999_999) {
-      throw new Error(`Se alcanzo el limite de consecutivos para el prefijo ${prefijo}`);
+      throw new Error(`Se alcanzó el límite de consecutivos para el prefijo ${prefijo}`);
     }
-
-    return `${prefijo}${siguienteNumero.toString().padStart(cantidadDigitos, '0')}`;
+    return `${prefijo}${siguienteNumero.toString().padStart(10, '0')}`;
   }
 
   private _prefijoSolicitudPedido(ctx: GcmContextType, sedeId: number): string {
