@@ -9,6 +9,12 @@ export const REPORTE_MESES = [
 export type PrioridadReporte = 'NORMAL' | 'CRITICA' | 'ALTA';
 export type PrioridadReporteCode = 1 | 2 | 3;
 
+export const DIAS_MES_REPORTE = 30;
+export const DIAS_SEMANA_REPORTE = 7;
+export const DIAS_OBJETIVO_PEDIDO = 15;
+export const DIAS_PRIORIDAD_CRITICA = 2;
+export const DIAS_PRIORIDAD_ALTA = 4;
+
 export interface MovimientoMensualReporte {
   anio: number;
   mes: number;
@@ -29,10 +35,16 @@ export interface ProductoReporteSolicitudPedido {
   existenciaActual: number;
   movimientosMensuales: MovimientoMensualReporte[];
   totalSalidas: number;
+  totalConsumo: number;
   promedioSemanal: number;
   consumoPromedioMensual: number;
   consumoPromedioDiario: number;
+  rotacionInventario: number | null;
   inventarioDias: number | null;
+  diasObjetivo: number;
+  existenciaObjetivo: number;
+  debePedir: boolean;
+  cantidadSugerida: number;
   prioridadCode: PrioridadReporteCode;
   prioridad: PrioridadReporte;
 }
@@ -100,22 +112,13 @@ const crearMovimientosVacios = (): Map<string, MovimientoMensualReporte> =>
   );
 
 export const calcularPrioridadReporte = (
-  existenciaActual: number,
-  promedioSemanal: number,
-  consumoPromedioMensual: number,
-  consumoPromedioDiario: number
+  inventarioDias: number | null
 ): { prioridadCode: PrioridadReporteCode; prioridad: PrioridadReporte } => {
-  if (consumoPromedioDiario === 0) {
-    return existenciaActual > 0
-      ? { prioridadCode: 1, prioridad: 'NORMAL' }
-      : { prioridadCode: 2, prioridad: 'CRITICA' };
-  }
-
-  if (existenciaActual < promedioSemanal) {
+  if (inventarioDias !== null && inventarioDias <= DIAS_PRIORIDAD_CRITICA) {
     return { prioridadCode: 2, prioridad: 'CRITICA' };
   }
 
-  if (existenciaActual < consumoPromedioMensual) {
+  if (inventarioDias !== null && inventarioDias <= DIAS_PRIORIDAD_ALTA) {
     return { prioridadCode: 3, prioridad: 'ALTA' };
   }
 
@@ -177,29 +180,34 @@ export const transformarReporteSolicitudPedido = (
         despachoConsumo: redondear(movimiento.despachoConsumo),
         salidaFV: redondear(movimiento.salidaFV),
       }));
-      const totalSalidas = redondear(
-        [...producto.movimientos.values()].reduce(
-          (total, movimiento) => total + movimiento.salidaCorregida,
-          0
-        )
+      const totalSalidasExacto = [...producto.movimientos.values()].reduce(
+        (total, movimiento) => total + movimiento.salidaCorregida,
+        0
       );
-      const consumoPromedioMensualExacto = totalSalidas / REPORTE_MESES.length;
-      const promedioSemanalExacto = (consumoPromedioMensualExacto * 12) / 52;
-      const consumoPromedioDiarioExacto = (consumoPromedioMensualExacto * 12) / 365;
+      const totalSalidas = redondear(totalSalidasExacto);
+      // La macro llama consumo total a salida corregida + despacho de consumo.
+      const totalConsumoExacto = [...producto.movimientos.values()].reduce(
+        (total, movimiento) => total + movimiento.salidaCorregida + movimiento.despachoConsumo,
+        0
+      );
+      const totalConsumo = redondear(totalConsumoExacto);
+      const consumoPromedioMensualExacto = totalConsumoExacto / REPORTE_MESES.length;
+      const consumoPromedioDiarioExacto = consumoPromedioMensualExacto / DIAS_MES_REPORTE;
+      const promedioSemanalExacto = consumoPromedioDiarioExacto * DIAS_SEMANA_REPORTE;
       const consumoPromedioMensual = redondear(consumoPromedioMensualExacto);
       const promedioSemanal = redondear(promedioSemanalExacto);
       const consumoPromedioDiario = redondear(consumoPromedioDiarioExacto);
       const existenciaActual = redondear(producto.existenciaActual);
-      const inventarioDias =
-        consumoPromedioDiarioExacto === 0
-          ? null
-          : redondear(existenciaActual / consumoPromedioDiarioExacto);
-      const prioridad = calcularPrioridadReporte(
-        existenciaActual,
-        promedioSemanalExacto,
-        consumoPromedioMensualExacto,
-        consumoPromedioDiarioExacto
-      );
+      const inventarioDiasExacto =
+        consumoPromedioDiarioExacto === 0 ? null : existenciaActual / consumoPromedioDiarioExacto;
+      const inventarioDias = inventarioDiasExacto === null ? null : redondear(inventarioDiasExacto);
+      const rotacionInventario =
+        existenciaActual === 0 ? null : redondear(consumoPromedioMensualExacto / existenciaActual);
+      const existenciaObjetivoExacta = consumoPromedioDiarioExacto * DIAS_OBJETIVO_PEDIDO;
+      const existenciaObjetivo = redondear(existenciaObjetivoExacta);
+      const cantidadSugerida = redondear(Math.max(0, existenciaObjetivoExacta - existenciaActual));
+      const debePedir = consumoPromedioDiarioExacto > 0 && cantidadSugerida > 0;
+      const prioridad = calcularPrioridadReporte(inventarioDiasExacto);
 
       return {
         codigoAgrupamiento: producto.codigoAgrupamiento,
@@ -211,10 +219,16 @@ export const transformarReporteSolicitudPedido = (
         existenciaActual,
         movimientosMensuales,
         totalSalidas,
+        totalConsumo,
         promedioSemanal,
         consumoPromedioMensual,
         consumoPromedioDiario,
+        rotacionInventario,
         inventarioDias,
+        diasObjetivo: DIAS_OBJETIVO_PEDIDO,
+        existenciaObjetivo,
+        debePedir,
+        cantidadSugerida,
         ...prioridad,
       };
     })

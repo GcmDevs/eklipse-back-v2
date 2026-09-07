@@ -32,9 +32,9 @@ export class FetchSolicitudPedidosImpl extends BaseSource {
   private readonly _existenciasDinamica: ExistenciasDinamicaImpl;
 
   public async execute(fechaInicio: Date, fechaFin: Date) {
-    const showAllContext = false; /* await this.hasAnyAuthority([
+    const showAllContext = await this.hasAnyAuthority([
       INN_AUTHORITIES.SOLICITUD_PEDIDO.FACTURAR_PEDIDO,
-    ]);*/
+    ]);
 
     const ctxs = showAllContext
       ? [

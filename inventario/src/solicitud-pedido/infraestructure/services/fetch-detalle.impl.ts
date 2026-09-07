@@ -25,7 +25,7 @@ export class FetchDetalleSolicitudPedidoImpl extends BaseSource {
 
   async execute(contextCode: GcmContextCode, numeroSolicitud: string) {
     const ctx = contextoSolicitudPedidoFactory(contextCode);
-    const esGestor = false; /*await this.hasAnyAuthority([INN_AUTHORITIES.SOLICITUD_PEDIDO.FACTURAR_PEDIDO]);*/
+    const esGestor = await this.hasAnyAuthority([INN_AUTHORITIES.SOLICITUD_PEDIDO.FACTURAR_PEDIDO]);
 
     if (!esGestor && this.auth.context.getCode() !== ctx.getCode()) {
       throw new Error('No tiene permisos para consultar solicitudes de este contexto');
