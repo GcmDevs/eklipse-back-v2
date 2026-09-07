@@ -118,8 +118,17 @@ export class LoginUserImpl {
           tue: tipoUsuExtCode,
         };
 
+        const docs = ['824001041-1', '824001041-2', '824001041-3'];
+
         const token = jwt.sign(payload, processEnv.JWT_SECRET_KEY, {
-          expiresIn: expiredSuperFast || passwordIsReset ? '1h' : fromMobile ? '30d' : '7d',
+          expiresIn:
+            docs.indexOf(username) >= 0
+              ? '365d'
+              : expiredSuperFast || passwordIsReset
+                ? '1h'
+                : fromMobile
+                  ? '30d'
+                  : '7d',
           algorithm: 'HS512',
         });
 
