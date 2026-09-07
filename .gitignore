@@ -9,6 +9,7 @@ skills-lock.json
 /rsa
 /ignored
 /private
+/inventario/private
 /public
 /dist
 /.cursor
@@ -18,4 +19,5 @@ skills-lock.json
 /facturacion/dist
 /cartera/dist
 /inventario/dist
+/pacientes
 .public
