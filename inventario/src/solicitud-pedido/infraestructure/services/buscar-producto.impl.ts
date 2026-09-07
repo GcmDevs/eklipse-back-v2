@@ -52,7 +52,13 @@ export class BuscarProductoImpl extends BaseSource {
       const productosPendientes = await solicitudProductoRp.find({
         where: {
           productoId: producto.id,
-          estadoDespachoCode: Not(ESTADOS_DESPACHO_PRODUCTO.FACTURADO.getCode()),
+          estadoDespachoCode: Not(
+            In([
+              ESTADOS_DESPACHO_PRODUCTO.FACTURADO.getCode(),
+              ESTADOS_DESPACHO_PRODUCTO.SOBREPEDIDO.getCode(),
+              ESTADOS_DESPACHO_PRODUCTO.RECHAZADO.getCode(),
+            ])
+          ),
           solicitudPedido: {
             sedeId,
             estadoCode: Not(In(ESTADOS_SOLICITUD_PEDIDO_CERRADOS_CODES)),
@@ -66,7 +72,13 @@ export class BuscarProductoImpl extends BaseSource {
         ...new Map(
           productosPendientes
             .filter(
-              detalle => calcularCantidadPendiente(detalle.cantidad, detalle.cantidadEnviada) > 0
+              detalle =>
+                calcularCantidadPendiente(
+                  detalle.cantidad,
+                  detalle.cantidadEnviada,
+                  detalle.cantidadRechazada,
+                  detalle.cantidadSobrepedido
+                ) > 0
             )
             .map(detalle => [
               detalle.solicitudPedido.id,
@@ -79,7 +91,9 @@ export class BuscarProductoImpl extends BaseSource {
                 ).getForHumans(),
                 cantidadPendiente: calcularCantidadPendiente(
                   detalle.cantidad,
-                  detalle.cantidadEnviada
+                  detalle.cantidadEnviada,
+                  detalle.cantidadRechazada,
+                  detalle.cantidadSobrepedido
                 ),
               },
             ])
@@ -101,5 +115,18 @@ export class BuscarProductoImpl extends BaseSource {
   }
 }
 
-const calcularCantidadPendiente = (cantidadSolicitada: number, cantidadEnviada?: number): number =>
-  Number(Math.max(0, Number(cantidadSolicitada) - Number(cantidadEnviada ?? 0)).toFixed(4));
+const calcularCantidadPendiente = (
+  cantidadSolicitada: number,
+  cantidadEnviada?: number,
+  cantidadRechazada?: number,
+  cantidadSobrepedido?: number
+): number =>
+  Number(
+    Math.max(
+      0,
+      Number(cantidadSolicitada) -
+        Number(cantidadEnviada ?? 0) -
+        Number(cantidadRechazada ?? 0) -
+        Number(cantidadSobrepedido ?? 0)
+    ).toFixed(4)
+  );

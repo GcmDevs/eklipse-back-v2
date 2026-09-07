@@ -36,7 +36,13 @@
     "coverageDirectory": "./coverage",
     "testEnvironment": "node",
     "roots": [
-      "<rootDir>/apps/"
-    ]
+      "<rootDir>/src/"
+    ],
+    "moduleNameMapper": {
+      "^@common/(.*)$": "<rootDir>/../@common/$1",
+      "^@inn/types/(.*)$": "<rootDir>/@types/$1",
+      "^@inn/orm/(.*)$": "<rootDir>/@orm/$1",
+      "^@inn/(.*)$": "<rootDir>/src/$1"
+    }
   }
 }
