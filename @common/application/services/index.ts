@@ -9,7 +9,7 @@ export * from './date';
 export * from './timer';
 
 export const findImageFromContext = (contexto: GcmContextType, centroId?: number) => {
-  return `../private/clinicas/${
+  return `private/clinicas/${
     contexto === GCM_CONTEXTS.ALTACENTRO
       ? centroId === undefined
         ? 'alta-centro.jpg'
