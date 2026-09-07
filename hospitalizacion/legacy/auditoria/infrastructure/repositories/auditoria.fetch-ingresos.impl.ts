@@ -84,6 +84,7 @@ export class AuditoriaFetchIngresosImpl extends BaseSource {
         'ingreso.paciente',
         'ingreso.detalleContrato',
         'cama',
+        'cama.centro',
         'cama.grupo',
         'cama.subgrupo',
       ],
@@ -305,6 +306,7 @@ export class AuditoriaFetchIngresosImpl extends BaseSource {
         codigoCama: i.cama.codigo,
         cama: {
           id: i.cama.id,
+          centroId: Number(i.cama.centroId),
           codigo: i.cama.codigo,
           nombre: i.cama.nombre,
           grupo: {
