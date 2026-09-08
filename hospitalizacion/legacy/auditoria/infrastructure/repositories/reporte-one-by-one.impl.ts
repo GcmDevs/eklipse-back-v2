@@ -140,7 +140,7 @@ export class AuditoriaReporteOneByOneImpl extends BaseSource {
         au.setTypes(false);
         return {
           id: au.id,
-          ingreso: au.ingreso.consecutivo,
+          ingreso: au.ingreso ? au.ingreso.consecutivo : 'UNDEFINED',
           nombreContrato: au.detalleContrato.nombre,
           fechaCreacion: au.fechaCreacion,
           pacienteDocumento: au.paciente.numeroDoc,
@@ -194,7 +194,7 @@ export class AuditoriaReporteOneByOneImpl extends BaseSource {
           }),
           cups: {
             id: au.id,
-            ingreso: au.ingreso.consecutivo,
+            ingreso: au.ingreso ? au.ingreso.consecutivo : 'UNDEFINED',
             nombreContrato: au.detalleContrato.nombre,
             cups1Codigo: au.ekGenserips1Id
               ? serviciosIps.find(sv => sv.id === au.ekGenserips1Id).codigo
@@ -283,6 +283,7 @@ export class AuditoriaReporteOneByOneImpl extends BaseSource {
         };
       });
     } catch (error: any) {
+      console.log(error);
       throw new BadRequestException(error.message);
     }
   }
