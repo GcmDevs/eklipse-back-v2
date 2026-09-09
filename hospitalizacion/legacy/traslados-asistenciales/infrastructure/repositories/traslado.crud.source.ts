@@ -905,8 +905,8 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
       //await this.verifyEntityExist(TABLE_NAMES.adn.centros, body.centroId);
       await this.qr.connect();
       await this.qr.startTransaction();
-      await this.verifyEntityExist(TABLE_NAMES.gen.pct.pacientes, body.pacienteId);
       transactionStarted = true;
+      await this.verifyEntityExist(TABLE_NAMES.gen.pct.pacientes, body.pacienteId);
 
       const trasladoRp = this.qr.manager.getRepository(TrasladoAsistencialOrm);
       const tramoRp = this.qr.manager.getRepository(TrasladoTramoOrm);
@@ -1001,8 +1001,8 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
       //await this.verifyEntityExist(TABLE_NAMES.adn.centros, body.centroId);
       await this.qr.connect();
       await this.qr.startTransaction();
-      await this.verifyEntityExist(TABLE_NAMES.gen.pct.pacientes, body.pacienteId);
       transactionStarted = true;
+      await this.verifyEntityExist(TABLE_NAMES.gen.pct.pacientes, body.pacienteId);
 
       const trasladoRp = this.qr.manager.getRepository(TrasladoAsistencialOrm);
 

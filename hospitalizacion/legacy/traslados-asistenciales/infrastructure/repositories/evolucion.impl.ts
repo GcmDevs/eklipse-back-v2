@@ -594,171 +594,175 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
     contextoCode: GcmContextCode
   ): Promise<any> {
     const qr = this.dynamicQR(gcmContextFactory(contextoCode));
-    const tramo = await this.getActiveTramoOrFail(trasladoId, qr);
-    await this.fetchAsignacionTramoActualConTripulacion(trasladoId, tramo.id, vehiculoId, qr);
+    try {
+      const tramo = await this.getActiveTramoOrFail(trasladoId, qr);
+      await this.fetchAsignacionTramoActualConTripulacion(trasladoId, tramo.id, vehiculoId, qr);
 
-    const signosVitalesRp = qr.manager.getRepository(TrasladoSignosVitalesOrm);
-    const notasRp = qr.manager.getRepository(TrasladoNotaOrm);
-    const procedimientoRp = qr.manager.getRepository(ProcedimientoOrm);
-    const medicamentoRp = qr.manager.getRepository(MedicamentoOrm);
+      const signosVitalesRp = qr.manager.getRepository(TrasladoSignosVitalesOrm);
+      const notasRp = qr.manager.getRepository(TrasladoNotaOrm);
+      const procedimientoRp = qr.manager.getRepository(ProcedimientoOrm);
+      const medicamentoRp = qr.manager.getRepository(MedicamentoOrm);
 
-    const [signosVitales, notas, procedimientos, medicamentos] = await Promise.all([
-      signosVitalesRp.find({
-        where: { trasladoId, tramoId: tramo.id },
-        order: { fecha: 'DESC' },
-      }),
-      notasRp.find({
-        where: { trasladoId, tramoId: tramo.id },
-        order: { fecha: 'DESC' },
-      }),
-      procedimientoRp.find({
-        where: { trasladoId, tramoId: tramo.id },
-        relations: ['procedimiento'],
-        order: { fechaCreacion: 'DESC' },
-      }),
-      medicamentoRp.find({
-        where: { trasladoId, tramoId: tramo.id },
-        relations: ['medicamento'],
-        order: { id: 'DESC' },
-      }),
-    ]);
+      const [signosVitales, notas, procedimientos, medicamentos] = await Promise.all([
+        signosVitalesRp.find({
+          where: { trasladoId, tramoId: tramo.id },
+          order: { fecha: 'DESC' },
+        }),
+        notasRp.find({
+          where: { trasladoId, tramoId: tramo.id },
+          order: { fecha: 'DESC' },
+        }),
+        procedimientoRp.find({
+          where: { trasladoId, tramoId: tramo.id },
+          relations: ['procedimiento'],
+          order: { fechaCreacion: 'DESC' },
+        }),
+        medicamentoRp.find({
+          where: { trasladoId, tramoId: tramo.id },
+          relations: ['medicamento'],
+          order: { id: 'DESC' },
+        }),
+      ]);
 
-    // Buscar procedimientos temporales en EKLIPSE
-    const ekProcedimientoIds = this.uniqueNumbers(
-      procedimientos.filter(p => p.ekprocedimientoId).map(p => p.ekprocedimientoId)
-    );
+      // Buscar procedimientos temporales en EKLIPSE
+      const ekProcedimientoIds = this.uniqueNumbers(
+        procedimientos.filter(p => p.ekprocedimientoId).map(p => p.ekprocedimientoId)
+      );
 
-    const ekQr = this.dynamicQR(GCM_CONTEXTS.EKLIPSE);
-    await ekQr.connect();
+      const ekQr = this.dynamicQR(GCM_CONTEXTS.EKLIPSE);
+      await ekQr.connect();
 
-    let procedimientoTempMap = new Map<number, any>();
-    if (ekProcedimientoIds.length > 0) {
-      try {
-        const procedimientoTempRp = ekQr.manager.getRepository(ProcedimientoTempOrm);
-        const procedimientosTemp = await procedimientoTempRp.find({
-          where: { id: In(ekProcedimientoIds) },
-        });
-        procedimientoTempMap = new Map(procedimientosTemp.map(p => [p.id, p]));
-      } finally {
+      let procedimientoTempMap = new Map<number, any>();
+      if (ekProcedimientoIds.length > 0) {
+        try {
+          const procedimientoTempRp = ekQr.manager.getRepository(ProcedimientoTempOrm);
+          const procedimientosTemp = await procedimientoTempRp.find({
+            where: { id: In(ekProcedimientoIds) },
+          });
+          procedimientoTempMap = new Map(procedimientosTemp.map(p => [p.id, p]));
+        } finally {
+          await ekQr.release();
+        }
+      } else {
         await ekQr.release();
       }
-    } else {
-      await ekQr.release();
-    }
 
-    const userIdsByContexto = new Map<number, number[]>();
+      const userIdsByContexto = new Map<number, number[]>();
 
-    for (const sv of signosVitales) {
-      const ctx = sv.centroProcesamiento;
-      if (!userIdsByContexto.has(ctx)) userIdsByContexto.set(ctx, []);
-      userIdsByContexto.get(ctx).push(sv.usuarioId);
-    }
+      for (const sv of signosVitales) {
+        const ctx = sv.centroProcesamiento;
+        if (!userIdsByContexto.has(ctx)) userIdsByContexto.set(ctx, []);
+        userIdsByContexto.get(ctx).push(sv.usuarioId);
+      }
 
-    for (const n of notas) {
-      const ctx = n.centroProcesamiento;
-      if (!userIdsByContexto.has(ctx)) userIdsByContexto.set(ctx, []);
-      userIdsByContexto.get(ctx).push(n.usuarioId);
-    }
+      for (const n of notas) {
+        const ctx = n.centroProcesamiento;
+        if (!userIdsByContexto.has(ctx)) userIdsByContexto.set(ctx, []);
+        userIdsByContexto.get(ctx).push(n.usuarioId);
+      }
 
-    for (const m of medicamentos) {
-      const ctx = m.centroProcesamiento;
-      if (!userIdsByContexto.has(ctx)) userIdsByContexto.set(ctx, []);
-      userIdsByContexto.get(ctx).push(m.usuarioId);
-    }
+      for (const m of medicamentos) {
+        const ctx = m.centroProcesamiento;
+        if (!userIdsByContexto.has(ctx)) userIdsByContexto.set(ctx, []);
+        userIdsByContexto.get(ctx).push(m.usuarioId);
+      }
 
-    for (const p of procedimientos) {
-      const ctx = p.centroProcesamiento;
-      if (!userIdsByContexto.has(ctx)) userIdsByContexto.set(ctx, []);
-      userIdsByContexto.get(ctx).push(p.usuarioId);
-    }
+      for (const p of procedimientos) {
+        const ctx = p.centroProcesamiento;
+        if (!userIdsByContexto.has(ctx)) userIdsByContexto.set(ctx, []);
+        userIdsByContexto.get(ctx).push(p.usuarioId);
+      }
 
-    const usuariosPorContexto = new Map<number, Map<number, UsuarioOrm>>();
+      const usuariosPorContexto = new Map<number, Map<number, UsuarioOrm>>();
 
-    await Promise.all(
-      Array.from(userIdsByContexto.entries()).map(async ([contexto, ids]) => {
-        const usuarios = await this.findUsuarioByContexto(ids, contexto);
-        usuariosPorContexto.set(contexto, new Map(usuarios.map(u => [u.id, u])));
-      })
-    );
+      await Promise.all(
+        Array.from(userIdsByContexto.entries()).map(async ([contexto, ids]) => {
+          const usuarios = await this.findUsuarioByContexto(ids, contexto);
+          usuariosPorContexto.set(contexto, new Map(usuarios.map(u => [u.id, u])));
+        })
+      );
 
-    const findUser = (usuarioId: number, centroProcesamiento: number) => {
-      const map = usuariosPorContexto.get(centroProcesamiento);
-      return map?.get(usuarioId) ?? null;
-    };
-
-    // ── Formatear ──
-    const formattedSignosVitales = signosVitales.map(sv => {
-      const u = findUser(sv.usuarioId, sv.centroProcesamiento);
-      return {
-        id: sv.id,
-        fechaCreacion: sv.fecha,
-        momentoCode: sv.momentoCode,
-        ta: sv.ta,
-        fc: sv.fc,
-        fr: sv.fr,
-        sat: sv.sat,
-        sato2: sv.sat,
-        fcf: sv.fcf,
-        temp: sv.temp,
-        talla: sv.talla,
-        peso: sv.peso,
-        glasgow: sv.glasgow,
-        observacion: sv.observacion,
-        asignacionId: sv.asignacionId ?? null,
-        usuario: u ? { id: u.id, nombre: u.nombreCompleto, documento: u.cedula } : 'Sistema',
+      const findUser = (usuarioId: number, centroProcesamiento: number) => {
+        const map = usuariosPorContexto.get(centroProcesamiento);
+        return map?.get(usuarioId) ?? null;
       };
-    });
 
-    const formattedNotas = notas.map(n => {
-      const u = findUser(n.usuarioId, n.centroProcesamiento);
+      // ── Formatear ──
+      const formattedSignosVitales = signosVitales.map(sv => {
+        const u = findUser(sv.usuarioId, sv.centroProcesamiento);
+        return {
+          id: sv.id,
+          fechaCreacion: sv.fecha,
+          momentoCode: sv.momentoCode,
+          ta: sv.ta,
+          fc: sv.fc,
+          fr: sv.fr,
+          sat: sv.sat,
+          sato2: sv.sat,
+          fcf: sv.fcf,
+          temp: sv.temp,
+          talla: sv.talla,
+          peso: sv.peso,
+          glasgow: sv.glasgow,
+          observacion: sv.observacion,
+          asignacionId: sv.asignacionId ?? null,
+          usuario: u ? { id: u.id, nombre: u.nombreCompleto, documento: u.cedula } : 'Sistema',
+        };
+      });
+
+      const formattedNotas = notas.map(n => {
+        const u = findUser(n.usuarioId, n.centroProcesamiento);
+        return {
+          id: n.id,
+          fechaCreacion: n.fecha,
+          nota: n.nota,
+          asignacionId: n.asignacionId ?? null,
+          usuario: u ? { id: u.id, nombre: u.nombreCompleto, documento: u.cedula } : 'Sistema',
+        };
+      });
+
+      const formattedProcedimientos = procedimientos.map(p => {
+        const u = findUser(p.usuarioId, p.centroProcesamiento);
+        const isTemporal = !!p.ekprocedimientoId;
+
+        const procTemp = isTemporal ? procedimientoTempMap.get(p.ekprocedimientoId) : null;
+
+        return {
+          id: p.id,
+          procedimientoId: p.procedimientoId,
+          ekprocedimientoId: p.ekprocedimientoId ?? null,
+          isTemporal,
+          fechaCreacion: p.fechaCreacion,
+          nombre: procTemp?.nombre ?? p.procedimiento?.nombre ?? 'Procedimiento',
+          codigo: procTemp?.codigo ?? p.procedimiento?.codigo ?? 'N/A',
+          asignacionId: p.asignacionId ?? null,
+          usuario: u ? { id: u.id, nombre: u.nombreCompleto, documento: u.cedula } : 'Sistema',
+        };
+      });
+
+      const formattedMedicamentos = medicamentos.map(m => {
+        const u = findUser(m.usuarioId, m.centroProcesamiento);
+        return {
+          id: m.id,
+          medicamentoId: m.medicamentoId,
+          dosis: m.dosis,
+          via: m.via,
+          nombre: m.medicamento?.nombre ?? 'Medicamento',
+          fechaCreacion: tramo.horaInicioRecorrido ?? new Date(),
+          asignacionId: m.asignacionId ?? null,
+          usuario: u ? { id: u.id, nombre: u.nombreCompleto, documento: u.cedula } : 'Sustituto',
+        };
+      });
+
       return {
-        id: n.id,
-        fechaCreacion: n.fecha,
-        nota: n.nota,
-        asignacionId: n.asignacionId ?? null,
-        usuario: u ? { id: u.id, nombre: u.nombreCompleto, documento: u.cedula } : 'Sistema',
+        signosVitales: formattedSignosVitales,
+        notas: formattedNotas,
+        procedimientos: formattedProcedimientos,
+        medicamentos: formattedMedicamentos,
       };
-    });
-
-    const formattedProcedimientos = procedimientos.map(p => {
-      const u = findUser(p.usuarioId, p.centroProcesamiento);
-      const isTemporal = !!p.ekprocedimientoId;
-
-      const procTemp = isTemporal ? procedimientoTempMap.get(p.ekprocedimientoId) : null;
-
-      return {
-        id: p.id,
-        procedimientoId: p.procedimientoId,
-        ekprocedimientoId: p.ekprocedimientoId ?? null,
-        isTemporal,
-        fechaCreacion: p.fechaCreacion,
-        nombre: procTemp?.nombre ?? p.procedimiento?.nombre ?? 'Procedimiento',
-        codigo: procTemp?.codigo ?? p.procedimiento?.codigo ?? 'N/A',
-        asignacionId: p.asignacionId ?? null,
-        usuario: u ? { id: u.id, nombre: u.nombreCompleto, documento: u.cedula } : 'Sistema',
-      };
-    });
-
-    const formattedMedicamentos = medicamentos.map(m => {
-      const u = findUser(m.usuarioId, m.centroProcesamiento);
-      return {
-        id: m.id,
-        medicamentoId: m.medicamentoId,
-        dosis: m.dosis,
-        via: m.via,
-        nombre: m.medicamento?.nombre ?? 'Medicamento',
-        fechaCreacion: tramo.horaInicioRecorrido ?? new Date(),
-        asignacionId: m.asignacionId ?? null,
-        usuario: u ? { id: u.id, nombre: u.nombreCompleto, documento: u.cedula } : 'Sustituto',
-      };
-    });
-
-    return {
-      signosVitales: formattedSignosVitales,
-      notas: formattedNotas,
-      procedimientos: formattedProcedimientos,
-      medicamentos: formattedMedicamentos,
-    };
+    } finally {
+      await qr.release();
+    }
   }
 
   public async createProcedimientosLista(body: CreateProcedimientosListaDto): Promise<number> {

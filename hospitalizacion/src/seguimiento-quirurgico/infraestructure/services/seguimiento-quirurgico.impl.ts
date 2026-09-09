@@ -158,7 +158,7 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
       return cirugias
         .filter(
           (item: any) =>
-            !['PROGRAMADO', 'SALIDA_PACIENTE', 'CIRUGIA_SUSPENDIDA'].includes(
+            !['SALIDA_PACIENTE', 'CIRUGIA_SUSPENDIDA'].includes(
               item.estadoActual.codigo
             )
         )
@@ -169,7 +169,7 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
             sede: item.sede,
             salaQx: item.quirofano.id,
             identificadorPublico: item.identificadorPublico,
-            nombrePublico: this.enmascararNombre(item.paciente.nombreCompleto),
+            nombrePublico: item.paciente.nombreCompleto,
             estadoActual: item.estadoActual,
             fechaActualizacion: item.fechaActualizacion,
             eventoActual: alertaActiva,
@@ -178,13 +178,6 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
     } finally {
       await qr.release();
     }
-  }
-  private enmascararNombre(nombre: string): string {
-    return nombre
-      .split(/\s+/)
-      .filter(Boolean)
-      .map(parte => `${parte.charAt(0).toUpperCase()}.`)
-      .join(' ');
   }
   private async obtenerAlertasActivas(qr: QueryRunner) {
     const [estados, historial] = await Promise.all([

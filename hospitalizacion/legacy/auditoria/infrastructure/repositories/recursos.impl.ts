@@ -26,18 +26,20 @@ import { AuditoriaOrm, EkServicioIpsOrm } from '@hpn/lgc/aud/orm/hpn/auditoria';
 export class AuditoriaRecursosImpl extends BaseSource {
   async fetchSubgrupos() {
     const camaRp = this.conn.getRepository(CamaOrm);
-    const camas = await camaRp.find({ relations: ['grupo', 'subgrupo'] });
+    const camas = await camaRp.find({ relations: ['grupo', 'subgrupo', 'centro'] });
     const subgrupos: any = [];
 
-    const camasReduced = uniqBy(camas, 'subGrupoId');
-    const camasGrouped = groupByKey(camasReduced, 'subGrupoId');
+    const camasGrouped = groupByKey(camas, 'subGrupoId');
 
     camasGrouped.forEach(c => {
       const sg = c.rows[0].subgrupo;
       sg.grupo = c.rows[0].grupo;
       delete sg.areaServicioId;
       sg.nombreGrupo = sg.grupo.nombre;
-      subgrupos.push(sg);
+      const centros = uniqBy(c.rows.map(cama => cama.centro).filter(Boolean), 'id').map(
+        centro => ({ id: centro.id, codigo: centro.codigo, nombre: centro.nombre })
+      );
+      subgrupos.push({ ...sg, centros });
     });
 
     return subgrupos;
