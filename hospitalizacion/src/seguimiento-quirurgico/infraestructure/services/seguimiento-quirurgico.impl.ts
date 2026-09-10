@@ -232,10 +232,12 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
       );
       if (!actual || dto.estadoEsperado !== actual.codigo)
         throw new ConflictException('El registro fue actualizado desde otra estación.');
-      if (destino.esEvento)
+      if (destino.esAlternativo || destino.esEvento)
         throw new ConflictException('Este código debe registrarse como evento.');
-      if (!destino.esAlternativo && destino.orden !== actual.orden + 1)
-        throw new ConflictException('La transición de estado no es consecutiva.');
+      if (Math.abs(destino.orden - actual.orden) !== 1)
+        throw new ConflictException(
+          'La transición de estado debe avanzar o retroceder un solo paso.'
+        );
       const now = new Date();
       seguimiento =
         seguimiento ??
@@ -248,11 +250,18 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
       seguimiento.estadoActual = destino.codigo;
       seguimiento.usuarioModificacionId = this.auth.id;
       seguimiento.usuarioModificacionNombre = this.auth.user.fullName ?? '';
-      if (destino.codigo === 'EN_PREPARACION') seguimiento.fechaInicioPreparacion = now;
-      if (destino.codigo === 'INICIA_CIRUGIA') seguimiento.fechaInicioCirugia = now;
-      if (destino.codigo === 'EN_SALA_RECUPERACION') seguimiento.fechaInicioRecuperacion = now;
-      if (destino.codigo === 'SALIDA_PACIENTE' || destino.codigo === 'CIRUGIA_SUSPENDIDA')
-        seguimiento.fechaFinalizacion = now;
+      if (destino.orden < actual.orden) {
+        if (actual.codigo === 'EN_PREPARACION') seguimiento.fechaInicioPreparacion = null;
+        if (actual.codigo === 'INICIA_CIRUGIA') seguimiento.fechaInicioCirugia = null;
+        if (actual.codigo === 'EN_SALA_RECUPERACION') seguimiento.fechaInicioRecuperacion = null;
+        if (actual.codigo === 'SALIDA_PACIENTE') seguimiento.fechaFinalizacion = null;
+      } else {
+        if (destino.codigo === 'EN_PREPARACION') seguimiento.fechaInicioPreparacion = now;
+        if (destino.codigo === 'INICIA_CIRUGIA') seguimiento.fechaInicioCirugia = now;
+        if (destino.codigo === 'EN_SALA_RECUPERACION') seguimiento.fechaInicioRecuperacion = now;
+        if (destino.codigo === 'SALIDA_PACIENTE' || destino.codigo === 'CIRUGIA_SUSPENDIDA')
+          seguimiento.fechaFinalizacion = now;
+      }
       await seguimientoRp.save(seguimiento);
       await qr.manager.getRepository(HistorialEstadoCirugiaOrm).save({
         pcnConsec: id,
