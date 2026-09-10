@@ -2,7 +2,14 @@ import { BaseSource } from '@common/infrastructure/services';
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { QueryRunner } from 'typeorm';
 import { CambiarEstadoCirugiaDto } from '../../presentation/dto/cambiar-estado-cirugia.dto';
-import { AgrupadorSalaQuirurgicaOrm, AgrupadorSalasQuirurgicasOrm, AsignacionQuirofanoUsuarioOrm, EstadoCirugiaOrm, HistorialEstadoCirugiaOrm, SeguimientoCirugiaOrm } from '../orm';
+import {
+  AgrupadorSalaQuirurgicaOrm,
+  AgrupadorSalasQuirurgicasOrm,
+  AsignacionQuirofanoUsuarioOrm,
+  EstadoCirugiaOrm,
+  HistorialEstadoCirugiaOrm,
+  SeguimientoCirugiaOrm,
+} from '../orm';
 
 @Injectable()
 export class SeguimientoQuirurgicoImpl extends BaseSource {
@@ -19,7 +26,9 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
         nombre: agrupador.nombre,
         salas: agrupador.salas.map(sala => sala.salaQx),
       }));
-    } finally { await qr.release(); }
+    } finally {
+      await qr.release();
+    }
   }
   async crearAgrupadorSalas(datos: { nombre: string; salas: string[] }) {
     const nombre = datos.nombre?.trim();
@@ -27,20 +36,25 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
     if (!nombre) throw new ConflictException('Debe indicar el nombre de la especialidad.');
     if (!salas.length) throw new ConflictException('Debe seleccionar al menos una sala.');
     const qr = this.dynamicQR(this.auth.context);
-    await qr.connect(); await qr.startTransaction();
+    await qr.connect();
+    await qr.startTransaction();
     try {
       const agrupadores = qr.manager.getRepository(AgrupadorSalasQuirurgicasOrm);
       const salasRepo = qr.manager.getRepository(AgrupadorSalaQuirurgicaOrm);
       const existente = await agrupadores.findOne({ where: { nombre } });
       if (existente) throw new ConflictException('Ya existe un agrupador con este nombre.');
       const agrupador = await agrupadores.save(agrupadores.create({ nombre, activo: true }));
-      await salasRepo.save(salas.map(salaQx => salasRepo.create({ agrupadorId: agrupador.id, salaQx })));
+      await salasRepo.save(
+        salas.map(salaQx => salasRepo.create({ agrupadorId: agrupador.id, salaQx }))
+      );
       await qr.commitTransaction();
       return { id: agrupador.id, nombre: agrupador.nombre, salas };
     } catch (error) {
       if (qr.isTransactionActive) await qr.rollbackTransaction();
       throw error;
-    } finally { await qr.release(); }
+    } finally {
+      await qr.release();
+    }
   }
   async actualizarAgrupadorSalas(id: number, datos: { nombre: string; salas: string[] }) {
     const nombre = datos.nombre?.trim();
@@ -48,7 +62,8 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
     if (!nombre) throw new ConflictException('Debe indicar el nombre de la especialidad.');
     if (!salas.length) throw new ConflictException('Debe seleccionar al menos una sala.');
     const qr = this.dynamicQR(this.auth.context);
-    await qr.connect(); await qr.startTransaction();
+    await qr.connect();
+    await qr.startTransaction();
     try {
       const agrupadores = qr.manager.getRepository(AgrupadorSalasQuirurgicasOrm);
       const salasRepo = qr.manager.getRepository(AgrupadorSalaQuirurgicaOrm);
@@ -67,7 +82,9 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
     } catch (error) {
       if (qr.isTransactionActive) await qr.rollbackTransaction();
       throw error;
-    } finally { await qr.release(); }
+    } finally {
+      await qr.release();
+    }
   }
   async asignacionesUsuario(usuarioDocumento: string) {
     const qr = this.dynamicQR(this.auth.context);
@@ -169,7 +186,7 @@ export class SeguimientoQuirurgicoImpl extends BaseSource {
             sede: item.sede,
             salaQx: item.quirofano.id,
             identificadorPublico: item.identificadorPublico,
-            nombrePublico: this.enmascararNombre(item.paciente.nombreCompleto),
+            nombrePublico: item.paciente.nombreCompleto,
             estadoActual: item.estadoActual,
             fechaActualizacion: item.fechaActualizacion,
             eventoActual: alertaActiva,
