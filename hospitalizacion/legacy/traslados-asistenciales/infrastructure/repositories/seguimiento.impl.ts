@@ -298,6 +298,10 @@ export class SeguimientoTrasladoImpl extends RecursosCompartidosSource {
         throw new Error('Este traslado no se puede reasignar porque se encuentra en curso');
       }
 
+      if (traslado.estadoCode === ESTADOS_ASISTENCIA.RECIBIDO.getCode()) {
+        throw new Error('Este traslado no se puede reasignar porque se encuentra recibido');
+      }
+
       const asignacionRp = qr.manager.getRepository(TrasladoAsignacionOrm);
       const activa = await asignacionRp.findOne({
         where: { trasladoId: body.trasladoId, tramoId: tramoActivo.id, isActiva: true },

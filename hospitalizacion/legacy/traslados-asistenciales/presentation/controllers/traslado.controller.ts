@@ -28,6 +28,7 @@ import { GcmContextCode } from '@common/domain/types';
 import { TrasladosRealtimeGateway } from '../gateways/traslados-realtime.gateway';
 import { HPN_AUTHORITIES } from '@authorities';
 import { LGC_TAS_LOCATIONS } from '../../application/constants';
+import { ESTADOS_ASISTENCIA } from '../../@types/gcn';
 
 @ApiTags('Traslados Asistenciales')
 @ApiBearerAuth()
@@ -63,6 +64,16 @@ export class TrasladoController {
         onlyMisSolicitudes,
         contextoCode
       );
+    } catch (error: any) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @ApiOperation({ summary: 'Obtener un traslado por id' })
+  @Get('find-by-id/:id')
+  public findById(@Param('id') id: string, @Query('contextoCode') contextoCode?: GcmContextCode) {
+    try {
+      return this._source.findTrasladoById(+id, contextoCode);
     } catch (error: any) {
       throw new BadRequestException(error.message);
     }
@@ -147,7 +158,7 @@ export class TrasladoController {
       const result = await this._source.createPrimario(payload);
       if (result.result) {
         this._events.publish({
-          tipo: 'CREACION',
+          tipo: ESTADOS_ASISTENCIA.FINALIZADO.getCode(),
           trasladoId: result.trasladoId,
           contextoCode: this._source.getRealtimeContextCode(),
         });
@@ -166,7 +177,7 @@ export class TrasladoController {
       const result = await this._source.createSecundario(body);
       if (result.result) {
         this._events.publish({
-          tipo: 'CREACION',
+          tipo: ESTADOS_ASISTENCIA.CREADO.getCode(),
           trasladoId: result.trasladoId,
           contextoCode: this._source.getRealtimeContextCode(),
         });
@@ -222,7 +233,7 @@ export class TrasladoController {
       const result = await this._source.inicioSecundario(body);
       if (result)
         this._events.publish({
-          tipo: 'INICIO',
+          tipo: ESTADOS_ASISTENCIA.EN_CURSO.getCode(),
           trasladoId: body.trasladoId,
           contextoCode: body.contextoCode,
         });

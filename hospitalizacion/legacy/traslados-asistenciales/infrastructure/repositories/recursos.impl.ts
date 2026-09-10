@@ -250,9 +250,9 @@ export class TrasladoRecursosImpl extends BaseSource {
 
     for (const contexto of ALL_CONTEXTS_WITH_AUTHORITIES) {
       const qr = this.dynamicQR(contexto);
-      await qr.connect();
 
       try {
+        await qr.connect();
         const usuarioRp = qr.manager.getRepository(_PrivSecUserOrm);
         const qbUsuario = usuarioRp
           .createQueryBuilder('u')

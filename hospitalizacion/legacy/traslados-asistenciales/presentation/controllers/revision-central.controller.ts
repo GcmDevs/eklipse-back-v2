@@ -5,6 +5,7 @@ import { TrasladoRevisionCentralImpl } from '@hpn/lgc/tas/infrastructure/reposit
 import { CreateRevisionCentralDto, CancelTrasladoDto } from '../dtos';
 import { HPN_AUTHORITIES } from '@authorities';
 import { TrasladosRealtimeGateway } from '../gateways/traslados-realtime.gateway';
+import { ESTADOS_ASISTENCIA } from '../../@types/gcn';
 
 @ApiTags('Traslados Asistenciales')
 @ApiBearerAuth()
@@ -24,7 +25,7 @@ export class TrasladoRevisionCentralController {
       const result = await this._source.decidir(body);
       if (result)
         this._events.publish({
-          tipo: 'DECISION',
+          tipo: ESTADOS_ASISTENCIA.APROBADO.getCode(),
           trasladoId: body.trasladoId,
           contextoCode: body.contextoCode,
         });
@@ -42,7 +43,7 @@ export class TrasladoRevisionCentralController {
       const result = await this._source.cancel(body);
       if (result)
         this._events.publish({
-          tipo: 'CANCELACION',
+          tipo: ESTADOS_ASISTENCIA.CANCELADO.getCode(),
           trasladoId: body.trasladoId,
           contextoCode: body.contextoCode,
         });

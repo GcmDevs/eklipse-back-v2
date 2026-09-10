@@ -902,7 +902,8 @@ export class RecursosCompartidosSource extends BaseSource {
         estadoCode: ESTADOS_ASISTENCIA.ASIGNADO.getCode(),
         //motivo: body.observacion,
         fechaAsignacion: new Date(),
-        isActiva: true,
+        fechaDesasignacion: new Date(),
+        isActiva: false,
         centroProcesamiento: this.auth.context.getNumericCode(),
       })
     );

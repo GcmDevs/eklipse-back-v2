@@ -35,6 +35,7 @@ export class DataRes {
 }
 
 export class UbicacionDataRes {
+  nit: number;
   ekid: number;
   id: number;
   codigo: string;
@@ -147,6 +148,7 @@ export class TramoDetalleDataRes {
   orden: number;
   tipoTramoCode: number;
   estadoCode: number;
+  kmInicial: number;
   kmFinal: number;
   recibidoPorNombre: string;
   recibidoPorDocumento: string;

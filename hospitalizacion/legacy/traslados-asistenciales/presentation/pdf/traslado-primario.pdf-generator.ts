@@ -67,7 +67,7 @@ function resolveBackendResource(relativePath: string): string {
   const cleanPath = relativePath.replace(/^(\.\.[\/\\])+/, '');
   const isSubdir = /[\\\/]\d+$/.test(process.cwd());
   const backendRoot = isSubdir ? path.resolve(process.cwd(), '..') : process.cwd();
-  return path.resolve(backendRoot, cleanPath);
+  return path.resolve(backendRoot.replace('\hospitalizacion', ''), cleanPath);
 }
 
 /** Carga una imagen local para jsPDF usando fs.readFileSync directamente */
@@ -91,11 +91,14 @@ function getLocalImageBuffer(
 }
 
 /** Obtiene el buffer de una firma a partir de la cédula del usuario buscando en private/gen/trasl */
-function getFirmaBufferFromCedula(cedula?: string): { buffer: any; ext: string } | null {
+function getFirmaBufferFromCedula(
+  cedula?: string,
+  ruta?: string
+): { buffer: any; ext: string } | null {
   if (!cedula) return null;
   try {
     const targetCedula = String(cedula).trim();
-    const folderPath = resolveBackendResource('private/gen/trasl');
+    const folderPath = resolveBackendResource(ruta || 'private/gen/trasl/firma');
     if (fs.existsSync(folderPath)) {
       const files = fs.readdirSync(folderPath);
       const matchedFile = files.find(f => f.includes(targetCedula));
@@ -425,6 +428,104 @@ function drawCheck(doc: jsPDF, label: string, active: boolean, x: number, y: num
   doc.text(label, x + 3.5, y - 0.2);
 }
 
+// ─── Layout dinámico de firmas ───────────────────────────────────────────────
+interface FirmaItem {
+  bufferObj: { buffer: any; ext: string } | null;
+  nombreLabel: string;
+  cargoLabel: string;
+  isSello?: boolean;
+}
+
+/** Calcula la distribución de firmas en filas (máx 3 por fila) */
+function computeFirmaRows(total: number): number[] {
+  if (total <= 0) return [];
+  if (total <= 3) return [total];
+  if (total === 4) return [2, 2];
+  if (total === 5) return [3, 2];
+  return [3, 3];
+}
+
+/** Dibuja un bloque de firma (imagen + línea + nombre + cargo) en una posición específica */
+function drawFirmaBlock(
+  doc: jsPDF,
+  bufferObj: { buffer: any; ext: string } | null,
+  nombreLabel: string,
+  cargoLabel: string,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  isSello = false
+): void {
+  if (bufferObj) {
+    if (isSello) {
+      const selloSize = 40;
+      const imgX = x + (w - selloSize) / 2;
+      const imgY = y + 1;
+      doc.addImage(bufferObj.buffer, bufferObj.ext, imgX, imgY, selloSize, 20, undefined, 'FAST');
+    } else {
+      doc.addImage(bufferObj.buffer, bufferObj.ext, x + 5, y + 1, w - 10, h - 5, undefined, 'FAST');
+    }
+  }
+  const lineY = y + h - 3;
+  doc.setDrawColor(120, 120, 120);
+  doc.setLineWidth(0.2);
+  doc.line(x + 3, lineY, x + w - 3, lineY);
+
+  doc.setTextColor(0);
+  doc.setFont(FM.h, F.b);
+  doc.setFontSize(6);
+  doc.text(nombreLabel.toUpperCase(), x + w / 2, lineY + 3, { align: 'center' });
+
+  doc.setTextColor(100);
+  doc.setFont(FM.h, F.n);
+  doc.setFontSize(5);
+  doc.text(cargoLabel.toUpperCase(), x + w / 2, lineY + 5.5, { align: 'center' });
+}
+
+/** Dibuja todas las firmas distribuidas dinámicamente en filas (máx 3 por fila) */
+function drawFirmasLayout(
+  doc: jsPDF,
+  firmas: FirmaItem[],
+  opts: { M: number; CW: number; startY: number; PH: number }
+): number {
+  const rows = computeFirmaRows(firmas.length);
+  let curY = opts.startY;
+  let firmaIdx = 0;
+
+  for (const firmasInRow of rows) {
+    const rowW = opts.CW / firmasInRow;
+    const rowH = 22;
+
+    if (curY + rowH > opts.PH - opts.M) {
+      doc.addPage();
+      curY = opts.M;
+    }
+
+    for (let col = 0; col < firmasInRow; col++) {
+      const firma = firmas[firmaIdx];
+      if (!firma) break;
+      const x = opts.M + rowW * col;
+      drawFirmaBlock(
+        doc,
+        firma.bufferObj,
+        firma.nombreLabel,
+        firma.cargoLabel,
+        x,
+        curY,
+        rowW,
+        rowH,
+        firma.isSello
+      );
+      firmaIdx++;
+    }
+
+    curY += rowH + 2;
+  }
+
+  return curY;
+}
+
 // ─── Exportación Principal ────────────────────────────────────────────────────
 export async function generateTrasladoPrimarioPdf(
   payload: TrasladoPdfPayload
@@ -601,7 +702,7 @@ export async function generateTrasladoPrimarioPdf(
   const orig = data.origen;
   const dest = data.destino;
 
-  doc.setFillColor(245, 245, 245);
+  /*  doc.setFillColor(245, 245, 245);
   doc.rect(M, Y, hw, 5.5, 'F');
   doc.setDrawColor(180, 180, 180);
   doc.rect(M, Y, hw, 5.5);
@@ -618,12 +719,12 @@ export async function generateTrasladoPrimarioPdf(
   doc.setFontSize(5.5);
   doc.setTextColor(255);
   doc.text('INSTITUCIÓN DE DESTINO / RECEPTORA', M + hw + hw / 2, Y + 3.8, { align: 'center' });
-  doc.setTextColor(0);
+  doc.setTextColor(0); */
 
   Y += 5.5;
 
-  drawField(doc, 'Nombre IPS / Institución', v(orig.nombre), M, Y, hw, 7.5);
-  drawField(doc, 'Nombre IPS / Institución', v(dest.nombre), M + hw, Y, hw, 7.5);
+  drawField(doc, 'LUGAR DE ORIGEN', v(orig.nombre), M, Y, hw, 7.5);
+  drawField(doc, 'INSTITUCION RECEPTORA', v(dest.nombre), M + hw, Y, hw, 7.5);
   Y += 7.5;
 
   const wReps = 25;
@@ -734,20 +835,20 @@ export async function generateTrasladoPrimarioPdf(
   chkPage(40);
   Y += drawSectionHeader(doc, '6. TRIPULACIÓN Y FIRMAS (Res. 2284/2023)', M, Y, CW);
   const asig = data.asignacionActual || {};
-  const cnd = asig.conductor;
-  const axl = asig.auxiliar;
-  const med = asig.medico;
+  const conductor = asig.conductor;
+  const auxiliar = asig.auxiliar;
+  const medico = asig.medico;
   const cq = CW / 3;
-  drawField(doc, 'CONDUCTOR', getUsuarioLabel(cnd?.nombre, cnd?.documento), M, Y, cq);
+  drawField(doc, 'CONDUCTOR', getUsuarioLabel(conductor?.nombre, conductor?.documento), M, Y, cq);
   drawField(
     doc,
     'AUXILIAR EN ENFERMERÍA',
-    getUsuarioLabel(axl?.nombre, axl?.documento),
+    getUsuarioLabel(auxiliar?.nombre, auxiliar?.documento),
     M + cq,
     Y,
     cq
   );
-  drawField(doc, 'MÉDICO', getUsuarioLabel(med?.nombre, med?.documento), M + cq * 2, Y, cq);
+  drawField(doc, 'MÉDICO', getUsuarioLabel(medico?.nombre, medico?.documento), M + cq * 2, Y, cq);
   Y += 8.5;
   drawField(
     doc,
@@ -771,77 +872,52 @@ export async function generateTrasladoPrimarioPdf(
   );
   Y += 12;
 
-  // Firmas premium con inyección binaria nativa
-  chkPage(35);
+  // Firmas y sellos — distribución dinámica
+  chkPage(30);
 
   const isMedicalizado = data.tipoTrasladoCode === 2 || data.tipoTrasladoCode === 3;
-  const numFirmas = isMedicalizado ? 4 : 3;
-  const firmaW = CW / numFirmas;
+  //const asigFinal = data.asignacionActual || {};
+  const firmaConductor = getFirmaBufferFromCedula(conductor?.documento);
+  const firmaAuxiliar = getFirmaBufferFromCedula(auxiliar?.documento);
+  const firmaMedico = isMedicalizado ? getFirmaBufferFromCedula(medico?.documento) : null;
+  const firmaIPS = getFirmaBufferFromCedula(`${activeTramo.destino.nit}`, 'private/clinicas/sellos');
 
-  const asigFinal = data.asignacionActual || {};
-  const firmaConductor = getFirmaBufferFromCedula(asigFinal.conductor?.documento);
-  const firmaAuxiliar = getFirmaBufferFromCedula(asigFinal.auxiliar?.documento);
-  const firmaMedico = isMedicalizado ? getFirmaBufferFromCedula(asigFinal.medico?.documento) : null;
+  const firmasPrimario: FirmaItem[] = [
+    {
+      bufferObj: firmaConductor,
+      nombreLabel: v(conductor?.nombre, 'CONDUCTOR ASIGNADO'),
+      cargoLabel: 'FIRMA CONDUCTOR',
+    },
+    {
+      bufferObj: firmaAuxiliar,
+      nombreLabel: v(auxiliar?.nombre, 'AUXILIAR ASIGNADO'),
+      cargoLabel: 'FIRMA AUXILIAR',
+    },
+    {
+      bufferObj: firmaImgData,
+      nombreLabel: v(activeTramo.recibidoPorNombre, 'RECEPCIÓN IPS'),
+      cargoLabel: 'FIRMA PROFESIONAL QUE RECIBE ',
+    },
+  ];
 
-  let curFirma = 0;
-  const baseFirmaY = Y;
-  const lineY = baseFirmaY + 15;
-
-  const drawFirmaColPrimario = (bufferObj: any, nombreLabel: string, cargoLabel: string) => {
-    const startX = M + firmaW * curFirma;
-    if (bufferObj) {
-      doc.addImage(
-        bufferObj.buffer,
-        bufferObj.ext,
-        startX + 5,
-        baseFirmaY + 1,
-        firmaW - 10,
-        13,
-        undefined,
-        'FAST'
-      );
-    }
-    doc.setDrawColor(120, 120, 120);
-    doc.setLineWidth(0.2);
-    doc.line(startX + 3, lineY, startX + firmaW - 3, lineY);
-
-    doc.setTextColor(0);
-    doc.setFont(FM.h, F.b);
-    doc.setFontSize(6);
-    doc.text(nombreLabel.toUpperCase(), startX + firmaW / 2, lineY + 3, { align: 'center' });
-
-    doc.setTextColor(100);
-    doc.setFont(FM.h, F.n);
-    doc.setFontSize(5);
-    doc.text(cargoLabel.toUpperCase(), startX + firmaW / 2, lineY + 5.5, { align: 'center' });
-
-    curFirma++;
-  };
-
-  drawFirmaColPrimario(
-    firmaConductor,
-    v(asigFinal.conductor?.nombre, 'CONDUCTOR ASIGNADO'),
-    'FIRMA CONDUCTOR'
-  );
-  drawFirmaColPrimario(
-    firmaAuxiliar,
-    v(asigFinal.auxiliar?.nombre, 'AUXILIAR ASIGNADO'),
-    'FIRMA AUXILIAR'
-  );
-  if (isMedicalizado) {
-    drawFirmaColPrimario(
-      firmaMedico,
-      v(asigFinal.medico?.nombre, 'MÉDICO ASIGNADO'),
-      'FIRMA MÉDICO'
-    );
+  if (firmaMedico) {
+    firmasPrimario.splice(2, 0, {
+      bufferObj: firmaMedico,
+      nombreLabel: v(medico?.nombre, 'MÉDICO ASIGNADO'),
+      cargoLabel: 'FIRMA MÉDICO',
+    });
   }
-  drawFirmaColPrimario(
-    firmaImgData,
-    v(activeTramo.recibidoPorNombre || data.recibidoPorNombre, 'RECEPCIÓN IPS'),
-    'SELLO / FIRMA INSTITUCIÓN'
-  );
 
-  Y += 23;
+  if (firmaIPS) {
+    firmasPrimario.push({
+      bufferObj: firmaIPS,
+      nombreLabel: v(activeTramo.destino.nombre),
+      cargoLabel: 'FIRMA O SELLO DE LA ENTIDAD RECEPTORA',
+      isSello: true,
+    });
+  }
+
+  Y = drawFirmasLayout(doc, firmasPrimario, { M, CW, startY: Y, PH });
 
   // Pie de Página
   doc.setFontSize(5);

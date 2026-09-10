@@ -27,19 +27,8 @@ export class DescargarPdfService {
       throw new NotFoundException('No se encontró el traslado solicitado');
     }
 
-    const isPrimario = traslado.tipoCode === PRIMARIO.getCode();
-    const isSecundario = traslado.tipoCode === SECUNDARIO.getCode();
-
-    const canDownload =
-      (isPrimario && traslado.estadoCode === ESTADOS_ASISTENCIA.CREADO.getCode()) ||
-      (isSecundario && traslado.estadoCode === ESTADOS_ASISTENCIA.FINALIZADO.getCode());
-
-    if (!canDownload) {
-      throw new Error(
-        isPrimario
-          ? 'El PDF del traslado primario solo está disponible en estado CREADO'
-          : 'El PDF del traslado secundario solo está disponible en estado FINALIZADO'
-      );
+    if (traslado.estadoCode !== ESTADOS_ASISTENCIA.FINALIZADO.getCode()) {
+      throw new Error('El PDF del traslado solo está disponible en estado FINALIZADO');
     }
 
     const payload = {

@@ -51,7 +51,7 @@ function resolveBackendResource(relativePath: string): string {
   const cleanPath = relativePath.replace(/^(\.\.[\/\\])+/, '');
   const isSubdir = /[\\\/]\d+$/.test(process.cwd());
   const backendRoot = isSubdir ? path.resolve(process.cwd(), '..') : process.cwd();
-  return path.resolve(backendRoot, cleanPath);
+  return path.resolve(backendRoot.replace('\hospitalizacion', ''), cleanPath);
 }
 
 /** Carga una imagen local para jsPDF usando fs.readFileSync directamente */
@@ -75,11 +75,14 @@ function getLocalImageBuffer(
 }
 
 /** Obtiene el buffer de una firma a partir de la cédula del usuario buscando en private/gen/trasl */
-function getFirmaBufferFromCedula(cedula?: string): { buffer: any; ext: string } | null {
+function getFirmaBufferFromCedula(
+  cedula?: string,
+  ruta?: string
+): { buffer: any; ext: string } | null {
   if (!cedula) return null;
   try {
     const targetCedula = String(cedula).trim();
-    const folderPath = resolveBackendResource('private/gen/trasl');
+    const folderPath = resolveBackendResource(ruta || 'private/gen/trasl/firma');
     if (fs.existsSync(folderPath)) {
       const files = fs.readdirSync(folderPath);
       const matchedFile = files.find(f => f.includes(targetCedula));
@@ -406,6 +409,104 @@ function drawCheck(doc: jsPDF, label: string, active: boolean, x: number, y: num
   doc.text(label, x + 4.5, y - 0.5);
 }
 
+// ─── Layout dinámico de firmas ───────────────────────────────────────────────
+interface FirmaItem {
+  bufferObj: { buffer: any; ext: string } | null;
+  nombreLabel: string;
+  cargoLabel: string;
+  isSello?: boolean;
+}
+
+/** Calcula la distribución de firmas en filas (máx 3 por fila) */
+function computeFirmaRows(total: number): number[] {
+  if (total <= 0) return [];
+  if (total <= 3) return [total];
+  if (total === 4) return [2, 2];
+  if (total === 5) return [3, 2];
+  return [3, 3];
+}
+
+/** Dibuja un bloque de firma (imagen + línea + nombre + cargo) en una posición específica */
+function drawFirmaBlock(
+  doc: jsPDF,
+  bufferObj: { buffer: any; ext: string } | null,
+  nombreLabel: string,
+  cargoLabel: string,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  isSello = false
+): void {
+  if (bufferObj) {
+    if (isSello) {
+      const selloSize = 40;
+      const imgX = x + (w - selloSize) / 2;
+      const imgY = y + 1;
+      doc.addImage(bufferObj.buffer, bufferObj.ext, imgX, imgY, selloSize, 24, undefined, 'FAST');
+    } else {
+      doc.addImage(bufferObj.buffer, bufferObj.ext, x + 5, y + 1, w - 10, h - 5, undefined, 'FAST');
+    }
+  }
+  const lineY = y + h - 3;
+  doc.setDrawColor(120, 120, 120);
+  doc.setLineWidth(0.2);
+  doc.line(x + 4, lineY, x + w - 4, lineY);
+
+  doc.setTextColor(0);
+  doc.setFont(FM.h, F.b);
+  doc.setFontSize(6.5);
+  doc.text(nombreLabel.toUpperCase(), x + w / 2, lineY + 3.5, { align: 'center' });
+
+  doc.setTextColor(100);
+  doc.setFont(FM.h, F.n);
+  doc.setFontSize(5.5);
+  doc.text(cargoLabel.toUpperCase(), x + w / 2, lineY + 6.5, { align: 'center' });
+}
+
+/** Dibuja todas las firmas distribuidas dinámicamente en filas (máx 3 por fila) */
+function drawFirmasLayout(
+  doc: jsPDF,
+  firmas: FirmaItem[],
+  opts: { M: number; CW: number; startY: number; PH: number }
+): number {
+  const rows = computeFirmaRows(firmas.length);
+  let curY = opts.startY;
+  let firmaIdx = 0;
+
+  for (const firmasInRow of rows) {
+    const rowW = opts.CW / firmasInRow;
+    const rowH = 26;
+
+    if (curY + rowH > opts.PH - opts.M) {
+      doc.addPage();
+      curY = opts.M;
+    }
+
+    for (let col = 0; col < firmasInRow; col++) {
+      const firma = firmas[firmaIdx];
+      if (!firma) break;
+      const x = opts.M + rowW * col;
+      drawFirmaBlock(
+        doc,
+        firma.bufferObj,
+        firma.nombreLabel,
+        firma.cargoLabel,
+        x,
+        curY,
+        rowW,
+        rowH,
+        firma.isSello
+      );
+      firmaIdx++;
+    }
+
+    curY += rowH + 2;
+  }
+
+  return curY;
+}
+
 // ─── Exportación Principal ────────────────────────────────────────────────────
 export async function generateTrasladoSecundarioPdf(
   payload: TrasladoPdfPayload
@@ -422,8 +523,13 @@ export async function generateTrasladoSecundarioPdf(
 
   const tramos = data.tramos;
   const activeTramo = tramos.find((t: any) => t.isActivo) || tramos[tramos.length - 1];
-  const p = data.paciente;
+  const tramoIda = tramos.find(t => t.orden === 1);
   const isRedondo = data.tipoRecorridoCode === TIPOS_TRASLADO.REDONDO.getCode();
+  let tramoVuelta;
+  if (isRedondo) {
+    tramoVuelta = tramos.find(t => t.orden === 2);
+  }
+  const p = data.paciente;
 
   // Helper: último signo vital de un tramo específico (ordenado por fechaCreacion desc)
   const getLastSignoDeTramo = (tramo: any): Record<string, any> => {
@@ -458,8 +564,6 @@ export async function generateTrasladoSecundarioPdf(
 
   // Pre-cargar firma(s) en buffer nativo
   const firmaImgData = getLocalImageBuffer(activeTramo.firmaImg);
-  const firmaTramo1 = isRedondo ? getLocalImageBuffer(tramos[0]?.firmaImg) : null;
-  const firmaTramo2 = isRedondo ? getLocalImageBuffer(tramos[1]?.firmaImg) : null;
 
   // 1. Encabezado
   Y += drawOfficialHeader(
@@ -491,28 +595,88 @@ export async function generateTrasladoSecundarioPdf(
   const wKm = 32;
   const wTotal = CW - wFecha * 2 - wKm * 2;
 
-  drawField(doc, 'FECHA/HORA INICIO', fmt(activeTramo.horaInicioRecorrido), M, Y, wFecha);
-  drawField(doc, 'FECHA/HORA RECEPCIÓN', fmt(activeTramo.horaRecepcionInst), M + wFecha, Y, wFecha);
-  drawField(doc, 'KM INICIAL (ODÓMETRO)', v(data.kmInicial), M + wFecha * 2, Y, wKm);
-  drawField(
-    doc,
-    'KM FINAL (ODÓMETRO)',
-    v(activeTramo.kmFinal || data.kmFinal),
-    M + wFecha * 2 + wKm,
-    Y,
-    wKm
-  );
-  const totalKm =
-    (Number(activeTramo.kmFinal || data.kmFinal) || 0) - (Number(data.kmInicial) || 0);
-  drawField(
-    doc,
-    'TOTAL KM RECORRIDOS',
-    totalKm > 0 ? String(totalKm) : '',
-    M + wFecha * 2 + wKm * 2,
-    Y,
-    wTotal
-  );
-  Y += 10;
+  if (!isRedondo) {
+    drawField(doc, 'FECHA/HORA INICIO', fmt(tramoIda.horaInicioRecorrido), M, Y, wFecha);
+    drawField(doc, 'FECHA/HORA RECEPCIÓN', fmt(tramoIda.horaRecepcionInst), M + wFecha, Y, wFecha);
+    drawField(
+      doc,
+      'KM INICIAL (ODÓMETRO)',
+      v(data.kmInicial || tramoIda.kmInicial),
+      M + wFecha * 2,
+      Y,
+      wKm
+    );
+    drawField(doc, 'KM FINAL (ODÓMETRO)', v(tramoIda.kmFinal), M + wFecha * 2 + wKm, Y, wKm);
+    const totalKm =
+      (Number(tramoIda.kmFinal) || 0) - (Number(tramoIda.kmInicial | data.kmInicial) || 0);
+    drawField(
+      doc,
+      'TOTAL KM RECORRIDOS',
+      totalKm > 0 ? String(totalKm) : '',
+      M + wFecha * 2 + wKm * 2,
+      Y,
+      wTotal
+    );
+    Y += 10;
+  } else {
+    doc.setFont(FM.h, F.b);
+    doc.setFontSize(6);
+    doc.setTextColor(60, 60, 60);
+    doc.text('IDA (TRAMO 1):', M + 1, Y + 2.5);
+    doc.setTextColor(0);
+    Y += 4;
+    drawField(doc, 'FECHA/HORA INICIO', fmt(tramoIda.horaInicioRecorrido), M, Y, wFecha);
+    drawField(doc, 'FECHA/HORA RECEPCIÓN', fmt(tramoIda.horaRecepcionInst), M + wFecha, Y, wFecha);
+    drawField(
+      doc,
+      'KM INICIAL (ODÓMETRO)',
+      v(data.kmInicial || tramoIda.kmInicial),
+      M + wFecha * 2,
+      Y,
+      wKm
+    );
+    drawField(doc, 'KM FINAL (ODÓMETRO)', v(tramoIda.kmFinal), M + wFecha * 2 + wKm, Y, wKm);
+    const totalKm = Number(tramoIda.kmFinal) - Number(tramoIda.kmInicial | data.kmInicial);
+    drawField(
+      doc,
+      'TOTAL KM RECORRIDOS',
+      totalKm > 0 ? String(totalKm) : '',
+      M + wFecha * 2 + wKm * 2,
+      Y,
+      wTotal
+    );
+    Y += 10;
+
+    /* RETORNO */
+
+    doc.setFont(FM.h, F.b);
+    doc.setFontSize(6);
+    doc.setTextColor(60, 60, 60);
+    doc.text('RETORNO (TRAMO 2):', M + 1, Y + 2.5);
+    doc.setTextColor(0);
+    Y += 4;
+    drawField(doc, 'FECHA/HORA INICIO', fmt(tramoVuelta.horaInicioRecorrido), M, Y, wFecha);
+    drawField(
+      doc,
+      'FECHA/HORA RECEPCIÓN',
+      fmt(tramoVuelta.horaRecepcionInst),
+      M + wFecha,
+      Y,
+      wFecha
+    );
+    drawField(doc, 'KM INICIAL (ODÓMETRO)', v(tramoVuelta.kmInicial), M + wFecha * 2, Y, wKm);
+    drawField(doc, 'KM FINAL (ODÓMETRO)', v(tramoVuelta.kmFinal), M + wFecha * 2 + wKm, Y, wKm);
+    const totalKmRetorno = Number(tramoVuelta.kmFinal) - (Number(tramoVuelta.kmInicial) || 0);
+    drawField(
+      doc,
+      'TOTAL KM RECORRIDOS',
+      totalKmRetorno > 0 ? String(totalKmRetorno) : '',
+      M + wFecha * 2 + wKm * 2,
+      Y,
+      wTotal
+    );
+    Y += 10;
+  }
 
   doc.rect(M, Y, CW, 10);
   doc.setFont(FM.h, F.b);
@@ -524,7 +688,7 @@ export async function generateTrasladoSecundarioPdf(
   Y += 10;
 
   if (isRedondo) {
-    const descText = v(activeTramo.descripcionEspera);
+    const descText = v(tramoVuelta.descripcionEspera);
     doc.setFont(FM.h, F.n);
     doc.setFontSize(8.5);
 
@@ -549,7 +713,7 @@ export async function generateTrasladoSecundarioPdf(
     doc.line(M + 55, Y + 10.5, M + 85, Y + 10.5);
     doc.setFont(FM.h, F.n);
     doc.setFontSize(8.5);
-    doc.text(v(activeTramo.horasEspera), M + 56, Y + 10);
+    doc.text(v(tramoVuelta.horasEspera), M + 56, Y + 10);
 
     doc.setFont(FM.h, F.b);
     doc.setFontSize(7.5);
@@ -630,8 +794,8 @@ export async function generateTrasladoSecundarioPdf(
     Y += 14;
   } else {
     // Traslado REDONDO: último signo vital de tramo 1 (IDA) y tramo 2 (RETORNO)
-    const cvIda = getLastSignoDeTramo(tramos[0]);
-    const cvRetorno = getLastSignoDeTramo(tramos[1]);
+    const cvIda = getLastSignoDeTramo(tramoIda);
+    const cvRetorno = getLastSignoDeTramo(tramoVuelta);
 
     // Fila IDA
     doc.setFont(FM.h, F.b);
@@ -870,21 +1034,37 @@ export async function generateTrasladoSecundarioPdf(
   Y += drawSectionHeader(doc, '5. TRIPULACIÓN Y PROFESIONAL RECEPTOR (Res. 3100/2019)', M, Y, CW);
   const q3 = CW / 3;
   const asig = data.asignacionActual || {};
-  const cnd = asig.conductor;
-  const axl = asig.auxiliar;
-  const md = asig.medico;
+  const conductor = asig.conductor;
+  const auxiliar = asig.auxiliar;
+  const medico = asig.medico;
 
-  drawField(doc, 'CONDUCTOR', getUsuarioLabel(cnd?.nombre, cnd?.documento), M, Y, q3, 12);
+  drawField(
+    doc,
+    'CONDUCTOR',
+    getUsuarioLabel(conductor?.nombre, conductor?.documento),
+    M,
+    Y,
+    q3,
+    12
+  );
   drawField(
     doc,
     'AUXILIAR ENFERMERÍA',
-    getUsuarioLabel(axl?.nombre, axl?.documento),
+    getUsuarioLabel(auxiliar?.nombre, auxiliar?.documento),
     M + q3,
     Y,
     q3,
     12
   );
-  drawField(doc, 'MÉDICO', getUsuarioLabel(md?.nombre, md?.documento), M + q3 * 2, Y, q3, 12);
+  drawField(
+    doc,
+    'MÉDICO',
+    getUsuarioLabel(medico?.nombre, medico?.documento),
+    M + q3 * 2,
+    Y,
+    q3,
+    12
+  );
   Y += 12;
 
   drawField(
@@ -899,19 +1079,16 @@ export async function generateTrasladoSecundarioPdf(
   drawField(doc, 'VEHÍCULO (PLACA)', `Placa: ${v(data.vehiculo?.placa)}`, M + q3, Y, q3 * 2, 12);
   Y += 12;
 
-  drawField(
+  /*   drawField(
     doc,
     'PROFESIONAL/TECNÓLOGO QUE RECIBE (IPS DESTINO)',
-    getUsuarioLabel(
-      activeTramo.recibidoPorNombre || data.recibidoPorNombre,
-      activeTramo.recibidoPorDocumento || data.recibidoPorDocumento
-    ),
+    getUsuarioLabel(tramoIda.recibidoPorNombre, tramoIda.recibidoPorDocumento),
     M,
     Y,
     CW,
     12
   );
-  Y += 12;
+  Y += 12;*/
   chkPage(25);
   const obsH = drawDynamicField(
     doc,
@@ -924,154 +1101,82 @@ export async function generateTrasladoSecundarioPdf(
   );
   Y += obsH + 5;
 
-  // Firmas espacio con inyección binaria nativa y diseño premium de Acta
-  chkPage(35);
+  // Firmas y sellos — distribución dinámica
+  chkPage(30);
 
   const isMedicalizado =
     data.tipoTrasladoCode === MEDICALIZADO.getCode() ||
     data.tipoTrasladoCode === MEDICALIZADO_NEONATAL.getCode();
 
-  const asigFinal = data.asignacionActual || {};
-  const firmaConductor = getFirmaBufferFromCedula(asigFinal.conductor?.documento);
-  const firmaAuxiliar = getFirmaBufferFromCedula(asigFinal.auxiliar?.documento);
-  const firmaMedico = isMedicalizado ? getFirmaBufferFromCedula(asigFinal.medico?.documento) : null;
-
-  // ── Fila 1: Tripulación + (firma IPS si es simple) ──────────────────────────
-  const numFirmasFila1 = (isMedicalizado ? 3 : 2) + (isRedondo ? 0 : 1);
-  const firmaW = CW / numFirmasFila1;
-
-  let curFirma = 0;
-  const baseFirmaY = Y;
-  const lineY = baseFirmaY + 18;
-
-  const drawFirmaCol = (
-    bufferObj: any,
-    nombreLabel: string,
-    cargoLabel: string,
-    colW: number,
-    baseY: number,
-    offsetX: number
-  ) => {
-    const startX = offsetX + colW * curFirma;
-    const lY = baseY + 18;
-    if (bufferObj) {
-      doc.addImage(
-        bufferObj.buffer,
-        bufferObj.ext,
-        startX + 5,
-        baseY + 1,
-        colW - 10,
-        16,
-        undefined,
-        'FAST'
-      );
-    }
-    doc.setDrawColor(120, 120, 120);
-    doc.setLineWidth(0.2);
-    doc.line(startX + 4, lY, startX + colW - 4, lY);
-
-    doc.setTextColor(0);
-    doc.setFont(FM.h, F.b);
-    doc.setFontSize(6.5);
-    doc.text(nombreLabel.toUpperCase(), startX + colW / 2, lY + 3.5, { align: 'center' });
-
-    doc.setTextColor(100);
-    doc.setFont(FM.h, F.n);
-    doc.setFontSize(5.5);
-    doc.text(cargoLabel.toUpperCase(), startX + colW / 2, lY + 6.5, { align: 'center' });
-
-    curFirma++;
-  };
-
-  drawFirmaCol(
-    firmaConductor,
-    v(asigFinal.conductor?.nombre, 'CONDUCTOR ASIGNADO'),
-    'FIRMA CONDUCTOR',
-    firmaW,
-    baseFirmaY,
-    M
+  //const asigFinal = data.asignacionActual || {};
+  const firmaConductor = getFirmaBufferFromCedula(conductor?.documento);
+  const firmaAuxiliar = getFirmaBufferFromCedula(auxiliar?.documento);
+  const firmaMedico = isMedicalizado ? getFirmaBufferFromCedula(medico?.documento) : null;
+  const selloFirma = getFirmaBufferFromCedula(
+    data.tipoRecorridoCode === TIPOS_TRASLADO.REDONDO.getCode()
+      ? `${tramoIda.origen.nit}`
+      : `${tramoIda.destino.nit}`,
+    'private/clinicas/sellos'
   );
-  drawFirmaCol(
-    firmaAuxiliar,
-    v(asigFinal.auxiliar?.nombre, 'AUXILIAR ASIGNADO'),
-    'FIRMA AUXILIAR',
-    firmaW,
-    baseFirmaY,
-    M
-  );
+
+  const firmaTramo1 = isRedondo ? getLocalImageBuffer(tramoIda.firmaImg) : null;
+  const firmaTramo2 = isRedondo ? getLocalImageBuffer(tramoVuelta.firmaImg) : null;
+
+  const firmasSecundario: FirmaItem[] = [
+    {
+      bufferObj: firmaConductor,
+      nombreLabel: v(conductor?.nombre, 'CONDUCTOR ASIGNADO'),
+      cargoLabel: 'FIRMA CONDUCTOR',
+    },
+    {
+      bufferObj: firmaAuxiliar,
+      nombreLabel: v(auxiliar?.nombre, 'AUXILIAR ASIGNADO'),
+      cargoLabel: 'FIRMA AUXILIAR',
+    },
+  ];
+
   if (isMedicalizado) {
-    drawFirmaCol(
-      firmaMedico,
-      v(asigFinal.medico?.nombre, 'MÉDICO ASIGNADO'),
-      'FIRMA MÉDICO',
-      firmaW,
-      baseFirmaY,
-      M
-    );
-  }
-  if (!isRedondo) {
-    // Traslado SIMPLE: firma IPS en la misma fila que la tripulación
-    drawFirmaCol(
-      firmaImgData,
-      v(activeTramo.recibidoPorNombre || data.recibidoPorNombre, 'RECEPCIÓN IPS'),
-      'SELLO / FIRMA IPS RECEPTORA',
-      firmaW,
-      baseFirmaY,
-      M
-    );
+    firmasSecundario.push({
+      bufferObj: firmaMedico,
+      nombreLabel: v(medico?.nombre, 'MÉDICO ASIGNADO'),
+      cargoLabel: 'FIRMA MÉDICO',
+    });
   }
 
-  Y += 28;
+  if (!isRedondo) {
+    firmasSecundario.push({
+      bufferObj: firmaImgData,
+      nombreLabel: v(tramoIda.recibidoPorNombre, 'RECEPCIÓN IPS'),
+      cargoLabel: 'FIRMA FUNCIONARIO RECEPTOR',
+    });
+  }
 
   if (isRedondo) {
-    // ── Fila 2: Firmas IPS IDA y RETORNO (cada una ocupa la mitad del ancho) ──
-    chkPage(28);
-    const firmaIpsW = CW / 2;
-    let curIps = 0;
-    const baseIpsY = Y;
-
-    const drawIpsFirma = (bufferObj: any, nombreLabel: string, cargoLabel: string) => {
-      const startX = M + firmaIpsW * curIps;
-      const lY = baseIpsY + 18;
-      if (bufferObj) {
-        doc.addImage(
-          bufferObj.buffer,
-          bufferObj.ext,
-          startX + 5,
-          baseIpsY + 1,
-          firmaIpsW - 10,
-          16,
-          undefined,
-          'FAST'
-        );
-      }
-      doc.setDrawColor(120, 120, 120);
-      doc.setLineWidth(0.2);
-      doc.line(startX + 4, lY, startX + firmaIpsW - 4, lY);
-      doc.setTextColor(0);
-      doc.setFont(FM.h, F.b);
-      doc.setFontSize(6.5);
-      doc.text(nombreLabel.toUpperCase(), startX + firmaIpsW / 2, lY + 3.5, { align: 'center' });
-      doc.setTextColor(100);
-      doc.setFont(FM.h, F.n);
-      doc.setFontSize(5.5);
-      doc.text(cargoLabel.toUpperCase(), startX + firmaIpsW / 2, lY + 6.5, { align: 'center' });
-      curIps++;
-    };
-
-    drawIpsFirma(
-      firmaTramo1,
-      v(tramos[0]?.recibidoPorNombre, 'RECEPCIÓN IPS (IDA)'),
-      'FIRMA IPS DESTINO — IDA'
-    );
-    drawIpsFirma(
-      firmaTramo2,
-      v(tramos[1]?.recibidoPorNombre, 'RECEPCIÓN IPS (RETORNO)'),
-      'FIRMA IPS DESTINO — RETORNO'
-    );
-
-    Y += 28;
+    firmasSecundario.push({
+      bufferObj: firmaTramo1,
+      nombreLabel: v(tramoIda?.recibidoPorNombre, 'RECEPCIÓN IPS (IDA)'),
+      cargoLabel: 'FIRMA IPS DESTINO — IDA',
+    });
+    firmasSecundario.push({
+      bufferObj: firmaTramo2,
+      nombreLabel: v(tramoVuelta?.recibidoPorNombre, 'RECEPCIÓN IPS (RETORNO)'),
+      cargoLabel: 'FIRMA IPS DESTINO — RETORNO',
+    });
   }
+
+  if (selloFirma) {
+    firmasSecundario.push({
+      bufferObj: selloFirma,
+      nombreLabel:
+        data.tipoRecorridoCode === TIPOS_TRASLADO.REDONDO.getCode()
+          ? v(tramoIda.origen.nombre)
+          : v(tramoIda.destino.nombre),
+      cargoLabel: 'SELLO',
+      isSello: true,
+    });
+  }
+
+  Y = drawFirmasLayout(doc, firmasSecundario, { M, CW, startY: Y, PH });
 
   // Pie de Página
   doc.setFontSize(6);
@@ -1098,8 +1203,8 @@ export async function generateTrasladoSecundarioPdf(
       if (notas.length) seccionesNotas.push({ titulo, notas });
       return;
     }
-    const ida = notasPorTramo(tramos[0], tipoCode);
-    const retorno = notasPorTramo(tramos[1], tipoCode);
+    const ida = notasPorTramo(tramoIda, tipoCode);
+    const retorno = notasPorTramo(tramoVuelta, tipoCode);
     if (ida.length) seccionesNotas.push({ titulo, subtitulo: 'TRAMO 1 (IDA)', notas: ida });
     if (retorno.length)
       seccionesNotas.push({ titulo, subtitulo: 'TRAMO 2 (RETORNO)', notas: retorno });
