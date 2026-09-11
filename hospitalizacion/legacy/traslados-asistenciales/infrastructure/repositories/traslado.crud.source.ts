@@ -67,34 +67,18 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
         ESTADOS_ASISTENCIA.APROBADO.getCode(),
         ESTADOS_ASISTENCIA.CANCELADO.getCode(),
       ];
-
-      /*       where = onlyMisSolicitudes
-        ? [
-            { usuarioId: this.auth.id, fechaCreacion: Between(inicio, final) },
-            { usuarioId: this.auth.id, estadoCode: Not(In(excludedStates)) },
-          ]
-        : [{ fechaCreacion: Between(inicio, final) }, { estadoCode: Not(In(excludedStates)) }];
+      //where = [{ fechaCreacion: Between(inicio, final) }, { estadoCode: Not(In(excludedStates)) }];
     } else {
-       Rango Estricto (cuando el rango es diferente al día de hoy)
-      where = onlyMisSolicitudes
-        ? { usuarioId: this.auth.id, fechaCreacion: Between(inicio, final) }
-        : { fechaCreacion: Between(inicio, final) };
+      //where = { fechaCreacion: Between(inicio, final) };
     }
- */
-      // where = [{ fechaCreacion: Between(inicio, final) }, { estadoCode: Not(In(excludedStates)) }];
-    } else {
-      // where = { fechaCreacion: Between(inicio, final) };
-    }
-
     const traslados = await this.buildTrasladoQuery(trasladoRp)
-      //.andWhere(where)
+      //.where(where)
       .orderBy('t.id', 'DESC')
       .getMany();
 
     const ekQr = this.dynamicQR(GCM_CONTEXTS.EKLIPSE);
 
     await ekQr.connect();
-
     try {
       const vehiculoIds = this.uniqueNumbers(
         traslados.flatMap(
@@ -114,6 +98,17 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
     } finally {
       await ekQr.release();
     }
+  }
+
+  public async findTrasladoById(id: number, contextoCode?: GcmContextCode): Promise<any> {
+    const contexto = contextoCode ? gcmContextFactory(contextoCode) : this.auth.context;
+
+    const qr = this.dynamicConn(contexto);
+    const trasladoRp = qr.manager.getRepository(TrasladoAsistencialOrm);
+    const traslados = await this.buildTrasladoQuery(trasladoRp)
+      .where('t.id = :id', { id })
+      .getOne();
+    return newDataToTraslados([traslados], undefined, contexto)[0];
   }
 
   public async fetchSolicitudesCountByCentro(inicio: Date, final: Date): Promise<any> {
@@ -338,9 +333,10 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
       traslado.estadosHistorial = traslado.estadosHistorial?.sort((a, b) => b.id - a.id);
 
       const ekQr = this.dynamicQR(GCM_CONTEXTS.EKLIPSE);
-      await ekQr.connect();
 
       try {
+        await ekQr.connect();
+
         const vehiculoIds = this.uniqueNumbers(
           traslado.asignaciones?.map(asignacion => asignacion.vehiculoId) ?? []
         );
@@ -675,7 +671,7 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
       newTraslado.acompananteDocumento = body.acompananteNumero;
       newTraslado.usuarioId = this.auth.id;
       newTraslado.tipoCode = ASISTENCIA_TIPOS.PRIMARIO.getCode();
-      newTraslado.estadoCode = ESTADOS_ASISTENCIA.CREADO.getCode();
+      newTraslado.estadoCode = ESTADOS_ASISTENCIA.FINALIZADO.getCode();
       newTraslado.fechaCreacion = new Date();
       //newTraslado.observacion = body.observacion;
       newTraslado.isDeleted = false;
@@ -706,8 +702,8 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
       newTramo.ekOrigenId = origen.ekOrigenId;
       newTramo.destinoId = destino.origenId;
       newTramo.ekDestinoId = destino.ekOrigenId;
-      newTramo.estadoCode = ESTADOS_ASISTENCIA.CREADO.getCode();
-      newTramo.isActivo = true;
+      newTramo.estadoCode = ESTADOS_ASISTENCIA.FINALIZADO.getCode();
+      newTramo.isActivo = false;
       newTramo.horaSolicitud = body.solicitadoEl ? new Date(body.solicitadoEl) : new Date();
       newTramo.horaDespacho = body.despachoHora ? new Date(body.despachoHora) : new Date();
       newTramo.horaLlegadaEscena = body.llegadaEscenaHora
@@ -761,7 +757,7 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
       await this.createEstadoHistorial({
         trasladoId: trasladoCreado.id,
         tramoId: tramo.id,
-        estadoCode: ESTADOS_ASISTENCIA.CREADO.getCode(),
+        estadoCode: ESTADOS_ASISTENCIA.FINALIZADO.getCode(),
         observacion: 'Traslado primario registrado',
       });
 
@@ -782,7 +778,7 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
       } */
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await this.qr.release();
+      if (!this.qr.isReleased) await this.qr.release();
     }
   }
 
@@ -893,7 +889,7 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
       if (transactionStarted) await qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await qr.release();
+      if (!qr.isReleased) await qr.release();
     }
   }
 
@@ -989,103 +985,7 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
       if (transactionStarted) await this.qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await this.qr.release();
-    }
-  }
-
-  public async updateSecundario(
-    body: UpdateTrasladoSecundarioDto
-  ): Promise<{ trasladoId: number; result: boolean }> {
-    let transactionStarted = false;
-    try {
-      //await this.verifyEntityExist(TABLE_NAMES.adn.centros, body.centroId);
-      await this.qr.connect();
-      await this.qr.startTransaction();
-      transactionStarted = true;
-      await this.verifyEntityExist(TABLE_NAMES.gen.pct.pacientes, body.pacienteId);
-
-      const trasladoRp = this.qr.manager.getRepository(TrasladoAsistencialOrm);
-
-      const tramoRp = this.qr.manager.getRepository(TrasladoTramoOrm);
-
-      const traslado = await trasladoRp.findOneBy({ id: body.trasladoId });
-
-      if (!traslado) {
-        throw new Error('No es posible actualizar el traslado: traslado no encontrado');
-      }
-
-      traslado.centroId = body.centroId;
-      traslado.pacienteId = body.pacienteId;
-      traslado.usuarioId = this.auth.id;
-      traslado.cupsCode = body.cupsCode;
-      traslado.tipoCode = body.tipoCode;
-      traslado.estadoCode = ESTADOS_ASISTENCIA.CREADO.getCode();
-      traslado.tipoRemisionCode = body.tipoRemisionCode;
-      traslado.otroTipoRemision = body.otroTipoRemision;
-      traslado.tipoRecorridoCode = body.tipoRecorridoCode;
-      traslado.tipoTrasladoCode = body.tipoTrasladoCode;
-      traslado.isDeleted = false;
-
-      /*      if (body.tipoSoportesVitales.length > 0) {
-        newTraslado.tipoSoporteVital = body.tipoSoportesVitales.map(item => item.code).join(',');
-      } */
-
-      if (body.otroSoporteVital) {
-        traslado.otroSignoVital = body.otroSoporteVital;
-      }
-
-      traslado.servicioRequeridoId = body.servicioRequeridoId;
-
-      traslado.fechaCreacion = new Date();
-
-      traslado.fechaProgramada = new Date(body.fechaHoraProgramada);
-
-      traslado.observacion = body.observacion;
-
-      const trasladoCreado = await trasladoRp.save(traslado);
-
-      // const tramos = this.buildTramos(body);
-
-      const origen = await this.resolveUbicacion(body.origen);
-
-      const destino = await this.resolveUbicacion(body.destino);
-
-      let tramoActivoId: number | undefined;
-
-      /*       for (const tramo of tramos) {
-        const tramoCreado = await tramoRp.save(
-          tramoRp.create({
-            trasladoId: trasladoCreado.id,
-            orden: tramo.orden,
-            tipoTramoCode: tramo.tipoTramoCode,
-            origenId: tramo.orden === 1 ? origen.origenId : destino.origenId,
-            ekOrigenId: tramo.orden === 1 ? origen.ekOrigenId : destino.ekOrigenId,
-            destinoId: tramo.orden === 1 ? destino.origenId : origen.origenId,
-            ekDestinoId: tramo.orden === 1 ? destino.ekOrigenId : origen.ekOrigenId,
-            estadoCode: ESTADOS_ASISTENCIA.CREADO.getCode(),
-            isActivo: tramo.orden === 1,
-          })
-        );
-
-        if (tramo.orden === 1) {
-          tramoActivoId = tramoCreado.id;
-        }
-      } */
-
-      await this.createEstadoHistorial({
-        trasladoId: trasladoCreado.id,
-        tramoId: tramoActivoId as number,
-        estadoCode: ESTADOS_ASISTENCIA.CREADO.getCode(),
-        observacion: 'Traslado actualizado',
-      });
-
-      await this.qr.commitTransaction();
-      return { trasladoId: trasladoCreado.id, result: true };
-    } catch (error: any) {
-      if (transactionStarted) await this.qr.rollbackTransaction();
-      throw new BadRequestException(error.message);
-    } finally {
-      if (transactionStarted) await this.qr.release();
+      if (!this.qr.isReleased) await this.qr.release();
     }
   }
 

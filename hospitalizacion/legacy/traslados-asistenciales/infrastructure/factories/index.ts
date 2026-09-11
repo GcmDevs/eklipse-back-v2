@@ -398,6 +398,7 @@ const newDataToTramo = (
     causaDesviacion: tramo.causaDesviacion,
     ingresoIps: tramo.ingresoIps,
     nombreIps: tramo.nombreIps,
+    kmInicial: tramo.kmInicial,
     kmFinal: tramo.kmFinal,
     recibidoPorNombre: tramo.recibidoPorNombre,
     recibidoPorDocumento: tramo.recibidoPorDocumento,
@@ -440,7 +441,7 @@ export const newDataToPaciente = (data: PacienteTrasladoOrm): PacienteDataRes =>
   return paciente;
 };
 
-export const newDataToUbicacion = (data: UbicacionOrm): UbicacionDataRes => {
+/* export const newDataToUbicacion = (data: UbicacionOrm): UbicacionDataRes => {
   if (!data) return null;
 
   const ubicacion = new UbicacionDataRes();
@@ -452,7 +453,7 @@ export const newDataToUbicacion = (data: UbicacionOrm): UbicacionDataRes => {
   ubicacion.municipio = newDataRes(data.municipio);
 
   return ubicacion;
-};
+}; */
 
 export const newDataToUbicaciones = (data: EntidadOrm[]): UbicacionDataRes[] => {
   const instituciones: UbicacionDataRes[] = [];
@@ -462,6 +463,7 @@ export const newDataToUbicaciones = (data: EntidadOrm[]): UbicacionDataRes[] => 
 
     const ubicacion = new UbicacionDataRes();
     ubicacion.id = item.id;
+    ubicacion.nit = item.tercero.documento;
     ubicacion.codigo = item.codigo;
     ubicacion.nombre = item.nombre;
     ubicacion.direccion = item.tercero?.direccion?.direccion ?? null;
@@ -542,6 +544,7 @@ export const DNnewDataToUbicacion = (data: EntidadOrm): UbicacionDataRes => {
   const dpto = data.tercero.municipio.departamento;
 
   const municipio = data.tercero.municipio;
+  ubicacion.nit = data.tercero.documento;
   ubicacion.ekid = data.id;
   ubicacion.id = data.id;
   ubicacion.direccion = data.tercero.direccion.direccion;

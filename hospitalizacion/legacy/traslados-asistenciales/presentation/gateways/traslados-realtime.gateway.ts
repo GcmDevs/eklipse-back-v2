@@ -12,23 +12,10 @@ import { processEnv } from '@env';
 import { JWTServices } from '@common/application/services';
 import { VALID_HOSTS } from '@hpn/app.environments';
 import { GcmContextCode } from '@common/domain/types';
-
-export type TrasladoRealtimeEventType =
-  | 'CREACION'
-  | 'DECISION'
-  | 'ASIGNACION'
-  | 'REASIGNACION'
-  | 'ENTREGA'
-  | 'RECEPCION'
-  | 'INICIO'
-  | 'RETORNO'
-  | 'MONITOREO'
-  | 'INCIDENTE'
-  | 'FINALIZACION'
-  | 'CANCELACION';
+import { EstadoAsistenciaTypeCode } from '../../@types/gcn';
 
 export interface TrasladoRealtimeEvent {
-  tipo: TrasladoRealtimeEventType;
+  tipo: EstadoAsistenciaTypeCode;
   trasladoId: number;
   contextoCode: GcmContextCode;
   ocurridoEn: string;
@@ -65,10 +52,6 @@ export class TrasladosRealtimeGateway {
     @MessageBody() body: { contextoCode: GcmContextCode }
   ): void {
     if (!client.data.documento || !body?.contextoCode) return;
-
-    [...client.rooms]
-      .filter(room => room.startsWith('traslado:contexto:'))
-      .forEach(room => client.leave(room));
 
     client.join(this.contextRoom(body.contextoCode));
   }

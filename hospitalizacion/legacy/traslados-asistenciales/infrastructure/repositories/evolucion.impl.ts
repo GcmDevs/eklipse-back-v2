@@ -40,11 +40,7 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
 
       const traslado = await this.getTrasladoOrFail(body.trasladoId, qr);
 
-      if (
-        [ESTADOS_ASISTENCIA.CANCELADO.getCode(), ESTADOS_ASISTENCIA.FINALIZADO.getCode()].includes(
-          traslado.estadoCode
-        )
-      ) {
+      if (ESTADOS_ASISTENCIA.EN_CURSO.getCode() !== traslado.estadoCode) {
         throw new Error('El traslado no permite mas registros clinicos/operativos');
       }
 
@@ -104,7 +100,7 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
       if (transactionStarted) await qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await qr.release();
+      if (!qr.isReleased) await qr.release();
     }
   }
 
@@ -117,7 +113,7 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
       await qr.startTransaction();
       transactionStarted = true;
 
-      await this.getTrasladoOrFail(body.trasladoId, qr);
+      const traslado = await this.getTrasladoOrFail(body.trasladoId, qr);
 
       const tramo = await this.getActiveTramoOrFail(body.trasladoId, qr);
       const asignacion = await this.fetchAsignacionTramoActualConTripulacion(
@@ -126,6 +122,10 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
         body.vehiculoId,
         qr
       );
+
+      if (ESTADOS_ASISTENCIA.EN_CURSO.getCode() !== traslado.estadoCode) {
+        throw new Error('El traslado no permite mas registros clinicos/operativos');
+      }
 
       if (!body.fechaHoraRegistro) {
         throw new Error('Debe enviar fechaHoraRegistro');
@@ -165,7 +165,7 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
       if (transactionStarted) await qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await qr.release();
+      if (!qr.isReleased) await qr.release();
     }
   }
 
@@ -178,7 +178,11 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
       await qr.startTransaction();
       transactionStarted = true;
 
-      await this.getTrasladoOrFail(body.trasladoId, qr);
+      const traslado = await this.getTrasladoOrFail(body.trasladoId, qr);
+
+      if (ESTADOS_ASISTENCIA.EN_CURSO.getCode() !== traslado.estadoCode) {
+        throw new Error('El traslado no permite mas registros clinicos/operativos');
+      }
 
       const tramo = await this.getActiveTramoOrFail(body.trasladoId, qr);
       const asignacion = await this.fetchAsignacionTramoActualConTripulacion(
@@ -221,7 +225,7 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
       if (transactionStarted) await qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await qr.release();
+      if (!qr.isReleased) await qr.release();
     }
   }
 
@@ -235,6 +239,11 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
       transactionStarted = true;
 
       const traslado = await this.getTrasladoOrFail(body.trasladoId, qr);
+
+      if (ESTADOS_ASISTENCIA.EN_CURSO.getCode() !== traslado.estadoCode) {
+        throw new Error('El traslado no permite mas registros clinicos/operativos');
+      }
+
       const tramo = await this.getActiveTramoOrFail(body.trasladoId, qr);
       await this.fetchAsignacionTramoActualConTripulacion(
         body.trasladoId,
@@ -264,7 +273,7 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
       if (transactionStarted) await qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await qr.release();
+      if (!qr.isReleased) await qr.release();
     }
   }
 
@@ -277,7 +286,11 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
       await qr.startTransaction();
       transactionStarted = true;
 
-      await this.getTrasladoOrFail(body.trasladoId, qr);
+      const traslado = await this.getTrasladoOrFail(body.trasladoId, qr);
+
+      if (ESTADOS_ASISTENCIA.EN_CURSO.getCode() !== traslado.estadoCode) {
+        throw new Error('El traslado no permite mas registros clinicos/operativos');
+      }
       const tramo = await this.getActiveTramoOrFail(body.trasladoId, qr);
       const asignacion = await this.fetchAsignacionTramoActualConTripulacion(
         body.trasladoId,
@@ -319,11 +332,13 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
       if (transactionStarted) await qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await qr.release();
+      if (!qr.isReleased) await qr.release();
     }
   }
 
-  public async finalizarTraslado(body: FinalizarTrasladoEvolucionDto): Promise<boolean> {
+  public async finalizarTraslado(
+    body: FinalizarTrasladoEvolucionDto
+  ): Promise<{ result: boolean; isRedondo: boolean }> {
     let transactionStarted = false;
 
     if (!body.contextoCode) {
@@ -403,6 +418,10 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
       const asignacionRp = qr.manager.getRepository(TrasladoAsignacionOrm);
       const notaRp = qr.manager.getRepository(TrasladoNotaOrm);
       const trasladoAsistencialRp = qr.manager.getRepository(TrasladoAsistencialOrm);
+
+      if (ESTADOS_ASISTENCIA.EN_CURSO.getCode() !== traslado.estadoCode) {
+        throw new Error('El traslado no permite mas registros clinicos/operativos');
+      }
 
       if (
         [ESTADOS_ASISTENCIA.CANCELADO.getCode(), ESTADOS_ASISTENCIA.FINALIZADO.getCode()].includes(
@@ -576,7 +595,7 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
       });
 
       await qr.commitTransaction();
-      return true;
+      return { result: true, isRedondo: isRedondo };
     } catch (error: any) {
       if (transactionStarted) await qr.rollbackTransaction();
       if (body?.recibidoPorFirmaImg) {
@@ -584,7 +603,7 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
       }
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await qr.release();
+      if (!qr.isReleased) await qr.release();
     }
   }
 
@@ -806,7 +825,7 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
       if (transactionStarted) await qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await qr.release();
+      if (!qr.isReleased) await qr.release();
     }
   }
 }
