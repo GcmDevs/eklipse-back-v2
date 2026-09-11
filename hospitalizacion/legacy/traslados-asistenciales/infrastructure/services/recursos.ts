@@ -79,8 +79,8 @@ export class RecursosCompartidosSource extends BaseSource {
     pacienteId?: number;
     pacienteTemporal?: CreateTrasladoPrimarioDto['pacienteTemporal'];
   }) {
-    const pacienteTrasladoRp = this.qr.manager.getRepository(PacienteTrasladoOrm);
-    const trasladoRp = this.qr.manager.getRepository(TrasladoAsistencialOrm);
+    const pacienteTrasladoRp = this.conn.getRepository(PacienteTrasladoOrm);
+    const trasladoRp = this.conn.getRepository(TrasladoAsistencialOrm);
     const estadosCerrados = [
       ESTADOS_ASISTENCIA.CANCELADO.getCode(),
       ESTADOS_ASISTENCIA.FINALIZADO.getCode(),

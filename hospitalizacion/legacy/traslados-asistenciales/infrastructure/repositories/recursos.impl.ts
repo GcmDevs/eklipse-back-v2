@@ -162,7 +162,7 @@ export class TrasladoRecursosImpl extends BaseSource {
 
         const estancias = await qb.orderBy('paciente.nombreCompleto', 'ASC').take(5).getMany();
 
-        estancias.map(estancia => {
+        estancias.forEach(estancia => {
           estancia.ingreso.paciente.ingreso = estancia.ingreso;
           pacientes.push(estancia.ingreso.paciente);
         });

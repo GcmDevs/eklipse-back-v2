@@ -53,10 +53,6 @@ export class TrasladosRealtimeGateway {
   ): void {
     if (!client.data.documento || !body?.contextoCode) return;
 
-    [...client.rooms]
-      .filter(room => room.startsWith('traslado:contexto:'))
-      .forEach(room => client.leave(room));
-
     client.join(this.contextRoom(body.contextoCode));
   }
 

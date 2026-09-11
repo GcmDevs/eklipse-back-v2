@@ -778,7 +778,7 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
       } */
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await this.qr.release();
+      if (!this.qr.isReleased) await this.qr.release();
     }
   }
 
@@ -889,7 +889,7 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
       if (transactionStarted) await qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await qr.release();
+      if (!qr.isReleased) await qr.release();
     }
   }
 
@@ -985,103 +985,7 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
       if (transactionStarted) await this.qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await this.qr.release();
-    }
-  }
-
-  public async updateSecundario(
-    body: UpdateTrasladoSecundarioDto
-  ): Promise<{ trasladoId: number; result: boolean }> {
-    let transactionStarted = false;
-    try {
-      //await this.verifyEntityExist(TABLE_NAMES.adn.centros, body.centroId);
-      await this.qr.connect();
-      await this.qr.startTransaction();
-      transactionStarted = true;
-      await this.verifyEntityExist(TABLE_NAMES.gen.pct.pacientes, body.pacienteId);
-
-      const trasladoRp = this.qr.manager.getRepository(TrasladoAsistencialOrm);
-
-      const tramoRp = this.qr.manager.getRepository(TrasladoTramoOrm);
-
-      const traslado = await trasladoRp.findOneBy({ id: body.trasladoId });
-
-      if (!traslado) {
-        throw new Error('No es posible actualizar el traslado: traslado no encontrado');
-      }
-
-      traslado.centroId = body.centroId;
-      traslado.pacienteId = body.pacienteId;
-      traslado.usuarioId = this.auth.id;
-      traslado.cupsCode = body.cupsCode;
-      traslado.tipoCode = body.tipoCode;
-      traslado.estadoCode = ESTADOS_ASISTENCIA.CREADO.getCode();
-      traslado.tipoRemisionCode = body.tipoRemisionCode;
-      traslado.otroTipoRemision = body.otroTipoRemision;
-      traslado.tipoRecorridoCode = body.tipoRecorridoCode;
-      traslado.tipoTrasladoCode = body.tipoTrasladoCode;
-      traslado.isDeleted = false;
-
-      /*      if (body.tipoSoportesVitales.length > 0) {
-        newTraslado.tipoSoporteVital = body.tipoSoportesVitales.map(item => item.code).join(',');
-      } */
-
-      if (body.otroSoporteVital) {
-        traslado.otroSignoVital = body.otroSoporteVital;
-      }
-
-      traslado.servicioRequeridoId = body.servicioRequeridoId;
-
-      traslado.fechaCreacion = new Date();
-
-      traslado.fechaProgramada = new Date(body.fechaHoraProgramada);
-
-      traslado.observacion = body.observacion;
-
-      const trasladoCreado = await trasladoRp.save(traslado);
-
-      // const tramos = this.buildTramos(body);
-
-      const origen = await this.resolveUbicacion(body.origen);
-
-      const destino = await this.resolveUbicacion(body.destino);
-
-      let tramoActivoId: number | undefined;
-
-      /*       for (const tramo of tramos) {
-        const tramoCreado = await tramoRp.save(
-          tramoRp.create({
-            trasladoId: trasladoCreado.id,
-            orden: tramo.orden,
-            tipoTramoCode: tramo.tipoTramoCode,
-            origenId: tramo.orden === 1 ? origen.origenId : destino.origenId,
-            ekOrigenId: tramo.orden === 1 ? origen.ekOrigenId : destino.ekOrigenId,
-            destinoId: tramo.orden === 1 ? destino.origenId : origen.origenId,
-            ekDestinoId: tramo.orden === 1 ? destino.ekOrigenId : origen.ekOrigenId,
-            estadoCode: ESTADOS_ASISTENCIA.CREADO.getCode(),
-            isActivo: tramo.orden === 1,
-          })
-        );
-
-        if (tramo.orden === 1) {
-          tramoActivoId = tramoCreado.id;
-        }
-      } */
-
-      await this.createEstadoHistorial({
-        trasladoId: trasladoCreado.id,
-        tramoId: tramoActivoId as number,
-        estadoCode: ESTADOS_ASISTENCIA.CREADO.getCode(),
-        observacion: 'Traslado actualizado',
-      });
-
-      await this.qr.commitTransaction();
-      return { trasladoId: trasladoCreado.id, result: true };
-    } catch (error: any) {
-      if (transactionStarted) await this.qr.rollbackTransaction();
-      throw new BadRequestException(error.message);
-    } finally {
-      if (transactionStarted) await this.qr.release();
+      if (!this.qr.isReleased) await this.qr.release();
     }
   }
 

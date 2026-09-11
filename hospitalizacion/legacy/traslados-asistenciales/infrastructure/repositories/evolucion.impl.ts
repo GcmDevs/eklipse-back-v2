@@ -100,7 +100,7 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
       if (transactionStarted) await qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await qr.release();
+      if (!qr.isReleased) await qr.release();
     }
   }
 
@@ -165,7 +165,7 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
       if (transactionStarted) await qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await qr.release();
+      if (!qr.isReleased) await qr.release();
     }
   }
 
@@ -225,7 +225,7 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
       if (transactionStarted) await qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await qr.release();
+      if (!qr.isReleased) await qr.release();
     }
   }
 
@@ -273,7 +273,7 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
       if (transactionStarted) await qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await qr.release();
+      if (!qr.isReleased) await qr.release();
     }
   }
 
@@ -332,7 +332,7 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
       if (transactionStarted) await qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await qr.release();
+      if (!qr.isReleased) await qr.release();
     }
   }
 
@@ -603,7 +603,7 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
       }
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await qr.release();
+      if (!qr.isReleased) await qr.release();
     }
   }
 
@@ -825,7 +825,7 @@ export class TrasladoEvolucionImpl extends RecursosCompartidosSource {
       if (transactionStarted) await qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await qr.release();
+      if (!qr.isReleased) await qr.release();
     }
   }
 }

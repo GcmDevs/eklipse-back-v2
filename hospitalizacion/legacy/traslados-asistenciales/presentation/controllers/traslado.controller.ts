@@ -188,17 +188,6 @@ export class TrasladoController {
     }
   }
 
-  /*   @ApiOperation({ summary: 'Actualizar un traslado secundario' })
-  @Authorities([HPN_AUTHORITIES.GESTION_CLINICA.AGREGAR_TRASLADO])
-  @Post('update-secundario')
-  public updateSecundario(@Body() body: UpdateTrasladoSecundarioDto) {
-    try {
-      return this._source.updateSecundario(body);
-    } catch (error:any) {
-      throw new BadRequestException(error.message);
-    }
-  } */
-
   @ApiOperation({ summary: 'Obtener la asignación actual de un traslado' })
   @Get(':trasladoId/asignacion-actual')
   public fetchAsignacionActual(

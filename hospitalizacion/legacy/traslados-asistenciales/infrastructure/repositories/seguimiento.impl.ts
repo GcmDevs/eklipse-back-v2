@@ -88,7 +88,7 @@ export class SeguimientoTrasladoImpl extends RecursosCompartidosSource {
       if (transactionStarted) await qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await qr.release();
+      if (!qr.isReleased) await qr.release();
     }
   }
 
@@ -170,7 +170,7 @@ export class SeguimientoTrasladoImpl extends RecursosCompartidosSource {
       if (transactionStarted) await qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await qr.release();
+      if (!qr.isReleased) await qr.release();
     }
   }
 
@@ -178,8 +178,8 @@ export class SeguimientoTrasladoImpl extends RecursosCompartidosSource {
     let transactionStarted = false;
     const qr = this.dynamicQR(gcmContextFactory(body.contextoCode));
     const ekQr = this.dynamicQR(GCM_CONTEXTS.EKLIPSE);
-    await ekQr.connect();
     try {
+      await ekQr.connect();
       await qr.connect();
       await qr.startTransaction();
       transactionStarted = true;
@@ -265,8 +265,8 @@ export class SeguimientoTrasladoImpl extends RecursosCompartidosSource {
       if (transactionStarted) await qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await qr.release();
-      await ekQr.release();
+      if (!qr.isReleased) await qr.release();
+      if (!ekQr.isReleased) await ekQr.release();
     }
   }
 
@@ -274,8 +274,8 @@ export class SeguimientoTrasladoImpl extends RecursosCompartidosSource {
     let transactionStarted = false;
     const qr = this.dynamicQR(gcmContextFactory(body.contextoCode));
     const ekQr = this.dynamicQR(GCM_CONTEXTS.EKLIPSE);
-    await ekQr.connect();
     try {
+      await ekQr.connect();
       await qr.connect();
       await qr.startTransaction();
       transactionStarted = true;
@@ -365,8 +365,8 @@ export class SeguimientoTrasladoImpl extends RecursosCompartidosSource {
       if (transactionStarted) await qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await qr.release();
-      await ekQr.release();
+      if (!qr.isReleased) await qr.release();
+      if (!ekQr.isReleased) await ekQr.release();
     }
   }
 
@@ -479,7 +479,7 @@ export class SeguimientoTrasladoImpl extends RecursosCompartidosSource {
       if (transactionStarted) await qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await qr.release();
+      if (!qr.isReleased) await qr.release();
     }
   }
 
@@ -558,7 +558,7 @@ export class SeguimientoTrasladoImpl extends RecursosCompartidosSource {
       if (transactionStarted) await qr.rollbackTransaction();
       throw new BadRequestException(error.message);
     } finally {
-      if (transactionStarted) await qr.release();
+      if (!qr.isReleased) await qr.release();
     }
   }
 }
