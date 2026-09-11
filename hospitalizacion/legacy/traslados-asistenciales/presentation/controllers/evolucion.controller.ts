@@ -9,6 +9,7 @@ import { nonEditFileName } from '@common/presentation/helpers';
 import { HPN_AUTHORITIES } from '@authorities';
 import { TrasladosRealtimeGateway } from '../gateways/traslados-realtime.gateway';
 import { LGC_TAS_LOCATIONS } from '../../application/constants';
+import { ESTADOS_ASISTENCIA } from '../../@types/gcn';
 
 @ApiTags('Traslados Asistenciales')
 @ApiBearerAuth()
@@ -37,7 +38,9 @@ export class TrasladoEvolucionController {
       const result = await this._source.finalizarTraslado(payload);
       if (result)
         this._events.publish({
-          tipo: 'FINALIZACION',
+          tipo: result.isRedondo
+            ? ESTADOS_ASISTENCIA.PENDIENTE_RETORNO.getCode()
+            : ESTADOS_ASISTENCIA.FINALIZADO.getCode(),
           trasladoId: payload.trasladoId,
           contextoCode: payload.contextoCode,
         });

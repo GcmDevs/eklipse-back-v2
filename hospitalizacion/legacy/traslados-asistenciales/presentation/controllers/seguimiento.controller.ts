@@ -11,6 +11,7 @@ import {
 import { SeguimientoTrasladoImpl } from '@hpn/lgc/tas/infrastructure';
 import { HPN_AUTHORITIES } from '@authorities';
 import { TrasladosRealtimeGateway } from '../gateways/traslados-realtime.gateway';
+import { ESTADOS_ASISTENCIA } from '../../@types/gcn';
 
 @ApiTags('Traslados Asistenciales')
 @ApiBearerAuth()
@@ -30,7 +31,7 @@ export class SeguimientoTrasladoController {
       const result = await this._source.entregarPaciente(body);
       if (result)
         this._events.publish({
-          tipo: 'ENTREGA',
+          tipo: ESTADOS_ASISTENCIA.ENTREGADO.getCode(),
           trasladoId: body.trasladoId,
           contextoCode: body.contextoCode,
         });
@@ -48,7 +49,7 @@ export class SeguimientoTrasladoController {
       const result = await this._source.recibirPaciente(body);
       if (result)
         this._events.publish({
-          tipo: 'RECEPCION',
+          tipo: ESTADOS_ASISTENCIA.RECIBIDO.getCode(),
           trasladoId: body.trasladoId,
           contextoCode: body.contextoCode,
         });
@@ -66,7 +67,11 @@ export class SeguimientoTrasladoController {
       const result = await this._source.asignar(body);
       if (result)
         this._events.publish(
-          { tipo: 'ASIGNACION', trasladoId: body.trasladoId, contextoCode: body.contextoCode },
+          {
+            tipo: ESTADOS_ASISTENCIA.ASIGNADO.getCode(),
+            trasladoId: body.trasladoId,
+            contextoCode: body.contextoCode,
+          },
           [body.conductor?.documento, body.auxiliar?.documento, body.medico?.documento]
         );
       return result;
@@ -83,7 +88,11 @@ export class SeguimientoTrasladoController {
       const result = await this._source.reasignar(body);
       if (result)
         this._events.publish(
-          { tipo: 'REASIGNACION', trasladoId: body.trasladoId, contextoCode: body.contextoCode },
+          {
+            tipo: ESTADOS_ASISTENCIA.REASIGNADO.getCode(),
+            trasladoId: body.trasladoId,
+            contextoCode: body.contextoCode,
+          },
           [body.conductor?.documento, body.auxiliar?.documento, body.medico?.documento]
         );
       return result;
@@ -100,7 +109,7 @@ export class SeguimientoTrasladoController {
       const result = await this._source.iniciarRetorno(body);
       if (result)
         this._events.publish({
-          tipo: 'RETORNO',
+          tipo: ESTADOS_ASISTENCIA.EN_CURSO.getCode(),
           trasladoId: body.trasladoId,
           contextoCode: body.contextoCode,
         });
@@ -116,12 +125,12 @@ export class SeguimientoTrasladoController {
   public async registrarComplicacion(@Body() body: RegistrarComplicacionDto) {
     try {
       const result = await this._source.registrarComplicacion(body);
-      if (result)
+      /*    if (result)
         this._events.publish({
           tipo: 'INCIDENTE',
           trasladoId: body.trasladoId,
           contextoCode: body.contextoCode,
-        });
+        }); */
       return result;
     } catch (error: any) {
       throw new BadRequestException(error.message);

@@ -162,7 +162,7 @@ export class TrasladoRecursosImpl extends BaseSource {
 
         const estancias = await qb.orderBy('paciente.nombreCompleto', 'ASC').take(5).getMany();
 
-        estancias.map(estancia => {
+        estancias.forEach(estancia => {
           estancia.ingreso.paciente.ingreso = estancia.ingreso;
           pacientes.push(estancia.ingreso.paciente);
         });
@@ -250,9 +250,9 @@ export class TrasladoRecursosImpl extends BaseSource {
 
     for (const contexto of ALL_CONTEXTS_WITH_AUTHORITIES) {
       const qr = this.dynamicQR(contexto);
-      await qr.connect();
 
       try {
+        await qr.connect();
         const usuarioRp = qr.manager.getRepository(_PrivSecUserOrm);
         const qbUsuario = usuarioRp
           .createQueryBuilder('u')
