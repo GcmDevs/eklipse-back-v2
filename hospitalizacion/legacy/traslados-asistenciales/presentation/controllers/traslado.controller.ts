@@ -42,7 +42,7 @@ export class TrasladoController {
   ) {}
 
   @ApiOperation({ summary: 'Obtener mis solicitudes de traslado por rango de fechas' })
-  @Get('')
+  @Get()
   public misSolicitudes(
     @Query('onlyMisSolicitudes') onlyMisSolicitudes: boolean,
     @Query('inicio') inicio: Date,
