@@ -1,7 +1,9 @@
 import { BadRequestException, Controller, Get, Param } from '@nestjs/common';
 import { AuditoriaFetchIngresosUnautenticatedImpl } from '@hpn/lgc/aud/infrastructure/repositories';
 import { GcmContextCode } from '@common/domain/types';
+import { CommonGuards } from '@common/presentation/decorators';
 
+@CommonGuards()
 @Controller('v1/hpn/auditoria')
 export class RecursosAuditoriaUnautenticatedController {
   constructor(private _fetchIngresos: AuditoriaFetchIngresosUnautenticatedImpl) {}

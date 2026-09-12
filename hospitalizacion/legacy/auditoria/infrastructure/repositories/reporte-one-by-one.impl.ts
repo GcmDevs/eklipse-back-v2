@@ -54,7 +54,7 @@ export class AuditoriaReporteOneByOneImpl extends BaseSource {
       const auditoriaRp = this.conn.getRepository(AuditoriaOrm);
 
       const auditorias = await auditoriaRp.find({
-        where: { fechaCreacion: start && end ? Between(start, end) : undefined },
+        where: { fechaCreacion: Between(start, end) },
         relations: [
           'medicamentosTrazadores',
           'estudiosDx',
