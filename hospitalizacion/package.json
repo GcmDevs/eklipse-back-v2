@@ -35,8 +35,16 @@
     ],
     "coverageDirectory": "./coverage",
     "testEnvironment": "node",
+    "setupFiles": [
+      "reflect-metadata"
+    ],
+    "moduleNameMapper": {
+      "^@hpn/(.*)$": "<rootDir>/src/$1",
+      "^@common/(.*)$": "<rootDir>/../@common/$1",
+      "^@orm/(.*)$": "<rootDir>/@orm/$1"
+    },
     "roots": [
-      "<rootDir>/apps/"
+      "<rootDir>/src/"
     ]
   }
 }
