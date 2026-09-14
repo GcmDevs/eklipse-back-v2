@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { FormatoMuestrasAnatomopatologicasController } from './presentation/formato-anatomopatologicos.controller';
-import { FormatoMuestrasAnatomopatologicasImpl } from './infraestructure/services';
+import { BuscarPacienteCensoFormatoImpl } from './infraestructure/services';
 
 @Module({
   controllers: [FormatoMuestrasAnatomopatologicasController],
-  providers: [FormatoMuestrasAnatomopatologicasImpl],
+  providers: [BuscarPacienteCensoFormatoImpl],
 })
 export class FormatoAnatomopatologicosModule {}

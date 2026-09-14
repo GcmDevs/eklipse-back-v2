@@ -1,13 +1,14 @@
 export interface PacienteRes {
-  sede: string;
-  especialidad: string;
-  fecha: string;
-  identificacion: string;
-  nombrePaciente: string;
   ingreso: number;
-  grupoNuevo: string;
-  planBeneficio: string;
-  entidad: string;
-  municipio: string;
+  nombreCompleto: string;
+  numeroDocumento: string;
+  eps: string;
+  diagnostico: string;
+}
+export interface PacienteMuestra {
+  ingreso: number;
+  nombreCompleto: string;
+  numeroDocumento: string;
+  eps: string;
   diagnostico: string;
 }

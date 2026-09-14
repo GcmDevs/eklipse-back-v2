@@ -59,7 +59,7 @@ export class FormatoMuestrasAnatomopatologicasController {
   @Patch(':id')
   public async actualizar(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: GuardarRegistroMuestraDto,
+    @Body() body: GuardarRegistroMuestraDto
   ) {
     try {
       return await this._buscarPacienteImpl.actualizar(id, body);
