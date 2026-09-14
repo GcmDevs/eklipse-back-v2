@@ -48,6 +48,9 @@ export class RecursosAuditoriaController {
   @Get('reporte-one-by-one')
   public async fetchReporteOneByOne(@Query('start') start: Date, @Query('end') end: Date) {
     try {
+      if (!start) throw new Error('Requiere fecha de inicio');
+      if (!end) throw new Error('Requiere fecha de inicio');
+
       return await this._reporteOneByOne.execute(start, end);
     } catch (error: any) {
       throw new BadRequestException(error.message);

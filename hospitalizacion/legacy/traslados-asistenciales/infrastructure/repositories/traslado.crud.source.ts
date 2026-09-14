@@ -4,6 +4,11 @@ import {
   TrasladoAsignacionOrm,
   TrasladoAsistencialOrm,
   TrasladoTramoOrm,
+  TrasladoEstadoHistorialOrm,
+  TrasladoSignosVitalesOrm,
+  TrasladoNotaOrm,
+  ProcedimientoOrm,
+  MedicamentoOrm,
   VehiculoOrm,
   EkEmpleadoOrm,
   TrasladoRevisionCentralOrm,
@@ -20,7 +25,7 @@ import {
   IniciarTrasladoDto,
   UpdateTrasladoSecundarioDto,
 } from '@hpn/lgc/tas/presentation/dtos';
-import { Between, Brackets, In, Not } from 'typeorm';
+import { Between, Brackets, In, Not, Repository, SelectQueryBuilder } from 'typeorm';
 import { newDataToTrasladoDetalle, newDataToTraslados } from '../factories';
 import { deleteFile } from '@common/presentation/helpers';
 import {
@@ -211,6 +216,41 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
     };
   }
 
+  /**
+   * Query used by the detail endpoint. It deliberately contains only the
+   * singular relations plus tramos and their locations. Collection relations
+   * are fetched independently in fetchTrasladoById to avoid cartesian joins.
+   */
+  private buildTrasladoDetailBaseQuery(
+    rp: Repository<TrasladoAsistencialOrm>
+  ): SelectQueryBuilder<TrasladoAsistencialOrm> {
+    return rp
+      .createQueryBuilder('t')
+      .leftJoinAndSelect('t.usuario', 'usuario')
+      .leftJoinAndSelect('t.paciente', 'paciente')
+      .leftJoinAndSelect('paciente.detalleContrato', 'detalleContrato')
+      .leftJoinAndSelect('t.ekPaciente', 'ekPaciente')
+      .leftJoinAndSelect('t.servicioRequerido', 'servicioRequerido')
+      .leftJoinAndSelect('t.tramos', 'tramos')
+      .leftJoinAndSelect('tramos.origen', 'origen')
+      .leftJoinAndSelect('origen.tercero', 'origenTercero')
+      .leftJoinAndSelect('origenTercero.municipio', 'origenMunicipio')
+      .leftJoinAndSelect('origenTercero.direccion', 'origenDireccion')
+      .leftJoinAndSelect('origenMunicipio.departamento', 'origenDepartamento')
+      .leftJoinAndSelect('tramos.destino', 'destino')
+      .leftJoinAndSelect('destino.tercero', 'destinoTercero')
+      .leftJoinAndSelect('destinoTercero.municipio', 'destinoMunicipio')
+      .leftJoinAndSelect('destinoTercero.direccion', 'destinoDireccion')
+      .leftJoinAndSelect('destinoMunicipio.departamento', 'destinoDepartamento')
+      .leftJoinAndSelect('tramos.ekOrigen', 'ekOrigen')
+      .leftJoinAndSelect('ekOrigen.municipio', 'ekOrigenMunicipio')
+      .leftJoinAndSelect('ekOrigen.departamento', 'ekOrigenDepartamento')
+      .leftJoinAndSelect('tramos.ekDestino', 'ekDestino')
+      .leftJoinAndSelect('ekDestino.municipio', 'ekDestinoMunicipio')
+      .leftJoinAndSelect('ekDestino.departamento', 'ekDestinoDepartamento')
+      .where('t.ISDELETE = 0');
+  }
+
   public async fetchTrasladoById(trasladoId: number, contextoCode?: GcmContextCode): Promise<any> {
     const contexto = gcmContextFactory(contextoCode);
     const connLocal = contextoCode ? this.dynamicConn(contexto) : this.conn;
@@ -218,23 +258,88 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
     const trasladoRp = connLocal.getRepository(TrasladoAsistencialOrm);
     const revisionRp = connLocal.getRepository(TrasladoRevisionCentralOrm);
     try {
-      const traslado = await this.buildTrasladoQuery(trasladoRp)
-        .leftJoinAndSelect('t.estadosHistorial', 'estadosHistorial')
+      // Do not join every one-to-many relation in the same query. A traslado with
+      // several tramos, signs, notes, procedures and medications produces a
+      // cartesian multiplication of rows that TypeORM must hydrate afterwards.
+      const traslado = await this.buildTrasladoDetailBaseQuery(trasladoRp)
         .leftJoinAndSelect('t.diagnostico', 'diagnostico')
         .leftJoinAndSelect('t.diagSecundario', 'diagSecundario')
-        .leftJoinAndSelect('tramos.signosVitales', 'signosVitales')
-        .leftJoinAndSelect('signosVitales.usuario', 'usuarioSignosVitales')
-        .leftJoinAndSelect('tramos.notas', 'notas')
-        .leftJoinAndSelect('tramos.procedimientos', 'procedimientos')
-        .leftJoinAndSelect('procedimientos.procedimiento', 'procedimiento')
-        .leftJoinAndSelect('tramos.medicamentos', 'medicamentos')
-        .leftJoinAndSelect('medicamentos.medicamento', 'medicamento')
         .andWhere({ id: trasladoId })
         .getOne();
 
       if (!traslado) {
         throw new Error(`No existe traslado con id ${trasladoId}o se encuentra eliminado`);
       }
+
+      const tramoIds = traslado.tramos?.map(tramo => tramo.id) ?? [];
+      const asignacionRp = connLocal.getRepository(TrasladoAsignacionOrm);
+      const historialRp = connLocal.getRepository(TrasladoEstadoHistorialOrm);
+      const signosVitalesRp = connLocal.getRepository(TrasladoSignosVitalesOrm);
+      const notasRp = connLocal.getRepository(TrasladoNotaOrm);
+      const procedimientosRp = connLocal.getRepository(ProcedimientoOrm);
+      const medicamentosRp = connLocal.getRepository(MedicamentoOrm);
+
+      const [
+        asignaciones,
+        estadosHistorial,
+        signosVitales,
+        notas,
+        procedimientos,
+        medicamentos,
+        revisionesCentral,
+      ] = await Promise.all([
+        asignacionRp.find({ where: { trasladoId } }),
+        historialRp.find({ where: { trasladoId } }),
+        tramoIds.length
+          ? signosVitalesRp
+              .createQueryBuilder('signosVitales')
+              .leftJoinAndSelect('signosVitales.usuario', 'usuarioSignosVitales')
+              .where('signosVitales.TRAMO IN (:...tramoIds)', { tramoIds })
+              .getMany()
+          : Promise.resolve([]),
+        tramoIds.length
+          ? notasRp
+              .createQueryBuilder('notas')
+              .leftJoinAndSelect('notas.usuario', 'usuarioNotas')
+              .where('notas.TRAMO IN (:...tramoIds)', { tramoIds })
+              .getMany()
+          : Promise.resolve([]),
+        tramoIds.length
+          ? procedimientosRp
+              .createQueryBuilder('procedimientos')
+              .leftJoinAndSelect('procedimientos.procedimiento', 'procedimiento')
+              .where('procedimientos.TRAMO IN (:...tramoIds)', { tramoIds })
+              .getMany()
+          : Promise.resolve([]),
+        tramoIds.length
+          ? medicamentosRp
+              .createQueryBuilder('medicamentos')
+              .leftJoinAndSelect('medicamentos.medicamento', 'medicamento')
+              .where('medicamentos.TRAMO IN (:...tramoIds)', { tramoIds })
+              .getMany()
+          : Promise.resolve([]),
+        revisionRp.find({ where: { trasladoId } }),
+      ]);
+
+      const tramosById = new Map((traslado.tramos ?? []).map(tramo => [tramo.id, tramo]));
+      for (const tramo of tramosById.values()) {
+        tramo.signosVitales = [];
+        tramo.notas = [];
+        tramo.procedimientos = [];
+        tramo.medicamentos = [];
+      }
+      signosVitales.forEach(signo => tramosById.get(signo.tramoId)?.signosVitales.push(signo));
+      notas.forEach(nota => tramosById.get(nota.tramoId)?.notas.push(nota));
+      procedimientos.forEach(procedimiento =>
+        tramosById.get(procedimiento.tramoId)?.procedimientos.push(procedimiento)
+      );
+      medicamentos.forEach(medicamento =>
+        tramosById.get(medicamento.tramoId)?.medicamentos.push(medicamento)
+      );
+
+      traslado.asignaciones = asignaciones;
+      traslado.estadosHistorial = estadosHistorial;
+      traslado.revisionesCentral = revisionesCentral;
 
       if (traslado.pacienteId) {
         const estanciaRp = connLocal.getRepository(EstanciaOrm);
@@ -319,12 +424,6 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
           }
         });
       });
-
-      const revisionesCentral = await revisionRp.find({
-        where: { trasladoId },
-      });
-
-      traslado.revisionesCentral = revisionesCentral;
 
       /* traslado.tramos = traslado.tramos?.sort((a, b) => a.orden - b.orden || a.id - b.id); */
 
