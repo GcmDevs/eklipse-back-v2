@@ -5,7 +5,6 @@ import { _PrivSecUserOrm } from '@common/infrastructure/orm/user.orm';
 import { _PrivSecRoleOrm } from '@common/infrastructure/orm/role.orm';
 import { enabledModules } from '@common/application/enabled-modules';
 import { RSAServices } from '@common/application/services';
-import { ChatUserOrm } from '@gen/chat/orm';
 
 @Injectable()
 export class AuthoritiesServicesImpl extends BaseSource {
@@ -39,29 +38,11 @@ export class AuthoritiesServicesImpl extends BaseSource {
   }> {
     try {
       if (!this.auth.isDim) return { authorities: [], onlyCodes: [], enabledModules: [] };
-      await this.registerChatUserIfNeeded(this.auth.user);
       const myAuthorities = await fetchAuthsByUser({ id: this.auth.id, ctx: this.auth.context });
       return { ...myAuthorities, enabledModules: enabledModules(myAuthorities.onlyCodes) };
     } catch (error: any) {
       throw new BadRequestException(error.message);
     }
-  }
-
-  private async registerChatUserIfNeeded(user: {
-    document: string;
-    fullName: string;
-  }): Promise<void> {
-    const document = String(user.document ?? '')
-      .trim()
-      .toUpperCase();
-    const fullName = String(user.fullName ?? '').trim();
-    if (!document || !fullName) throw new Error('No fue posible identificar al usuario del chat.');
-
-    const repository = this.ekConn.getRepository(ChatUserOrm);
-    const existing = await repository.findOne({ where: { document } });
-    if (existing) return;
-
-    await repository.save(repository.create({ document, fullName }));
   }
 
   public async addAuthorityToUser(authorityId: string, userId: string) {

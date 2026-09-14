@@ -1,7 +1,6 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { initializeSources } from '@common/infrastructure/services';
 import { SecurityModule } from '@gen/security/module';
-import { ChatModule } from '@gen/chat';
 import { ENTITIES } from './app.entities';
 import {
   FILE_PATHS_ARR,
@@ -18,7 +17,6 @@ import { FileSaverModule } from './file-server';
     // --- AVOID NOWRAP --- //
     SecurityModule,
     FileSaverModule,
-    ChatModule,
   ],
 })
 export class AppModule implements OnModuleInit {
