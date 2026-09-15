@@ -2,6 +2,7 @@ import { GcmContexts } from '@common/domain/types';
 import { castDataServices } from '@common/application/services';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
+import { TipoCode } from '@inn/lgc/ctc/types/inn/central-compras/solicitudes';
 
 export class UpdateItemSolicitudCompraDto {
   @ApiProperty()
@@ -15,11 +16,16 @@ export class UpdateItemSolicitudCompraDto {
   itemId: number;
   @ApiProperty()
   @IsNumber()
-  cotizacionId: number;
+  @IsOptional()
+  cotizacionId?: number;
   @ApiProperty()
   @IsNumber()
   @IsOptional()
   productoId: number;
+  @ApiProperty()
+  @IsNumber()
+  @IsOptional()
+  tipoCode?: TipoCode;
   @ApiProperty()
   @IsString()
   @IsOptional()
