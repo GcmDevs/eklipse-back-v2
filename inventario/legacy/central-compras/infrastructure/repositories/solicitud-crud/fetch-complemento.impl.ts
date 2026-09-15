@@ -203,6 +203,18 @@ export class FetchComplementoSolicitudImpl extends CentralComprasSource {
     createdState.usuario = solicitud.usuario;
     createdState.informacionAdicional = solicitud.justificacion.trim().toUpperCase();
     createdState.id = 1;
+
+    if (
+      solicitud.cambiosEstado.filter(
+        ce =>
+          ce.keyCode === ESTADOS.SOL_REGISTRADA.getCode() &&
+          ce.tipoCode === ESTADOS_ESPECIFICOS.SOL_REGISTRADA.getCode()
+      )
+    ) {
+      createdState.keyCode = ESTADOS_ESPECIFICOS.SOL_CARG_COLABORADOR.getCode();
+      createdState.tipoCode = ESTADOS.SOL_CARG_COLABORADOR.getCode();
+    }
+
     solicitud.cambiosEstado.unshift(createdState);
 
     solicitud.cambiosEstado.map(ce => {
