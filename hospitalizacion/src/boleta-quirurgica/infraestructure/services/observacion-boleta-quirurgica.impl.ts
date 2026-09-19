@@ -4,6 +4,7 @@ import { GuardarObservacionDto, ObservacionesDto } from '@hpn/boleta-quirurgica/
 import { Injectable } from '@nestjs/common';
 import { BoletaQuirurgicaObservacionOrm } from '../orm';
 import { trim } from '@hpn/boleta-quirurgica/shared/utils/utils';
+import { insertarObservacionQuery } from '../queries/observacion.query';
 
 @Injectable()
 export class ObservacionBoletaQuirurgicaImpl extends BaseSource {
@@ -15,19 +16,15 @@ export class ObservacionBoletaQuirurgicaImpl extends BaseSource {
       await this.qr.startTransaction();
       transactionStarted = true;
 
-      const observacionRp = this.qr.manager.getRepository(BoletaQuirurgicaObservacionOrm);
       const usuario = this.auth.user.fullName;
 
-      await observacionRp.save(
-        observacionRp.create({
-          ingreso: body.ingreso,
-          folio: body.folio,
-          observacion: body.observacion,
-          fechaObservacion: new Date(),
-          gestor: trim(body.gestor),
-          usuario,
-        })
-      );
+      await this.qr.query(insertarObservacionQuery(), [
+        body.ingreso,
+        trim(body.observacion),
+        body.folio,
+        trim(body.gestor),
+        usuario,
+      ]);
 
       await this.qr.commitTransaction();
       return { created: true, usuario };

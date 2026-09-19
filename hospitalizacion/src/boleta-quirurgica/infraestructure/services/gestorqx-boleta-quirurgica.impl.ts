@@ -1,3 +1,4 @@
+import { guardarObservacionPendiente } from './guardar-observacion-pendiente';
 import { BaseSource } from '@common/infrastructure/services';
 import { throwBoletaQuirurgicaError } from '@hpn/boleta-quirurgica/application/errors';
 import { GuardarGestorQxDto } from '@hpn/boleta-quirurgica/presentation/dto';
@@ -19,6 +20,9 @@ export class GestorQxBoletaQuirurgicaImpl extends BaseSource {
       await this.qr.connect();
       await this.qr.startTransaction();
       transactionStarted = true;
+      if (body.observacionPendiente?.trim()) {
+        await guardarObservacionPendiente(this.qr, body, 'GESTOR', this.auth.user.fullName);
+      }
 
       const gestorQxRp = this.qr.manager.getRepository(BoletaQuirurgicaGestorQxOrm);
       const auditoriaRp = this.qr.manager.getRepository(BoletaQuirurgicaAuditoriaOrm);
