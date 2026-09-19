@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CotizacionOrm, DetalleSolicitudOrm } from '@inn/lgc/ctc/orm/inn/central-compras';
 import { gcmContextFactory } from '@common/domain/types';
 import { ProductoOrm } from '@inn/lgc/ctc/orm/inn/productos';
@@ -28,7 +28,12 @@ export class UpdateItemSolicitudCompraImpl extends CentralComprasSource {
           })
         : null;
 
-      if (cotizacion?.cotDocumentoId) {
+      if (
+        cotizacion?.cotDocumentoId &&
+        cotizacion.detalle.some(
+          detalle => detalle.itemId === body.itemId && detalle.isAprobado === true
+        )
+      ) {
         throw new Error('La cotización tiene una OC, los items ya no pueden ser modificados');
       }
 
@@ -41,10 +46,12 @@ export class UpdateItemSolicitudCompraImpl extends CentralComprasSource {
         relations: ['detalle'],
       });
       const itemTieneOrdenCompra = cotizacionesDeSolicitud.some(
-        c => c.cotDocumentoId && c.detalle.some(detalle => detalle.itemId === body.itemId)
+        c =>
+          c.cotDocumentoId &&
+          c.detalle.some(detalle => detalle.itemId === body.itemId && detalle.isAprobado === true)
       );
       if (itemTieneOrdenCompra) {
-        throw new Error('El item ya estÃ¡ relacionado con una cotizaciÃ³n que tiene OC');
+        throw new Error('El item ya está relacionado con una cotización que tiene OC');
       }
 
       if (body.tipoCode && body.tipoCode !== item.tipoCode) {
@@ -80,7 +87,7 @@ export class UpdateItemSolicitudCompraImpl extends CentralComprasSource {
       return true;
     } catch (error: any) {
       await localQr.rollbackTransaction();
-      throw new Error(error.message);
+      throw new BadRequestException(error.message);
     } finally {
       await localQr.release();
     }
