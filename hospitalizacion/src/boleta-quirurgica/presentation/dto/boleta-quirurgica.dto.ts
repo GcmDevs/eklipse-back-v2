@@ -1,6 +1,7 @@
 import { Type } from 'class-transformer';
 import {
   IsBoolean,
+  IsIn,
   IsDateString,
   IsInt,
   IsOptional,
@@ -34,6 +35,10 @@ export class InicializarBoletaQuirurgicaDto {
 }
 
 export class GuardarAutorizacionDto {
+  @IsOptional()
+  @IsString()
+  observacionPendiente?: string;
+
   @Type(() => Number)
   @IsInt()
   @Min(1)
@@ -138,6 +143,7 @@ export class GuardarObservacionDto {
   fecha: string;
 
   @IsString()
+  @IsIn(['AUDITORIA', 'GESTOR', 'MAOS', 'PROGRAMACION', 'POST_QX'])
   @MaxLength(50)
   gestor: string;
 }
@@ -153,10 +159,14 @@ export class ObservacionesDto {
   folio: number;
 
   @IsString()
-  gestor: 'AUDITORIA' | 'GESTOR' | 'MAOS' | 'PROGRAMACION';
+  gestor: 'AUDITORIA' | 'GESTOR' | 'MAOS' | 'PROGRAMACION' | 'POST_QX';
 }
 
 export class GuardarProgramacionDto {
+  @IsOptional()
+  @IsString()
+  observacionPendiente?: string;
+
   @Type(() => Number)
   @IsInt()
   @Min(1)
@@ -187,6 +197,10 @@ export class GuardarProgramacionDto {
 }
 
 export class GuardarGestorQxDto {
+  @IsOptional()
+  @IsString()
+  observacionPendiente?: string;
+
   @Type(() => Number)
   @IsInt()
   @Min(1)
@@ -236,6 +250,10 @@ export class GuardarGestorQxDto {
 }
 
 export class GuardarMaosDto {
+  @IsOptional()
+  @IsString()
+  observacionPendiente?: string;
+
   @Type(() => Number)
   @IsInt()
   @Min(1)
@@ -271,4 +289,49 @@ export class GuardarMaosDto {
   @IsString()
   @MaxLength(250)
   existencia?: string;
+}
+
+export class CierreAdministrativoDto extends BoletaQuirurgicaDetalleDto {}
+
+export class ActualizarCupEjecutadoDto extends BoletaQuirurgicaDetalleDto {
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  cupEjecutadoOid: number;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  genseripsOid: number;
+}
+
+export class ActualizarCupSolicitadoDto extends BoletaQuirurgicaDetalleDto {
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  solicitudOid: number;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  genseripsOid: number;
+
+  @IsIn(['PQX', 'NPQX', 'EXA'])
+  origen: 'PQX' | 'NPQX' | 'EXA';
+}
+
+export class GuardarAuditoriaPreDto extends BoletaQuirurgicaDetalleDto {
+  @IsOptional()
+  @IsString()
+  observacionPendiente?: string;
+
+  @IsIn(['CUMPLE', 'NO CUMPLE'])
+  cumple: 'CUMPLE' | 'NO CUMPLE';
+
+  @IsBoolean()
+  cambioCups: boolean;
+
+  @IsOptional()
+  @IsString()
+  usuarioCambioCups?: string | null;
 }

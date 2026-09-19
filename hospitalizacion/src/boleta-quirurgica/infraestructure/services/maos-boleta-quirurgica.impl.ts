@@ -1,3 +1,4 @@
+import { guardarObservacionPendiente } from './guardar-observacion-pendiente';
 import { BaseSource } from '@common/infrastructure/services';
 import { GuardarMaosDto } from '@hpn/boleta-quirurgica/presentation/dto';
 import { Injectable } from '@nestjs/common';
@@ -14,6 +15,9 @@ export class MaosBoletaQuirurgicaImpl extends BaseSource {
       await this.qr.connect();
       await this.qr.startTransaction();
       transactionStarted = true;
+      if (body.observacionPendiente?.trim()) {
+        await guardarObservacionPendiente(this.qr, body, 'MAOS', this.auth.user.fullName);
+      }
 
       const maosRp = this.qr.manager.getRepository(BoletaQuirurgicaMaosOrm);
       const programacionRp = this.qr.manager.getRepository(BoletaQuirurgicaProgramacionOrm);

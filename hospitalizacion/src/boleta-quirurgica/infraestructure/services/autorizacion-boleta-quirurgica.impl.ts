@@ -1,3 +1,4 @@
+import { guardarObservacionPendiente } from './guardar-observacion-pendiente';
 import { BaseSource } from '@common/infrastructure/services';
 import { throwBoletaQuirurgicaError } from '@hpn/boleta-quirurgica/application/errors';
 import { GuardarAutorizacionDto } from '@hpn/boleta-quirurgica/presentation/dto';
@@ -5,7 +6,6 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   BoletaQuirurgicaAuditoriaOrm,
   BoletaQuirurgicaLogOrm,
-  BoletaQuirurgicaObservacionOrm,
   BoletaQuirurgicaRegistroOrm,
 } from '../orm';
 import { trim } from '@hpn/boleta-quirurgica/shared/utils/utils';
@@ -26,9 +26,11 @@ export class AutorizacionBoletaQuirurgicaImpl extends BaseSource {
       await this.qr.connect();
       await this.qr.startTransaction();
       transactionStarted = true;
+      if (body.observacionPendiente?.trim()) {
+        await guardarObservacionPendiente(this.qr, body, 'AUDITORIA', this.auth.user.fullName);
+      }
 
       const auditoriaRp = this.qr.manager.getRepository(BoletaQuirurgicaAuditoriaOrm);
-      const observacionRp = this.qr.manager.getRepository(BoletaQuirurgicaObservacionOrm);
       const registroRp = this.qr.manager.getRepository(BoletaQuirurgicaRegistroOrm);
       const logRp = this.qr.manager.getRepository(BoletaQuirurgicaLogOrm);
       const where = { ingreso: body.ingreso, folio: body.folio };
@@ -39,19 +41,6 @@ export class AutorizacionBoletaQuirurgicaImpl extends BaseSource {
       });
 
       if (!autorizacionExistente) {
-        if (observacion) {
-          await observacionRp.save(
-            observacionRp.create({
-              ingreso: body.ingreso,
-              folio: body.folio,
-              observacion,
-              fechaObservacion: new Date(),
-              gestor: 'AUTORIZACION',
-              usuario: usuarioLog,
-            })
-          );
-        }
-
         await auditoriaRp.save(
           auditoriaRp.create({
             ingreso: body.ingreso,

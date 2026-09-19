@@ -3,12 +3,13 @@ import { Injectable } from '@nestjs/common';
 import { boletaQuirurgicaQuery } from '../queries';
 import { mapBoletaQuirurgicaRows } from '@hpn/boleta-quirurgica/application/mappers';
 import { throwBoletaQuirurgicaError } from '@hpn/boleta-quirurgica/application/errors';
+import { boletaQuirurgicaNuevaQuery } from '../queries/boleta-quirurgica-nueva.query';
 
 @Injectable()
 export class FetchBoletaQuirurgicaImpl extends BaseSource {
   public async execute(): Promise<any> {
     try {
-      const result = await this.conn.query(boletaQuirurgicaQuery());
+      const result = await this.conn.query(boletaQuirurgicaNuevaQuery());
       return mapBoletaQuirurgicaRows(result);
     } catch (error) {
       throwBoletaQuirurgicaError(error, 'Error fetching boleta quirurgica');

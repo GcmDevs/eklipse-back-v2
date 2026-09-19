@@ -1,0 +1,29 @@
+export const auditoriaPreQuery = () => `
+  SELECT INGRESO, FOLIO, CUMPLE, CAMBIO_CUPS, USUARIO AS USUARIO_CAMBIO_CUPS
+  FROM GCMCIRDERINTRAHOSPAUDPRE
+  WHERE INGRESO = @0 AND FOLIO = @1
+`;
+
+export const buscarAuditoriaPreParaGuardarQuery = () => `
+  SELECT INGRESO FROM GCMCIRDERINTRAHOSPAUDPRE WITH (UPDLOCK, HOLDLOCK)
+  WHERE INGRESO = @0 AND FOLIO = @1
+`;
+
+export const insertarAuditoriaPreQuery = () => `
+  INSERT INTO GCMCIRDERINTRAHOSPAUDPRE (INGRESO, FOLIO, CUMPLE, CAMBIO_CUPS, USUARIO)
+  VALUES (@0, @1, @2, @3, @4)
+`;
+
+export const actualizarAuditoriaPreQuery = () => `
+  UPDATE GCMCIRDERINTRAHOSPAUDPRE
+  SET CUMPLE = @2,
+      CAMBIO_CUPS = CASE WHEN @3 = 'SI' THEN 'SI' ELSE CAMBIO_CUPS END,
+      USUARIO = CASE WHEN @3 = 'SI' THEN @4 ELSE USUARIO END
+  WHERE INGRESO = @0 AND FOLIO = @1
+`;
+
+export const gestionarRegistroAuditoriaPreQuery = () => `
+  UPDATE GCMCIRDERINTRAHOSP SET ESTADO = 'EN GESTION'
+  WHERE INGRESO = @0 AND FOLIO = @1;
+  SELECT @@ROWCOUNT AS afectados;
+`;
