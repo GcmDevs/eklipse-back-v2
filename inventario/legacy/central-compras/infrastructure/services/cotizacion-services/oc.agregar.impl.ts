@@ -176,7 +176,7 @@ export class AgregarOrdenCompraImpl extends CentralComprasSource {
           const diffPrecios = itemAprob.valorUnitario - prodInOC.valorCOP;
           const diffIsSafe = diffPrecios > -100 || diffPrecios < 100;
           if (!IVACoincide) throw new Error(`El IVA de ${nomItem} no es el mismo ${errExt}`);
-          if (descCoincide) throw new Error(`El descuento de ${nomItem} no es el mismo ${errExt}`);
+          //if (descCoincide) throw new Error(`El descuento de ${nomItem} no es el mismo ${errExt}`);
           if (cantCoincide) throw new Error(`La cantidad de ${nomItem} no es la misma ${errExt}`);
           if (!diffIsSafe) throw new Error(`El precio de ${nomItem} no es el mismo ${errExt}`);
         } else {
