@@ -1,11 +1,11 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { SOLICITUDES_RECHAZADAS_ESTADOS_CODES } from '@inn/lgc/ctc/application/constants';
+import { SolEstadoCode } from '@inn/lgc/ctc/@types/inn/central-compras/solicitudes/_deprecated';
 import {
   prioridadTypeFactory,
   estadoTypeFactory,
   tipoTypeFactory,
   PrioridadCode,
-  EstadoCode,
   TipoCode,
   PrioridadType,
   TipoType,
@@ -32,7 +32,7 @@ export class SolicitudOrm {
   justificacion: string;
 
   @Column({ name: 'ESTADO' })
-  estadoCode: EstadoCode;
+  estadoCode: SolEstadoCode;
 
   @Column({ name: 'CREATEDAT' })
   createdAt: Date;

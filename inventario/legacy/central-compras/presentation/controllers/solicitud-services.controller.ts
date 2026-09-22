@@ -5,6 +5,7 @@ import {
   AprobacionCotizacionByCtCDto,
   AprobacionSolicitudByGerenteDto,
   ConvertirACajaMenorExpressDto,
+  CambiarTipoSolicitudDto,
   ItemsRecomendadosByCotizadorDto,
   UpdateItemSolicitudCompraDto,
   UpdateSolicitudColaboradorDto,
@@ -82,14 +83,22 @@ export class SolicitudCompraServicesController {
   }
 
   @ApiOkResponse({ type: Boolean })
-  @Authorities([
-    INN_AUTHORITIES.CENTRAL_COMPRAS.COTIZAR,
-    INN_AUTHORITIES.CENTRAL_COMPRAS.AGREGAR_OC,
-  ])
+  @Authorities([INN_AUTHORITIES.CENTRAL_COMPRAS.CODE])
   @Patch('update-item-solicitud-compra')
   public updateItemSolicitudCompra(@Body() body: UpdateItemSolicitudCompraDto) {
     try {
       return this._services.updateItemSolicitudCompra(body);
+    } catch (error: any) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @ApiOkResponse({ type: Boolean })
+  @Authorities([INN_AUTHORITIES.CENTRAL_COMPRAS.CODE])
+  @Patch('cambiar-tipo-solicitud')
+  public cambiarTipoSolicitud(@Body() body: CambiarTipoSolicitudDto) {
+    try {
+      return this._services.cambiarTipoSolicitud(body);
     } catch (error: any) {
       throw new BadRequestException(error.message);
     }

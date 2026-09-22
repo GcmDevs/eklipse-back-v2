@@ -6,7 +6,7 @@ import { BaseSource, switchConn } from '@common/infrastructure/services';
 import { castDataServices } from '@common/application/services';
 import { gruposProductosValidosByCtx } from '@inn/lgc/ctc/infrastructure/queries';
 import { AlmacenOrm, ProductoOrm } from '@inn/lgc/ctc/orm/inn/productos';
-import { ProductoOrm as AfnProductoOrm } from '@inn/lgc/ctc/orm/inn/activos-fijos';
+import { AfnProductoOrm } from '@inn/lgc/ctc/orm/inn/activos-fijos';
 import { ClaseProductoCode } from '@inn/lgc/ctc/types/inn/productos';
 import { SRDCentroOrm } from '@inn/lgc/ctc/orm/shared-bd';
 

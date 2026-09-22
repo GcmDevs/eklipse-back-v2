@@ -25,7 +25,7 @@ import {
   SOLICITUDES_INVALIDAS_CODES,
 } from '@inn/lgc/ctc/application/constants';
 import { CentralComprasSource } from '@inn/lgc/ctc/infrastructure/base';
-import { ProductoOrm as AfnProductoOrm } from '@inn/lgc/ctc/orm/inn/activos-fijos';
+import { AfnProductoOrm } from '@inn/lgc/ctc/orm/inn/activos-fijos';
 import { ProductoOrm as InnProductoOrm } from '@inn/lgc/ctc/orm/inn/productos';
 import { orderBy } from 'lodash';
 import { generateBetweenDates } from '@inn/lgc/ctc/application/services';

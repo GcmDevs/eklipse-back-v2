@@ -4,7 +4,7 @@ import { GrupoOrm } from './grupo.orm';
 import { TIPOS } from '@inn/lgc/ctc/types/inn/central-compras/solicitudes';
 
 @Entity(TABLE_NAMES.inn.afn.productos)
-export class ProductoOrm {
+export class AfnProductoOrm {
   @PrimaryGeneratedColumn({ name: 'OID' })
   id: number;
 

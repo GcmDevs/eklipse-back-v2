@@ -1,6 +1,6 @@
 import { In } from 'typeorm';
 import { Injectable } from '@nestjs/common';
-import { ProductoOrm as AfnProductoOrm } from '@inn/lgc/ctc/orm/inn/activos-fijos';
+import { AfnProductoOrm } from '@inn/lgc/ctc/orm/inn/activos-fijos';
 import {
   CambioEstadoOrm,
   DetalleCotizacionOrm,

@@ -1,10 +1,15 @@
 import { INN_AUTHORITIES } from '@inn/authorities';
 import { CtcPermisosRes } from '../responses';
+import { SUPERADMINS } from '@common/application/constants';
 
 const auths = INN_AUTHORITIES.CENTRAL_COMPRAS;
 
-export const centralComprasValidations = (userCodeAuthorities: string[]): CtcPermisosRes => {
+export const centralComprasValidations = (
+  userCodeAuthorities: string[],
+  userDocument: string
+): CtcPermisosRes => {
   return {
+    isSuperAdmin: SUPERADMINS.includes(userDocument),
     canSeeAllSolicitudes: _hasAnyAuthority(userCodeAuthorities, [
       auths.VER_TODAS,
       auths.VER_INCL_FORBIDDEN_VALUES,

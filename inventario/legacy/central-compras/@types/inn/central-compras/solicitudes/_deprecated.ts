@@ -1,10 +1,27 @@
-import { EstadoCode, EstadoType } from './estado/code';
-import { EstadoEspecificoCode, EstadoEspecificoType } from './estado-especifico/code';
+import { EstadoType } from './estado/code';
+import { EstadoEspecificoType } from './estado-especifico/code';
 
 /**************************************************************************************************/
 /*************************** ESTADOS ANTERIORES ***************************************************/
 /**************************************************************************************************/
-export type SolEstadoCode = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 80 | 85 | 86 | 87 | 88 | 89 | 90 | 91;
+export type SolEstadoCode =
+  | 0
+  | 1
+  | 2
+  | 3
+  | 4
+  | 5
+  | 6
+  | 78
+  | 79
+  | 80
+  | 85
+  | 86
+  | 87
+  | 88
+  | 89
+  | 90
+  | 91;
 const SOL_ELIMINADA = new EstadoType(0, 'ELIMINADA');
 const SOL_REGISTRADA = new EstadoType(1, 'REGISTRADO');
 const SOL_APROBADA = new EstadoType(2, 'APROBADO');
@@ -12,6 +29,8 @@ const SOL_EN_COTI = new EstadoType(3, 'EN COTIZACIÓN');
 const COTI_POR_APROBAR = new EstadoType(4, 'COTIZACIÓN(ES) POR APROBAR');
 const COTI_APROBADA = new EstadoType(5, 'COT. APROBADA(S) O RECHAZADA(S)');
 const SOL_ULTIMOS_PASOS = new EstadoType(6, 'ULTIMOS PASOS');
+const SOL_MODIFICADA = new EstadoType(78, 'SOLICITUD MODIFICADO');
+const SOL_ITEM_MODIFICADO = new EstadoType(79, 'ITEM MODIFICADO');
 const SOL_GESTION_MANUAL = new EstadoType(80, 'GESTIONADA MANUALMENTE');
 const SOL_CANCELADA = new EstadoType(85, 'SOLICITUD CANCELADA');
 const SOL_CARG_COLABORADOR = new EstadoType(86, 'CARGADA POR COLABORADOR');
@@ -20,7 +39,7 @@ const SOL_CAJA_MENOR_EXPRESS = new EstadoType(88, 'CAJA MENOR EXPRESS');
 const SOL_REACTIVADA = new EstadoType(89, 'REACTIVADO');
 const SOL_RECHAZO_TEMPORAL = new EstadoType(90, 'RECHAZADA TEMPORALMENTE');
 const SOL_RECHAZO_DEFINITIVO = new EstadoType(91, 'RECHAZADA DEFINITIVAMENTE');
-export function solEstadoTypeFactory(code: EstadoCode): EstadoType {
+export function solEstadoTypeFactory(code: SolEstadoCode): EstadoType {
   switch (code) {
     case 0:
       return SOL_ELIMINADA;
@@ -36,6 +55,10 @@ export function solEstadoTypeFactory(code: EstadoCode): EstadoType {
       return COTI_APROBADA;
     case 6:
       return SOL_ULTIMOS_PASOS;
+    case 78:
+      return SOL_MODIFICADA;
+    case 79:
+      return SOL_ITEM_MODIFICADO;
     case 80:
       return SOL_GESTION_MANUAL;
     case 85:
@@ -70,6 +93,8 @@ export const SOL_ESTADOS = {
   SOL_REACTIVADA,
   SOL_RECHAZO_TEMPORAL,
   SOL_RECHAZO_DEFINITIVO,
+  SOL_MODIFICADA,
+  SOL_ITEM_MODIFICADO,
 };
 export const SOL_ESTADOS_VALUES = Object.values(SOL_ESTADOS);
 /**************************************************************************************************/
@@ -87,6 +112,8 @@ export type SolEstadoEspecificoCode =
   | 8
   | 9
   | 10
+  | 78
+  | 79
   | 80
   | 81
   | 82
@@ -115,6 +142,8 @@ const ESP_COTI_OC_CONTABILIZADA = new EstadoEspecificoType(7, 'ORDEN CONTABILIZA
 const ESP_COTI_OC_ABONO = new EstadoEspecificoType(8, 'ABONO ORDEN');
 const ESP_COTI_OC_PAGO_FINAL = new EstadoEspecificoType(9, 'ULTIMO PAGO ORDEN');
 const ESP_COTI_PRODUCTOS_RECIBIDOS = new EstadoEspecificoType(10, 'PRODUCTOS RECIBIDOS');
+const ESP_SOL_MODIFICADA = new EstadoEspecificoType(78, 'SOLICITUD MODIFICADA');
+const ESP_SOL_ITEM_MODIFICADO = new EstadoEspecificoType(79, 'ITEM MODIFICADO');
 const ESP_SOL_GESTION_MANUAL = new EstadoEspecificoType(80, 'GESTIONADA MANUALMENTE');
 const ESP_SOL_CANCELADA = new EstadoEspecificoType(81, 'CANCELADA POR MOTIVOS VARIOS');
 const ESP_SOL_DECLI_JEF_DEPEND = new EstadoEspecificoType(82, 'DECLINADA POR JEFE DEPENDENCIA');
@@ -133,7 +162,9 @@ const ESP_COTI_OC_NO_PAGADA = new EstadoEspecificoType(95, 'ORDEN NO PAGADA');
 const ESP_COTI_OC_NO_RECIBIDA = new EstadoEspecificoType(96, 'ORDEN NO RECIBIDA');
 const ESP_SOL_NO_APROBADA = new EstadoEspecificoType(97, 'SOLICITUD NO APROBADA');
 const ESP_COTI_NO_APROBADA = new EstadoEspecificoType(98, 'COTIZACION(ES) RECHAZADA(S)');
-export function solEstadoEspecificoTypeFactory(code: EstadoEspecificoCode): EstadoEspecificoType {
+export function solEstadoEspecificoTypeFactory(
+  code: SolEstadoEspecificoCode
+): EstadoEspecificoType {
   switch (code) {
     case 1:
       return ESP_SOL_REGISTRADA;
@@ -155,6 +186,10 @@ export function solEstadoEspecificoTypeFactory(code: EstadoEspecificoCode): Esta
       return ESP_COTI_OC_PAGO_FINAL;
     case 10:
       return ESP_COTI_PRODUCTOS_RECIBIDOS;
+    case 78:
+      return ESP_SOL_MODIFICADA;
+    case 79:
+      return ESP_SOL_ITEM_MODIFICADO;
     case 80:
       return ESP_SOL_GESTION_MANUAL;
     case 81:
@@ -222,5 +257,7 @@ export const SOL_ESTADOS_ESPECIFICOS = {
   COTI_OC_NO_RECIBIDA: ESP_COTI_OC_NO_RECIBIDA,
   SOL_NO_APROBADA: ESP_SOL_NO_APROBADA,
   COTI_NO_APROBADA: ESP_COTI_NO_APROBADA,
+  SOL_MODIFICADA: ESP_SOL_MODIFICADA,
+  SOL_ITEM_MODIFICADO: ESP_SOL_ITEM_MODIFICADO,
 };
 export const SOL_ESTADOS_ESPECIFICOS_VALUES = Object.values(SOL_ESTADOS_ESPECIFICOS);

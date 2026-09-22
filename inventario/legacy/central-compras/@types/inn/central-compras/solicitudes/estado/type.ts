@@ -1,16 +1,15 @@
-import { SOL_ESTADOS, SOL_ESTADOS_VALUES, solEstadoTypeFactory } from '../_deprecated';
-import { EstadoCode, EstadoType } from './code';
+import {
+  SOL_ESTADOS,
+  SOL_ESTADOS_VALUES,
+  SolEstadoCode,
+  solEstadoTypeFactory,
+} from '../_deprecated';
+import { EstadoType } from './code';
 
-const REGISTRADA = new EstadoType(101, 'REGISTRADO');
-
-export function estadoTypeFactory(code: EstadoCode): EstadoType {
-  if (code <= 100) return solEstadoTypeFactory(code as EstadoCode);
-  switch (code) {
-    case 101:
-      return REGISTRADA;
-  }
+export function estadoTypeFactory(code: SolEstadoCode): EstadoType {
+  return solEstadoTypeFactory(code as SolEstadoCode);
 }
 
-export const ESTADOS = { ...SOL_ESTADOS, REGISTRADA };
+export const ESTADOS = { ...SOL_ESTADOS };
 
-export const ESTADOS_VALUES = [...SOL_ESTADOS_VALUES, REGISTRADA];
+export const ESTADOS_VALUES = [...SOL_ESTADOS_VALUES];

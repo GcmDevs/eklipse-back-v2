@@ -23,7 +23,7 @@ import { ESTADOS, TIPOS } from '@inn/lgc/ctc/types/inn/central-compras/solicitud
 import { EntidadBasicaRes } from '@common/infrastructure/responses';
 
 export const generateEstadosActuales = (solicitud: SolicitudOrm) => {
-  const registradoCodes = [ESTADOS.SOL_REGISTRADA.getCode(), ESTADOS.REGISTRADA.getCode()];
+  const registradoCodes = [ESTADOS.SOL_REGISTRADA.getCode()];
 
   const rechazadoCodes = SOLICITUDES_INVALIDAS_CODES;
 

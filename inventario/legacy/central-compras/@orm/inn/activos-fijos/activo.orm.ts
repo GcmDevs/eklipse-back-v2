@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { InformacionAdicionalOrm } from './informacion-adicional.orm';
 import { TABLE_NAMES } from '@common/application/constants';
-import { ProductoOrm } from './producto.orm';
+import { AfnProductoOrm } from './producto.orm';
 import { ProveedorOrm } from '@inn/lgc/ctc/orm/gen';
 
 @Entity(TABLE_NAMES.inn.afn.activos)
@@ -18,9 +18,9 @@ export class ActivoOrm {
   @Column({ name: TABLE_NAMES.inn.afn.productos })
   productoId: number;
 
-  @ManyToOne(() => ProductoOrm)
+  @ManyToOne(() => AfnProductoOrm)
   @JoinColumn([{ name: TABLE_NAMES.inn.afn.productos, referencedColumnName: 'id' }])
-  producto: ProductoOrm;
+  producto: AfnProductoOrm;
 
   @Column({ name: TABLE_NAMES.gen.proveedores })
   proveedorId: number;

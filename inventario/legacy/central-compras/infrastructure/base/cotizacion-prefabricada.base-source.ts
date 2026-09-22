@@ -3,17 +3,17 @@ import { In } from 'typeorm';
 import { ProveedorOrm, UsuarioOrm } from '@inn/lgc/ctc/orm/gen';
 import { BaseSource } from '@common/infrastructure/services';
 import {
-  EstadoCode,
-  EstadoEspecificoCode,
-} from '@inn/lgc/ctc/types/inn/central-compras/solicitudes';
+  SolEstadoCode,
+  SolEstadoEspecificoCode,
+} from '@inn/lgc/ctc/@types/inn/central-compras/solicitudes/_deprecated';
 import { CambioEstadoOrm, SolicitudOrm } from '@inn/lgc/ctc/orm/inn/central-compras';
 import { ProductoOrm } from '@inn/lgc/ctc/orm/inn/productos';
 
 @Injectable()
 export class CotizacionPrefabricadaBaseSource extends BaseSource {
   protected async createCambioEstado(payload: {
-    estadoEspecificoCode: EstadoEspecificoCode;
-    estadoCode: EstadoCode;
+    estadoEspecificoCode: SolEstadoEspecificoCode;
+    estadoCode: SolEstadoCode;
     solicitud: SolicitudOrm;
     archivoRelacionado?: string;
     cedulaUsuario?: string;

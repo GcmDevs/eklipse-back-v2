@@ -16,7 +16,7 @@ export class CentralComprasSource extends _PrivCentralComprasBaseSource {
     if (!id) id = this.auth.id;
     if (!ctx) ctx = this.auth.context;
     const userCodeAuthorities = await fetchAuthsByUser({ id, ctx });
-    return centralComprasValidations(userCodeAuthorities.onlyCodes);
+    return centralComprasValidations(userCodeAuthorities.onlyCodes, this.auth.user.document);
   }
 
   protected async canSeeAllSolicitudes() {

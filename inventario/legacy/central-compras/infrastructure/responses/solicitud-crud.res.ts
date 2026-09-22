@@ -1,10 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  EstadoCode,
-  EstadoEspecificoCode,
-  PrioridadCode,
-  TipoCode,
-} from '@inn/lgc/ctc/types/inn/central-compras/solicitudes';
+  SolEstadoCode,
+  SolEstadoEspecificoCode,
+} from '@inn/lgc/ctc/@types/inn/central-compras/solicitudes/_deprecated';
+import { PrioridadCode, TipoCode } from '@inn/lgc/ctc/types/inn/central-compras/solicitudes';
 import { CentroRes, EntidadBasicaRes, UsuarioBasicoRes } from '@common/infrastructure/responses';
 
 export class BasicInfoSolicitudRes {
@@ -23,7 +22,7 @@ export class BasicInfoSolicitudRes {
   @ApiProperty()
   dependenciaDestinoNombre: string;
   @ApiProperty()
-  estadoCode: EstadoCode;
+  estadoCode: SolEstadoCode;
   @ApiProperty()
   usuarioNombre: string;
   @ApiProperty()
@@ -53,6 +52,8 @@ export class BasicInfoSolicitudRes {
 }
 
 export class CtcPermisosRes {
+  @ApiProperty()
+  isSuperAdmin: boolean;
   @ApiProperty()
   canSeeAllSolicitudes: boolean;
   @ApiProperty()
@@ -131,9 +132,9 @@ export class CambioEstadoSolicitudRes {
   @ApiProperty()
   usuario: UsuarioBasicoRes;
   @ApiProperty()
-  estadoCode: EstadoCode;
+  estadoCode: SolEstadoCode;
   @ApiProperty()
-  estadoEspecificoCode: EstadoEspecificoCode;
+  estadoEspecificoCode: SolEstadoEspecificoCode;
 }
 
 export class PagoCotizacionRes {
@@ -274,7 +275,7 @@ export class ComplementoSolicitudRes {
   @ApiProperty()
   prioridadCode: PrioridadCode;
   @ApiProperty()
-  estadoCode: EstadoCode;
+  estadoCode: SolEstadoCode;
   @ApiProperty()
   tipoCode: TipoCode;
   @ApiProperty({ type: ItemSolicitudRes, isArray: true })
