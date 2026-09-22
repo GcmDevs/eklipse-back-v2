@@ -3,6 +3,7 @@ import {
   AprobacionCotizacionByCtCDto,
   AprobacionSolicitudByGerenteDto,
   ConvertirACajaMenorExpressDto,
+  CambiarTipoSolicitudDto,
   ItemsRecomendadosByCotizadorDto,
   UpdateItemSolicitudCompraDto,
   UpdateSolicitudColaboradorDto,
@@ -51,5 +52,9 @@ export class SolicitudServicesSource {
 
   public async updateItemSolicitudCompra(payload: UpdateItemSolicitudCompraDto) {
     return await this._updateItemSolicitudCompra.execute(payload);
+  }
+
+  public async cambiarTipoSolicitud(payload: CambiarTipoSolicitudDto) {
+    return await this._updateItemSolicitudCompra.cambiarTipoSolicitud(payload);
   }
 }

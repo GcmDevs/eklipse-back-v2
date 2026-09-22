@@ -1,8 +1,10 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { SolicitudOrm } from './solicitud.orm';
 import {
-  EstadoCode,
-  EstadoEspecificoCode,
+  SolEstadoCode,
+  SolEstadoEspecificoCode,
+} from '@inn/lgc/ctc/@types/inn/central-compras/solicitudes/_deprecated';
+import {
   EstadoEspecificoType,
   estadoEspecificoTypeFactory,
   EstadoType,
@@ -16,10 +18,10 @@ export class CambioEstadoOrm {
   id: number;
 
   @Column({ name: 'TIPOCBEST' })
-  tipoCode: EstadoCode;
+  tipoCode: SolEstadoCode;
 
   @Column({ name: 'CUSTOMKEY' })
-  keyCode: EstadoEspecificoCode;
+  keyCode: SolEstadoEspecificoCode;
 
   @Column({ name: 'INFORMADIO' })
   informacionAdicional: string;

@@ -76,3 +76,5 @@ export const CTC_FILE_LOCATIONS = {
 };
 
 export const IVA = 19;
+
+export const LIMIT_COTIZACIONES = 5;

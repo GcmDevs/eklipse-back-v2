@@ -1,23 +1,15 @@
 import {
   SOL_ESTADOS_ESPECIFICOS,
   SOL_ESTADOS_ESPECIFICOS_VALUES,
+  SolEstadoEspecificoCode,
   solEstadoEspecificoTypeFactory,
 } from '../_deprecated';
-import { EstadoEspecificoCode, EstadoEspecificoType } from './code';
+import { EstadoEspecificoType } from './code';
 
-const REGISTRADA = new EstadoEspecificoType(101, 'SOLICITUD REGISTRADA');
-
-export function estadoEspecificoTypeFactory(code: EstadoEspecificoCode): EstadoEspecificoType {
-  if (code <= 100) {
-    return solEstadoEspecificoTypeFactory(code as EstadoEspecificoCode);
-  } else {
-    switch (code) {
-      case 101:
-        return REGISTRADA;
-    }
-  }
+export function estadoEspecificoTypeFactory(code: SolEstadoEspecificoCode): EstadoEspecificoType {
+  return solEstadoEspecificoTypeFactory(code as SolEstadoEspecificoCode);
 }
 
-export const ESTADOS_ESPECIFICOS = { ...SOL_ESTADOS_ESPECIFICOS, REGISTRADA };
+export const ESTADOS_ESPECIFICOS = { ...SOL_ESTADOS_ESPECIFICOS };
 
-export const ESTADOS_ESPECIFICOS_VALUES = [...SOL_ESTADOS_ESPECIFICOS_VALUES, REGISTRADA];
+export const ESTADOS_ESPECIFICOS_VALUES = [...SOL_ESTADOS_ESPECIFICOS_VALUES];

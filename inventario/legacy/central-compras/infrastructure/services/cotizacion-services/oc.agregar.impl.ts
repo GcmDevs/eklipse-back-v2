@@ -13,7 +13,7 @@ import {
   ESTADOS,
   ESTADOS_ESPECIFICOS,
 } from '@inn/lgc/ctc/types/inn/central-compras/solicitudes';
-import { ProductoOrm as AfnProductoOrm } from '@inn/lgc/ctc/orm/inn/activos-fijos';
+import { AfnProductoOrm } from '@inn/lgc/ctc/orm/inn/activos-fijos';
 import { gcmContextFactory } from '@common/domain/types';
 import { ProductoOrm } from '@inn/lgc/ctc/orm/inn/productos';
 import {

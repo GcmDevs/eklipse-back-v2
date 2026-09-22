@@ -39,3 +39,20 @@ export class UpdateItemSolicitudCompraDto {
   @IsOptional()
   cantidad: number;
 }
+
+export class CambiarTipoSolicitudDto {
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsEnum(GcmContexts, {
+    message: `${castDataServices.enumToString(GcmContexts)}`,
+  })
+  context: GcmContexts;
+
+  @ApiProperty()
+  @IsNumber()
+  solicitudId: number;
+
+  @ApiProperty()
+  @IsNumber()
+  tipoCode: TipoCode;
+}

@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { DetalleSolicitudOrm, SolicitudOrm } from '@inn/lgc/ctc/orm/inn/central-compras';
 import { ManageSolicitudDto } from '@inn/lgc/ctc/presentation/dtos';
 import { TIPOS, ESTADOS } from '@inn/lgc/ctc/types/inn/central-compras/solicitudes';
-import { ProductoOrm as AfnProductoOrm } from '@inn/lgc/ctc/orm/inn/activos-fijos';
+import { AfnProductoOrm } from '@inn/lgc/ctc/orm/inn/activos-fijos';
 import { SOLICITUD_COMPRA_DIRECTA } from '@inn/lgc/ctc/types/gen/dependencias';
 import { CentralComprasSource } from '../../base';
 import { ProductoOrm } from '@inn/lgc/ctc/orm/inn/productos';

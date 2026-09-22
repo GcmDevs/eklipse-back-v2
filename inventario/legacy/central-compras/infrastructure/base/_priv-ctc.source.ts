@@ -1,11 +1,10 @@
 import { QueryRunner } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import {
-  TIPOS,
-  TipoCode,
-  EstadoCode,
-  EstadoEspecificoCode,
-} from '@inn/lgc/ctc/types/inn/central-compras/solicitudes';
+  SolEstadoCode,
+  SolEstadoEspecificoCode,
+} from '@inn/lgc/ctc/@types/inn/central-compras/solicitudes/_deprecated';
+import { TIPOS, TipoCode } from '@inn/lgc/ctc/types/inn/central-compras/solicitudes';
 import { CambioEstadoOrm, SolicitudOrm } from '@inn/lgc/ctc/orm/inn/central-compras';
 import { BaseSource } from '@common/infrastructure/services';
 import { TipoDocumentoCode } from '@inn/lgc/ctc/types/inn/documentos';
@@ -18,15 +17,15 @@ import { TimerService } from './timer/timer';
 export class _PrivCentralComprasBaseSource extends BaseSource {
   /** @deprecated Pertenece a la versión original */
   protected validationsDeprecated(userCodeAuthorities: string[]) {
-    return centralComprasValidations(userCodeAuthorities);
+    return centralComprasValidations(userCodeAuthorities, this.auth.user.document);
   }
 
   /** @deprecated Pertenece a la versión original */
   protected async createCambioEstadoDeprecated(
     qr: QueryRunner,
     payload: {
-      estadoEspecificoCode: EstadoEspecificoCode;
-      estadoCode: EstadoCode;
+      estadoEspecificoCode: SolEstadoEspecificoCode;
+      estadoCode: SolEstadoCode;
       solicitud: SolicitudOrm;
       archivoRelacionado?: string;
       entidadRelacionadaId?: number;

@@ -5,7 +5,7 @@ import {
   TipoType,
   tipoTypeFactory,
 } from '@inn/lgc/ctc/types/inn/central-compras/solicitudes';
-import { ProductoOrm as AfnProductoOrm } from '@inn/lgc/ctc/orm/inn/activos-fijos';
+import { AfnProductoOrm } from '@inn/lgc/ctc/orm/inn/activos-fijos';
 import { ProductoOrm } from '@inn/lgc/ctc/orm/inn/productos';
 
 @Entity('EKINNCTCSOLITEM')

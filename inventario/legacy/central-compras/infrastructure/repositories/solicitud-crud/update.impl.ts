@@ -2,7 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { TIPOS, ESTADOS } from '@inn/lgc/ctc/types/inn/central-compras/solicitudes';
 import { ManageSolicitudDto } from '@inn/lgc/ctc/presentation/dtos';
 import { DetalleSolicitudOrm, SolicitudOrm } from '@inn/lgc/ctc/orm/inn/central-compras';
-import { ProductoOrm as AfnProductoOrm } from '@inn/lgc/ctc/orm/inn/activos-fijos';
+import { AfnProductoOrm } from '@inn/lgc/ctc/orm/inn/activos-fijos';
 import { DependenciaOrm } from '@inn/lgc/ctc/orm/gen';
 import { ROL_DEPENDIENTES } from '@inn/lgc/ctc/types/gen/dependencias';
 import { deleteFile } from '@common/presentation/helpers';
