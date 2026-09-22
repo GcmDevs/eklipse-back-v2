@@ -10,7 +10,7 @@ import { deleteFile } from '@common/presentation/helpers';
 import { gcmContextFactory } from '@common/domain/types';
 import { CentralComprasSource } from '../../base';
 import { ProveedorOrm } from '@inn/lgc/ctc/orm/gen';
-import { CTC_FILE_LOCATIONS, IVA } from '@inn/lgc/ctc/application/constants';
+import { CTC_FILE_LOCATIONS, IVA, LIMIT_COTIZACIONES } from '@inn/lgc/ctc/application/constants';
 
 @Injectable()
 export class CreateCotizacionImpl extends CentralComprasSource {
@@ -27,7 +27,7 @@ export class CreateCotizacionImpl extends CentralComprasSource {
       const solicitud = await solicitudRp.findOne({ where: { id: payload.solicitudId } });
       const cotizaciones = await cotizacionRp.find({ where: { solicitudId: payload.solicitudId } });
 
-      if (cotizaciones.length >= 3) {
+      if (cotizaciones.length >= LIMIT_COTIZACIONES) {
         throw new Error('Ya no puede agregar mas cotizaciones');
       }
 
