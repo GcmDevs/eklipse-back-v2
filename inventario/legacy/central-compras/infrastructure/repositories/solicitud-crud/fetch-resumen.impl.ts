@@ -166,6 +166,7 @@ export class FetchResumenSolicitudesImpl extends CentralComprasSource {
         tipoCode: true,
         estadoCode: true,
         justificacion: true,
+        valorEstimado: true,
         prioridadCode: true,
         usuario: { nombreCompleto: true, cedula: true },
         createdAt: true,

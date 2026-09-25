@@ -83,7 +83,7 @@ export class SolicitudOrm {
   @OneToMany(() => CambioEstadoOrm, cambioEstado => cambioEstado.solicitud)
   cambiosEstado: CambioEstadoOrm[];
 
-  @Column({ name: 'VALORESTIMADO', type: 'money', scale: 4 })
+  @Column({ name: 'VALORESTIMADO', type: 'money', scale: 4, nullable: true })
   valorEstimado: number;
 
   tipo: TipoType;

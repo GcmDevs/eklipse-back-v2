@@ -13,6 +13,8 @@ export class BasicInfoSolicitudRes {
   codigo: string;
   @ApiProperty()
   justificacion: string;
+  @ApiProperty({ required: false, nullable: true })
+  valorEstimado: number | null;
   @ApiProperty()
   tipoCode: TipoCode;
   @ApiProperty()
@@ -250,6 +252,8 @@ export class ComplementoSolicitudRes {
   codigo: string;
   @ApiProperty()
   justificacion: string;
+  @ApiProperty({ required: false, nullable: true })
+  valorEstimado: number | null;
   @ApiProperty()
   createdAt: Date;
   @ApiProperty()

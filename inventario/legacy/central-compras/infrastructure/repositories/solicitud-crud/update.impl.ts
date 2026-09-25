@@ -65,6 +65,7 @@ export class UpdateSolicitudCompraImpl extends CentralComprasSource {
       solicitud.createdAt = new Date();
       solicitud.usuarioId = this.auth.user.id;
       solicitud.justificacion = payload.justificacion;
+      solicitud.valorEstimado = payload.valorEstimado ?? null;
 
       const solicitudStored = await solicitudRp.save(solicitud);
 
