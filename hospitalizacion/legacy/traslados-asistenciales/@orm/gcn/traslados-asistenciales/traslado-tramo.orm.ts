@@ -106,25 +106,25 @@ export class TrasladoTramoOrm {
   tipoTrasladoCode: TipoTrasladoItemTypeCode;
 
   /* traslado primario */
-  @Column({ name: 'HORAINICIORECORRIDO', type: 'timestamp', nullable: true })
+  @Column({ name: 'HORAINICIORECORRIDO', type: 'datetime', nullable: true })
   horaInicioRecorrido?: Date;
 
-  @Column({ name: 'HORASOLICITUD', type: 'timestamp', nullable: true })
+  @Column({ name: 'HORASOLICITUD', type: 'datetime', nullable: true })
   horaSolicitud?: Date;
 
-  @Column({ name: 'HORADESPACHO', type: 'timestamp', nullable: true })
+  @Column({ name: 'HORADESPACHO', type: 'datetime', nullable: true })
   horaDespacho?: Date;
 
-  @Column({ name: 'HORALLEGADAESCENA', type: 'timestamp', nullable: true })
+  @Column({ name: 'HORALLEGADAESCENA', type: 'datetime', nullable: true })
   horaLlegadaEscena?: Date;
 
-  @Column({ name: 'HORASALIDAESCENA', type: 'timestamp', nullable: true })
+  @Column({ name: 'HORASALIDAESCENA', type: 'datetime', nullable: true })
   horaSalidaEscena?: Date;
 
-  @Column({ name: 'HORALLEGADAINST', type: 'timestamp', nullable: true })
+  @Column({ name: 'HORALLEGADAINST', type: 'datetime', nullable: true })
   horaLlegadaInst?: Date;
 
-  @Column({ name: 'HORARECEPCIONINST', type: 'timestamp', nullable: true })
+  @Column({ name: 'HORARECEPCIONINST', type: 'datetime', nullable: true })
   horaRecepcionInst?: Date;
 
   /*   @Column({ name: 'EVIDENCIAS', type: 'simple-json', nullable: true })

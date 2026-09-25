@@ -21,6 +21,7 @@ import { PacienteTrasladoOrm } from './paciente.orm';
 import { DiagnosticoOrm } from '@hpn/lgc/tas/orm/temp';
 import { ServicioOrm } from '../servicio-destino.orm';
 import { GcmContextType } from '@common/domain/types';
+import { MedicamentoPrevioOrm } from './medicamento-previo.orm';
 
 @Entity(TABLE_NAMES.hpn.trasladosAsistenciales.index)
 export class TrasladoAsistencialOrm {
@@ -117,14 +118,20 @@ export class TrasladoAsistencialOrm {
   @Column({ name: 'TRIAGEIMG', nullable: true })
   triageImg: string;
 
-  @Column({ name: 'FECHACREACION', type: 'timestamp' })
+  @Column({ name: 'PRENOTIFICASITIO', nullable: true })
+  prenotificaAlSitio: boolean;
+
+  @Column({ name: 'FECHACREACION', type: 'datetime' })
   fechaCreacion: Date;
 
-  @Column({ name: 'FECHAPROGRAMADA', type: 'timestamp' })
+  @Column({ name: 'FECHAPROGRAMADA', type: 'datetime' })
   fechaProgramada: Date;
 
-  @Column({ name: 'FECHAVISTOBIEN', type: 'timestamp', nullable: true })
+  @Column({ name: 'FECHAVISTOBIEN', type: 'datetime', nullable: true })
   fechaHoraVistoBien: Date;
+
+  @Column({ name: 'TIPOCONDICLINICA', nullable: true })
+  condicionClinica: string;
 
   @Column({ name: 'OBSERVACION', nullable: true })
   observacion: string;
@@ -152,6 +159,9 @@ export class TrasladoAsistencialOrm {
 
   @OneToMany(() => MedicamentoOrm, medicamento => medicamento.traslado)
   medicamentos: MedicamentoOrm[];
+
+  @OneToMany(() => MedicamentoPrevioOrm, medicamento => medicamento.traslado)
+  medicamentosPrevios: MedicamentoPrevioOrm[];
 
   @OneToMany(() => TrasladoRevisionCentralOrm, revision => revision.traslado)
   revisionesCentral: TrasladoRevisionCentralOrm[];

@@ -1114,8 +1114,8 @@ export async function generateTrasladoSecundarioPdf(
   const firmaMedico = isMedicalizado ? getFirmaBufferFromCedula(medico?.documento) : null;
   const selloFirma = getFirmaBufferFromCedula(
     data.tipoRecorridoCode === TIPOS_TRASLADO.REDONDO.getCode()
-      ? `${tramoIda.origen.nit}`
-      : `${tramoIda.destino.nit}`,
+      ? `${tramoIda.origen.codigo}`
+      : `${tramoIda.destino.codigo}`,
     'private/clinicas/sellos'
   );
 
@@ -1167,11 +1167,8 @@ export async function generateTrasladoSecundarioPdf(
   if (selloFirma) {
     firmasSecundario.push({
       bufferObj: selloFirma,
-      nombreLabel:
-        data.tipoRecorridoCode === TIPOS_TRASLADO.REDONDO.getCode()
-          ? v(tramoIda.origen.nombre)
-          : v(tramoIda.destino.nombre),
-      cargoLabel: 'SELLO',
+      nombreLabel: '',
+      cargoLabel: '',
       isSello: true,
     });
   }

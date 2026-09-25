@@ -7,3 +7,4 @@ export * from './grupo-sanguineo';
 export * from './estado-asistencia';
 export * from './motivo-cancelacion';
 export * from './cups';
+export * from './evento-neurologico';
