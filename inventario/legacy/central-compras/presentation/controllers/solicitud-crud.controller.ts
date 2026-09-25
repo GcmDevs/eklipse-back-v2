@@ -30,15 +30,17 @@ export class SolicitudCompraCrudController {
   @ApiQuery({ name: 'start', type: Date, required: true })
   @ApiQuery({ name: 'end', type: Date, required: true })
   @ApiQuery({ name: 'tipos', type: Number, isArray: true, required: true })
+  @ApiQuery({ name: 'codigoSolicitud', type: String, required: false })
   @Authorities([INN_AUTHORITIES.CENTRAL_COMPRAS.CODE])
   @Get()
   async fetchResumen(
     @Query('start') start: Date,
     @Query('end') end: Date,
-    @Query('tipos') tipos: TipoCode[]
+    @Query('tipos') tipos: TipoCode[],
+    @Query('codigoSolicitud') codigoSolicitud?: string
   ) {
     try {
-      const response = await this._crud.fetchResumen(start, end, tipos);
+      const response = await this._crud.fetchResumen(start, end, tipos, codigoSolicitud);
       return response;
     } catch (error: any) {
       throw new BadRequestException(error.message);

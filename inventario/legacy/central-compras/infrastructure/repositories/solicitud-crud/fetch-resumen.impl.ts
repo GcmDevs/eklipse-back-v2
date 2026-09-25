@@ -42,9 +42,15 @@ export class FetchResumenSolicitudesImpl extends CentralComprasSource {
         this.centralCompras.ctx
       );
 
-  public async execute(start: Date, end: Date, tipos: TipoCode[]) {
+  public async execute(start: Date, end: Date, tipos: TipoCode[], codigoSolicitud?: string) {
     let ctxs = [this.auth.context];
     const canSeeAllSolicitudes = await this.canSeeAllSolicitudes();
+    const codigoNormalizado = codigoSolicitud?.trim().toUpperCase();
+    const solicitudId = codigoNormalizado
+      ? Number(codigoNormalizado.match(/\d+$/)?.[0])
+      : undefined;
+
+    if (codigoNormalizado && !Number.isInteger(solicitudId)) return [];
 
     if (this.centralCompras.authInCtC && canSeeAllSolicitudes) ctxs = CTXS_CLINICAS_VALIDAS;
     const dates = generateBetweenDates(start, end);
@@ -55,16 +61,23 @@ export class FetchResumenSolicitudesImpl extends CentralComprasSource {
       const conn = this.dynamicConn(ctx);
       const solicitudRp = conn.getRepository(SolicitudOrm);
       const conditions = {
+        ...(solicitudId !== undefined ? { id: solicitudId } : {}),
         usuarioId: !canSeeAllSolicitudes ? this.auth.id : undefined,
         tipoCode: In(tipos),
         isDeleted: false,
       };
 
       const solicitudes = await solicitudRp.find({
-        where: [
-          { ...conditions, createdAt: Between(dates.start, dates.end) },
-          { ...conditions, estadoCode: Not(In(SOLICITUDES_INVALIDAS_CODES)), isFinished: false },
-        ],
+        where: codigoNormalizado
+          ? conditions
+          : [
+              { ...conditions, createdAt: Between(dates.start, dates.end) },
+              {
+                ...conditions,
+                estadoCode: Not(In(SOLICITUDES_INVALIDAS_CODES)),
+                isFinished: false,
+              },
+            ],
         select: { id: true, usuarioId: true, estadoCode: true, dependenciaId: true },
       });
 
@@ -118,7 +131,13 @@ export class FetchResumenSolicitudesImpl extends CentralComprasSource {
       res.push(...solicitudesRes);
     }
 
-    return res;
+    if (!codigoNormalizado) return res;
+
+    return res.filter(
+      solicitud =>
+        solicitud.codigo.toUpperCase() === codigoNormalizado ||
+        String(solicitud.id) === codigoNormalizado
+    );
   }
 
   private async _fetch(ids: number[], ctx: GcmContextType, conn: DataSource) {
