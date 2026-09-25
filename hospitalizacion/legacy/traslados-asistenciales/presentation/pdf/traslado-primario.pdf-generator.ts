@@ -5,6 +5,7 @@ import { TrasladoAsistencialDetalleDataRes } from '../../application/responses';
 import { generoTypeFactory, tipoDocumentoTypeFactory } from '@hpn/lgc/tas/types/gen';
 import { TIPOS_EMPLEADO } from '@hpn/lgc/tas/types/gcn';
 import {
+  ACCIDENTE_TRANSITO,
   codigoCupsFactory,
   MOTIVO_TRASLADO_PRIM_VALUE,
   MOTIVO_TRASLADO_PRIM_VALUES,
@@ -533,6 +534,7 @@ export async function generateTrasladoPrimarioPdf(
   if (!payload || !payload.data) return null;
 
   const data = payload.data;
+  const isAccidenteTransito = data.tipoRemisionCode === ACCIDENTE_TRANSITO.getCode();
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
   const PW = doc.internal.pageSize.getWidth();
   const PH = doc.internal.pageSize.getHeight();
@@ -880,7 +882,10 @@ export async function generateTrasladoPrimarioPdf(
   const firmaConductor = getFirmaBufferFromCedula(conductor?.documento);
   const firmaAuxiliar = getFirmaBufferFromCedula(auxiliar?.documento);
   const firmaMedico = isMedicalizado ? getFirmaBufferFromCedula(medico?.documento) : null;
-  const firmaIPS = getFirmaBufferFromCedula(`${activeTramo.destino.nit}`, 'private/clinicas/sellos');
+  const firmaIPS = getFirmaBufferFromCedula(
+    isAccidenteTransito ? 'IPS010' : `${activeTramo.destino.codigo}`,
+    'private/clinicas/sellos'
+  );
 
   const firmasPrimario: FirmaItem[] = [
     {
@@ -911,8 +916,8 @@ export async function generateTrasladoPrimarioPdf(
   if (firmaIPS) {
     firmasPrimario.push({
       bufferObj: firmaIPS,
-      nombreLabel: v(activeTramo.destino.nombre),
-      cargoLabel: 'FIRMA O SELLO DE LA ENTIDAD RECEPTORA',
+      nombreLabel: '',
+      cargoLabel: '',
       isSello: true,
     });
   }
