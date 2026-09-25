@@ -51,10 +51,6 @@ export class CreateCotizacionImpl extends CentralComprasSource {
 
       if (payload.isCotizacionUnica && !cotizaciones.length) solicitud.isCotizacionUnica = true;
 
-      if (payload.isPagoPorCajaMenor && !cotizaciones.length) {
-        solicitud.isPagoPorCajaMenor = true;
-      }
-
       solicitud.estadoCode = ESTADOS.SOL_EN_COTI.getCode();
       await solicitudRp.save(solicitud);
 

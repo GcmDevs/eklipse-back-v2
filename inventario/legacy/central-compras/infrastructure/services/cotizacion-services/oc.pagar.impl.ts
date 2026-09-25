@@ -72,9 +72,7 @@ export class PagarOrdenCompraImpl extends CentralComprasSource {
       const kwTO = this.keyWordsTipoOrden(solicitud.tipoCode);
 
       const pagos = await pagoRp.find({
-        where: solicitud.isPagoPorCajaMenor
-          ? { cotizacionId: cotizacion.id }
-          : { cotizacionId: cotizacion.id, cotDocumentoId: cotizacion.cotDocumentoId },
+        where: { cotizacionId: cotizacion.id, cotDocumentoId: cotizacion.cotDocumentoId },
       });
 
       const pagosPendientes = pagos.filter(
@@ -103,30 +101,15 @@ export class PagarOrdenCompraImpl extends CentralComprasSource {
 
       const diffInPagos = payload.valorPagado - newPago.valor;
 
-      if (
-        (diffInPagos < minVariableValor || diffInPagos > maxVariableValor) &&
-        !solicitud.isPagoPorCajaMenorExpress &&
-        VERIFICAR_VALORES
-      ) {
+      if ((diffInPagos < minVariableValor || diffInPagos > maxVariableValor) && VERIFICAR_VALORES) {
         throw new Error(`El pago difiere en mas de $${maxVariableValor}`);
-      }
-
-      if (solicitud.isPagoPorCajaMenorExpress) {
-        const valuePerItem =
-          (payload.valorPagado * payload.valorPagado) /
-          ((payload.valorPagado / 100) * (100 + IVA)) /
-          solicitud.detalle.length;
-
-        cotizacion.detalle.map(el => {
-          el.valorUnitario = valuePerItem / el.item.cantidad;
-        });
       }
 
       newPago.valor = payload.valorPagado;
 
       await detCotizacionRp.save(cotizacion.detalle);
 
-      if (!cotizacion.cotDocumentoId && !solicitud.isPagoPorCajaMenor) {
+      if (!cotizacion.cotDocumentoId) {
         throw new Error(`Esta cotización no tiene ninguna orden de ${kwTO.tipoOrden} agregada`);
       }
 

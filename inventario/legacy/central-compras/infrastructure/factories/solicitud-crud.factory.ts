@@ -94,7 +94,6 @@ export const solicitudOrmToBasicInfoSolicitudRes = (
     fechaCreacion: e.createdAt,
     ultimoCambioEstado: ultimoCambioEstado ? ultimoCambioEstado.fechaCreacion : e.createdAt,
     totalFacturado: 0,
-    isPagoPorCajaMenor: e.isPagoPorCajaMenor,
     centroId: e.centroId,
     isCotizacionUnica: e.isCotizacionUnica,
     authInSameContext: e.authInSameContext,
@@ -186,8 +185,6 @@ export const solicitudOrmToComplementoSolicitudRes = (solicitud: SolicitudOrm) =
     isDeleted: solicitud.isDeleted,
     isFinished: solicitud.isFinished,
     isCotizacionUnica: solicitud.isCotizacionUnica,
-    isPagoPorCajaMenor: solicitud.isPagoPorCajaMenor,
-    isPagoPorCajaMenorExpress: solicitud.isPagoPorCajaMenorExpress,
     usuario: {
       cedula: solicitud.usuario.cedula,
       nombreCompleto: solicitud.usuario.nombreCompleto,

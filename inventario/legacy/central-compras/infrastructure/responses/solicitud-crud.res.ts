@@ -34,8 +34,6 @@ export class BasicInfoSolicitudRes {
   @ApiProperty()
   totalFacturado: number;
   @ApiProperty()
-  isPagoPorCajaMenor: boolean;
-  @ApiProperty()
   authInSameContext: boolean;
   @ApiProperty()
   isCotizacionUnica: boolean;
@@ -260,10 +258,6 @@ export class ComplementoSolicitudRes {
   isFinished: boolean;
   @ApiProperty()
   isCotizacionUnica: boolean;
-  @ApiProperty()
-  isPagoPorCajaMenor: boolean | null;
-  @ApiProperty()
-  isPagoPorCajaMenorExpress: boolean | null;
   @ApiProperty()
   usuario: UsuarioBasicoRes;
   @ApiProperty()

@@ -170,7 +170,6 @@ export class FetchResumenSolicitudesImpl extends CentralComprasSource {
         usuario: { nombreCompleto: true, cedula: true },
         createdAt: true,
         isCotizacionUnica: true,
-        isPagoPorCajaMenor: true,
         dependencia: { nombre: true },
         dependenciaDestino: { nombre: true },
         detalle: { id: true, productoId: true, tipoCode: true, nombre: true, isDeleted: true },

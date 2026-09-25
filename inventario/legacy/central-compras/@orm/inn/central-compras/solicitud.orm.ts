@@ -74,12 +74,6 @@ export class SolicitudOrm {
   @Column({ name: 'ISCOTIZUNICA' })
   isCotizacionUnica: boolean;
 
-  @Column({ name: 'ISPACAJMEN' })
-  isPagoPorCajaMenor: boolean;
-
-  @Column({ name: 'ISPACAJMENEXPRE' })
-  isPagoPorCajaMenorExpress: boolean;
-
   @OneToMany(() => DetalleSolicitudOrm, detalle => detalle.solicitud)
   detalle: DetalleSolicitudOrm[];
 
@@ -88,6 +82,9 @@ export class SolicitudOrm {
 
   @OneToMany(() => CambioEstadoOrm, cambioEstado => cambioEstado.solicitud)
   cambiosEstado: CambioEstadoOrm[];
+
+  @Column({ name: 'VALORESTIMADO', type: 'money', scale: 4 })
+  valorEstimado: number;
 
   tipo: TipoType;
   estado: EstadoType;

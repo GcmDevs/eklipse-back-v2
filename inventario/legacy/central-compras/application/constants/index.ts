@@ -21,8 +21,6 @@ export enum EstGlobSoliEnum {
   ORDEN_FINALI = 16,
 }
 
-export const DIAS_PLAZO_CAJA_MENOR = 3;
-
 export const CTXS_CLINICAS_VALIDAS = [
   GCM_CONTEXTS.AGUACHICA,
   GCM_CONTEXTS.ALTACENTRO,
