@@ -67,10 +67,10 @@ export class TrasladoAsignacionOrm {
   @Column({ name: 'MOTIVO', nullable: true })
   motivo?: string;
 
-  @Column({ name: 'FECHAASIGNACION', type: 'timestamp' })
+  @Column({ name: 'FECHAASIGNACION', type: 'datetime' })
   fechaAsignacion: Date;
 
-  @Column({ name: 'FECHADESASIGNACION', type: 'timestamp', nullable: true })
+  @Column({ name: 'FECHADESASIGNACION', type: 'datetime', nullable: true })
   fechaDesasignacion?: Date;
 
   @Column({ name: 'ISACTIVA', nullable: true })

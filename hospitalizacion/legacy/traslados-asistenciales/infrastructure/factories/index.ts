@@ -31,6 +31,10 @@ import {
 } from '@hpn/lgc/tas/orm/gen';
 import { tipoSoportesVitalesTypeFactory } from '@hpn/lgc/tas/types/gcn/tipo-soperte-vital';
 import { GcmContextType } from '@common/domain/types';
+import {
+  CondicionClinicaCode,
+  CONDICIONES_CLINICAS_CODES,
+} from '@hpn/lgc/tas/types/gcn/traslados-asistenciales';
 
 const getAsignacionActual = (asignaciones?: TrasladoAsignacionOrm[]): TrasladoAsignacionOrm => {
   if (!asignaciones?.length) return null;
@@ -343,6 +347,33 @@ export const newDataToTrasladoDetalle = (
     ? item.tipoSoporteVital.split(',').map(code => tipoSoportesVitalesTypeFactory(+code as any))
     : [];
 
+  traslado.condicionesClinicas = item.condicionClinica?.trim()
+    ? item.condicionClinica
+        .split(',')
+        .map(code => Number(code.trim()))
+        .filter((code): code is CondicionClinicaCode =>
+          CONDICIONES_CLINICAS_CODES.includes(code as CondicionClinicaCode)
+        )
+        .map(code => ({ code }))
+    : [];
+
+  traslado.medicamentosPrevios = (item.medicamentosPrevios ?? []).map(medicamentoPrevio => ({
+    id: medicamentoPrevio.id,
+    medicamentoId: medicamentoPrevio.medicamentoId ?? null,
+    medicamento: medicamentoPrevio.medicamento
+      ? {
+          id: medicamentoPrevio.medicamento.id,
+          codigo: medicamentoPrevio.medicamento.codigo,
+          nombre: medicamentoPrevio.medicamento.nombre,
+        }
+      : null,
+    descripcion: medicamentoPrevio.descripcion ?? null,
+    fechaCreacion: medicamentoPrevio.fechaCreacion,
+  }));
+
+  traslado.prenotificaAlSitio = item.prenotificaAlSitio ?? null;
+  traslado.fechaHoraVistoBienPaciente = item.fechaHoraVistoBien ?? null;
+
   return traslado;
 };
 
@@ -464,7 +495,7 @@ export const newDataToUbicaciones = (data: EntidadOrm[]): UbicacionDataRes[] => 
     const ubicacion = new UbicacionDataRes();
     ubicacion.id = item.id;
     ubicacion.nit = item.tercero.documento;
-    ubicacion.codigo = item.codigo;
+    ubicacion.codigo = item.codigoIps;
     ubicacion.nombre = item.nombre;
     ubicacion.direccion = item.tercero?.direccion?.direccion ?? null;
     ubicacion.departamento = newDataRes(item.tercero?.municipio?.departamento);
@@ -548,7 +579,7 @@ export const DNnewDataToUbicacion = (data: EntidadOrm): UbicacionDataRes => {
   ubicacion.ekid = data.id;
   ubicacion.id = data.id;
   ubicacion.direccion = data.tercero.direccion.direccion;
-  ubicacion.codigo = data?.codigo ?? null;
+  ubicacion.codigo = data?.codigoIps ?? null;
   ubicacion.nombre = data.nombre ?? null;
 
   ubicacion.departamento = new DataRes();

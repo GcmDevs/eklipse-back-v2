@@ -1,4 +1,5 @@
 import { MedicamentoOrm } from './medicamento.orm';
+import { MedicamentoPrevioOrm } from './medicamento-previo.orm';
 import { TrasladoNotaOrm } from './nota.orm';
 import { PacienteTrasladoOrm } from './paciente.orm';
 import { ProcedimientoTempOrm } from './procedimiento-temp.orm';
@@ -22,6 +23,7 @@ export * from './traslado-signos-vitales.orm';
 export * from './traslado-revision-central.orm';
 export * from './procedimiento.orm';
 export * from './medicamento.orm';
+export * from './medicamento-previo.orm';
 export * from './nota.orm';
 export * from './paciente.orm';
 export * from './ubicacion.orm';
@@ -38,6 +40,7 @@ export const LGC_TAS_TRASLADO_ENTITIES = [
   TrasladoRevisionCentralOrm,
   ProcedimientoOrm,
   MedicamentoOrm,
+  MedicamentoPrevioOrm,
   TrasladoNotaOrm,
   PacienteTrasladoOrm,
   UbicacionOrm,

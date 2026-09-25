@@ -4,6 +4,8 @@ import { TipoSoporteVitalTypeCode } from '@hpn/lgc/tas/types/gcn/tipo-soperte-vi
 import {
   AsistenciaTipoCode,
   CodigoCupsTypeCode,
+  CondicionClinicaCode,
+  CONDICIONES_CLINICAS_CODES,
   EstadoPacienteCode,
   GrupoSanguineoTypeCode,
   TipoRemisionTypeCode,
@@ -13,7 +15,11 @@ import { TipoDocumentoCode } from '@hpn/lgc/tas/types/gen';
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  ArrayMinSize,
+  ArrayUnique,
   IsBoolean,
+  IsIn,
+  MaxLength,
   IsNumber,
   IsOptional,
   IsString,
@@ -217,6 +223,17 @@ class EkEmpleadoOrUsuarioDto {
   documento: string;
 }
 
+export class MedicamentoPrevioDto {
+  @IsOptional()
+  @IsNumber()
+  medicamentoId?: number;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  descripcion?: string;
+}
+
 export class CreateTrasladoPrimarioDto {
   @ApiProperty({ description: 'ID del centro' })
   @IsNumber()
@@ -229,6 +246,38 @@ export class CreateTrasladoPrimarioDto {
   @ApiProperty({ description: 'Kilometraje final' })
   @IsNumber()
   kmFinal: number;
+
+  @ApiProperty({ description: 'Indica si se prenotifico al sitio receptor' })
+  @IsOptional()
+  @IsBoolean()
+  prenotificaAlSitio?: boolean;
+
+  @ApiProperty({
+    description: 'Códigos de las condiciones clínicas seleccionadas',
+    enum: CONDICIONES_CLINICAS_CODES,
+    isArray: true,
+    minItems: 1,
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayUnique()
+  @IsNumber({}, { each: true })
+  @IsIn(CONDICIONES_CLINICAS_CODES, { each: true })
+  tiposCondicionClinicaCodes?: CondicionClinicaCode[];
+
+  @ApiProperty({ description: 'Fecha y hora de visto bueno del paciente', required: false })
+  @IsOptional()
+  @IsString()
+  fechaHoraVistoBienPaciente?: string;
+
+  @ApiProperty({ type: [MedicamentoPrevioDto], minItems: 1, required: false })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => MedicamentoPrevioDto)
+  medicamentosPrevios?: MedicamentoPrevioDto[];
 
   @ApiProperty({ description: 'ID del paciente (opcional)', required: false })
   @IsOptional()
@@ -353,6 +402,9 @@ export class CreateTrasladoPrimarioDto {
   @ValidateNested({ each: true })
   @Type(() => EkImagenesDto)
   archivosAdjuntos?: EkImagenesDto[]; */
+  @IsString()
+  @IsOptional()
+  observacion: string;
 }
 
 export class AsignarTrasladoDto {
