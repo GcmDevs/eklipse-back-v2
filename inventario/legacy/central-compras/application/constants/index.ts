@@ -77,4 +77,6 @@ export const CTC_FILE_LOCATIONS = {
 
 export const IVA = 19;
 
+export const SALARIO_MINIMO = 1750905;
+
 export const LIMIT_COTIZACIONES = 5;
