@@ -34,10 +34,10 @@ export class TrasladoEstadoHistorialOrm {
   @Column({ name: 'MOTIVO', nullable: true })
   motivoCancelacionCode: MotivoFallidoTypeCode;
 
-  @Column({ name: 'FECHA', type: 'timestamp' })
+  @Column({ name: 'FECHA', type: 'datetime' })
   fecha: Date;
 
-  @Column({ name: 'FECHAREGISTRO', type: 'timestamp' })
+  @Column({ name: 'FECHAREGISTRO', type: 'datetime' })
   fechaRegistro: Date;
 
   @Column({ name: 'PROCESADAPORCENATE', nullable: true })

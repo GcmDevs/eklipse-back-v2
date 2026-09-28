@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { BaseSource } from '@common/infrastructure/services';
 import { Brackets, Like } from 'typeorm';
-import { MunicipioOrm, PacienteOrm, ServicioIpsOrm } from '@hpn/lgc/tas/orm/gen';
+import { IngresoOrm, MunicipioOrm, PacienteOrm, ServicioIpsOrm } from '@hpn/lgc/tas/orm/gen';
 import { ALL_CONTEXTS_WITH_AUTHORITIES, GCM_CONTEXTS } from '@common/domain/types';
 import {
   EkEmpleadoOrm,
@@ -10,7 +10,7 @@ import {
   ServicioOrm,
   VehiculoOrm,
 } from '@hpn/lgc/tas/orm/gcn';
-import { DiagnosticoOrm, EstanciaOrm } from '@hpn/lgc/tas/orm/temp';
+import { DiagnosticoOrm } from '@hpn/lgc/tas/orm/temp';
 import { newDataToUbicaciones } from '../factories';
 import { ProcedimientoTempOrm, ProductoOrm } from '@hpn/lgc/tas/orm/gcn/traslados-asistenciales';
 import { TipoEmpleadoCode } from '@hpn/lgc/tas/types/gcn';
@@ -97,8 +97,8 @@ export class TrasladoRecursosImpl extends BaseSource {
 
   async fetchPacientesByPattern(pattern: string, onlyActivos: boolean = true) {
     try {
-      const estanciaRp = this.conn.getRepository(EstanciaOrm);
       const pacienteRp = this.conn.getRepository(PacienteOrm);
+      const ingresoRp = this.conn.getRepository(IngresoOrm);
 
       const value = pattern?.trim();
       const isNumeric = /^\d+$/.test(value);
@@ -132,12 +132,11 @@ export class TrasladoRecursosImpl extends BaseSource {
         pacientes = await qb.orderBy('paciente.nombreCompleto', 'ASC').take(5).getMany();
         /*   } */
       } else {
-        const qb = estanciaRp
-          .createQueryBuilder('estancia')
-          .leftJoinAndSelect('estancia.ingreso', 'ingreso')
+        const qb = ingresoRp
+          .createQueryBuilder('ingreso')
           .leftJoinAndSelect('ingreso.paciente', 'paciente')
           .leftJoinAndSelect('paciente.detalleContrato', 'detalleContrato')
-          .where('estancia.fechaEgreso IS NULL');
+          .where('ingreso.fechaEgreso IS NULL');
 
         if (!isNumeric) {
           const palabras = value.split(/\s+/).filter(p => p.length > 0);
@@ -160,12 +159,23 @@ export class TrasladoRecursosImpl extends BaseSource {
           });
         }
 
-        const estancias = await qb.orderBy('paciente.nombreCompleto', 'ASC').take(5).getMany();
+        const ingresos = await qb
+          .orderBy('paciente.nombreCompleto', 'ASC')
+          .addOrderBy('ingreso.fechaIngreso', 'DESC')
+          .addOrderBy('ingreso.id', 'DESC')
+          .take(10)
+          .getMany();
 
-        estancias.forEach(estancia => {
-          estancia.ingreso.paciente.ingreso = estancia.ingreso;
-          pacientes.push(estancia.ingreso.paciente);
+        const pacientesPorId = new Map<number, PacienteOrm>();
+
+        ingresos.forEach(ingreso => {
+          if (!pacientesPorId.has(ingreso.pacienteId)) {
+            ingreso.paciente.ingreso = ingreso;
+            pacientesPorId.set(ingreso.pacienteId, ingreso.paciente);
+          }
         });
+
+        pacientes = Array.from(pacientesPorId.values()).slice(0, 5);
       }
 
       return pacientes.map(pac => {

@@ -18,4 +18,7 @@ export class EntidadOrm {
 
   @Column({ name: 'GENTERCER1' })
   terceroId: number;
+
+  @Column({ name: 'ENTCODEPSDTS' })
+  codigoIps: string;
 }

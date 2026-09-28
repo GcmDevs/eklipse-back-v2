@@ -14,12 +14,17 @@ import {
   VehiculoOrm,
   EkEmpleadoOrm,
   TrasladoNotaOrm,
+  ProductoOrm,
+  MedicamentoPrevioOrm,
 } from '@hpn/lgc/tas/orm/gcn';
 import {
   EstadoAsistenciaTypeCode,
   ASISTENCIA_TIPOS,
   ESTADOS_ASISTENCIA,
   MotivoFallidoTypeCode,
+  CONDICIONES_CLINICAS_VALUES,
+  condicionClinicaTypeFactory,
+  CONDICIONES_CLINICAS_CODES,
 } from '@hpn/lgc/tas/types/gcn/traslados-asistenciales';
 import {
   AsignarTrasladoDto,
@@ -584,6 +589,57 @@ export class RecursosCompartidosSource extends BaseSource {
     const hasPacienteId = !!body.pacienteId;
     const hasPacienteTemporal = !!body.pacienteTemporal;
 
+    const condicionesClinicas = body.tiposCondicionClinicaCodes ?? [];
+    const tieneCondicionClinica = condicionesClinicas.length > 0;
+
+    if (body.tiposCondicionClinicaCodes && !tieneCondicionClinica) {
+      throw new Error('tiposCondicionClinicaCodes debe tener al menos una condición clínica');
+    }
+
+    if (new Set(condicionesClinicas).size !== condicionesClinicas.length) {
+      throw new Error('tiposCondicionClinicaCodes no puede contener códigos repetidos');
+    }
+
+    if (tieneCondicionClinica) {
+      if (typeof body.prenotificaAlSitio !== 'boolean') {
+        throw new Error('prenotificaAlSitio es obligatorio cuando existe una condición clínica');
+      }
+
+      if (condicionesClinicas.some(codigo => !CONDICIONES_CLINICAS_CODES.includes(codigo))) {
+        throw new Error('tiposCondicionClinicaCodes debe corresponder al catálogo vigente');
+      }
+
+      const fechaVistoBien = body.fechaHoraVistoBienPaciente
+        ? new Date(body.fechaHoraVistoBienPaciente)
+        : null;
+      if (!fechaVistoBien || Number.isNaN(fechaVistoBien.getTime())) {
+        throw new Error(
+          'fechaHoraVistoBienPaciente es obligatoria cuando existe una condición clínica'
+        );
+      }
+      if (fechaVistoBien.getTime() > Date.now()) {
+        throw new Error('fechaHoraVistoBienPaciente no puede ser futura');
+      }
+
+      if (!Array.isArray(body.medicamentosPrevios) || !body.medicamentosPrevios.length) {
+        throw new Error(
+          'El traslado primario debe tener al menos un medicamento previo cuando existe una condición clínica'
+        );
+      }
+
+      body.medicamentosPrevios.forEach((medicamento, index) => {
+        const hasMedicamentoId =
+          Number.isInteger(medicamento?.medicamentoId) && medicamento.medicamentoId > 0;
+        const hasDescripcion = !!medicamento?.descripcion?.trim();
+
+        if (!hasMedicamentoId && !hasDescripcion) {
+          throw new Error(
+            `El medicamento previo ${index + 1} debe tener medicamentoId, descripcion o ambos`
+          );
+        }
+      });
+    }
+
     if (!body.notas.length) {
       throw new Error('El traslado debe tener al menos una nota');
     }
@@ -702,8 +758,14 @@ export class RecursosCompartidosSource extends BaseSource {
       if (date.getTime() > Date.now()) {
         throw new Error('fechaHoraRegistro no puede ser futura');
       }
-      if (llegadaEscena && date.getTime() < llegadaEscena.getTime()) {
-        throw new Error('El registro no puede ser anterior a la hora de llegada a escena');
+      if (
+        salidaEscena &&
+        recepcionInstitucion &&
+        (date.getTime() < salidaEscena.getTime() || date.getTime() > recepcionInstitucion.getTime())
+      ) {
+        throw new Error(
+          'La fecha y hora del registro debe estar entre la salida de escena y la recepción por la institución'
+        );
       }
     }
 
@@ -719,9 +781,9 @@ export class RecursosCompartidosSource extends BaseSource {
       throw new Error('La fechaRegistro de signos vitales no puede ser futura');
     }
 
-    if (llegadaEscena && svFechaRegistro && svFechaRegistro.getTime() < llegadaEscena.getTime()) {
+    if (salidaEscena && svFechaRegistro && svFechaRegistro.getTime() < salidaEscena.getTime()) {
       throw new Error(
-        'La fechaRegistro de signos vitales no puede ser anterior a la hora de llegada a escena'
+        'La fechaRegistro de signos vitales no puede ser anterior a la hora de salida de escena'
       );
     }
 
@@ -1085,6 +1147,77 @@ export class RecursosCompartidosSource extends BaseSource {
         .leftJoinAndSelect('ekDestino.departamento', 'ekDestinoDepartamento')
 
         .andWhere('t.ISDELETE = 0')
+    );
+  }
+
+  public buildTrasladoDetailBaseQuery(
+    rp: Repository<TrasladoAsistencialOrm>
+  ): SelectQueryBuilder<TrasladoAsistencialOrm> {
+    return rp
+      .createQueryBuilder('t')
+      .leftJoinAndSelect('t.usuario', 'usuario')
+      .leftJoinAndSelect('t.paciente', 'paciente')
+      .leftJoinAndSelect('paciente.detalleContrato', 'detalleContrato')
+      .leftJoinAndSelect('t.ekPaciente', 'ekPaciente')
+      .leftJoinAndSelect('t.servicioRequerido', 'servicioRequerido')
+      .leftJoinAndSelect('t.tramos', 'tramos')
+      .leftJoinAndSelect('tramos.origen', 'origen')
+      .leftJoinAndSelect('origen.tercero', 'origenTercero')
+      .leftJoinAndSelect('origenTercero.municipio', 'origenMunicipio')
+      .leftJoinAndSelect('origenTercero.direccion', 'origenDireccion')
+      .leftJoinAndSelect('origenMunicipio.departamento', 'origenDepartamento')
+      .leftJoinAndSelect('tramos.destino', 'destino')
+      .leftJoinAndSelect('destino.tercero', 'destinoTercero')
+      .leftJoinAndSelect('destinoTercero.municipio', 'destinoMunicipio')
+      .leftJoinAndSelect('destinoTercero.direccion', 'destinoDireccion')
+      .leftJoinAndSelect('destinoMunicipio.departamento', 'destinoDepartamento')
+      .leftJoinAndSelect('tramos.ekOrigen', 'ekOrigen')
+      .leftJoinAndSelect('ekOrigen.municipio', 'ekOrigenMunicipio')
+      .leftJoinAndSelect('ekOrigen.departamento', 'ekOrigenDepartamento')
+      .leftJoinAndSelect('tramos.ekDestino', 'ekDestino')
+      .leftJoinAndSelect('ekDestino.municipio', 'ekDestinoMunicipio')
+      .leftJoinAndSelect('ekDestino.departamento', 'ekDestinoDepartamento')
+      .where('t.ISDELETE = 0');
+  }
+
+  public async createMedicamentosPrevios(
+    trasladoId: number,
+    medicamentos: CreateTrasladoPrimarioDto['medicamentosPrevios']
+  ): Promise<void> {
+    const medicamentoIds = [
+      ...new Set(
+        medicamentos
+          .map(medicamento => medicamento.medicamentoId)
+          .filter((id): id is number => id !== null && id !== undefined)
+      ),
+    ];
+
+    if (medicamentoIds.length) {
+      const productos = await this.qr.manager.getRepository(ProductoOrm).find({
+        where: {
+          id: In(medicamentoIds),
+          tipoProducto: 2,
+        },
+      });
+      const productosEncontrados = new Set(productos.map(producto => producto.id));
+      const idsInvalidos = medicamentoIds.filter(id => !productosEncontrados.has(id));
+
+      if (idsInvalidos.length) {
+        throw new Error(`No existen medicamentos validos para los IDs: ${idsInvalidos.join(', ')}`);
+      }
+    }
+
+    const medicamentoPrevioRp = this.qr.manager.getRepository(MedicamentoPrevioOrm);
+
+    await medicamentoPrevioRp.save(
+      medicamentos.map(medicamento =>
+        medicamentoPrevioRp.create({
+          trasladoId,
+          medicamentoId: medicamento.medicamentoId,
+          descripcion: medicamento.descripcion?.trim(),
+          fechaCreacion: new Date(),
+        })
+      )
     );
   }
 }

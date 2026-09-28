@@ -9,6 +9,7 @@ import {
   TrasladoNotaOrm,
   ProcedimientoOrm,
   MedicamentoOrm,
+  MedicamentoPrevioOrm,
   VehiculoOrm,
   EkEmpleadoOrm,
   TrasladoRevisionCentralOrm,
@@ -23,9 +24,8 @@ import {
   CreateTrasladoPrimarioDto,
   CreateTrasladoSecundarioDto,
   IniciarTrasladoDto,
-  UpdateTrasladoSecundarioDto,
 } from '@hpn/lgc/tas/presentation/dtos';
-import { Between, Brackets, In, Not, Repository, SelectQueryBuilder } from 'typeorm';
+import { Between, Brackets, In, Not } from 'typeorm';
 import { newDataToTrasladoDetalle, newDataToTraslados } from '../factories';
 import { deleteFile } from '@common/presentation/helpers';
 import {
@@ -71,13 +71,14 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
       const excludedStates = [
         ESTADOS_ASISTENCIA.APROBADO.getCode(),
         ESTADOS_ASISTENCIA.CANCELADO.getCode(),
+        ESTADOS_ASISTENCIA.FINALIZADO.getCode(),
       ];
-      //where = [{ fechaCreacion: Between(inicio, final) }, { estadoCode: Not(In(excludedStates)) }];
+      where = [{ fechaCreacion: Between(inicio, final) }, { estadoCode: Not(In(excludedStates)) }];
     } else {
-      //where = { fechaCreacion: Between(inicio, final) };
+      where = { fechaCreacion: Between(inicio, final) };
     }
     const traslados = await this.buildTrasladoQuery(trasladoRp)
-      //.where(where)
+      .andWhere(where)
       .orderBy('t.id', 'DESC')
       .getMany();
 
@@ -216,41 +217,6 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
     };
   }
 
-  /**
-   * Query used by the detail endpoint. It deliberately contains only the
-   * singular relations plus tramos and their locations. Collection relations
-   * are fetched independently in fetchTrasladoById to avoid cartesian joins.
-   */
-  private buildTrasladoDetailBaseQuery(
-    rp: Repository<TrasladoAsistencialOrm>
-  ): SelectQueryBuilder<TrasladoAsistencialOrm> {
-    return rp
-      .createQueryBuilder('t')
-      .leftJoinAndSelect('t.usuario', 'usuario')
-      .leftJoinAndSelect('t.paciente', 'paciente')
-      .leftJoinAndSelect('paciente.detalleContrato', 'detalleContrato')
-      .leftJoinAndSelect('t.ekPaciente', 'ekPaciente')
-      .leftJoinAndSelect('t.servicioRequerido', 'servicioRequerido')
-      .leftJoinAndSelect('t.tramos', 'tramos')
-      .leftJoinAndSelect('tramos.origen', 'origen')
-      .leftJoinAndSelect('origen.tercero', 'origenTercero')
-      .leftJoinAndSelect('origenTercero.municipio', 'origenMunicipio')
-      .leftJoinAndSelect('origenTercero.direccion', 'origenDireccion')
-      .leftJoinAndSelect('origenMunicipio.departamento', 'origenDepartamento')
-      .leftJoinAndSelect('tramos.destino', 'destino')
-      .leftJoinAndSelect('destino.tercero', 'destinoTercero')
-      .leftJoinAndSelect('destinoTercero.municipio', 'destinoMunicipio')
-      .leftJoinAndSelect('destinoTercero.direccion', 'destinoDireccion')
-      .leftJoinAndSelect('destinoMunicipio.departamento', 'destinoDepartamento')
-      .leftJoinAndSelect('tramos.ekOrigen', 'ekOrigen')
-      .leftJoinAndSelect('ekOrigen.municipio', 'ekOrigenMunicipio')
-      .leftJoinAndSelect('ekOrigen.departamento', 'ekOrigenDepartamento')
-      .leftJoinAndSelect('tramos.ekDestino', 'ekDestino')
-      .leftJoinAndSelect('ekDestino.municipio', 'ekDestinoMunicipio')
-      .leftJoinAndSelect('ekDestino.departamento', 'ekDestinoDepartamento')
-      .where('t.ISDELETE = 0');
-  }
-
   public async fetchTrasladoById(trasladoId: number, contextoCode?: GcmContextCode): Promise<any> {
     const contexto = gcmContextFactory(contextoCode);
     const connLocal = contextoCode ? this.dynamicConn(contexto) : this.conn;
@@ -278,6 +244,7 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
       const notasRp = connLocal.getRepository(TrasladoNotaOrm);
       const procedimientosRp = connLocal.getRepository(ProcedimientoOrm);
       const medicamentosRp = connLocal.getRepository(MedicamentoOrm);
+      const medicamentosPreviosRp = connLocal.getRepository(MedicamentoPrevioOrm);
 
       const [
         asignaciones,
@@ -286,6 +253,7 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
         notas,
         procedimientos,
         medicamentos,
+        medicamentosPrevios,
         revisionesCentral,
       ] = await Promise.all([
         asignacionRp.find({ where: { trasladoId } }),
@@ -318,6 +286,12 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
               .where('medicamentos.TRAMO IN (:...tramoIds)', { tramoIds })
               .getMany()
           : Promise.resolve([]),
+        medicamentosPreviosRp
+          .createQueryBuilder('medicamentoPrevio')
+          .leftJoinAndSelect('medicamentoPrevio.medicamento', 'productoMedicamentoPrevio')
+          .where('medicamentoPrevio.TRASLADO = :trasladoId', { trasladoId })
+          .orderBy('medicamentoPrevio.id', 'ASC')
+          .getMany(),
         revisionRp.find({ where: { trasladoId } }),
       ]);
 
@@ -340,6 +314,7 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
       traslado.asignaciones = asignaciones;
       traslado.estadosHistorial = estadosHistorial;
       traslado.revisionesCentral = revisionesCentral;
+      traslado.medicamentosPrevios = medicamentosPrevios;
 
       if (traslado.pacienteId) {
         const estanciaRp = connLocal.getRepository(EstanciaOrm);
@@ -758,6 +733,10 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
       const newTraslado = new TrasladoAsistencialOrm();
       newTraslado.centroId = body.centroId;
       newTraslado.kmInicial = body.kmInicial;
+      newTraslado.prenotificaAlSitio = body.prenotificaAlSitio;
+      newTraslado.fechaHoraVistoBien = body.fechaHoraVistoBienPaciente
+        ? new Date(body.fechaHoraVistoBienPaciente)
+        : null;
       newTraslado.cupsCode = body.cupsCode;
       newTraslado.tipoRemisionCode = body.tipoRemisionCode;
       newTraslado.otroTipoRemision = body.otroTipoRemision;
@@ -786,7 +765,15 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
         newTraslado.ekPacienteId = paciente.id;
       }
 
+      if (body.tiposCondicionClinicaCodes?.length > 0) {
+        newTraslado.condicionClinica = body.tiposCondicionClinicaCodes.map(item => item).join(',');
+      }
+
       const trasladoCreado = await trasladoRp.save(newTraslado);
+
+      if (body.medicamentosPrevios?.length) {
+        await this.createMedicamentosPrevios(trasladoCreado.id, body.medicamentosPrevios);
+      }
 
       const newTramo = new TrasladoTramoOrm();
 
@@ -811,6 +798,7 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
       newTramo.horaSalidaEscena = body.salidaEscenaHora
         ? new Date(body.salidaEscenaHora)
         : undefined;
+      newTramo.horaInicioRecorrido = new Date(body.salidaEscenaHora);
       newTramo.horaLlegadaInst = new Date(body.llegadaInstitucionHora);
       newTramo.horaRecepcionInst = new Date(body.recepcionInstitucionHora);
       newTramo.kmInicial = body.kmInicial;
