@@ -3,6 +3,7 @@ import { TipoTrasladoItemTypeCode, TipoTrasladoTypeCode } from '@hpn/lgc/tas/typ
 import {
   AsistenciaTipoCode,
   CodigoCupsTypeCode,
+  CondicionClinicaCode,
   EstadoAsistenciaTypeCode,
   EstadoPacienteCode,
   TipoRemisionTypeCode,
@@ -178,6 +179,20 @@ export class TramoDetalleDataRes {
 }
 
 export class TrasladoAsistencialDetalleDataRes extends TrasladoAsistencialDataRes {
+  condicionesClinicas: Array<{ code: CondicionClinicaCode }>;
+  medicamentosPrevios: Array<{
+    id: number;
+    medicamentoId: number | null;
+    medicamento: {
+      id: number;
+      codigo: string;
+      nombre: string;
+    } | null;
+    descripcion: string | null;
+    fechaCreacion: Date;
+  }>;
+  prenotificaAlSitio: boolean | null;
+  fechaHoraVistoBienPaciente: Date | null;
   asignacionActual: any;
   asignaciones: any[];
   tramos: TramoDetalleDataRes[];

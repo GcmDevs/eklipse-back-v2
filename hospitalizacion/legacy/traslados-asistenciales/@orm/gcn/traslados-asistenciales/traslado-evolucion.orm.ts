@@ -18,6 +18,6 @@ export class TrasladoEvolucionOrm {
   @Column({ name: 'OBSERVACION', nullable: true })
   observacion?: string;
 
-  @Column({ name: 'FECHA', type: 'timestamp' })
+  @Column({ name: 'FECHA', type: 'datetime' })
   fecha: Date;
 }
