@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import {
   AprobacionCotizacionByCtCDto,
   AprobacionSolicitudByGerenteDto,
-  ConvertirACajaMenorExpressDto,
   CambiarTipoSolicitudDto,
   ItemsRecomendadosByCotizadorDto,
   UpdateItemSolicitudCompraDto,
@@ -44,10 +43,6 @@ export class SolicitudServicesSource {
 
   public async aprobacionItemsCotizadosCtC(payload: AprobacionCotizacionByCtCDto) {
     return await this._itemsRecomendadosByCotizador.aprobacionItemsCotizadosCtC(payload);
-  }
-
-  public async cajaMenorExpress(payload: ConvertirACajaMenorExpressDto) {
-    return await this._itemsRecomendadosByCotizador.cajaMenorExpress(payload);
   }
 
   public async updateItemSolicitudCompra(payload: UpdateItemSolicitudCompraDto) {

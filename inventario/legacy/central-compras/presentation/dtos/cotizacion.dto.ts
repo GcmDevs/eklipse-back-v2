@@ -211,10 +211,6 @@ export class CreateCotizacionDto {
   @IsOptional()
   isCotizacionUnica: boolean;
   @ApiProperty()
-  @IsBoolean()
-  @IsOptional()
-  isPagoPorCajaMenor: boolean;
-  @ApiProperty()
   @IsOptional()
   @IsString()
   fileName: string;

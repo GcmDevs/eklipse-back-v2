@@ -31,9 +31,7 @@ export class ConfirmarOrdenCompraImpl extends CentralComprasSource {
       const solicitud = await solicitudRp.findOneOrFail({ where: { id: cotizacion.solicitudId } });
 
       const pagos = await pagoRp.find({
-        where: solicitud.isPagoPorCajaMenor
-          ? { cotizacionId: cotizacion.id }
-          : { cotizacionId: cotizacion.id, cotDocumentoId: cotizacion.cotDocumentoId },
+        where: { cotizacionId: cotizacion.id, cotDocumentoId: cotizacion.cotDocumentoId },
       });
 
       const estados = await cambioEstadoRp.find({
@@ -59,7 +57,7 @@ export class ConfirmarOrdenCompraImpl extends CentralComprasSource {
         throw new Error('Esta solicitud ya fue aprobada previamente');
       }
 
-      if (!cotizacion.cotDocumentoId && !solicitud.isPagoPorCajaMenor) {
+      if (!cotizacion.cotDocumentoId) {
         throw new Error(`Esta cotización no tiene ninguna orden de ${kwTO.tipoOrden} agregada`);
       }
 
@@ -87,40 +85,11 @@ export class ConfirmarOrdenCompraImpl extends CentralComprasSource {
               ? 'RECHAZADA TEMPORALMENTE'
               : 'RECHAZADA DEFINITIVAMENTE'
         }${
-          payload.isAprobado !== 1 && !solicitud.isPagoPorCajaMenor
-            ? `, ${cotizacion.cotDocumento.documento.consecutivo}`
-            : ''
+          payload.isAprobado !== 1 ? `, ${cotizacion.cotDocumento.documento.consecutivo}` : ''
         }${payload.observaciones ? ` - ${payload.observaciones}` : ''}`,
       });
 
-      if (solicitud.isPagoPorCajaMenor && payload.isAprobado === 1) {
-        pagos[0].fechaProgramacion = new Date();
-
-        await pagoRp.save(pagos[0]);
-
-        cotizacion.fechaProgramacion = new Date();
-        cotizacion.contabilizada = true;
-
-        await cotizacionRp.save(cotizacion);
-
-        await this.createCambioEstadoDeprecated(localQr, {
-          estadoEspecificoCode: ESTADOS_ESPECIFICOS.COTI_OC_PROGRAMADA.getCode(),
-          estadoCode: ESTADOS.SOL_ULTIMOS_PASOS.getCode(),
-          solicitud,
-          entidadRelacionadaId: cotizacion.id,
-          informacionAdicional: `${kwTO.tipoOrdenAbr} de cot. #${cotizacion.id} programada automaticamente`,
-        });
-
-        await this.createCambioEstadoDeprecated(localQr, {
-          estadoEspecificoCode: ESTADOS_ESPECIFICOS.COTI_OC_CONTABILIZADA.getCode(),
-          estadoCode: ESTADOS.SOL_ULTIMOS_PASOS.getCode(),
-          solicitud,
-          entidadRelacionadaId: cotizacion.id,
-          informacionAdicional: `${kwTO.tipoOrdenAbr} de cot. #${cotizacion.id} contabilizada automaticamente`,
-        });
-      }
-
-      if ([2, 3].indexOf(payload.isAprobado) >= 0 && !solicitud.isPagoPorCajaMenor) {
+      if ([2, 3].indexOf(payload.isAprobado) >= 0) {
         cotizacion.cotDocumento = null;
       }
 

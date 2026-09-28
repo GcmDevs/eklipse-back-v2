@@ -21,8 +21,6 @@ export enum EstGlobSoliEnum {
   ORDEN_FINALI = 16,
 }
 
-export const DIAS_PLAZO_CAJA_MENOR = 3;
-
 export const CTXS_CLINICAS_VALIDAS = [
   GCM_CONTEXTS.AGUACHICA,
   GCM_CONTEXTS.ALTACENTRO,
@@ -76,5 +74,9 @@ export const CTC_FILE_LOCATIONS = {
 };
 
 export const IVA = 19;
+
+export const SALARIO_MINIMO = 1750905;
+
+export const MAX_EXTRA_SALARIO_MINIMO = 120000;
 
 export const LIMIT_COTIZACIONES = 5;
