@@ -4,17 +4,27 @@ import { contextoSolicitudPedidoFactory } from './contexto-solicitud-pedido.util
 
 export interface ConfiguracionReporteSolicitudPedido {
   contexto: GcmContextType;
+  almacenes: readonly number[] | null;
   query: () => string;
 }
+
+const configurarReporte = (
+  contexto: GcmContextType,
+  almacenes: readonly number[] | null
+): ConfiguracionReporteSolicitudPedido => ({
+  contexto,
+  almacenes,
+  query: () => reporteConsumoQuery(almacenes),
+});
 
 const reportesPorSede = new Map<string, ConfiguracionReporteSolicitudPedido>([
   [
     `${GCM_CONTEXTS.ALTACENTRO.getCode()}:1`,
-    { contexto: GCM_CONTEXTS.ALTACENTRO, query: () => reporteConsumoQuery([2, 39]) },
+    configurarReporte(GCM_CONTEXTS.ALTACENTRO, [2, 39]),
   ],
   [
     `${GCM_CONTEXTS.ALTACENTRO.getCode()}:2`,
-    { contexto: GCM_CONTEXTS.ALTACENTRO, query: () => reporteConsumoQuery([101, 105, 106, 153]) },
+    configurarReporte(GCM_CONTEXTS.ALTACENTRO, [101, 105, 106, 153]),
   ],
 ]);
 
@@ -29,7 +39,7 @@ export const obtenerConfiguracionReporte = (
   // Solo ALTACENTRO discrimina almacenes. Los demás contextos operables usan
   // todos los almacenes asociados a la sede, nunca los de otra sede o base.
   if (contextCode !== GCM_CONTEXTS.ALTACENTRO.getCode()) {
-    return { contexto, query: () => reporteConsumoQuery(null) };
+    return configurarReporte(contexto, null);
   }
   const configuracion = reportesPorSede.get(`${contextCode}:${sedeId}`);
   if (!configuracion) {
