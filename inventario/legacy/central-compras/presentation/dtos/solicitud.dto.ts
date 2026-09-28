@@ -83,6 +83,10 @@ export class ManageSolicitudDto {
   @IsNumber()
   @IsOptional()
   valorEstimado?: number | null;
+  @ApiProperty({ required: false, default: false })
+  @IsBoolean()
+  @IsOptional()
+  isCompraExpress?: boolean;
   @ApiProperty({ type: DetalleSolicitudDto, isArray: true })
   @IsArray()
   @ValidateNested({ each: true })

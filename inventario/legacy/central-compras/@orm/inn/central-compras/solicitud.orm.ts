@@ -86,6 +86,9 @@ export class SolicitudOrm {
   @Column({ name: 'VALORESTIMADO', type: 'money', scale: 4, nullable: true })
   valorEstimado: number;
 
+  @Column({ name: 'ISEXPRESS', nullable: true })
+  isCompraExpress: boolean;
+
   tipo: TipoType;
   estado: EstadoType;
   prioridad: PrioridadType;

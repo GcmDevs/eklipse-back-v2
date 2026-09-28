@@ -16,6 +16,8 @@ export class BasicInfoSolicitudRes {
   @ApiProperty({ required: false, nullable: true })
   valorEstimado: number | null;
   @ApiProperty()
+  isCompraExpress: boolean;
+  @ApiProperty()
   tipoCode: TipoCode;
   @ApiProperty()
   prioridadCode: PrioridadCode;
@@ -254,6 +256,8 @@ export class ComplementoSolicitudRes {
   justificacion: string;
   @ApiProperty({ required: false, nullable: true })
   valorEstimado: number | null;
+  @ApiProperty()
+  isCompraExpress: boolean;
   @ApiProperty()
   createdAt: Date;
   @ApiProperty()

@@ -77,4 +77,6 @@ export const IVA = 19;
 
 export const SALARIO_MINIMO = 1750905;
 
+export const MAX_EXTRA_SALARIO_MINIMO = 120000;
+
 export const LIMIT_COTIZACIONES = 5;
