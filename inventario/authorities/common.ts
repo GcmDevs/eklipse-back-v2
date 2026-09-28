@@ -15,5 +15,6 @@ export const INN_MODULES = {
     EQUIPOS: `${inn}010`,
     CENTRAL_MEZCLAS: `${inn}011`,
     SOLICITUD_PEDIDO: `${inn}012`,
+    RONDAS_HABITACIONES: `${inn}017`,
   },
 };
