@@ -70,10 +70,10 @@ export class TrasladoSignosVitalesOrm {
   @Column({ name: 'OBSERVACION', nullable: true })
   observacion?: string;
 
-  @Column({ name: 'FECHA', type: 'timestamp' })
+  @Column({ name: 'FECHA', type: 'datetime' })
   fecha: Date;
 
-  @Column({ name: 'FECHAREGISTRO', type: 'timestamp' })
+  @Column({ name: 'FECHAREGISTRO', type: 'datetime' })
   fechaRegistro: Date;
 
   @Column({ name: 'PROCESADAPORCENATE', nullable: true })
