@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { BaseSource } from '@common/infrastructure/services';
 import {
   RhAlertaOrm,
@@ -9,6 +9,7 @@ import {
 import { In, Like } from 'typeorm';
 import { UsuarioOrm } from '@inn/orm/gen';
 import { INN_AUTHORITIES } from '@inn/authorities';
+import { ADMIN_AUTHORITY } from '@common/application/constants';
 
 const EQUIPOS = [
   'TV',
@@ -24,14 +25,51 @@ type Equipo = { tipoEquipo: string; estado: string; observacion?: string };
 
 @Injectable()
 export class RondasHabitacionesService extends BaseSource {
+  private fechaVencimiento(fechaCreacion: Date): Date {
+    const vencimiento = new Date(fechaCreacion);
+    const diasHastaSabado = (6 - vencimiento.getDay() + 7) % 7 || 7;
+    vencimiento.setDate(vencimiento.getDate() + diasHastaSabado);
+    vencimiento.setHours(23, 59, 59, 999);
+    return vencimiento;
+  }
+  private async marcarVencidaSiCorresponde(ronda: RhRondaOrm): Promise<boolean> {
+    if (ronda.estado !== 'EN_PROGRESO' || new Date() <= this.fechaVencimiento(ronda.fechaCreacion))
+      return ronda.estado === 'VENCIDA';
+    ronda.estado = 'VENCIDA';
+    ronda.fechaFinalizacion = this.fechaVencimiento(ronda.fechaCreacion);
+    ronda.fechaActualizacion = new Date();
+    await this.conn.getRepository(RhRondaOrm).save(ronda);
+    return true;
+  }
+  private async cerrarRondasVencidas(): Promise<void> {
+    const activas = await this.conn.getRepository(RhRondaOrm).find({
+      where: { estado: 'EN_PROGRESO' },
+    });
+    await Promise.all(activas.map(ronda => this.marcarVencidaSiCorresponde(ronda)));
+  }
+  private async validarRondaVigente(ronda: RhRondaOrm): Promise<void> {
+    if (await this.marcarVencidaSiCorresponde(ronda))
+      throw new ForbiddenException('La ronda venció el sábado y ya no permite registros ni modificaciones.');
+  }
   private async esAdministrador(): Promise<boolean> {
-    return this.hasAnyAuthority([INN_AUTHORITIES.RONDAS_HABITACIONES.ADMINISTRAR]);
+    return this.hasAnyAuthority([
+      ADMIN_AUTHORITY,
+      INN_AUTHORITIES.RONDAS_HABITACIONES.ADMINISTRAR,
+    ]);
   }
   private async validarAccesoRonda(id: number): Promise<RhRondaOrm> {
     const ronda = await this.conn.getRepository(RhRondaOrm).findOneBy({ id });
     if (!ronda) throw new Error('Ronda no encontrada.');
     if (!(await this.esAdministrador()) && Number(ronda.responsableId) !== Number(this.auth.id))
       throw new Error('Solo puede consultar la ronda que tiene asignada.');
+    return ronda;
+  }
+  private async validarResponsableRonda(id: number): Promise<RhRondaOrm> {
+    const ronda = await this.conn.getRepository(RhRondaOrm).findOneBy({ id });
+    if (!ronda) throw new Error('Ronda no encontrada.');
+    if (Number(ronda.responsableId) !== Number(this.auth.id))
+      throw new ForbiddenException('No puede guardar este registro porque no es el responsable asignado a la ronda.');
+    await this.validarRondaVigente(ronda);
     return ronda;
   }
   private async validarAccesoSede(sedeId: number): Promise<void> {
@@ -65,10 +103,12 @@ export class RondasHabitacionesService extends BaseSource {
     );
   }
   async rondas() {
+    await this.cerrarRondasVencidas();
     const where = (await this.esAdministrador()) ? {} : { responsableId: Number(this.auth.id) };
     return this.conn.getRepository(RhRondaOrm).find({ where, order: { anio: 'DESC', semana: 'DESC' } });
   }
   async actual() {
+    await this.cerrarRondasVencidas();
     const where = (await this.esAdministrador())
       ? { estado: 'EN_PROGRESO' as const }
       : { estado: 'EN_PROGRESO' as const, responsableId: Number(this.auth.id) };
@@ -79,6 +119,7 @@ export class RondasHabitacionesService extends BaseSource {
   }
   async crearRonda(body: any) {
     if (!(await this.esAdministrador())) throw new Error('Solo un administrador puede crear y asignar rondas.');
+    await this.cerrarRondasVencidas();
     const sedeId = Number(body.sedeId);
     if (!sedeId || !body.responsableId)
       throw new Error('La sede y el responsable son obligatorios.');
@@ -129,7 +170,7 @@ export class RondasHabitacionesService extends BaseSource {
     }));
   }
   async guardarRegistro(rondaId: number, habitacionId: number, body: any) {
-    const ronda = await this.obtenerRonda(rondaId);
+    const ronda = await this.validarResponsableRonda(rondaId);
     if (ronda.estado !== 'EN_PROGRESO')
       throw new Error('Una ronda completada no puede modificarse.');
     const equipos: Equipo[] = body.equipos ?? [];
@@ -191,6 +232,7 @@ export class RondasHabitacionesService extends BaseSource {
   }
   async completar(id: number) {
     const ronda = await this.obtenerRonda(id);
+    await this.validarRondaVigente(ronda);
     if (ronda.estado !== 'EN_PROGRESO') throw new Error('La ronda ya está completada.');
     if (ronda.habitacionesRegistradas < ronda.totalHabitaciones)
       throw new Error('Existen habitaciones pendientes por registrar.');
@@ -286,11 +328,15 @@ export class RondasHabitacionesService extends BaseSource {
     return rp.save(item);
   }
   async dashboard() {
-    const rondaActual = await this.actual();
     const esAdministrador = await this.esAdministrador();
     const rondasVisibles = esAdministrador
-      ? await this.conn.getRepository(RhRondaOrm).find({ select: { id: true } })
-      : await this.conn.getRepository(RhRondaOrm).find({ where: { responsableId: Number(this.auth.id) }, select: { id: true } });
+      ? await this.conn.getRepository(RhRondaOrm).find({ order: { anio: 'DESC', semana: 'DESC', id: 'DESC' } })
+      : await this.conn.getRepository(RhRondaOrm).find({
+          where: { responsableId: Number(this.auth.id) },
+          order: { anio: 'DESC', semana: 'DESC', id: 'DESC' },
+        });
+    const rondaEnCurso = await this.actual();
+    const rondaActual = rondaEnCurso ?? rondasVisibles[0] ?? null;
     const rondaIds = rondasVisibles.map(ronda => ronda.id);
     const [rondasCompletadas, alertasPendientes, registros] = await Promise.all([
       this.conn.getRepository(RhRondaOrm).count({ where: esAdministrador ? { estado: 'COMPLETADA' } : { estado: 'COMPLETADA', responsableId: Number(this.auth.id) } }),
@@ -301,7 +347,7 @@ export class RondasHabitacionesService extends BaseSource {
     const equiposRegistrados = registroIds.size
       ? await this.conn.getRepository(RhRegistroEquipoOrm).find({ where: { registroHabitacionId: In([...registroIds]) } })
       : [];
-    const habitacionesActivas = rondaActual
+    const habitacionesActivas = rondaActual && (esAdministrador || rondaActual.estado === 'EN_PROGRESO')
       ? (await this.habitaciones(rondaActual.sedeId)).length
       : 0;
     const distribucion = { BUENO: 0, AVERIADO: 0, FALTANTE: 0 };
