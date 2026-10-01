@@ -13,24 +13,6 @@ import {
   IsNotEmpty,
 } from 'class-validator';
 
-export class OldCajaMenorExpressDto {
-  @IsNotEmpty()
-  @IsEnum(GcmContexts, {
-    message: `Opción invalida. Las opciones validas son ${castDataServices.enumToString(GcmContexts)}`,
-  })
-  context: GcmContexts;
-
-  @IsNumber()
-  solicitudId: number;
-
-  @IsNumber()
-  presupuesto: number;
-
-  @IsString()
-  @IsOptional()
-  observacion: string;
-}
-
 export class OldAprobarSolicitudDto {
   @IsNumber()
   solicitudId: number;

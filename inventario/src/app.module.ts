@@ -11,6 +11,7 @@ import { SolicitudPedidoModule } from './solicitud-pedido/solicitud-pedido.modul
 import * as fs from 'fs';
 import { FOLDERS_STRINGS } from './folders';
 import { CloudController } from './cloud.controller';
+import { RondasHabitacionesModule } from './rondas-habitaciones/rondas-habitaciones.module';
 
 @Module({
   controllers: [CloudController],
@@ -22,6 +23,7 @@ import { CloudController } from './cloud.controller';
     MAOSModule,
     CentralMezclasModule,
     SolicitudPedidoModule,
+    RondasHabitacionesModule,
   ],
 })
 export class AppModule implements OnModuleInit {

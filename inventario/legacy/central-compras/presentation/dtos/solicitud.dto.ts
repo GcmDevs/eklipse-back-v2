@@ -79,10 +79,14 @@ export class ManageSolicitudDto {
   @ApiProperty()
   @IsNumber()
   prioridadCode: PrioridadCode;
-  @ApiProperty()
+  @ApiProperty({ required: false, nullable: true })
   @IsNumber()
   @IsOptional()
-  valorEstimado: number;
+  valorEstimado?: number | null;
+  @ApiProperty({ required: false, default: false })
+  @IsBoolean()
+  @IsOptional()
+  isCompraExpress?: boolean;
   @ApiProperty({ type: DetalleSolicitudDto, isArray: true })
   @IsArray()
   @ValidateNested({ each: true })

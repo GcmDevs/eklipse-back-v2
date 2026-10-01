@@ -10,6 +10,7 @@ import { RECEPCION_TECNICA_AUTHS } from './_recepcion-tecnica';
 import { SERVICIO_TECNICO_AUTHS } from './_servicio-tecnico';
 import { SUMINISTROS_PACIENTE_AUTHS } from './_suministros-paciente';
 import { SOLICITUD_PEDIDO_AUTHS } from './_solicitud-pedido';
+import { RONDAS_HABITACIONES_AUTHS } from './_rondas-habitaciones';
 
 export const INN_AUTHORITIES = {
   CODE: INN_MODULES.CODE,
@@ -24,4 +25,5 @@ export const INN_AUTHORITIES = {
   EQUIPOS: EQUIPOS_AUTHS,
   CENTRAL_MEZCLAS: CTMZ_AUTHS,
   SOLICITUD_PEDIDO: SOLICITUD_PEDIDO_AUTHS,
+  RONDAS_HABITACIONES: RONDAS_HABITACIONES_AUTHS,
 };

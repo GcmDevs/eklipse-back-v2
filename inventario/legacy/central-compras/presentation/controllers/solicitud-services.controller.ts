@@ -4,7 +4,6 @@ import { SolicitudServicesSource } from '@inn/lgc/ctc/infrastructure/services';
 import {
   AprobacionCotizacionByCtCDto,
   AprobacionSolicitudByGerenteDto,
-  ConvertirACajaMenorExpressDto,
   CambiarTipoSolicitudDto,
   ItemsRecomendadosByCotizadorDto,
   UpdateItemSolicitudCompraDto,
@@ -99,18 +98,6 @@ export class SolicitudCompraServicesController {
   public cambiarTipoSolicitud(@Body() body: CambiarTipoSolicitudDto) {
     try {
       return this._services.cambiarTipoSolicitud(body);
-    } catch (error: any) {
-      throw new BadRequestException(error.message);
-    }
-  }
-
-  @ApiOkResponse({ type: Boolean })
-  @Authorities([INN_AUTHORITIES.CENTRAL_COMPRAS.CAJA_MENOR_EXPRESS])
-  @Post('caja-menor-express')
-  public async cajaMenorExpress(@Body() body: ConvertirACajaMenorExpressDto): Promise<boolean> {
-    try {
-      const response = await this._services.cajaMenorExpress(body);
-      return response;
     } catch (error: any) {
       throw new BadRequestException(error.message);
     }
