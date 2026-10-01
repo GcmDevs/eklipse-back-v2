@@ -1,0 +1,33 @@
+export interface ConciliacionResponse {
+  OID: number;
+  IDGEST: number;
+  IDUSU: number;
+  IDTERC: number;
+  FECHA: string;
+  USUNOMBRE: string;
+  USUDESCRI: string;
+  TERNUMDOC: string;
+  TERNOMCOM: string;
+  NACTACONCI: string;
+  FECHACONC: string;
+  CalendarYear: string;
+  CalendarQuarterOfYear: number;
+  MonthNumberOfYear: number;
+  Dias: number;
+  VALCONCI: number;
+  VALRECPAG: number;
+  VALGLOSAD: number;
+  VALDEVUEL: number;
+  VALNORADI: number;
+  AUDITORIA: number;
+  RETENCION: number;
+  GLOSACEPTIPS: number;
+  NOTNODESCEPS: number;
+  PAGNOAPLI: number;
+  COPCUOMODE: number;
+  VALCANCEL: number;
+  TOTAL: number;
+  DIFEREN: number;
+  RUTARCHI: string;
+  ESTADO: 'PENDIENTE' | 'CONCILIADO';
+}

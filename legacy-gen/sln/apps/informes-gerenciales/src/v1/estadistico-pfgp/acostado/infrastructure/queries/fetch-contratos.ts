@@ -1,0 +1,37 @@
+export const fetchContratosQuery = (codigosContratos: string[], idCentro: number) => {
+  const filterByCentro = idCentro ? `AND ADNINGRESO.ADNCENATE IN(${idCentro})` : '';
+
+  let contratos = '';
+
+  codigosContratos.map((codigo, i) => {
+    if (!i) contratos = `'${codigo}'`;
+    else contratos = `${contratos}, '${codigo}'`;
+  });
+
+  return `
+  SELECT   
+        GENDETCON.GDECODIGO As codigoContrato,
+        GENDETCON.GDENOMBRE As nombreContrato,
+        COUNT(DISTINCT(ADNINGRESO.AINCONSEC)) cantidadPacientes,
+        SUM(SLNSERPRO.SERCANTID * SLNSERPRO.SERVALPRO) totalEjecutado,
+        ISNULL(G.LIMITE, 0) totalContratado,
+        ISNULL((G.LIMITE -SUM(SLNSERPRO.SERCANTID * SLNSERPRO.SERVALPRO)), 0) errorAbsoluto,
+        ISNULL(((G.LIMITE - SUM(SLNSERPRO.SERCANTID * SLNSERPRO.SERVALPRO)) / G.LIMITE)*100, 0) errorRelativo,
+        ISNULL(ROUND(((SUM(SLNSERPRO.SERCANTID * SLNSERPRO.SERVALPRO) / G.LIMITE)*100), 2),0) porcentaje
+      FROM HPNESTANC
+        INNER JOIN HPNDEFCAM ON HPNESTANC.HPNDEFCAM = HPNDEFCAM.OID
+          INNER JOIN ADNINGRESO ON HPNESTANC.ADNINGRES = ADNINGRESO.OID
+          INNER JOIN GENPACIEN ON ADNINGRESO.GENPACIEN = GENPACIEN.OID
+          INNER JOIN GENDETCON ON ADNINGRESO.GENDETCON = GENDETCON.OID
+          LEFT JOIN SLNSERPRO ON SLNSERPRO.ADNINGRES1 = ADNINGRESO.OID
+          LEFT Join SLNORDSER On SLNORDSER.OID = SLNSERPRO.SLNORDSER1
+          LEFT JOIN GCMLIMPGP G ON GENDETCON.GDECODIGO = G.GDECODIGO
+        WHERE GENDETCON.GDECODIGO IN (${contratos})
+          AND ADNINGRESO.AINESTADO = 0 
+          AND SLNORDSER.SOSESTADO <> 2
+          AND HPNDEFCAM.HCAESTADO = 2
+          AND ADNINGRESO.ADNCENATE IS NOT NULL ${filterByCentro}
+          AND HPNESTANC.HESFECSAL IS NULL
+        GROUP BY GENDETCON.GDECODIGO, GENDETCON.GDENOMBRE, G.LIMITE
+        ORDER BY GENDETCON.GDECODIGO;`;
+};

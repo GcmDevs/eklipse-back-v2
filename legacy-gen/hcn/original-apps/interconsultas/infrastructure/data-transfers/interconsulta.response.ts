@@ -1,0 +1,35 @@
+export interface InterConsultaPendienteResponse {
+  ACACODIGO: string;
+  ACANOMBRE: string;
+  ADNCENATE: number;
+  GPASEXPAC: number;
+  ADNINGRESO: number;
+  AINCONSEC: number;
+  AINESTADO: number;
+  DIACODIGO: number | null;
+  DIANOMBRE: string | null;
+  GASNOMBRE: string;
+  GEEDESCRI: string;
+  GENARESER: number;
+  GENDIAGNO: string | null;
+  GENESPECI: number;
+  GENPACIEN: number;
+  HCACODIGO: string;
+  HCANOMBRE: string;
+  HCICONSEC: number;
+  HCIMOTIVO: string;
+  HCIREGSUS: false;
+  HCNFECFOL: string;
+  HCNFOLIO: number;
+  HCNINTERC: number;
+  HCNINTERR: number | null;
+  HCTIPINTER: number;
+  HPNDEFCAM: number;
+  HPNSUBGRU: number;
+  HSUCODIGO: string;
+  HSUNOMBRE: string;
+  PACDOCUME: string;
+  PACGNEDAD: number;
+  PACGNSEXO: number;
+  PACNOMBRE: string;
+}

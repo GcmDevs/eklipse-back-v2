@@ -1,0 +1,16145 @@
+export interface Genserips {
+  cups: string;
+  descripcion: string;
+  grupo: string;
+}
+
+export const agrupadores = [
+  'ATENCION PARTO Y RN',
+  'CIRUGIA AMBULATORIA',
+  'CONSULTA MEDICA ESPECIALIZADA',
+  'INTERNACION MEDICA',
+  'INTERNACION QUIRURGICA',
+  'PROCEDIMIENTOS',
+  'SISTEMA NERVIOSO CENTRAL',
+  'UNIDAD INTERMEDIOS',
+  'UCI',
+  'URGENCIAS',
+  'TRATAMIENTO QUIRURGICO ENFERMEDADES CONGENITAS',
+];
+
+export const noRegistradosEnGENSERIPS: Genserips[] = [
+  {
+    cups: '043105',
+    descripcion: 'NEURORRAFIA DE NERVIO EN MANO +(378)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '043108',
+    descripcion: 'NEURORRAFIA DE NERVIO EN PIERNA +(381)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044516',
+    descripcion: 'DESCOMPRESION DE NERVIO EN ANTEBRAZO VIA ABIERTA(45827)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '062001',
+    descripcion: 'TIROIDECTOMIA PARCIAL VIA ABIERTA(42953)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '065201',
+    descripcion: 'TIROIDECTOMIA RETROESTERNAL TOTAL VIA ABIERTA(42956)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '405502',
+    descripcion: 'RESECCION RADICAL DE GANGLIOS LINFATICOS RETROPERITONEALES VIA ABIERTA(41269)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '425301',
+    descripcion:
+      'RECONSTRUCCIÓN O ANASTOMOSIS ESOFÁGICA CON INTERPOSICIÓN DEL INTESTINO DELGADO VÍA ABIERTA(42365)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '541504',
+    descripcion: 'RESECCIÓN DE TUMOR RETROPERITONEAL VÍA ABIERTA(42561)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '684103',
+    descripcion: 'HISTERECTOMIA TOTAL ABDOMINAL AMPLIADA POR LAPAROTOMIA(46499)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862001',
+    descripcion: 'DESBRIDAMIENTO ESCISIONAL EN AREA ESPECIAL EN CARA Y CUELLO(47383)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '033101',
+    descripcion: 'PUNCION LUMBAR (DIAGNOSTICA O TERAPEUTICA)(45385)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053101',
+    descripcion: 'BLOQUEO DE NERVIO SIMPATICO UNICO(434)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '061001',
+    descripcion: 'BIOPSIA DE GLÁNDULA TIROIDES VÍA ABIERTA(42599)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '482701',
+    descripcion: 'MANOMETRIA ANORECTAL(43027)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '895401',
+    descripcion: 'MONITORIZACION ELECTROCARDIOGRAFICA (TELEMETRIA)(53676)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '930102',
+    descripcion: 'PRUEBA COGNITIVA (CADA UNA)(9909)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '013101',
+    descripcion: 'DRENAJE DE ESPACIO SUBDURAL. POR CRANEOTOMIA(47)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '013110',
+    descripcion: 'DRENAJE DE ESPACIO SUBDURAL CON REPARO DE SENOS DURALES ROTOS(53)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '017001',
+    descripcion: 'DRENAJE DE COLECCIONES INTRACEREBRALES. POR CRANEOTOMIA(110)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '019101',
+    descripcion: 'LOBECTOMIA POR CRANEOTOMIA(45603)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '020203',
+    descripcion:
+      'REDUCCION DE FRACTURA CRANEAL (HUNDIMIENTO SIN COMPROMISO DE DURA) CON ESQUIRLECTOMIA Y CRANEOPLASTIA(172)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '023201',
+    descripcion: 'DERIVACION VENTRICULOATRIAL(209)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '024300',
+    descripcion: 'RETIRO DE DERIVACION SOD +(219)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '030214',
+    descripcion:
+      'EXPLORACION Y DESCOMPRESION DEL CANAL RAQUIDEO Y RAICES ESPINALES HASTA DOS SEGMENTOS POR HEMILAMINECTOMIA VIA ABIERTA(45648)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '040705',
+    descripcion: 'NEURECTOMIA DE NERVIO PERIFERICO EN CABEZA O CUELLO(341)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040715',
+    descripcion: 'RESECCION DE TUMOR BENIGNO DE NERVIO EN BRAZO VIA ABIERTA(45781)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040716',
+    descripcion: 'RESECCION DE TUMOR MALIGNO DE NERVIO EN BRAZO VIA ABIERTA(45782)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040717',
+    descripcion: 'RESECCION DE TUMOR BENIGNO DE NERVIO EN ANTEBRAZO VIA ABIERTA(45783)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040718',
+    descripcion: 'RESECCION DE TUMOR MALIGNO DE NERVIO EN ANTEBRAZO VIA ABIERTA(45784)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040719',
+    descripcion: 'RESECCION DE TUMOR BENIGNO DE NERVIO EN MANO O DEDOS VIA ABIERTA(45785)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040721',
+    descripcion: 'RESECCION DE TUMOR BENIGNO DE NERVIO EN MUSLO VIA ABIERTA(45786)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040722',
+    descripcion: 'RESECCION DE TUMOR MALIGNO DE NERVIO EN MUSLO VIA ABIERTA(45787)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040725',
+    descripcion: 'RESECCION DE TUMOR BENIGNO DE NERVIO EN PIERNA VIA ABIERTA(45790)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040726',
+    descripcion: 'RESECCION DE TUMOR MALIGNO DE NERVIO EN PIERNA VIA ABIERTA(45791)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040729',
+    descripcion: 'RESECCION DE TUMOR BENIGNO DE NERVIO EN PIE VIA ABIERTA(45794)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040730',
+    descripcion: 'TOMA DE INJERTO DE NERVIO PERIFERICO +(349)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040731',
+    descripcion: 'RESECCION DE TUMOR MALIGNO DE NERVIO EN PIE VIA ABIERTA(45795)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '042310',
+    descripcion: 'NEUROLISIS DE NERVIO EN BRAZO VIA ABIERTA(45797)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '042312',
+    descripcion: 'NEUROLISIS DE NERVIO EN ANTEBRAZO VIA ABIERTA(45799)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '042314',
+    descripcion: 'NEUROLISIS EN NERVIO DE MANO VIA ABIERTA(45801)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '042315',
+    descripcion: 'NEUROLISIS DE NERVIOS EN DEDOS DE MANO VIA ABIERTA(45802)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '042316',
+    descripcion: 'NEUROLISIS DE NERVIO EN MUSLO VIA ABIERTA(45803)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '042319',
+    descripcion: 'NEUROLISIS DE NERVIO EN PIERNA VIA ABIERTA(45806)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '042321',
+    descripcion: 'NEUROLISIS DE NERVIO EN TOBILLO VIA ABIERTA(45808)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '042323',
+    descripcion: 'NEUROLISIS DE NERVIO EN PIE EXCEPTO DEDO DE PIE VIA ABIERTA(45810)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '042324',
+    descripcion: 'NEUROLISIS DE NERVIO EN DEDO DE PIE VIA ABIERTA(45811)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '043101',
+    descripcion: 'NEURORRAFIA DE NERVIO PERIFERICO(29728)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '043102',
+    descripcion: 'NEURORRAFIA DE NERVIO DENTARIO +(375)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '043103',
+    descripcion: 'NEURORRAFIA DE NERVIO EN BRAZO +(376)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '043104',
+    descripcion: 'NEURORRAFIA DE NERVIO EN ANTEBRAZO +(377)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '043106',
+    descripcion: 'NEURORRAFIA DE NERVIO COLATERAL EN DEDO DE MANO +(379)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '043107',
+    descripcion: 'NEURORRAFIA DE NERVIO EN MUSLO +(380)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '043109',
+    descripcion: 'NEURORRAFIA DE NERVIO EN PIE +(382)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044303',
+    descripcion: 'DESCOMPRESION DE NERVIO EN TUNEL DEL CARPO VIA ABIERTA(45816)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044401',
+    descripcion: 'DESCOMPRESION DE NERVIO EN TUNEL DEL TARSO VIA ABIERTA(45819)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044512',
+    descripcion: 'DESCOMPRESION DE NERVIO EN BRAZO VIA ABIERTA(45823)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044514',
+    descripcion: 'DESCOMPRESION DE NERVIO EN CODO VIA ABIERTA(45825)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044518',
+    descripcion: 'DESCOMPRESION DE NERVIO EN MANO VIA ABIERTA(45829)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044519',
+    descripcion: 'DESCOMPRESION DE NERVIO EN DEDO DE LA MANO VIA ABIERTA(45830)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044520',
+    descripcion: 'DESCOMPRESION DE NERVIO EN MUSLO VIA ABIERTA(45831)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044522',
+    descripcion: 'DESCOMPRESION DE NERVIO EN HUECO POPLITEO VIA ABIERTA(45833)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044523',
+    descripcion: 'DESCOMPRESION DE NERVIO EN PIERNA VIA ABIERTA(45834)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044525',
+    descripcion: 'DESCOMPRESION DE NERVIO EN TOBILLO VIA ABIERTA(45836)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044527',
+    descripcion: 'DESCOMPRESION DE NERVIO EN PIE VIA ABIERTA(45838)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '046103',
+    descripcion: 'TRANSPOSICION DE NERVIO PERIFERICO EN MIEMBRO SUPERIOR VIA ABIERTA(45839)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053201',
+    descripcion: 'NEUROLISIS DE PLEJO BRAQUIAL(452)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053202',
+    descripcion: 'NEUROLISIS DE PLEJO LUMBAR(453)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053203',
+    descripcion: 'NEUROLISIS DE PLEJO CERVICAL (SUPERFICIAL O PROFUNDO)(454)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053204',
+    descripcion: 'NEUROLISIS DE PLEJO TORACICO(455)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053205',
+    descripcion: 'NEUROLISIS DE PLEJO CELIACO(456)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053206',
+    descripcion: 'NEUROLISIS DE PLEJO HIPOGASTRICO(457)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053207',
+    descripcion: 'NEUROLISIS DEL GANGLIO SIMPATICO PRESACRO (GANGLIO IMPAR DE WALTER)(458)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053208',
+    descripcion: 'NEUROLISIS DE NERVIO SIMPATICO UNICO(29592)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053301',
+    descripcion: 'GANGLIOLISIS EN GANGLIOS SIMPATICOS. POR RADIOFRECUENCIA O FENOLIZACION(461)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053302',
+    descripcion: 'GANGLIOLISIS(30101)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053303',
+    descripcion:
+      'GANGLIOLISIS EN GANGLIOS PARAVERTEBRALES. POR RADIOFRECUENCIA O FENOLIZACION(462)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053304',
+    descripcion:
+      'GANGLIOLISIS EN GANGLIO DEL V PAR (GASSER) POR RADIOFRE-CUENCIA O FENOLIZACION(464)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '054101',
+    descripcion: 'NEURORRAFIA DE TRONCO DE PLEJO BRAQUIAL +(465)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '054102',
+    descripcion: 'NEURORRAFIA DE TRONCO DE PLEJO BRAQUIAL. CON INJERTO DE TRONCOS +(466)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '054104',
+    descripcion: 'NEURORRAFIA DE NERVIO O GANGLIO SIMPATICO(30129)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '054202',
+    descripcion: 'RECONSTRUCCION DE PLEJO. POR INJERTO DE NERVIO(470)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '054203',
+    descripcion: 'RECONSTRUCCION DE PLEJO. POR NEUROTIZACION(471)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '054204',
+    descripcion: 'RECONSTRUCCION DE PLEJO(29613)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '209606',
+    descripcion:
+      'IMPLANTACION O SUSTITUCION DE PROTESIS COCLEAR CON PRESERVACION DE RESTOS AUDITIVOS(61963)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '209607',
+    descripcion:
+      'IMPLANTACION O SUSTITUCION DE PROTESIS COCLEAR SIN PRESERVACION DE RESTOS AUDITIVOS(61964)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '218504',
+    descripcion: 'RINOPLASTIA DE AUMENTO CON IMPLANTE SINTETICO VIA ABIERTA(61968)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '218505',
+    descripcion: 'RINOPLASTIA DE AUMENTO CON INJERTO OSEO O CONDRAL VIA TRANSNASAL(61969)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '218506',
+    descripcion: 'RINOPLASTIA DE AUMENTO CON INJERTO OSEO O CONDRAL VIA ABIERTA(61970)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '569101',
+    descripcion: 'LIGADURA DE URETER VIA ABIERTA(46296)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '597105',
+    descripcion: 'AJUSTE DE DISPOSITIVO DE CISTOURETROPEXIA(46378)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '649601',
+    descripcion: 'RETIRO DE PROTESIS PENEANA INFLABLE(62127)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '649602',
+    descripcion: 'RETIRO DE PROTESIS PENEANA NO INFLABLE(62128)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '649701',
+    descripcion: 'INSERCION DE PROTESIS DE PENE INFLABLE(62129)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '649702',
+    descripcion: 'REVISION O SUSTITUCION DE PROTESIS DE PENE INFLABLE(62130)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '676103',
+    descripcion: 'SUTURA DE ANILLO PERICERVICAL VIA VAGINAL(46487)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '698001',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO INTRAUTERINO POR LAPAROTOMIA(46525)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '698004',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO INTRAUTERINO POR LEGRADO(46528)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '699701',
+    descripcion: 'RETIRO DE DISPOSITIVO EN CUELLO UTERINO VIA VAGINAL(46533)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '712001',
+    descripcion: 'DRENAJE POR PUNCION DE LA GLANDULA DE BARTHOLIN(46574)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '766203',
+    descripcion: 'OSTEOTOMIA DE RAMA MANDIBULAR VIA TRANS MUCOSA O VIA TRANSCUTANEA(29719)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '780903',
+    descripcion: 'INJERTO OSEO EN MANO CON FIJACION INTERNA(46882)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '780904',
+    descripcion: 'INJERTO OSEO CON CARTILAGO EN MANO CON FIJACION INTERNA(46883)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '780905',
+    descripcion: 'APLICACION DE INJERTO ESTRUCTURAL EN PIE(46884)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '782771',
+    descripcion: 'GRAPADO EPIFISIARIO DE FALANGES DE PIE (UNA O MAS)(32005)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '812909',
+    descripcion: 'ARTRODESIS INTERCARPIANA CON INJERTO OSEO VIA ABIERTA(47252)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '828907',
+    descripcion: 'RECONSTRUCCION DE LIGAMENTOS EN MANO CON AUTOINJERTO VIA ABIERTA(47342)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '842500',
+    descripcion: 'REIMPLANTE DE ARTEJOS SOD(32056)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '862104',
+    descripcion: 'RESECCIÓN QUISTE PILONIDAL CON RECONSTRUCCIÓN CON COLGAJO(43064)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '045103',
+    descripcion: 'INJERTO DE NERVIO PERIFERICO A NERVIO FACIAL IPSILATERAL(42948)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '045104',
+    descripcion: 'INJERTO DE NERVIO PERIFERICO A NERVIO FACIAL CONTRALATERAL(42949)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '052101',
+    descripcion: 'GANGLIONECTOMIA ESFENOPALATINA(418)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '052102',
+    descripcion: 'GANGLIONECTOMIA(29564)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '052200',
+    descripcion: 'SIMPATECTOMIA CERVICAL SOD(419)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '052300',
+    descripcion: 'SIMPATECTOMIA LUMBAR SOD(420)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '055101',
+    descripcion: 'EXPLORACION SUPRA E INFRACLAVICULAR DE PLEJO BRAQUIAL +(473)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '055102',
+    descripcion: 'EXPLORACION DE PLEJO O TRONCO (CERVICAL, LUMBAR O SACRO)(29698)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '055200',
+    descripcion: 'DESCOMPRESION DE PLEJO O TRONCO (CERVICAL. LUMBAR O SACRO) SOD +(474)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '060901',
+    descripcion: 'DRENAJE DE COLECCION EN AREA TIROIDEA POR INCISION(477)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '060903',
+    descripcion: 'EXPLORACION DE CUELLO O AREA TIROIDEA POR INCISION(479)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '064101',
+    descripcion: 'TIROIDECTOMIA TOTAL VIA ABIERTA(42954)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '068101',
+    descripcion: 'PARATIROIDECTOMIA TOTAL VIA ABIERTA(42958)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '068901',
+    descripcion: 'PARATIROIDECTOMIA PARCIAL VIA ABIERTA(42959)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '072001',
+    descripcion: 'SUPRARRENALECTOMÍA PARCIAL UNILATERAL VÍA ABIERTA(42249)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '072401',
+    descripcion: 'SUPRARRENALECTOMÍA PARCIAL BILATERAL VÍA ABIERTA(42250)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '072501',
+    descripcion: 'SUPRARRENALECTOMÍA TOTAL UNILATERAL VÍA ABIERTA(42251)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '072601',
+    descripcion: 'SUPRARRENALECTOMÍA TOTAL BILATERAL VÍA ABIERTA(42252)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '074101',
+    descripcion: 'DRENAJE DE GLÁNDULA SUPRARRENAL VÍA ABIERTA(42255)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '078203',
+    descripcion: 'RESECCION TOTAL DEL TIMO VIA ABIERTA(45852)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '421101',
+    descripcion: 'ESOFAGOSTOMÍA CON MIOTOMÍA CERVICAL VÍA ABIERTA(42354)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '425206',
+    descripcion:
+      'RECONSTRUCCION O ANASTOMOSIS ESOFAGICA CON ASCENSO GASTRICO RETROESTERNAL VIA ABIERTA(46105)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '429103',
+    descripcion: 'LIGADURA DE VARICES ESOFAGICAS POR TORACOTOMIA(46113)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '454208',
+    descripcion: 'RESECCIÓN DE LESIÓN DE INTESTINO GRUESO VÍA ENDOSCÓPICA (4 - 10)(42404)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '555607',
+    descripcion: 'RESECCION DE RIÑON UNILATERAL TOTAL [NEFRECTOMIA SIMPLE] POR LAPAROTOMIA(46241)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '646002',
+    descripcion: 'CIRUGIA DE GENITALES AMBIGUOS VIRILIZANTE(46420)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '652203',
+    descripcion: 'RESECCION PARCIAL DE OVARIO VIA VAGINAL(46433)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '652303',
+    descripcion: 'RESECCION DE TUMOR DE OVARIO VIA VAGINAL(48871)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '652804',
+    descripcion: 'RESECCION DE QUISTE PARAOVARICO VIA VAGINAL(46437)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '707503',
+    descripcion: 'CIERRE DE FISTULA URETROVAGINAL O VESICO VAGINAL VIA VAGINAL(46559)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772204',
+    descripcion: 'OSTEOTOMIA DE HUMERO CON FIJACION EXTERNA(46669)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772305',
+    descripcion: 'OSTEOTOMIA EN RADIO O CUBITO CON FIJACION EXTERNA(46671)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772307',
+    descripcion: 'OSTEOTOMIA EN RADIO Y CUBITO CON FIJACION EXTERNA(46673)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772508',
+    descripcion:
+      'OSTEOTOMIA EN FEMUR PROXIMAL (CUELLO DE FEMUR O INTERTROCANTERICA O SUBTROCANTERICA) CON FIJACION EXTERNA(46679)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772706',
+    descripcion: 'OSTEOTOMIA DE DIAFISIS DE TIBIA CON FIJACION INTERNA(46691)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772707',
+    descripcion: 'OSTEOTOMIA DE DIAFISIS DE TIBIA CON FIJACION EXTERNA(46692)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772711',
+    descripcion: 'OSTEOTOMIA DIAFISIARIA DE PERONE CON FIJACION INTERNA(46696)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793719',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE TIBIA DISTAL CON FIJACION EXTERNA(46937)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '811202',
+    descripcion: 'ARTRODESIS SUBTALAR VIA ABIERTA(47232)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '854401',
+    descripcion: 'MASTECTOMÍA SIMPLE AMPLIADA BILATERAL VÍA ABIERTA(43059)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '854601',
+    descripcion: 'MASTECTOMÍA RADICAL BILATERAL VÍA ABIERTA(43060)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '854801',
+    descripcion: 'MASTECTOMÍA RADICAL AMPLIADA BILATERAL VÍA ABIERTA(43061)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '859401',
+    descripcion: 'EXTRACCION DE DISPOSITIVO DE MAMA UNILATERAL(62194)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862002',
+    descripcion:
+      'DESBRIDAMIENTO ESCISIONAL EN AREA ESPECIAL EN PLIEGUES DE FLEXION AXILA ANTECUBITAL HUECOS POPLITEOS INGUINAL(47384)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862505',
+    descripcion:
+      'DERMOABRASION (QUIMICA O MECANICA) DE AREA GENERAL MENOR DEL 10% DE SUPERFICIE CORPORAL(24783)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '040703',
+    descripcion: 'ESCISION [RESECCION] DE NERVIO CRANEAL O PERIFERICO(30061)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '040713',
+    descripcion: 'NEURECTOMIA DE OTRO NERVIO PERIFERICO VIA ABIERTA(42597)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '045102',
+    descripcion: 'INJERTO DE NERVIO PERIFERICO(29547)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '052401',
+    descripcion: 'SIMPATECTOMIA PRESACRA POR LAPAROTOMIA +(421)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '052403',
+    descripcion: 'SIMPATECTOMIA PRESACRA(29660)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '052500',
+    descripcion: 'SIMPATECTOMIA PERIARTERIAL SOD(425)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '052601',
+    descripcion: 'RESECCION DE TUMOR EN NERVIO O GANGLIO SIMPATICO(428)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '052602',
+    descripcion: 'RESECCION DE TUMOR EN NERVIO O GANGLIO SIMPATICO CERVICAL(429)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '052603',
+    descripcion: 'SIMPATECTOMIA DIGITAL (DEDO) +(25039)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '052605',
+    descripcion: 'SIMPATECTOMIA O GANGLIECTOMIA(29591)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '060201',
+    descripcion: 'REAPERTURA DE HERIDA DE AREA TIROIDEA VIA ABIERTA(42952)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '060902',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO POR INCISION(478)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '060904',
+    descripcion: 'DRENAJE EN CUELLO (EXCEPTO AREA TIROIDEA) POR INCISION(480)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '065101',
+    descripcion: 'TIROIDECTOMIA RETROESTERNAL PARCIAL VIA ABIERTA(42955)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '069101',
+    descripcion: 'REEXPLORACION DE CUELLO Y MEDIASTINO VIA ABIERTA(42960)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '070001',
+    descripcion: 'EXPLORACIÓN DE ÁREA SUPRARENAL VÍA ABIERTA(42245)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '071001',
+    descripcion: 'BIOPSIA DE GLÁNDULA SUPRARRENAL VÍA ABIERTA(42610)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '072701',
+    descripcion: 'REIMPLANTE DE TEJIDO SUPRARRENAL VÍA ABIERTA(42253)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '078205',
+    descripcion: 'RESECCION PARCIAL DEL TIMO VIA ABIERTA(45854)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '317308',
+    descripcion: 'CIERRE DE FISTULA TRAQUEOESOFAGICA SIN RECONSTRUCCION POR CERVICOTOMIA(46060)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '425208',
+    descripcion:
+      'RECONSTRUCCION O ANASTOMOSIS ESOFAGICA CON ASCENSO GASTRICO MEDIASTINAL VIA ABIERTA(46107)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '469401',
+    descripcion: 'REINTERVENCIÓN DE ANASTOMOSIS INTESTINAL VÍA ABIERTA(42433)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '649501',
+    descripcion:
+      'INSERCION O REEMPLAZO DE PROTESIS INTERNA DE PENE NO INFLABLE RIGIDA O SEMIRIGIDA(62126)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '688201',
+    descripcion: 'EXENTERACION ANTERIOR UTERO Y VEJIGA(46504)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '715004',
+    descripcion: 'VULVECTOMIA SIMPLE BILATERAL(46586)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '773101',
+    descripcion: 'OSTEOTOMIA PERIARTICULAR UNICA(46754)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '773103',
+    descripcion: 'OSTEOTOMIA INTRAARTICULAR UNICA(46756)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776934',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DEL CUERPO O DISCO VERTEBRAL NIVEL C1 C2 VIA TRANSORAL ABIERTA(46766)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776936',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DEL CUERPO O DISCO VERTEBRAL NIVEL C1 C2 VIA ANTERIOR O LATERAL(46768)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776937',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DEL CUERPO O DISCO VERTEBRAL SUBAXIAL VIA ANTERIOR O LATERAL HASTA DOS VERTEBRAS(46769)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776938',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DEL CUERPO O DISCO VERTEBRAL SUBAXIAL VIA ANTERIOR O LATERAL MAS DE DOS VERTEBRAS(46770)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776939',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DEL CUERPO O DISCO VERTEBRAL DE LA UNION CERVICOTORACICA VIA ANTERIOR O LATERAL(46771)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776940',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DEL CUERPO O DISCO VERTEBRAL TORACICO HASTA DOS VERTEBRAS ANTERIOR O LATERAL VIA ABIERTA(46772)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776943',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DEL CUERPO O DISCO VERTEBRAL TORACICO MAS DE DOS VERTEBRAS ANTERIOR O LATERAL VIA ABIERTA(46775)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776946',
+    descripcion: 'RESECCION DE TUMOR O LESION DEL CUERPO O DISCO(46778)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776949',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DEL CUERPO O DISCO VERTEBRAL TORACICO HASTA DOS VERTEBRAS VIA POSTERIOR(46781)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776952',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DEL CUERPO O DISCO VERTEBRAL TORACICO MAS DE DOS VERTEBRAS VIA POSTERIOR ABIERTA(46784)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783803',
+    descripcion:
+      'ALARGAMIENTO DE METATARSIANOS (UNO O MAS) POR INJERTO SIN DISPOSITIVOS INTERNOS DE FIJACION Y OSTEOTOMIA(3724)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783805',
+    descripcion:
+      'ALARGAMIENTO DE TARSIANOS (UNO O MAS) POR TECNICA DE DISTRACCIÓN SIN CORTICOTOMIA/OSTEOTOMIA(3728)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '791302',
+    descripcion: 'REDUCCION INDIRECTA DE FRACTURA DE CUBITO Y RADIO CON FIJACION(46914)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '791704',
+    descripcion:
+      'REDUCCION INDIRECTA DE FRACTURAS DE LA TIBIA DIAFISIARIA CON FIJACION INTERNA(46918)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '791705',
+    descripcion: 'REDUCCION INDIRECTA DE FRACTURAS DE PERONE CON FIJACION INTERNA(46919)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793714',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE ESPINA TIBIAL CON FIJACION INTERNA(46932)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793715',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE TIBIA PROXIMAL CON FIJACION EXTERNA(46933)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793716',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE TIBIA DIAFISIARIA CON FIJACION INTERNA(46934)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793717',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE TIBIA DIAFISIARIA CON FIJACION EXTERNA(46935)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '799805',
+    descripcion: 'REDUCCION ABIERTA DE LUXOFRACTURA CON FIJACION DE HALLUX(46958)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '799807',
+    descripcion:
+      'REDUCCION ABIERTA DE LUXOFRACTURA CON FIJACION DE HUESO DE DEDO DE PIE (CADA UNO)(46960)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '810310',
+    descripcion: 'LAMINOPLASTIA CERVICAL HASTA DOS SEGMENTOS VIA POSTERIOR(47075)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '810311',
+    descripcion: 'LAMINOPLASTIA CERVICAL MAS DE DOS SEGMENTOS VIA POSTERIOR(47076)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '810435',
+    descripcion: 'LAMINOPLASTIA TORACICA HASTA TRES SEGMENTOS VIA POSTERIOR(47107)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '810436',
+    descripcion: 'LAMINOPLASTIA TORACICA MAS DE TRES SEGMENTOS VIA POSTERIOR(47108)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '810901',
+    descripcion: 'REFUSION DE COLUMNA OCCIPITOCERVICAL ANTERIOR O LATERAL(47216)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '814103',
+    descripcion: 'OSTEOCONDROPLASTIA DE CADERA VIA ABIERTA(47261)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '818607',
+    descripcion: 'CONDROPLASTIA DE HOMBRO VIA ABIERTA(47305)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '841202',
+    descripcion: 'AMPUTACION O DESARTICULACION DE MEDIOPIE(47365)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '842800',
+    descripcion: 'REIMPLANTE DE MUSLO SOD(31999)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862352',
+    descripcion: 'ESCAROTOMIA DESCOMPRESIVA EN TOBILLOS O PIES(47396)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862353',
+    descripcion: 'ESCAROTOMIA DESCOMPRESIVA EN EXTREMIDAD SUPERIOR EXCEPTO MUÑECA MANOS(47397)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862354',
+    descripcion: 'ESCAROTOMIA DESCOMPRESIVA EN EXTREMIDAD INFERIOR EXCEPTO TOBILLO PIE(47398)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862355',
+    descripcion: 'ESCAROTOMIA DESCOMPRESIVA EN TRONCO (TORAX O ABDOMEN)(47399)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862506',
+    descripcion:
+      'DERMOABRASION (QUIMICA O MECANICA) DE AREA GENERAL ENTRE EL 10% AL 19 % DE SUPERFICIE CORPORAL(47400)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862507',
+    descripcion:
+      'DERMOABRASION (QUIMICA O MECANICA) DE AREA GENERAL ENTRE EL 20% AL 29 % DE SUPERFICIE CORPORAL(47401)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862508',
+    descripcion:
+      'DERMOABRASION (QUIMICA O MECANICA) DE AREA GENERAL DEL 30 % AL 49% DE SUPERFICIE CORPORAL(47402)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862509',
+    descripcion:
+      'DERMOABRASION (QUIMICA O MECANICA) DE AREA GENERAL DEL 50% O MAS DE SUPERFICIE CORPORAL(47403)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862511',
+    descripcion:
+      'DERMOABRASION (QUIMICA O MECANICA) EN AREA ESPECIAL EN PLIEGUES DE FLEXION (AXILA , ANTECUBITAL, HUECOS POPLITEOS, INGUINAL)(47405)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862512',
+    descripcion: 'DERMOABRASION (QUIMICA O MECANICA) EN AREA ESPECIAL EN MUÑECAS Y MANOS(47406)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862513',
+    descripcion: 'DERMOABRASION (QUIMICA O MECANICA) EN AREA ESPECIAL EN TOBILLOS Y PIES(47407)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862514',
+    descripcion: 'DERMOABRASION (QUIMICA O MECANICA) EN AREA ESPECIAL EN GENITALES(47408)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '011101',
+    descripcion: 'BIOPSIA OSEA EN CRANEO POR CRANEOTOMIA +(16)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '011102',
+    descripcion: 'BIOPSIA ÓSEA EN CRÁNEO POR CRANIECTOMIA(18)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '011103',
+    descripcion: 'BIOPSIA DE CRANEO(29417)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '011201',
+    descripcion: 'BIOPSIA DE MENINGE. POR CRANEOTOMIA(21)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '011202',
+    descripcion: 'BIOPSIA DE MENINGE CEREBRAL(29897)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '011302',
+    descripcion: 'BIOPSIA ABIERTA (CRANEOTOMIA) DE CEREBRO(26)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '011303',
+    descripcion: 'BIOPSIA DE CEREBRO POR TREPANACION(27)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '033201',
+    descripcion:
+      'BIOPSIA DE TUMOR INTRADURALES (INTRAMEDULARES Y EXTRAMEDULARES) CERVICALES. DORSALES. LUMBOSACROS O COCCIGEOS +(262)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '033202',
+    descripcion: 'BIOPSIA ABIERTA DE TUMOR DEL FORAMEN MAGNO, VIA LATERAL(264)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '033203',
+    descripcion: 'BIOPSIA DE MEDULA ESPINAL O MENINGES ESPINALES(29908)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '039001',
+    descripcion:
+      'INSERCION DE CATETER EPIDURAL EN CANAL ESPINAL PARA INFUSION DE SUSTANCIA TERAPEUTICA O PALIATIVA(313)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '039003',
+    descripcion:
+      'INSERCION DE CATETER SUBARACNOIDEO EN CANAL ESPINAL PARA INFUSION DE SUSTANCIA TERAPEUTICA O PALIATIVA(315)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '039004',
+    descripcion:
+      'INSERCION DE CATETER SUBARACNOIDEO EN CANAL ESPINAL CON PUERTO DE ENTRADA IMPLANTABLE PARA INFUSION DE SUSTANCIA TERAPEUTICA O PALIATIVA(316)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '039101',
+    descripcion: 'INYECCION DE ANESTESICO EN EL CANAL ESPINAL(45760)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '039500',
+    descripcion: 'PARCHE HEMATICO EPIDURAL EN CANAL ESPINAL SOD(323)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '041200',
+    descripcion: 'BIOPSIA ABIERTA DE NERVIO O GANGLIO PERIFERICO SOD +(353)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '051100',
+    descripcion: 'BIOPSIA DE NERVIO O GANGLIO SIMPATICO SOD(415)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053102',
+    descripcion: 'BLOQUEO DE PLEJO BRAQUIAL(435)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053103',
+    descripcion: 'BLOQUEO DE PLEJO LUMBOSACRO(436)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053104',
+    descripcion: 'BLOQUEO DE SENO CAROTIDEO(437)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053106',
+    descripcion: 'BLOQUEO PARACERVICAL BILATERAL(439)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053107',
+    descripcion: 'BLOQUEO DE NERVIO FRENICO(440)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053108',
+    descripcion: 'BLOQUEO DE PLEJO CELIACO(441)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053110',
+    descripcion: 'BLOQUEO DE NERVIO VAGO(443)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053111',
+    descripcion: 'BLOQUEO DEL NERVIO HIPOGASTRICO SUPERIOR(444)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053112',
+    descripcion: 'BLOQUEO DE NERVIO ESPLACNICO(445)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053113',
+    descripcion: 'BLOQUEO REGIONAL CONTINUO(446)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053114',
+    descripcion: 'BLOQUEO SIMPATICO REGIONAL (CERVICAL. TORACICO O LUMBAR) +(447)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053115',
+    descripcion: 'BLOQUEO DEL SIMPATICO PRESACRO (GANGLIO IMPAR DE WALTER)(448)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053116',
+    descripcion: 'INYECCION DE ANESTESICO EN NERVIO SIMPATICO(29697)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053121',
+    descripcion: 'INYECCION DE ANESTESICO EN GANGLIO SIMPATICO CILIAL(449)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '061301',
+    descripcion: 'BIOPSIA DE GLÁNDULA PARATIROIDES VÍA ABIERTA(42601)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '071300',
+    descripcion: 'BIOPSIA DE HIPOFISIS. VIA TRANSFRONTAL SOD(504)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '071401',
+    descripcion: 'BIOPSIA DE HIPÓFISIS VÍA TRANSESFENOIDAL(42612)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '071601',
+    descripcion: 'BIOPSIA DE TIMO VIA ABIERTA(45850)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '071700',
+    descripcion: 'BIOPSIA DE GLANDULA PINEAL SOD(507)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '181103',
+    descripcion: 'BIOPSIA DE OIDO EXTERNO(30112)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '241104',
+    descripcion: 'BIOPSIA DE ENCIA(29867)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '243110',
+    descripcion: 'RESECCION DE LESION DE ENCIA(29920)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '372602',
+    descripcion: 'BIOPSIA DE PERICARDIO MINIMAMENTE INVASIVA(36593)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '422002',
+    descripcion: 'ESOFAGOSCOPIA A TRAVES DE ESTOMA ARTIFICIAL(43018)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '482101',
+    descripcion: 'PROCTOSIGMOIDOSCOPIA TRANSABDOMINAL(46153)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '552607',
+    descripcion: 'BIOPSIA TEJIDOS PERIRRENALES POR LAPAROTOMIA(46217)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '563102',
+    descripcion: 'URETEROSCOPIA RETROGRADA DIAGNOSTICA(46262)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '573102',
+    descripcion: 'CISTOSCOPIA A TRAVÉS DE ESTOMA CONGÉNITO(43037)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '573103',
+    descripcion: 'CISTOSCOPIA A TRAVÉS DE ESTOMA TRAUMÁTICO(43038)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '592402',
+    descripcion:
+      'LITOTRICIA (FRAGMENTACION) EXTRACORPOREA DE CALCULOS SIMPLES EN VIA URINARIA(46376)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '601104',
+    descripcion: 'BIOPSIA CERRADA DE PROSTATA POR SATURACION ABORDAJE PERINEAL(46386)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '651204',
+    descripcion: 'BIOPSIA DE OVARIO VIA VAGINAL(46429)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '753101',
+    descripcion: 'AMNIOSCOPIA(3316)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '819801',
+    descripcion: 'OTROS PROCEDIMIENTOS DIAGNOSTICOS EN ESTRUCTURAS ARTICULARES(32042)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '960405',
+    descripcion: 'INSERCION DE CANULA JET TRANSTRAQUEAL(10101)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '972400',
+    descripcion: 'SUSTITUCION DE DIAFRAGMA VAGINAL SOD(30179)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '010101',
+    descripcion: 'PUNCION CISTERNAL. VIA LATERAL(5)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '010102',
+    descripcion: 'PUNCION CISTERNAL. VIA MEDIAL(6)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '010103',
+    descripcion: 'PUNCION CISTERNAL(29524)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '010201',
+    descripcion:
+      'PUNCION [ASPIRACION DE LIQUIDO] VENTRICULAR A TRAVES DE CATETER PREVIAMENTE IMPLANTADO(9)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '010202',
+    descripcion: 'PUNCION [ASPIRACION DE LIQUIDO] VENTRICULAR POR TREPANACION (SIN CATETER)(10)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '010203',
+    descripcion: 'PUNCION [ASPIRACION DE LIQUIDO] VENTRICULAR A TRAVES DE UN RESERVORIO(11)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '010204',
+    descripcion: 'PUNCIÓN [ASPIRACIÓN DE LIQUIDO] VENTRICULAR, VÍA TRANSFONTANELAR(13)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '010205',
+    descripcion: 'PUNCION (ASPIRACION DE LIQUIDO) VENTRICULAR(29896)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '010901',
+    descripcion: 'PUNCION SUBDURAL(14)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '010902',
+    descripcion: 'OTRA PUNCION CRANEAL(30055)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012201',
+    descripcion: 'RETIRO O SUSTITUCION DE ELECTRODO CRANEAL PROFUNDO O INTRAPARENQUIMATOSO(45558)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012402',
+    descripcion: 'DRENAJE DE ESPACIO EPIDURAL FOSA POSTERIOR. POR CRANEOTOMIA(38)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012410',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO INTRACRANEAL. POR CRANEOTOMIA(39)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012501',
+    descripcion: 'SECUESTRECTOMIA DE CRANEO. POR CRANIECTOMIA(42)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012502',
+    descripcion: 'DRENAJE DE COLECCION EPIDURAL SUPRATENTORIAL. POR CRANIECTOMIA +(43)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012503',
+    descripcion: 'DRENAJE DE COLECCION EPIDURAL FOSA POSTERIOR. POR CRANIECTOMIA +(44)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012505',
+    descripcion: 'CRANIECTOMIA DESCOMPRESIVA BIFRONTAL(53610)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '013103',
+    descripcion: 'DRENAJE DE ESPACIO SUBDURAL EN FOSA POSTERIOR. POR CRANIECTOMIA(49)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '013106',
+    descripcion: 'DRENAJE DE ESPACIO SUBDURAL. POR DERIVACION SUBDURO PERITONEAL(52)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '013107',
+    descripcion: 'INCISION DE MENINGES CEREBRALES(29419)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '017004',
+    descripcion:
+      'DRENAJE DE COLECCIONES INTRACEREBRALES DE FOSA POSTERIOR. POR CRANEOTOMIA SUBOCCIPITAL(114)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '018103',
+    descripcion: 'HEMISFERECTOMIA CEREBRAL ANATOMICA POR CRANEOTOMIA(45598)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '019201',
+    descripcion: 'LOBECTOMIA POR CRANIECTOMIA(45604)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '020109',
+    descripcion: 'APERTURA DE SUTURA CRANEAL(29905)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '020201',
+    descripcion: 'ESQUIRLECTOMIA CRANEAL A TRAVES DE TREPANACION(170)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '020401',
+    descripcion:
+      'CORRECCION DE DEFECTO OSEO PRE-EXISTENTE POR CRANEOPLASTIA. CON INJERTO AUTOLOGO O HETEROLOGO +(176)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '020402',
+    descripcion: 'INJERTO OSEO EN CRANEO(36357)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '020501',
+    descripcion:
+      'INSERCION O SUSTITUCION DE DISPOSITIVO DE FIJACION U OSTEOSINTESIS EN CRANEO(53614)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '021215',
+    descripcion: 'REPARACION DE MENINGE CEREBRAL(30205)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '022101',
+    descripcion: 'DERIVACION DE VENTRICULO A CISTERNA MAGNA(201)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '022202',
+    descripcion: 'DERIVACION VENTRICULAR A ESPACIO SUBARACNOIDEO CERVICAL(205)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '022203',
+    descripcion: 'VENTRICULOSTOMIA EXTERNA(29530)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '023403',
+    descripcion: 'DERIVACION VENTRICULAR A CAVIDAD Y ORGANOS ABDOMINALES(29431)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '024100',
+    descripcion: 'IRRIGACION DE DERIVACION VENTRICULAR SOD(214)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '024201',
+    descripcion: 'REEMPLAZO PARCIAL DE DERIVACION(217)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '024202',
+    descripcion: 'REEMPLAZO TOTAL DE DERIVACION(218)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '024203',
+    descripcion: 'SUSTITUCION DE DERIVACION VENTRICULAR(29907)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '030105',
+    descripcion:
+      'EXTRACCION DE CUERPO EXTRAÑO DEL CANAL RAQUIDEO POR LAMINECTOMIA VIA ABIERTA(45634)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '030108',
+    descripcion:
+      'EXTRACCION DE CUERPO EXTRAÑO DEL CANAL RAQUIDEO POR HEMILAMINECTOMIA VIA ABIERTA(45384)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '030208',
+    descripcion:
+      'EXPLORACION Y DESCOMPRESION DEL CANAL RAQUIDEO Y RAICES ESPINALES HASTA DOS SEGMENTOS POR LAMINECTOMIA VIA ABIERTA(45642)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '030220',
+    descripcion:
+      'EXPLORACION Y DESCOMPRESION DEL CANAL RAQUIDEO Y RAICES ESPINALES HASTA DOS SEGMENTOS POR LAMINOTOMIA VIA ABIERTA(45654)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '030226',
+    descripcion:
+      'EXPLORACION Y DESCOMPRESION HASTA DOS SEGMENTOS POR FORAMINOTOMIA VIA ABIERTA(45660)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '031101',
+    descripcion: 'RIZOTOMIA DE RAIZ NERVIO ESPINAL VIA ABIERTA(45673)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '032304',
+    descripcion: 'LESIÓN DE TRACTOS DE ENTRADA DE RAÍCES POSTERIORES [DREZ](42939)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '035402',
+    descripcion: 'ESQUIRLECTOMIA CON PLASTIA O INJERTO DE MENINGE ESPINAL(299)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '036101',
+    descripcion:
+      'LISIS O RESECCIÓN DE ADHERENCIAS EXTRADURALES EN MÉDULA ESPINAL O RAÍCES DE NERVIOS ESPINALES VÍA ABIERTA(42941)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '039401',
+    descripcion: 'RETIRO DE ELECTRODOS O RECEPTOR DE NEUROESTIMULACION ESPINAL(42944)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '043001',
+    descripcion: 'ANASTOMOSIS DE NERVIO FACIAL +(374)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '044207',
+    descripcion: 'DESCOMPRESION DE NERVIO FACIAL INTRATEMPORAL VIA TRANSLABERINTICA(390)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '044208',
+    descripcion: 'DESCOMPRESION DE NERVIO FACIAL INTRATEMPORAL VIA TRANSMASTOIDEA(391)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012101',
+    descripcion: 'CRANEALIZACION DE SENO FRONTAL(30)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012102',
+    descripcion: 'INCISION Y DRENAJE DE SENO FRONTAL(29525)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012103',
+    descripcion: 'DESFUNCIONALIZACION DE SENO FRONTAL(36356)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012202',
+    descripcion: 'RETIRO O SUSTITUCION DE ELECTRODO EPIDURAL(45559)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012203',
+    descripcion: 'RETIRO O SUSTITUCION DE ELECTRODO SUBDURAL(45560)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012204',
+    descripcion: 'RETIRO O SUSTITUCION DE ELECTRODO A NERVIO CRANEAL O PERIFERICO(45561)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012205',
+    descripcion: 'RETIRO O SUSTITUCION DE NEUROESTIMULADOR INTRACRANEAL(45562)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012300',
+    descripcion: 'REAPERTURA DE CRANEOTOMIA SOD(34)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012401',
+    descripcion: 'DRENAJE DE ESPACIO EPIDURAL SUPRATENTORIAL. POR CRANEOTOMIA(37)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012403',
+    descripcion: 'CRANEOTOMIA (DESCOMPRESIVA O EXPLORATORIA)(29475)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '013102',
+    descripcion: 'DRENAJE DE ESPACIO SUBDURAL. POR TREPANACION(48)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '013104',
+    descripcion: 'DRENAJE DE ESPACIO SUBDURAL. POR DRENAJE EXTERNO(50)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '013105',
+    descripcion: 'DRENAJE DE ESPACIO SUBARACNOIDEO. POR DERIVACION CISTO PERITONEAL(51)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '013202',
+    descripcion: 'SECCION DE TEJIDO CEREBRAL (TRACTOS CEREBRALES). POR CRANEOTOMIA +(57)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '015101',
+    descripcion: 'RESECCION TUMOR OSEO. POR CRANEOTOMIA +(62)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '015102',
+    descripcion: 'RESECCION TUMOR OSEO. POR CRANIECTOMIA +(63)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '015103',
+    descripcion: 'ESCISION DE LESION CRANEAL(29421)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '015406',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DE LA BASE DEL CRANEO FOSA POSTERIOR VIA TRANSLABERINTICA(90)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '015407',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DE LA BASE DEL CRANEO FOSA POSTERIOR VIA TRANSCOCLEAR(91)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '016402',
+    descripcion: 'RESECCION DE OTRA LESION DE MENINGE CEREBRAL(29479)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '017003',
+    descripcion: 'DRENAJE DE COLECCIONES INTRACEREBRALES, POR PUNCION DIRIGIDA(113)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '017006',
+    descripcion: 'DRENAJE DE COLECCIONES INTRACEREBRAL(29528)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '018104',
+    descripcion: 'HEMISFERECTOMIA CEREBRAL FUNCIONAL POR CRANEOTOMIA(45599)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '018106',
+    descripcion: 'HEMISFEROTOMIA CEREBRAL POR CRANEOTOMIA(45601)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '020202',
+    descripcion: 'DESBRIDAMIENTO DE FRACTURA COMPUESTA (CONMINUTA) DE CRANEO(171)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '020204',
+    descripcion:
+      'REDUCCION DE FRACTURA COMPUESTA (CONMINUTA) DE CRANEO. CON PLASTIA DURAL Y LIMPIEZA HEMOSTASIA CEREBRAL (DESBRIDAMIENTO) EN UN SOLO TIEMPO(173)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '020205',
+    descripcion: 'ELEVACION DE FRAGMENTOS DE FRACTURA DE CRANEO(29430)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '020602',
+    descripcion: 'OSTEOPLASTIA CRANEAL(29906)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '020701',
+    descripcion:
+      'EXTRACCION O SUSTITUCION DE DISPOSITIVO DE FIJACION U OSTEOSINTESIS EN CRANEO(53617)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '021101',
+    descripcion:
+      'CORRECCION DE DESGARRO DURAL POST TRAUMATICO EN BOVEDA CRANEANA. POR CRANEOTOMIA(183)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '021104',
+    descripcion:
+      'CORRECCION DE DESGARRO DURAL EN BASE DE CRANEO. CON PLASTIA AUTOLOGA O HETEROLOGA. POR CRANEOTOMIA +(186)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '021105',
+    descripcion: 'SUTURA SIMPLE DE DURAMADRE CEREBRAL(30058)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '021201',
+    descripcion: 'CORRECCION FISTULA LCR EN BOVEDA CRANEANA. POR CRANEOTOMIA Y CRANEOPLASTIA(187)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '021202',
+    descripcion: 'CORRECCION FISTULA LCR EN BOVEDA CRANEANA, POR DUROPLASTIA(188)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '022201',
+    descripcion: 'COLOCACION DE CATETER VENTRICULAR AL EXTERIOR(204)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '022401',
+    descripcion: 'COLOCACION DE CATETER VENTRICULO PERITONEAL SIN VALVULA POR CRANEOTOMIA(45618)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '023402',
+    descripcion: 'DERIVACION CISTO PERITONEAL [QUISTE VENTRICULAR A PERITONEO](212)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '025000',
+    descripcion:
+      'IMPLANTE DE CATETER (INTRAVENTRICULAR. INTRACISTICO) CON RESERVORIO SUBCUTANEO SOD +(220)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '028100',
+    descripcion: 'LISIS DE ADHERENCIAS CORTICALES SOD(222)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '028201',
+    descripcion: 'IMPLANTACION DE CATETER INTRACEREBRAL(225)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '028202',
+    descripcion: 'IMPLANTACION DE DISPOSITIVO EXTRADURAL(226)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '028309',
+    descripcion: 'IMPLANTACION DE ELECTRODO SUBDURAL POR CRANEOTOMIA(45625)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '028311',
+    descripcion: 'IMPLANTACION DE ELECTRODO EPIDURAL (PERMANENTE)(45627)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '028312',
+    descripcion: 'IMPLANTACION DE ELECTRODO INTRACRANEAL PARENQUIMATOSO(45628)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '028313',
+    descripcion:
+      'IMPLANTACION DE ELECTRODO INTRACRANEAL PROFUNDO PARA ESTEREOELECTROENCEFALOGRAFIA(45629)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '028401',
+    descripcion: 'COLOCACIÓN DE TRACTOR CEFÁLICO(42936)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '028402',
+    descripcion: 'COLOCACIÓN DE TRACTOR ESQUELÉTICO CERVICAL(42937)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '028602',
+    descripcion: 'INJERTO INTRACEREBRAL(30005)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '030111',
+    descripcion:
+      'EXTRACCION DE CUERPO EXTRAÑO DEL CANAL RAQUIDEO POR LAMINOTOMIA VIA ABIERTA(45639)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '030301',
+    descripcion: 'EXPLORACIÓN Y DESCOMPRESIÓN DE RAÍZ DEL NERVIO ESPINAL(42938)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '030302',
+    descripcion: 'ESCISION DE QUISTE SINOVIAL FACETARIO VIA POSTERIOR(45666)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '030404',
+    descripcion: 'DRENAJE DE COLECCION EPIDURAL CERVICAL(45667)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '030407',
+    descripcion: 'DRENAJE DE COLECCION SUBDURAL CERVICAL(45670)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '035401',
+    descripcion: 'PLASTIA O INJERTO DE MENINGE ESPINAL(298)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '037101',
+    descripcion: 'DERIVACION SIRINGO PERITONEAL O RETROPERITONEAL(45755)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '037201',
+    descripcion: 'DERIVACION SIRINGO SUBDURAL ESPINAL VIA ABIERTA(45756)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '037301',
+    descripcion: 'DERIVACIÓN LUMBO PERITONEAL(42942)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '037302',
+    descripcion: 'DERIVACIÓN LUMBO RETROPERITONEAL(42943)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '037401',
+    descripcion: 'DERIVACION Y DRENAJE LUMBAR EXTERNA(45758)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '037501',
+    descripcion: 'DERIVACION SIRINGO PLEURAL ESPINAL(45759)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '039304',
+    descripcion: 'IMPLANTACION DE ELECTRODOS DE NEUROESTIMULACION ESPINAL POR LAMINECTOMIA(45766)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '039307',
+    descripcion: 'IMPLANTACION DE NEUROESTIMULADOR ESPINAL VIA ABIERTA(45767)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '039308',
+    descripcion: 'IMPLANTACION DE NEUROESTIMULADOR ESPINAL POR LAMINECTOMIA(45768)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '039800',
+    descripcion: 'RETIRO DE DERIVACION ESPINAL SOD +(325)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '042103',
+    descripcion: 'RIZOTOMIA DE NERVIO CRANEAL(29919)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '042201',
+    descripcion: 'NEUROLISIS DE NERVIO XI POR AMIGDALECTOMIA ESTEREOTACTICA(29158)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '048101',
+    descripcion: 'BLOQUEO DE NERVIO TRIGEMINAL O ESFENOPALATINO(412)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '278402',
+    descripcion: 'CORRECCION DE MICROSTOMA(36404)',
+    grupo: 'TRATAMIENTO QUIRURGICO ENFERMEDADES CONGENITAS',
+  },
+  {
+    cups: '547103',
+    descripcion:
+      'CORRECCION TOTAL DE GASTROSQUISIS CON SEPARACION DE COMPONENTES DE PARED ABDOMINAL(46187)',
+    grupo: 'TRATAMIENTO QUIRURGICO ENFERMEDADES CONGENITAS',
+  },
+  {
+    cups: '547203',
+    descripcion:
+      'CORRECCION TOTAL DE ONFALOCELE CON SEPARACION DE COMPONENTES DE PARED ABDOMINAL(46190)',
+    grupo: 'TRATAMIENTO QUIRURGICO ENFERMEDADES CONGENITAS',
+  },
+];
+
+export const newRelaciones: Genserips[] = [
+  {
+    cups: '735301',
+    descripcion: 'ASISTENCIA DEL PARTO CON O SIN EPISIORRAFIA O PERINEORRAFIA(46597)',
+    grupo: 'ATENCION PARTO Y RN',
+  },
+  {
+    cups: '740001',
+    descripcion: 'CESAREA SEGMENTARIA TRANSPERITONEAL(46598)',
+    grupo: 'ATENCION PARTO Y RN',
+  },
+  {
+    cups: '043105',
+    descripcion: 'NEURORRAFIA DE NERVIO EN MANO +(378)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '043108',
+    descripcion: 'NEURORRAFIA DE NERVIO EN PIERNA +(381)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044304',
+    descripcion: 'DESCOMPRESION DE NERVIO EN TUNEL DEL CARPO CON NEUROLISIS VIA ABIERTA(45817)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044516',
+    descripcion: 'DESCOMPRESION DE NERVIO EN ANTEBRAZO VIA ABIERTA(45827)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '180301',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO DE CONDUCTO AUDITIVO EXTERNO CON INCISION(36393)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '193101',
+    descripcion: 'ESTAPEDECTOMIA O ESTAPEDOTOMIA CON COLOCACION DE PROTESIS(41827)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '218403',
+    descripcion: 'SEPTORRINOPLASTIA FUNCIONAL PRIMARIA VIA TRANSNASAL(41857)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '218404',
+    descripcion: 'SEPTORRINOPLASTIA FUNCIONAL PRIMARIA VIA ABIERTA(41858)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '219302',
+    descripcion: 'TURBINOPLASTIA VIA TRANSNASAL(41794)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '219501',
+    descripcion: 'SEPTOPLASTIA PRIMARIA TRANSNASAL(41796)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '255006',
+    descripcion: 'PLASTIA DE FRENILLO LINGUAL(42966)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '255101',
+    descripcion: 'SUTURA DE LACERACION DE LENGUA (GLOSORRAFIA) VIA ABIERTA(42968)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '274302',
+    descripcion:
+      'RESECCION DE LESION BENIGNA DE LA MUCOSA ORAL. MAYOR DE DOS CENTIMETROS DE DIAMETRO(1174)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '282101',
+    descripcion: 'AMIGDALECTOMIA VIA ABIERTA(41874)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '389101',
+    descripcion: 'IMPLANTACION DE CATETER VENOSO SUBCLAVIO O FEMORAL +(1836)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '389107',
+    descripcion: 'INSERCION DE CATETER PERMANENTE(36669)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '471102',
+    descripcion: 'APENDICECTOMÍA VÍA ABIERTA(42434)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '494001',
+    descripcion: 'LIGADURA DE HEMORROIDES(42451)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '494004',
+    descripcion: 'RESECCION DE HEMORROIDES INTERNAS(46167)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '530001',
+    descripcion: 'HERNIORRAFIA INGUINAL UNILATERAL VÍA ABIERTA(42516)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '530401',
+    descripcion: 'HERNIORRAFIA INGUINAL REPRODUCIDA VÍA ABIERTA(42519)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '531001',
+    descripcion: 'HERNIORRAFIA INGUINAL BILATERAL VÍA ABIERTA(42522)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '531501',
+    descripcion: 'HERNIORRAFIA BILATERAL INGUINAL REPRODUCIDA VÍA ABIERTA(42524)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '534001',
+    descripcion: 'HERNIORRAFIA UMBILICAL VÍA ABIERTA(42528)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '534101',
+    descripcion: 'HERNIORRAFIA UMBILICAL REPRODUCIDA VÍA ABIERTA(42529)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '586102',
+    descripcion: 'DILATACION DE URETRA POR URETROTOMIA INTERNA(2836)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '612100',
+    descripcion:
+      'REPARACION O ESCISION DE HIDROCELE DE TUNICA VAGINALIS (HIDROCELECTOMIA) SOD §(2917)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '613102',
+    descripcion: 'FULGURACION DE LESION ESCROTAL(2921)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '631010',
+    descripcion: 'VARICOCELECTOMIA CON LIGADURA ALTA DE VENA ESPERMATICA(2954)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '631011',
+    descripcion: 'VARICOCELECTOMIA CON PRESERVACION DE ARTERIA(2955)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '631301',
+    descripcion: 'HIDROCELECTOMIA DE CORDON ESPERMATICO VIA INGUINAL+(2960)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '632100',
+    descripcion: 'ESPERMATOCELECTOMIA O RESECCION QUISTE DEL EPIDIDIMO SOD(2961)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '642100',
+    descripcion: 'FULGURACION O RESECCION DE LESION EN PENE SOD +(2983)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '644920',
+    descripcion: 'PLASTIA DE FRENILLO PENEAL(2992)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '673101',
+    descripcion: 'ESCISION DE POLIPO EN CUELLO UTERINO (CERVIX)(3113)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '690103',
+    descripcion: 'LEGRADO UTERINO GINECOLOGICO(46506)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '712003',
+    descripcion: 'MARSUPIALIZACION O DRENAJE EN LA GLANDULA DE BARTHOLIN(46576)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '712401',
+    descripcion: 'RESECCION O ABLACION DE GLANDULA DE BARTHOLIN(3275)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '750101',
+    descripcion:
+      'LEGRADO UTERINO OBSTETRICO POSTPARTO O POSTABORTO POR DILATACION Y CURETAJE +(3307)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '758001',
+    descripcion: 'TAPONAMIENTO OBSTETRICO DE UTERO(46658)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '786901',
+    descripcion: 'EXTRACCION DE DISPOSITIVO IMPLANTADO EN FALANGES (UNO O MAS) DE MANO +(3763)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '786910',
+    descripcion: 'EXTRACCION DE DISPOSITIVO IMPLANTADO EN FALANGES (UNO O MAS) DE PIE +(3765)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '793901',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA EN FALANGES DE MANO (UNA O MAS) CON FIJACION INTERNA(3887)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '800301',
+    descripcion: 'EXTRACCION DE DISPOSITIVO IMPLANTADO EN MUÑECA POR ARTROTOMIA +(4006)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '800801',
+    descripcion: 'EXTRACCION DE DISPOSITIVO IMPLANTADO EN PIE Y ARTEJOS POR ARTROTOMIA +(4016)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '807402',
+    descripcion: 'SINOVECTOMIA EN CARPO VIA ABIERTA(4096)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '819331',
+    descripcion: 'CAPSULORRAFIA ARTICULAR EN MUÑECA VIA ABIERTA(47321)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '822104',
+    descripcion: 'RESECCION DE GANGLION DORSAL DE MUÑECA VIA ABIERTA(47334)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '823301',
+    descripcion: 'TENOSINOVECTOMIA EN EXTENSORES DE MANO (UNO O MAS)(4326)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '823303',
+    descripcion: 'TENOSINOVECTOMIA FLEXORES MANO (UNO O MAS)(4327)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '824201',
+    descripcion: 'TENORRAFIA DE FLEXORES DE DEDOS (CADA UNO) CON NEURORRAFIA(4334)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '824213',
+    descripcion: 'TENORRAFIA DE FLEXORES DE MANO (UNO O MAS) CON NEURORRAFIA(4338)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '824301',
+    descripcion: 'TENORRAFIA DE EXTENSORES DE DEDOS (CADA UNO)(4340)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '828404',
+    descripcion: 'CORRECCION QUIRURGICA DE DEDO EN GATILLO (DEDO DE RESORTE)(4376)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '829115',
+    descripcion: 'TENOLISIS EN FLEXORES DE DEDOS (UNO O MAS)(4381)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '833001',
+    descripcion: 'RESECCION DE TUMOR BENIGNO DE FASCIA. MUSCULO. TENDON O SINOVIAL(4424)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '833002',
+    descripcion: 'RESECCION DE TUMOR MALIGNO DE FASCIA. MUSCULO. TENDON O SINOVIAL(4425)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '834202',
+    descripcion: 'TENOSINOVECTOMIA(30287)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '861102',
+    descripcion:
+      'DRENAJE DE COLECCION PROFUNDA EN PIEL O TEJIDO CELULAR SUBCUTANEO POR INCISION O ASPIRACION(4601)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '861104',
+    descripcion: 'DRENAJE DE COLECCIÓN PROFUNDA DE TEJIDOS BLANDOS(43063)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '861201',
+    descripcion:
+      'EXTRACCION DE CUERPO EXTRAÑO EN PIEL O TEJIDO CELULAR SUBCUTANEO DE AREA GENERAL POR INCISION +(4604)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '862006',
+    descripcion:
+      'DESBRIDAMIENTO ESCISIONAL MENOR DEL 10% DE SUPERFICIE CORPORAL EN AREA GENERAL(47388)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '862701',
+    descripcion: 'ONICECTOMIA +(4658)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '864101',
+    descripcion:
+      'RESECCION DE TUMOR BENIGNO O MALIGNO DE PIEL O TEJIDO CELULAR SUBCUTANEO AREA GENERAL HASTA TRES CENTIMETROS(4677)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '864102',
+    descripcion:
+      'RESECCION DE TUMOR BENIGNO O MALIGNO DE PIEL O TEJIDO CELULAR SUBCUTANEO AREA GENERAL, ENTRE TRES A CINCO CENTIMETROS(4678)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '864103',
+    descripcion:
+      'RESECCION DE TUMOR BENIGNO O MALIGNO DE PIEL O TEJIDO CELULAR SUBCUTANEO AREA GENERAL, ENTRE CINCO A DIEZ CENTIMETROS(4679)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '864104',
+    descripcion:
+      'RESECCION DE TUMOR BENIGNO O MALIGNO DE PIEL O TEJIDO CELULAR SUBCUTANEO AREA GENERAL, DE MAS DE DIEZ CENTIMETROS(4680)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '864105',
+    descripcion:
+      'RESECCION DE TUMOR BENIGNO DE PIEL O TEJIDO CELULAR SUBCUTANEO AREA GENERAL, CON REPARACION (COLGAJO O INJERTO)(4681)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '864201',
+    descripcion:
+      'RESECCION DE TUMOR BENIGNO O MALIGNO DE PIEL O TEJIDO CELULAR SUBCUTANEO DE AREA ESPECIAL, HASTA UN CENTIMETRO(4683)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '864202',
+    descripcion:
+      'RESECCION DE TUMOR BENIGNO O MALIGNO DE PIEL O TEJIDO CELULAR SUBCUTANEO DE AREA ESPECIAL, ENTRE UNO A DOS CENTIMETROS(4684)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '864203',
+    descripcion:
+      'RESECCION DE TUMOR BENIGNO O MALIGNO DE PIEL O TEJIDO CELULAR SUBCUTANEO DE AREA ESPECIAL, ENTRE DOS A TRES CENTIMETROS(4685)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '864204',
+    descripcion:
+      'RESECCION DE TUMOR BENIGNO O MALIGNO DE PIEL O TEJIDO CELULAR SUBCUTANEO DE AREA ESPECIAL, ENTRE TRES A CINCO CENTIMETROS(4686)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '864205',
+    descripcion:
+      'RESECCION DE TUMOR BENIGNO O MALIGNO DE PIEL O TEJIDO CELULAR SUBCUTANEO DE AREA ESPECIAL, DE MAS DE CINCO CENTIMETROS(4687)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '865101',
+    descripcion: 'SUTURA DE HERIDA UNICA. EN AREA GENERAL(4690)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '865208',
+    descripcion:
+      'SUTURA DE AVULSION EN PABELLON AURICULAR. NARIZ. LABIOS. PARPADOS O GENITALES +(4702)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '867001',
+    descripcion: 'COLGAJO LOCAL SIMPLE DE PIEL HASTA DE DOS CENTIMETROS CUADRADOS(4727)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '867002',
+    descripcion: 'COLGAJO LOCAL SIMPLE DE PIEL ENTRE DOS A CINCO CENTIMETROS CUADRADOS(4728)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '867003',
+    descripcion: 'COLGAJO LOCAL SIMPLE DE PIEL DE MAS DE CINCO CENTIMETROS CUADRADOS +(4729)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '890226',
+    descripcion: 'CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN ANESTESIOLOGIA(5344)',
+    grupo: 'CONSULTA MEDICA ESPECIALIZADA',
+  },
+  {
+    cups: '890235',
+    descripcion: 'CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN CIRUGIA GENERAL(5353)',
+    grupo: 'CONSULTA MEDICA ESPECIALIZADA',
+  },
+  {
+    cups: '890250',
+    descripcion: 'CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN GINECOLOGIA Y OBSTETRICIA(5369)',
+    grupo: 'CONSULTA MEDICA ESPECIALIZADA',
+  },
+  {
+    cups: '890280',
+    descripcion: 'CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN ORTOPEDIA Y TRAUMATOLOGIA(5398)',
+    grupo: 'CONSULTA MEDICA ESPECIALIZADA',
+  },
+  {
+    cups: '890294',
+    descripcion: 'CONSULTA DE PRIMERA VEZ POR ESPECIALISTA EN UROLOGIA(33465)',
+    grupo: 'CONSULTA MEDICA ESPECIALIZADA',
+  },
+  {
+    cups: '890326',
+    descripcion: 'CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN ANESTESIOLOGIA(33252)',
+    grupo: 'CONSULTA MEDICA ESPECIALIZADA',
+  },
+  {
+    cups: '890335',
+    descripcion: 'CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN CIRUGIA GENERAL(33261)',
+    grupo: 'CONSULTA MEDICA ESPECIALIZADA',
+  },
+  {
+    cups: '890350',
+    descripcion:
+      'CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN GINECOLOGIA Y OBSTETRICIA(33276)',
+    grupo: 'CONSULTA MEDICA ESPECIALIZADA',
+  },
+  {
+    cups: '890380',
+    descripcion:
+      'CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN ORTOPEDIA Y TRAUMATOLOGIA(33306)',
+    grupo: 'CONSULTA MEDICA ESPECIALIZADA',
+  },
+  {
+    cups: '890394',
+    descripcion: 'CONSULTA DE CONTROL O DE SEGUIMIENTO POR ESPECIALISTA EN UROLOGIA(33319)',
+    grupo: 'CONSULTA MEDICA ESPECIALIZADA',
+  },
+  {
+    cups: '10A001',
+    descripcion: 'INTERNACION COMPLEJIDAD ALTA HABITACION UNIPERSONAL INCLUYE AISLAMIENTO(56278)',
+    grupo: 'INTERNACION MEDICA',
+  },
+  {
+    cups: '10A002',
+    descripcion: 'INTERNACION COMPLEJIDAD ALTA HABITACION BIPERSONAL(56279)',
+    grupo: 'INTERNACION MEDICA',
+  },
+  {
+    cups: '10A004',
+    descripcion: 'INTERNACION COMPLEJIDAD ALTA CUATRO O MAS CAMAS(56281)',
+    grupo: 'INTERNACION MEDICA',
+  },
+  {
+    cups: '10M001',
+    descripcion:
+      'INTERNACION COMPLEJIDAD MEDIANA HABITACION UNIPERSONAL INCLUYE AISLAMIENTO(56287)',
+    grupo: 'INTERNACION MEDICA',
+  },
+  {
+    cups: '10M002',
+    descripcion: 'INTERNACION COMPLEJIDAD MEDIANA HABITACION BIPERSONAL(56288)',
+    grupo: 'INTERNACION MEDICA',
+  },
+  {
+    cups: '10M003',
+    descripcion: 'INTERNACION COMPLEJIDAD MEDIANA HABITACION TRES CAMAS(56289)',
+    grupo: 'INTERNACION MEDICA',
+  },
+  {
+    cups: '10M004',
+    descripcion: 'INTERNACION COMPLEJIDAD MEDIANA HABITACION CUATRO O MAS CAMAS(56290)',
+    grupo: 'INTERNACION MEDICA',
+  },
+  {
+    cups: '120N01',
+    descripcion: 'INTERNACION EN UNIDAD DE CUIDADO BASICO NEONATAL CUNA O INCUBADORA(56292)',
+    grupo: 'INTERNACION MEDICA',
+  },
+  {
+    cups: '549002',
+    descripcion: 'INSERCION DE CATETER PERMANENTE PARA HEMODIALISIS(2596)',
+    grupo: 'INTERNACION MEDICA',
+  },
+  {
+    cups: '062001',
+    descripcion: 'TIROIDECTOMIA PARCIAL VIA ABIERTA(42953)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '065201',
+    descripcion: 'TIROIDECTOMIA RETROESTERNAL TOTAL VIA ABIERTA(42956)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '204201',
+    descripcion: 'MASTOIDECTOMIA SIN PRESERVACION DE LA PARED POSTERIOR(41839)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '218915',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA NASAL(41866)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '226307',
+    descripcion: 'MAXILOETMOIDECTOMIA VIA TRANSNASAL(41747)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '227001',
+    descripcion: 'CURACION DE SENOS PARANASALES VIA TRANSNASAL(41750)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '252001',
+    descripcion: 'RESECCION DE LENGUA EN CUÑA(41754)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '255003',
+    descripcion: 'GLOSOPEXIA POSTERIOR VIA ABIERTA(42965)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '317202',
+    descripcion: 'CIERRE DE FISTULA TRAQUEO CUTANEA(1350)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '317503',
+    descripcion: 'RECONSTRUCCION LARINGOTRAQUEAL TERMINOTERMINAL(42155)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '340401',
+    descripcion: 'TORACOSTOMIA CERRADA PARA DRENAJE(41661)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '341105',
+    descripcion: 'EXPLORACION Y DRENAJE DE MEDIASTINO POR TORACOTOMIA(42804)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '385320',
+    descripcion: 'OCLUSION DE VASOS DE MIEMBROS SUPERIORES. VIA ENDOVASCULAR(1802)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '385620',
+    descripcion: 'OCLUSION DE ARTERIAS ABDOMINALES. VIA ENDOVASCULAR(1810)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '385701',
+    descripcion: 'OCLUSION. PINZAMIENTO O LIGADURA DE VENAS INTRAABDOMINALES. UNA O MAS(1811)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '385720',
+    descripcion: 'OCLUSION DE VENAS INTRAABDOMINALES. VIA ENDOVASCULAR(1812)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '395030',
+    descripcion: 'ANGIOPLASTIA CON BALON DE VASOS DE MIEMBROS SUPERIORES(1902)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '395080',
+    descripcion: 'ANGIOPLASTIA O ATERECTOMIA DE VASOS DE MIEMBROS INFERIORES. CON BALON(1909)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '395081',
+    descripcion:
+      'ANGIOPLASTIA O ATERECTOMIA DE VASOS DE MIEMBROS INFERIORES. CON BALON. PROTESIS (STENT) O INJERTO (S) PROTESICO (S)(25054)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '405502',
+    descripcion: 'RESECCION RADICAL DE GANGLIOS LINFATICOS RETROPERITONEALES VIA ABIERTA(41269)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '414501',
+    descripcion: 'ESCISIÓN DE BAZO ACCESORIO VÍA ABIERTA(42349)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '425301',
+    descripcion:
+      'RECONSTRUCCIÓN O ANASTOMOSIS ESOFÁGICA CON INTERPOSICIÓN DEL INTESTINO DELGADO VÍA ABIERTA(42365)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '428201',
+    descripcion: 'ESOFAGORRAFIA POR CERVICOTOMIA(2062)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '431001',
+    descripcion: 'GASTROSTOMÍA VÍA ABIERTA(42367)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '454207',
+    descripcion: 'RESECCIÓN DE LESIÓN DE INTESTINO GRUESO VÍA ENDOSCÓPICA (1- 3)(42403)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '454210',
+    descripcion: 'ABLACIÓN DE LESIÓN EN INTESTINO GRUESO VÍA ENDOSCÓPICA(41917)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '456001',
+    descripcion: 'RESECCIÓN SEGMENTARIA DE INTESTINO DELGADO VÍA ABIERTA(42406)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '457001',
+    descripcion:
+      'COLECTOMÍA PARCIAL CON COLOSTOMIA Y CIERRE DE SEGMENTO DISTAL [HARTMAN] VÍA ABIERTA(42409)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '459401',
+    descripcion: 'ANASTOMOSIS DE INTESTINO GRUESO A INTESTINO GRUESO VÍA ABIERTA(42423)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '461301',
+    descripcion: 'COLOSTOMÍA VÍA ABIERTA(42426)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '467001',
+    descripcion: 'ENTERORRAFIA VÍA ABIERTA(42429)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '483101',
+    descripcion: 'ABLACIÓN DE LESIÓN O TEJIDO RECTAL O ANAL(41947)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '486701',
+    descripcion: 'RESECCIÓN DE LESIÓN O TUMOR RECTAL ABORDAJE TRANS-ANAL VÍA ABIERTA(42440)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '497302',
+    descripcion: 'FISTULECTOMIA ANO-PERINEAL(2354)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '512101',
+    descripcion: 'COLECISTECTOMIA POR LAPAROTOMIA(2442)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '512104',
+    descripcion: 'COLECISTECTOMIA POR LAPARASCOPIA(2445)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '518902',
+    descripcion: 'INSERCIÓN DE DISPOSITIVO EN VÍA BILIAR VÍA ENDOSCÓPICA(42492)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '530301',
+    descripcion: 'HERNIORRAFIA INGUINAL ENCARCELADA VÍA ABIERTA(42518)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '534301',
+    descripcion: 'HERNIORRAFIA UMBILICAL ENCARCELADA VÍA ABIERTA(42530)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '535204',
+    descripcion: 'HERNIORRAFIA EPIGÁSTRICA VÍA ABIERTA(42535)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '535301',
+    descripcion: 'HERNIORRAFIA EPIGÁSTRICA ENCARCELADA VÍA ABIERTA(42536)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '540010',
+    descripcion: 'DRENAJE DE COLECCIÓN DE LA PARED ABDOMINAL VÍA ABIERTA(42555)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '540013',
+    descripcion: 'DRENAJE DE COLECCIÓN INTRAPERITONEAL VÍA ABIERTA(42556)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '541102',
+    descripcion: 'LAPAROTOMÍA EXPLORATORIA(42560)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '541504',
+    descripcion: 'RESECCIÓN DE TUMOR RETROPERITONEAL VÍA ABIERTA(42561)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '541506',
+    descripcion:
+      'RESECCIÓN DE TUMOR RETROPERITONEAL CON DISECCIÓN DE ESTRUCTURAS VASCULARES U ÓRGANOS RETROPERITONEALES VÍA ABIERTA(42562)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '541601',
+    descripcion:
+      'RESECCIÓN DE LESIÓN BENIGNA O MALIGNA EN EPIPLON O EN MESENTERIO VÍA ABIERTA(42563)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '541701',
+    descripcion: 'LAVADO PERITONEAL TERAPÉUTICO VÍA ABIERTA(42564)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '543101',
+    descripcion: 'RESECCIÓN DE TUMOR BENIGNO EN LA PARED ABDOMINAL VÍA ABIERTA(42570)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '544104',
+    descripcion: 'OMENTECTOMÍA PARCIAL VÍA ABIERTA(42572)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '545001',
+    descripcion: 'LISIS DE ADHERENCIAS PERITONEALES VIA ABIERTA(42057)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '546100',
+    descripcion:
+      'NUEVO CIERRE DE DISRUPCION POSTOPERATORIA DE PARED ABDOMINAL (EVISCERACION) SOD +(2585)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '547401',
+    descripcion: 'EVENTRORRAFIA CON COLOCACION DE MALLA +(2592)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '547403',
+    descripcion: 'EVENTRORRAFIA VÍA ABIERTA(42574)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '555702',
+    descripcion: 'NEFRECTOMIA RADICAL POR LUMBOTOMIA(46243)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '571210',
+    descripcion: 'CISTOSTOMIA VIA ABIERTA(2741)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '578901',
+    descripcion: 'CISTOPEXIA (SUSPENSION VESICAL)(36756)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '597104',
+    descripcion: 'CISTOURETROPEXIA VAGINAL(2872)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '597940',
+    descripcion: 'URETROCOLPOPEXIA VIA VAGINAL O ABDOMINAL(2875)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '597990',
+    descripcion: 'REPARACION DE INCONTINENCIA URINARIA DE ESFUERZO(32079)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '602001',
+    descripcion:
+      'RESECCCION O ENUCLEACION TRANSURETRAL DE ADENOMA DE PROSTATA [RTUP] O ADENOMECTOMIA(46391)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '605101',
+    descripcion: 'RESECCION DE PROSTATA [PROSTATECTOMIA] RADICAL [PROSTATOVESICULECTOMIA](36764)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '623001',
+    descripcion: 'ORQUIECTOMIA CON EPIDIDIDECTOMIA (RADICAL) +(2939)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '652101',
+    descripcion: 'CISTECTOMIA DE OVARIO POR LAPAROTOMIA +(3010)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '652301',
+    descripcion: 'RESECCION DE TUMOR DE OVARIO POR LAPAROTOMIA(3014)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '652304',
+    descripcion: 'CITORREDUCCION DE TUMOR DE OVARIO POR LAPAROTOMIA(46434)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '652401',
+    descripcion: 'PUNCION Y DRENAJE DE LESION DE OVARIO POR LAPAROTOMIA(3018)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '652701',
+    descripcion: 'FULGURACION EN OVARIO POR LAPAROTOMIA(3024)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '652801',
+    descripcion: 'RESECCION DE QUISTE PARA-OVARICO POR LAPAROTOMIA +(3028)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '652901',
+    descripcion:
+      'LIBERACION O LISIS DE ADHERENCIAS (LEVES. MODERADAS O SEVERAS) DE OVARIO POR LAPAROTOMIA +(3031)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '653101',
+    descripcion: 'OOFORECTOMIA UNILATERAL POR LAPÀROTOMIA(3037)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '659301',
+    descripcion: 'ESCISION DE EMBARAZO ECTOPICO OVARICO SIN OOFORECTOMIA POR LAPAROTOMIA(46444)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '662101',
+    descripcion: 'ABLACION U OCLUSION DE TROMPA DE FALOPIO UNICA POR LAPAROTOMIA(46446)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '662201',
+    descripcion: 'ABLACION U OCLUSION DE TROMPA DE FALOPIO BILATERAL POR LAPAROTOMIA(46450)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '664001',
+    descripcion: 'SALPINGECTOMIA UNILATERAL TOTAL POR LAPAROTOMIA(3070)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '665001',
+    descripcion: 'SALPINGECTOMIA BILATERAL TOTAL POR LAPAROTOMIA(3073)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '669101',
+    descripcion: 'SALPINGO OOFORECTOMIA UNILATERAL POR LAPAROTOMIA(46460)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '669201',
+    descripcion: 'SALPINGO OOFORECTOMIA BILATERAL POR LAPAROTOMIA(46463)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '682401',
+    descripcion: 'MIOMECTOMIA UTERINA UNICA O MULTIPLE POR LAPAROTOMIA(3147)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '682402',
+    descripcion: 'MIOMECTOMIA UTERINA UNICA O MULTIPLE POR VIA VAGINAL(3148)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '683101',
+    descripcion: 'HISTERECTOMIA SUBTOTAL O SUPRACERVICAL POR LAPAROTOMIA(29739)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '684003',
+    descripcion: 'HISTERECTOMIA TOTAL POR LAPAROTOMIA(46498)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '684103',
+    descripcion: 'HISTERECTOMIA TOTAL ABDOMINAL AMPLIADA POR LAPAROTOMIA(46499)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '686001',
+    descripcion: 'HISTERECTOMIA RADICAL POR LAPAROTOMIA(29925)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '691301',
+    descripcion: 'SECCION DE ADHERENCIAS UTERINAS A PARED ABDOMINAL VIA LAPAROTOMIA(3183)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '705210',
+    descripcion: 'COLPORRAFIA POSTERIOR(3235)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '705301',
+    descripcion: 'COLPORRAFIA ANTERIOR Y POSTERIOR(3236)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '705302',
+    descripcion: 'COLPORRAFIA ANTERIOR Y POSTERIOR CON REPARACION DE ENTEROCELE(3237)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '707701',
+    descripcion: 'COLPOPEXIA POR LAPAROTOMIA(3252)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '707702',
+    descripcion: 'COLPOPEXIA VIA VAGINAL(3253)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '715003',
+    descripcion: 'VULVECTOMIA SIMPLE UNILATERAL(46585)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '743101',
+    descripcion: 'REMOCION DE EMBARAZO ECTOPICO ABDOMINAL POR LAPAROTOMIA(46601)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '764401',
+    descripcion: 'RESECCION PARCIAL MAXILAR CON RECONSTRUCCION SIMULTANEA(3365)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '766970',
+    descripcion: 'LAVADO Y DESBRIDAMIENTO DE FRACTURA ABIERTA DE HUESOS FACIALES(3405)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '767203',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA MALAR, CON REDUCCION PISO DE ORBITA, INJERTO O FIJACION INTERNA (DISPOSITIVOS DE FIJACION U OSTEOSINTESIS)(3408)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '767603',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA MULTIPLE DE CUERPO O RAMA MANDIBULAR. CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS] +(3422)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '768200',
+    descripcion: 'INSERCION DE IMPLANTE SINTETICO EN HUESO FACIAL SOD(30118)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '768701',
+    descripcion:
+      'RETIRO DE MATERIAL DE FIJACION INTERNA (DISPOSITIVOS DE FIJACION U OSTEOSINTESIS) DE HUESO FACIAL(3446)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '770200',
+    descripcion: 'SECUESTRECTOMIA. DRENAJE. DESBRIDAMIENTO DE HUMERO SOD(3450)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '770301',
+    descripcion: 'SECUESTRECTOMIA. DRENAJE. DESBRIDAMIENTO DE RADIO O CUBITO(3451)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '770302',
+    descripcion: 'SECUESTRECTOMIA. DRENAJE. DESBRIDAMIENTO DE RADIO Y CUBITO(3452)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '770701',
+    descripcion: 'SECUESTRECTOMIA. DRENAJE. DESBRIDAMIENTO DE TIBIA O PERONE(3457)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '770702',
+    descripcion: 'SECUESTRECTOMIA. DRENAJE. DESBRIDAMIENTO DE TIBIA Y PERONE(3458)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '770801',
+    descripcion: 'SECUESTRECTOMIA DRENAJE DESBRIDAMIENTO DE TARSO O METATARSO (CADA UNO)(3459)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '770802',
+    descripcion:
+      'SECUESTRECTOMIA DRENAJE DESBRIDAMIENTO DE TARSIANOS Y METATARSIANOS (CADA UNO)(3460)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '770901',
+    descripcion:
+      'SECUESTRECTOMIA DRENAJE DESBRIDAMIENTO DE ARTEJO O DE FALANGE DE PIE (CADA UNO)(3461)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772304',
+    descripcion: 'OSTEOTOMIA EN RADIO O CUBITO CON FIJACION INTERNA(46670)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772511',
+    descripcion: 'OSTEOTOMIA EN FEMUR DISTAL (SUPRA O INTERCONDILEA) CON FIJACION INTERNA(46682)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772905',
+    descripcion:
+      'OSTEOTOMIA EN FALANGE DE DEDO DE PIE (EXCEPTO GRUESO ARTEJO) CON FIJACION INTERNA(46716)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '780300',
+    descripcion: 'INJERTO OSEO EN CUBITO O RADIO SOD +(3638)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '780501',
+    descripcion: 'INJERTO OSEO EN FEMUR(29606)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '780701',
+    descripcion: 'INJERTO OSEO EN TIBIA O PERONE(29656)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '781301',
+    descripcion: 'APLICACION DE TUTOR EXTERNO EN RADIO O CUBITO +(3660)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '782401',
+    descripcion: 'EPIFISIODESIS ABIERTA DE FEMUR(3685)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '786101',
+    descripcion:
+      'EXTRACCION DE DISPOSITIVO IMPLANTADO EN ESCAPULA. CLAVICULA O TORAX [COSTILLAS Y ESTERNON] +(3747)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '786102',
+    descripcion:
+      'EXTRACCION DE CUERPO EXTRAÑO EN ESCAPULA. CLAVICULA O TORAX [COSTILLAS Y ESTERNON]. VIA ABIERTA +(3748)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '786201',
+    descripcion: 'EXTRACCION DE DISPOSITIVO IMPLANTADO EN HUMERO +(3749)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '786301',
+    descripcion: 'EXTRACCION DE DISPOSITIVO IMPLANTADO EN RADIO O CUBITO +(3751)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '786701',
+    descripcion: 'EXTRACCION DE DISPOSITIVO IMPLANTADO EN TIBIA O PERONE +(3759)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '786702',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO EN TIBIA O PERONE. VIA ABIERTA +(3760)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '791501',
+    descripcion:
+      'REDUCCION INDIRECTA CON FIJACION INTERNA DE CUELLO DE FEMUR O INTERTROCANTERICA(3819)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '792902',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA SIN FIJACION INTERNA DE FALANGES DE PIE(3850)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793101',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS] DE CLAVICULA(3857)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793201',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA SUBCAPITAL DE HUMERO CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS](3859)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793301',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA EN DIAFISIS DE CUBITO O RADIO CON FIJACION INTERNA(3866)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793303',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA EN SEGMENTO DISTAL DE CUBITO O RADIO CON FIJACION INTERNA(3868)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793306',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA EN SEGMENTO DISTAL DE RADIO Y CUBITO CON FIJACION INTERNA(3871)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793307',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA EN DIAFISIS DE CUBITO Y RADIO CON FIJACION INTERNA(3872)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793405',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE METACARPIANOS CON FIJACION INTERNA(46923)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793501',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA EN FEMUR (CUELLO. INTERTROCANTERICA. SUPRACONDILEA) CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS](3875)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793708',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE PERONE PROXIMAL CON FIJACION EXTERNA(46926)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793709',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE PERONE DIAFISIARIO CON FIJACION INTERNA(46927)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793711',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE PERONE DISTAL CON FIJACION INTERNA(46929)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793718',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE TIBIA DISTAL CON FIJACION INTERNA(46936)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793802',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA DE METATARSIANO (CADA UNO) CON FIJACION INTERNA (DISPOSITIVOS DE FIJACION U OSTEOSINTESIS)(3884)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793902',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA EN FALANGES DE PIE (UNA O MAS) CON FIJACION INTERNA(3888)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '795201',
+    descripcion: 'REDUCCION ABIERTA DE EPIFISIS SEPARADA DE RADIO O CUBITO SIN FIJACION(3928)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '795601',
+    descripcion: 'REDUCCION ABIERTA DE EPIFISIS SEPARADA DE TIBIA O PERONE SIN FIJACION +(3934)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '795602',
+    descripcion: 'REDUCCION ABIERTA DE EPIFISIS SEPARADA DE TIBIA O PERONE CON FIJACION +(3935)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '795604',
+    descripcion: 'REDUCCION ABIERTA DE EPIFISIS SEPARADA DE TIBIA Y PERONE CON FIJACION(3937)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '796600',
+    descripcion: 'LAVADO Y DESBRIDAMIENTO DE FRACTURA ABIERTA DE TIBIA O PERONE SOD(3943)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '798101',
+    descripcion: 'REDUCCION ABIERTA DE LUXACION ACROMIOCLAVICULAR(3968)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '798201',
+    descripcion: 'REDUCCION ABIERTA DE LUXACION DE LA CABEZA RADIAL(3972)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '798701',
+    descripcion: 'REDUCCION ABIERTA DE LUXACION DE TOBILLO (TIBIOASTRAGALINA)(3981)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '799204',
+    descripcion:
+      'REDUCCION ABIERTA FRACTURA O LUXOFRACTURA CODO CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS](3988)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '799704',
+    descripcion: 'REDUCCION ABIERTA CON FIJACION DE LUXO FRACTURA TRIMALEOLAR DE TOBILLO(3998)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '800101',
+    descripcion: 'EXTRACCION DE DISPOSITIVO IMPLANTADO EN HOMBRO POR ARTROTOMIA +(4002)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '800201',
+    descripcion: 'EXTRACCION DE DISPOSITIVO IMPLANTADO EN CODO POR ARTROTOMIA +(4004)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '800501',
+    descripcion: 'EXTRACCION DE DISPOSITIVO IMPLANTADO EN CADERA POR ARTROTOMIA +(4010)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '801600',
+    descripcion: 'ARTROTOMIA DE RODILLA SOD(4023)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '807501',
+    descripcion: 'SINOVECTOMIA PARCIAL DE CADERA. VIA ABIERTA +(4099)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '807602',
+    descripcion: 'SINOVECTOMIA DE RODILLA TOTAL VIA ABIERTA(4104)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '808051',
+    descripcion: 'DESBRIDAMIENTO. LAVADO Y LIMPIEZA DE ARTICULACION DE CADERA VIA ABIERTA(4120)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '817204',
+    descripcion: 'LIGAMENTORRAFIA O REINSERCION DE LIGAMENTOS VIA ABIERTA(47295)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '819401',
+    descripcion: 'RECONSTRUCCION PRIMARIA DE TENDON DE AQUILES VIA ABIERTA(47323)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '831450',
+    descripcion: 'FASCIOTOMIA EN ANTEBRAZO. CON LIBERACION EN CODO Y MUÑECA +(4414)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '835100',
+    descripcion: 'BURSECTOMIA ABIERTA SOD +(4447)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '836301',
+    descripcion: 'REPARACION DEL MANGUITO ROTADOR VIA ABIERTA(4455)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '840001',
+    descripcion: 'AMPUTACION CON COLGAJO CERRADO DE MIEMBRO SUPERIOR SITIO NO ESPECIFICADO(4492)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '841001',
+    descripcion: 'AMPUTACION CON COLGAJO CERRADO DE MIEMBRO INFERIOR SITIO NO ESPECIFICADO(4506)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '841002',
+    descripcion: 'AMPUTACION KINEPLÁSTICA DE MIEMBRO INFERIOR SITIO NO ESPECIFICADO(4508)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '841500',
+    descripcion: 'AMPUTACION O DESARTICULACION DE PIERNA SOD +(4513)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '843500',
+    descripcion:
+      'REMODELACION [REVISION] [RECONSTRUCCION] DEL MUÑON DE AMPUTACION DE DEDOS DE MANO (UNO O MAS) SOD +(4532)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '852201',
+    descripcion: 'RESECCIÓN DE CUADRANTE DE MAMA(43050)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '854002',
+    descripcion: 'EXTIRPACION DE TEJIDO MAMARIO [MASTECTOMIA] SUBCUTANEA(36801)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '854101',
+    descripcion: 'MASTECTOMIA SIMPLE UNILATERAL(42581)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '854102',
+    descripcion: 'MASTECTOMÍA SIMPLE UNILATERAL POR GLÁNDULA SUPERNUMERARIA(43054)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '854202',
+    descripcion: 'MASTECTOMÍA SIMPLE BILATERAL POR GLÁNDULA SUPERNUMERARIA(43057)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '858401',
+    descripcion: 'COLGAJO LOCAL EN LA MAMA(4582)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862001',
+    descripcion: 'DESBRIDAMIENTO ESCISIONAL EN AREA ESPECIAL EN CARA Y CUELLO(47383)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862003',
+    descripcion: 'DESBRIDAMIENTO ESCISIONAL EN AREA ESPECIAL EN MUÑECAS O MANOS(47385)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862004',
+    descripcion: 'DESBRIDAMIENTO ESCISIONAL EN AREA ESPECIAL EN TOBILLOS O PIES(47386)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862009',
+    descripcion:
+      'DESBRIDAMIENTO ESCISIONAL ENTRE EL 30% AL 49% DE SUPERFICIE CORPORAL EN AREA GENERAL(47391)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862324',
+    descripcion: 'ESCARECTOMIA MENOR DEL 10 % DE SUPERFICIE CORPORAL(4640)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '866101',
+    descripcion:
+      'INJERTO DE PIEL PARCIAL EN AREA GENERAL MENOR DEL DIEZ 10% DE SUPERFICIE CORPORAL TOTAL(4706)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '866105',
+    descripcion: 'INJERTO DE PIEL TOTAL EN AREA ESPECIAL EN CARA O CUELLO(47409)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '867104',
+    descripcion: 'COLGAJO COMPUESTO A DISTANCIA. EN VARIOS TIEMPOS(4733)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '867106',
+    descripcion: 'COLGAJO LIBRE COMPUESTO CON TECNICA MICROVASCULAR(4735)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '867202',
+    descripcion:
+      'COLGAJO LOCAL DE PIEL COMPUESTO DE VECINDAD ENTRE DOS A CINCO CENTIMETROS CUADRADOS(4738)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '867203',
+    descripcion:
+      'COLGAJO LOCAL DE PIEL COMPUESTO DE VECINDAD ENTRE CINCO A DIEZ CENTIMETROS CUADRADOS(4739)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '033101',
+    descripcion: 'PUNCION LUMBAR (DIAGNOSTICA O TERAPEUTICA)(45385)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053101',
+    descripcion: 'BLOQUEO DE NERVIO SIMPATICO UNICO(434)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '061001',
+    descripcion: 'BIOPSIA DE GLÁNDULA TIROIDES VÍA ABIERTA(42599)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '202401',
+    descripcion: 'ASPIRACION DE OIDO MEDIO O CAVIDAD MASTOIDEA(41836)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '210101',
+    descripcion: 'CONTROL DE EPISTAXIS, POR TAPONAMIENTO ANTERIOR VIA TRANSNASAL(41841)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '221401',
+    descripcion: 'NASOSINUSCOPIA(920)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '261003',
+    descripcion: 'BIOPSIA ABIERTA DE GLÁNDULA SALIVAL MAYOR (CON CONDUCTO SALIVAL)(42675)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '306001',
+    descripcion: 'NASOLARINGOSCOPIA(41898)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '389900',
+    descripcion: 'FLEBOTOMIA TERAPEUTICA SOD +(1844)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '399902',
+    descripcion: 'RETIRO DE CATETER INTRARTERIAL O INTRAVENOSO PERMANENTE(36710)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '401101',
+    descripcion: 'BIOPSIA DE GANGLIO LINFATICO SUPERFICIAL(1974)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '401102',
+    descripcion: 'BIOPSIA DE GANGLIO LINFATICO PROFUNDO +(1975)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '413101',
+    descripcion: 'BIOPSIA POR ASPIRACION DE MEDULA OSEA(2009)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '441302',
+    descripcion: 'ESOFAGOGASTRODUODENOSCOPIA [EGD] CON O SIN BIOPSIA(46123)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '452301',
+    descripcion: 'COLONOSCOPIA TOTAL §(2149)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '452305',
+    descripcion: 'COLONOSCOPIA TOTAL CON O SIN BIOPSIA(46137)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '452401',
+    descripcion: 'SIGMOIDOSCOPIA FLEXIBLE O RIGIDA +(2151)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '482701',
+    descripcion: 'MANOMETRIA ANORECTAL(43027)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '573201',
+    descripcion: 'CISTOSCOPIA TRANSURETRAL(2748)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '601101',
+    descripcion: 'BIOPSIA CERRADA DE PROSTATA POR ABORDAJE TRANSRECTAL(2887)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '601102',
+    descripcion: 'BIOPSIA CERRADA DE PROSTATA POR ABORDAJE PERINEAL(2888)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '637300',
+    descripcion: 'VASECTOMIA SOD(2970)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '671201',
+    descripcion: 'BIOPSIA EN SACABOCADO DE CUELLO UTERINO(3110)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '672001',
+    descripcion: 'CONIZACION(3112)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '702203',
+    descripcion: 'COLPOSCOPIA(46539)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '711110',
+    descripcion: 'BIOPSIA DE LABIO MAYOR VULVA(3268)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '751101',
+    descripcion: 'AMNIOCENTESIS DIAGNOSTICA(46608)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '761201',
+    descripcion: 'ARTROCENTESIS DIAGNOSTICA DE ARTICULACION TEMPOROMANDIBULAR(3340)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '797200',
+    descripcion: 'REDUCCION CERRADA DE LUXACION EN CODO SOD +(3950)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '799702',
+    descripcion: 'REDUCCION CERRADA DE LUXOFRACTURA DE CUELLO DE PIE O TOBILLO(3996)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '819101',
+    descripcion: 'ASPIRACION ARTICULAR(4297)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '819201',
+    descripcion:
+      'INYECCIÓN DE SUSTANCIA TERAPÉUTICA DENTRO DE LA ARTICULACIÓN O EL LIGAMENTO(43048)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '839600',
+    descripcion: 'INYECCION O INFILTRACION DE SUSTANCIA TERAPEUTICA DENTRO DE BURSA SOD(4483)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '839700',
+    descripcion: 'INYECCION O INFILTRACION DE SUSTANCIA TERAPEUTICA DENTRO DE TENDON SOD(4484)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '851301',
+    descripcion: 'LOCALIZACION DE LESION NO PALPABLE. DE MAMA CON ARPON(4549)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '851302',
+    descripcion: 'LOCALIZACION DE LESION NO PALPABLE. DE MAMA POR ESTEREOTAXIA(4551)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '863101',
+    descripcion:
+      'RESECCION DE LESIONES CUTANEAS POR CAUTERIZACION. FULGURACION O CRIOTERAPIA EN AREA GENERAL. HASTA SEIS LESIONES(4669)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '863103',
+    descripcion:
+      'RESECCION DE LESIONES CUTANEAS POR CAUTERIZACION. FULGURACION O CRIOTERAPIA EN AREA ESPECIAL. HASTA TRES LESIONES(4671)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '863104',
+    descripcion:
+      'RESECCION DE LESIONES CUTANEAS POR CAUTERIZACION. FULGURACION O CRIOTERAPIA EN AREA ESPECIAL. ENTRE TRES A DIEZ LESIONES(4672)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '863105',
+    descripcion:
+      'RESECCION DE LESIONES CUTANEAS POR CAUTERIZACION. FULGURACION O CRIOTERAPIA EN AREA ESPECIAL. MAS DE DIEZ LESIONES(4673)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '869400',
+    descripcion: 'RETIRO DE SUTURA EN PIEL O TEJIDO CELULAR SUBCUTÁNEO SOD(4778)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '895401',
+    descripcion: 'MONITORIZACION ELECTROCARDIOGRAFICA (TELEMETRIA)(53676)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '930102',
+    descripcion: 'PRUEBA COGNITIVA (CADA UNA)(9909)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '930401',
+    descripcion: 'EVALUACION DE LA FUNCION OSTEOMUSCULAR(37039)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '965201',
+    descripcion: 'LAVADO E IRRIGACION DE OIDOS(42111)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '970200',
+    descripcion: 'SUSTITUCION DE TUBO (SONDA) DE GASTROSTOMIA SOD(10900)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '972300',
+    descripcion: 'SUSTITUCION DE TUBO DE TRAQUEOSTOMIA SOD(10915)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '973700',
+    descripcion: 'EXTRACCION DE TUBO DE TRAQUEOSTOMIA SOD(10919)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '981201',
+    descripcion: 'EXTRACCIÓN DE CUERPO EXTRAÑO DE LA NARIZ SIN INCISIÓN VÍA TRANSNASAL(43097)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '982101',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO SUPERFICIAL DE LA CONJUNTIVA(10970)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '982102',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO SUPERFICIAL EN CORNEA O ESCLEROTICA(10971)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '013101',
+    descripcion: 'DRENAJE DE ESPACIO SUBDURAL. POR CRANEOTOMIA(47)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '013110',
+    descripcion: 'DRENAJE DE ESPACIO SUBDURAL CON REPARO DE SENOS DURALES ROTOS(53)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '017001',
+    descripcion: 'DRENAJE DE COLECCIONES INTRACEREBRALES. POR CRANEOTOMIA(110)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '019101',
+    descripcion: 'LOBECTOMIA POR CRANEOTOMIA(45603)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '020203',
+    descripcion:
+      'REDUCCION DE FRACTURA CRANEAL (HUNDIMIENTO SIN COMPROMISO DE DURA) CON ESQUIRLECTOMIA Y CRANEOPLASTIA(172)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '023201',
+    descripcion: 'DERIVACION VENTRICULOATRIAL(209)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '024300',
+    descripcion: 'RETIRO DE DERIVACION SOD +(219)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '030214',
+    descripcion:
+      'EXPLORACION Y DESCOMPRESION DEL CANAL RAQUIDEO Y RAICES ESPINALES HASTA DOS SEGMENTOS POR HEMILAMINECTOMIA VIA ABIERTA(45648)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '385120',
+    descripcion: 'OCLUSION DE LESION EN VASOS INTRACRANEALES. VIA ENDOVASCULAR(1790)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '640000',
+    descripcion: 'CIRCUNCISION SOD +(2979)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '828350',
+    descripcion: 'CORRECCION DE POLIDACTILIA CON RECONSTRUCCION(4370)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '105M01',
+    descripcion: 'INTERNACION EN UNIDAD DE CUIDADO INTERMEDIO NEONATAL(56271)',
+    grupo: 'UNIDAD INTERMEDIOS',
+  },
+  {
+    cups: '106M01',
+    descripcion: 'INTERNACION EN UNIDAD DE CUIDADO INTERMEDIO PEDIATRICO(56272)',
+    grupo: 'UNIDAD INTERMEDIOS',
+  },
+  {
+    cups: '107M01',
+    descripcion: 'INTERNACION EN UNIDAD DE CUIDADO INTERMEDIO ADULTO(56274)',
+    grupo: 'UNIDAD INTERMEDIOS',
+  },
+  {
+    cups: '108A01',
+    descripcion: 'INTERNACION EN UNIDAD DE CUIDADO INTENSIVO NEONATAL(56276)',
+    grupo: 'UCI',
+  },
+  {
+    cups: '109A01',
+    descripcion: 'INTERNACION EN UNIDAD DE CUIDADO INTENSIVO PEDIATRICO(56277)',
+    grupo: 'UCI',
+  },
+  {
+    cups: '110A01',
+    descripcion: 'INTERNACION EN UNIDAD DE CUIDADO INTENSIVO ADULTOS(56235)',
+    grupo: 'UCI',
+  },
+  {
+    cups: '890701',
+    descripcion: 'CONSULTA DE URGENCIAS. POR MEDICINA GENERAL(5477)',
+    grupo: 'URGENCIAS',
+  },
+  {
+    cups: '735930',
+    descripcion: 'ASISTENCIA DEL PARTO ESPONTANEO GEMELAR O MULTIPLE(3300)',
+    grupo: 'ATENCION PARTO Y RN',
+  },
+  {
+    cups: '040705',
+    descripcion: 'NEURECTOMIA DE NERVIO PERIFERICO EN CABEZA O CUELLO(341)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040715',
+    descripcion: 'RESECCION DE TUMOR BENIGNO DE NERVIO EN BRAZO VIA ABIERTA(45781)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040716',
+    descripcion: 'RESECCION DE TUMOR MALIGNO DE NERVIO EN BRAZO VIA ABIERTA(45782)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040717',
+    descripcion: 'RESECCION DE TUMOR BENIGNO DE NERVIO EN ANTEBRAZO VIA ABIERTA(45783)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040718',
+    descripcion: 'RESECCION DE TUMOR MALIGNO DE NERVIO EN ANTEBRAZO VIA ABIERTA(45784)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040719',
+    descripcion: 'RESECCION DE TUMOR BENIGNO DE NERVIO EN MANO O DEDOS VIA ABIERTA(45785)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040720',
+    descripcion: 'RESECCION DE TUMOR MALIGNO DE NERVIO EN MANO O DEDOS VIA ABIERTA(45452)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040721',
+    descripcion: 'RESECCION DE TUMOR BENIGNO DE NERVIO EN MUSLO VIA ABIERTA(45786)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040722',
+    descripcion: 'RESECCION DE TUMOR MALIGNO DE NERVIO EN MUSLO VIA ABIERTA(45787)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040725',
+    descripcion: 'RESECCION DE TUMOR BENIGNO DE NERVIO EN PIERNA VIA ABIERTA(45790)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040726',
+    descripcion: 'RESECCION DE TUMOR MALIGNO DE NERVIO EN PIERNA VIA ABIERTA(45791)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040727',
+    descripcion: 'RESECCION DE TUMOR BENIGNO DE NERVIO EN TOBILLO VIA ABIERTA(45792)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040728',
+    descripcion: 'RESECCION DE TUMOR MALIGNO DE NERVIO EN TOBILLO VIA ABIERTA(45793)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040729',
+    descripcion: 'RESECCION DE TUMOR BENIGNO DE NERVIO EN PIE VIA ABIERTA(45794)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040730',
+    descripcion: 'TOMA DE INJERTO DE NERVIO PERIFERICO +(349)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '040731',
+    descripcion: 'RESECCION DE TUMOR MALIGNO DE NERVIO EN PIE VIA ABIERTA(45795)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '042310',
+    descripcion: 'NEUROLISIS DE NERVIO EN BRAZO VIA ABIERTA(45797)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '042312',
+    descripcion: 'NEUROLISIS DE NERVIO EN ANTEBRAZO VIA ABIERTA(45799)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '042314',
+    descripcion: 'NEUROLISIS EN NERVIO DE MANO VIA ABIERTA(45801)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '042315',
+    descripcion: 'NEUROLISIS DE NERVIOS EN DEDOS DE MANO VIA ABIERTA(45802)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '042316',
+    descripcion: 'NEUROLISIS DE NERVIO EN MUSLO VIA ABIERTA(45803)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '042318',
+    descripcion: 'NEUROLISIS DE NERVIO EN HUECO POPLITEO VIA ABIERTA(45805)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '042319',
+    descripcion: 'NEUROLISIS DE NERVIO EN PIERNA VIA ABIERTA(45806)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '042321',
+    descripcion: 'NEUROLISIS DE NERVIO EN TOBILLO VIA ABIERTA(45808)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '042323',
+    descripcion: 'NEUROLISIS DE NERVIO EN PIE EXCEPTO DEDO DE PIE VIA ABIERTA(45810)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '042324',
+    descripcion: 'NEUROLISIS DE NERVIO EN DEDO DE PIE VIA ABIERTA(45811)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '043101',
+    descripcion: 'NEURORRAFIA DE NERVIO PERIFERICO(29728)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '043102',
+    descripcion: 'NEURORRAFIA DE NERVIO DENTARIO +(375)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '043103',
+    descripcion: 'NEURORRAFIA DE NERVIO EN BRAZO +(376)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '043104',
+    descripcion: 'NEURORRAFIA DE NERVIO EN ANTEBRAZO +(377)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '043106',
+    descripcion: 'NEURORRAFIA DE NERVIO COLATERAL EN DEDO DE MANO +(379)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '043107',
+    descripcion: 'NEURORRAFIA DE NERVIO EN MUSLO +(380)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '043109',
+    descripcion: 'NEURORRAFIA DE NERVIO EN PIE +(382)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044303',
+    descripcion: 'DESCOMPRESION DE NERVIO EN TUNEL DEL CARPO VIA ABIERTA(45816)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044401',
+    descripcion: 'DESCOMPRESION DE NERVIO EN TUNEL DEL TARSO VIA ABIERTA(45819)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044510',
+    descripcion: 'DESCOMPRESION DE NERVIO EN HOMBRO VIA ABIERTA(45821)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044512',
+    descripcion: 'DESCOMPRESION DE NERVIO EN BRAZO VIA ABIERTA(45823)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044514',
+    descripcion: 'DESCOMPRESION DE NERVIO EN CODO VIA ABIERTA(45825)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044518',
+    descripcion: 'DESCOMPRESION DE NERVIO EN MANO VIA ABIERTA(45829)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044519',
+    descripcion: 'DESCOMPRESION DE NERVIO EN DEDO DE LA MANO VIA ABIERTA(45830)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044520',
+    descripcion: 'DESCOMPRESION DE NERVIO EN MUSLO VIA ABIERTA(45831)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044522',
+    descripcion: 'DESCOMPRESION DE NERVIO EN HUECO POPLITEO VIA ABIERTA(45833)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044523',
+    descripcion: 'DESCOMPRESION DE NERVIO EN PIERNA VIA ABIERTA(45834)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044525',
+    descripcion: 'DESCOMPRESION DE NERVIO EN TOBILLO VIA ABIERTA(45836)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '044527',
+    descripcion: 'DESCOMPRESION DE NERVIO EN PIE VIA ABIERTA(45838)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '046103',
+    descripcion: 'TRANSPOSICION DE NERVIO PERIFERICO EN MIEMBRO SUPERIOR VIA ABIERTA(45839)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053201',
+    descripcion: 'NEUROLISIS DE PLEJO BRAQUIAL(452)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053202',
+    descripcion: 'NEUROLISIS DE PLEJO LUMBAR(453)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053203',
+    descripcion: 'NEUROLISIS DE PLEJO CERVICAL (SUPERFICIAL O PROFUNDO)(454)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053204',
+    descripcion: 'NEUROLISIS DE PLEJO TORACICO(455)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053205',
+    descripcion: 'NEUROLISIS DE PLEJO CELIACO(456)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053206',
+    descripcion: 'NEUROLISIS DE PLEJO HIPOGASTRICO(457)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053207',
+    descripcion: 'NEUROLISIS DEL GANGLIO SIMPATICO PRESACRO (GANGLIO IMPAR DE WALTER)(458)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053208',
+    descripcion: 'NEUROLISIS DE NERVIO SIMPATICO UNICO(29592)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053301',
+    descripcion: 'GANGLIOLISIS EN GANGLIOS SIMPATICOS. POR RADIOFRECUENCIA O FENOLIZACION(461)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053302',
+    descripcion: 'GANGLIOLISIS(30101)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053303',
+    descripcion:
+      'GANGLIOLISIS EN GANGLIOS PARAVERTEBRALES. POR RADIOFRECUENCIA O FENOLIZACION(462)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '053304',
+    descripcion:
+      'GANGLIOLISIS EN GANGLIO DEL V PAR (GASSER) POR RADIOFRE-CUENCIA O FENOLIZACION(464)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '054101',
+    descripcion: 'NEURORRAFIA DE TRONCO DE PLEJO BRAQUIAL +(465)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '054102',
+    descripcion: 'NEURORRAFIA DE TRONCO DE PLEJO BRAQUIAL. CON INJERTO DE TRONCOS +(466)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '054104',
+    descripcion: 'NEURORRAFIA DE NERVIO O GANGLIO SIMPATICO(30129)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '054202',
+    descripcion: 'RECONSTRUCCION DE PLEJO. POR INJERTO DE NERVIO(470)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '054203',
+    descripcion: 'RECONSTRUCCION DE PLEJO. POR NEUROTIZACION(471)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '054204',
+    descripcion: 'RECONSTRUCCION DE PLEJO(29613)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '180100',
+    descripcion: 'DRENAJE DE COLECCION DE PABELLON AURICULAR SOD(796)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '180200',
+    descripcion: 'DRENAJE DE COLECCION DE CONDUCTO AUDITIVO EXTERNO SOD(797)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '182200',
+    descripcion: 'RESECCION DE APENDICE PREAURICULAR SOD(804)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '182300',
+    descripcion: 'RESECCION DE QUISTE DE PABELLON AURICULAR SOD(805)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '182401',
+    descripcion:
+      'ABLACION DE LESION DE OIDO EXTERNO POR COAGULACION. CAUTERIZACION. FULGURACION. CRIOTERAPIA U OTRA TÈCNICA +(808)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '182402',
+    descripcion: 'ABLACION DE LESION DE OIDO EXTERNO(29713)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '182501',
+    descripcion: 'TOMA DE INJERTO CONDRAL DE PABELLON AURICULAR(41825)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '183101',
+    descripcion: 'RESECCION DE TUMOR BENIGNO DE CONDUCTO AUDITIVO EXTERNO(810)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '183102',
+    descripcion: 'AURICULECTOMIA PARCIAL(811)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '183103',
+    descripcion: 'AURICULECTOMIA TOTAL(812)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '184100',
+    descripcion: 'SUTURA DE LACERACION DE PABELLON AURICULAR SOD(814)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '185101',
+    descripcion: 'OTOPLASTIA SIN REDUCCION DE TAMAÑO(815)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '185104',
+    descripcion: 'PLASTIA EN LOBULO DE OREJA(36395)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '186202',
+    descripcion: 'RECONSTRUCCION DE MEATO AUDITIVO EXTERNO(30113)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '187101',
+    descripcion: 'RECONSTRUCCION PROTESICA DE AURICULA(820)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '187102',
+    descripcion:
+      'RECONSTRUCCION PROTESICA DE AURICULA, CON MINIPLACAS DE FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS](822)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '187107',
+    descripcion: 'RECONSTRUCCION DE PABELLON AURICULAR(29714)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '193001',
+    descripcion: 'ESTAPEDIOLISIS(41826)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '194105',
+    descripcion: 'CIERRE DE PERFORACION DE MEMBRANA TIMPANICA [MIRINGOPLASTIA](41829)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '194107',
+    descripcion: 'TIMPANOPLASTIA CON REVISION DE LA CADENA OSICULAR(41830)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '200102',
+    descripcion: 'TIMPANOTOMIA CON DRENAJE DE MEMBRANA TIMPANICA(41834)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '200104',
+    descripcion: 'TIMPANOSTOMIA CON COLOCACION DE DISPOSITIVO(41835)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '202101',
+    descripcion: 'DRENAJE DE COLECCION DE MASTOIDES(841)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '202301',
+    descripcion: 'TIMPANOTOMIA EXPLORATORIA(842)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '207301',
+    descripcion: 'DESCOMPRESION DE SACO ENDOLINFATICO CON DERIVACION +(853)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '207501',
+    descripcion: 'LABERINTECTOMIA Y VESTIBULOTOMIA. VIA TRANSMASTOIDEA +(856)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '207502',
+    descripcion: 'LABERINTECTOMIA O VESTIBULOTOMIA(29603)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '209100',
+    descripcion: 'REVISION DE MASTOIDECTOMIAS O MASTOIDOPLASTIAS SOD +(857)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '209606',
+    descripcion:
+      'IMPLANTACION O SUSTITUCION DE PROTESIS COCLEAR CON PRESERVACION DE RESTOS AUDITIVOS(61963)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '209607',
+    descripcion:
+      'IMPLANTACION O SUSTITUCION DE PROTESIS COCLEAR SIN PRESERVACION DE RESTOS AUDITIVOS(61964)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '210401',
+    descripcion: 'CONTROL DE EPISTAXIS, POR LIGADURA DE ARTERIAS ETMOIDALES VIA TRANSNASAL(41844)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '210501',
+    descripcion:
+      'CONTROL DE EPISTAXIS, POR LIGADURA DE ARTERIA MAXILAR INTERNA VIA TRANSNASAL(41845)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '210801',
+    descripcion:
+      'CONTROL DE EPISTAXIS, POR LIGADURA DE ARTERIA ESFENOPALATINA VIA TRANSNASAL(41846)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '210901',
+    descripcion: 'CONTROL DE EPISTAXIS POR DERMOPLASTIA VIA TRANSNASAL(41847)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '211202',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO DE NARIZ CON INCISION VIA TRANSNASAL(41848)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '211204',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO DE NARIZ VIA ABIERTA(41849)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '211301',
+    descripcion: 'DRENAJE DE LESION (COLECCION) EN PIRAMIDE NASAL +(874)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '218001',
+    descripcion: 'RESECCION O ABLACION DE LESION DE PIRAMIDE NASAL(41853)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '218002',
+    descripcion: 'RINECTOMIA(41854)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '218201',
+    descripcion: 'FISTULECTOMIA GINGIVONASAL(900)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '218405',
+    descripcion: 'SEPTORRINOPLASTIA FUNCIONAL SECUNDARIA VIA TRANSNASAL(41859)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '218406',
+    descripcion: 'SEPTORRINOPLASTIA FUNCIONAL SECUNDARIA VIA ABIERTA(41860)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '218407',
+    descripcion: 'REVISION DE RINOPLASTIA VIA TRANSNASAL(41861)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '218408',
+    descripcion: 'REVISION DE RINOPLASTIA VIA ABIERTA(41862)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '218503',
+    descripcion: 'RINOPLASTIA DE AUMENTO CON IMPLANTE SINTETICO VIA TRANSNASAL(61967)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '218504',
+    descripcion: 'RINOPLASTIA DE AUMENTO CON IMPLANTE SINTETICO VIA ABIERTA(61968)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '218505',
+    descripcion: 'RINOPLASTIA DE AUMENTO CON INJERTO OSEO O CONDRAL VIA TRANSNASAL(61969)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '218506',
+    descripcion: 'RINOPLASTIA DE AUMENTO CON INJERTO OSEO O CONDRAL VIA ABIERTA(61970)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '218603',
+    descripcion: 'RINOPLASTIA LIMITADA VIA TRANSNASAL(41863)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '218604',
+    descripcion: 'RINOPLASTIA LIMITADA VIA ABIERTA(41864)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '218605',
+    descripcion: 'RECONSTRUCCION DE VALVULA NASAL(42639)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '219003',
+    descripcion: 'RESECCION DE TUMOR BENIGNO DE FOSA NASAL VIA ABIERTA(41778)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '219101',
+    descripcion: 'CORRECCION DE ATRESIA DE COANAS VIA TRANSNASAL(41786)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '219103',
+    descripcion: 'CORRECCION DE ATRESIA DE COANAS VIA TRANSPALATINA(41788)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '219104',
+    descripcion: 'RESECCION DE LESION BENIGNA DE CAVUM VIA TRANSNASAL(42640)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '219201',
+    descripcion: 'TURBINECTOMIA VIA TRANSNASAL(41792)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '219401',
+    descripcion: 'SEPTECTOMIA VIA TRANSNASAL(42643)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '219503',
+    descripcion: 'SEPTOPLASTIA EXTRACORPOREA(41798)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '219504',
+    descripcion: 'SEPTOPLASTIA REVISIONAL TRANSNASAL(41799)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '219601',
+    descripcion: 'RECONSTRUCCION ENDONASAL VIA TRANSNASAL(42646)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '219603',
+    descripcion: 'RECONSTRUCCION ENDONASAL VIA ABIERTA(42648)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '219604',
+    descripcion: 'CIERRE DE PERFORACION SEPTAL(41800)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '222104',
+    descripcion: 'ANTROSTOMIA MAXILAR POR MEATO INFERIOR VIA TRANSNASAL(42649)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '222106',
+    descripcion: 'ANTROSTOMIA MAXILAR POR MEATO MEDIO VIA TRANSNASAL(42650)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '222108',
+    descripcion: 'ASPIRACION O LAVADO O DRENAJE DE SENO MAXILAR VIA OROANTRAL(41806)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '223101',
+    descripcion: 'ANTROTOMIA MAXILAR RADICAL VIA OROANTRAL(41807)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '223102',
+    descripcion: 'ANTROTOMIA MAXILAR RADICAL VIA TRANSNASAL(41808)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '223104',
+    descripcion: 'ANTROTOMIA MAXILAR RADICAL VIA ABIERTA(41809)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '223901',
+    descripcion: 'ANTROTOMIA MAXILAR EXPLORATORIA VIA MEATO INFERIOR(927)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '223902',
+    descripcion:
+      'ANTROTOMIA MAXILAR EXPLORATORIA VIA FOSA CANINA CON RESECCION DE MUCOSA DEL ANTRO MAXILAR Y ANTROTOMIA INFERIOR(928)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '224101',
+    descripcion: 'SINUSOTOMIA FRONTAL(29441)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '224103',
+    descripcion: 'SINUSOTOMIA FRONTAL VIA CORONAL CON COLGAJO OSTEOPLASTICO(933)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '224104',
+    descripcion: 'SINUSOTOMIA FRONTAL VIA CORONAL CON FRONTOTOMIA RADICAL(934)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '224105',
+    descripcion: 'SINUSOTOMIA FRONTAL VIA CORONAL CON CRANEALIZACION DE SENO FRONTAL(935)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '224106',
+    descripcion:
+      'SINUSOTOMIA FRONTAL VIA CILIAR CON TREPANACION OBLITERATIVA. SIN COLGAJO OSTEOPLASTICO(936)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '224107',
+    descripcion:
+      'SINUSOTOMÍA FRONTAL VIA CILIAR CON TREPANACION OBLITERATIVA, CON COLGAJO OSTEOPLASTICO(937)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '224203',
+    descripcion: 'RESECCION DE LESIONES BENIGNAS DE SENOS FRONTAL O ETMOIDAL VIA TRANSNASAL(41734)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '225002',
+    descripcion: 'ETMOIDECTOMIA ANTERIOR REVISIONAL(41737)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '225003',
+    descripcion: 'ETMOIDECTOMIA POSTERIOR REVISIONAL(41738)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '225004',
+    descripcion: 'ETMOIDECTOMIA ANTERIOR Y POSTERIOR REVISIONAL(41739)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '225005',
+    descripcion: 'SINUSOTOMIA FRONTAL REVISIONAL(41740)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '225006',
+    descripcion: 'ESFENOIDECTOMIA REVISIONAL(41741)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '225301',
+    descripcion: 'INCISION DE MULTIPLES SENOS PARANASALES VIA TRANSNASAL(41742)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '226405',
+    descripcion: 'DRENAJE DE SENOS ESFENOIDALES VIA TRANSNASAL(42660)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '227201',
+    descripcion: 'SINUPLASTIA FRONTAL(42662)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '227202',
+    descripcion: 'SINUPLASTIA ETMOIDAL(42663)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '227203',
+    descripcion: 'SINUPLASTIA ESFENOIDAL(42664)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '227204',
+    descripcion: 'SINUPLASTIA MAXILAR(42665)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '243101',
+    descripcion: 'ESCISION DE LESION BENIGNA ENCAPSULADA EN ENCIA HASTA DE TRES CENTIMETROS(1052)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '243102',
+    descripcion: 'ESCISION DE LESION BENIGNA ENCAPSULADA EN ENCIA DE MAS DE TRES CENTIMETROS(1053)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '243103',
+    descripcion:
+      'ESCISION DE LESION BENIGNA NO ENCAPSULADA EN ENCIA HASTA DE TRES CENTIMETROS(1054)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '243104',
+    descripcion:
+      'ESCISION DE LESION BENIGNA NO ENCAPSULADA EN ENCIA DE MAS DE TRES CENTIMETROS(1055)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '243105',
+    descripcion:
+      'ESCISION DE LESION MALIGNA DE ENCIA SIN VACIAMIENTO GANGLIONAR NI RESECCION DE ESTRUCTURAS VECINAS U OSEAS(1056)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '243106',
+    descripcion:
+      'ESCISION DE LESION MALIGNA DE ENCIA CON VACIAMIENTO GANGLIONAR, PISO DE BOCA O LENGUA CON CIERRE PRIMARIO(1057)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '243301',
+    descripcion: 'ENUCLEACION DE QUISTE EPIDERMOIDE. VIA INTRAORAL(1067)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '243302',
+    descripcion: 'ENUCLEACION DE QUISTE EPIDERMOIDE. VIA EXTRAORAL(1068)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '243303',
+    descripcion: 'ENUCLEACION DE QUISTE EPIDERMOIDE(29869)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '244101',
+    descripcion: 'ENUCLEACION DE QUISTE ODONTOGENICO HASTA DE TRES CENTIMETROS DE DIAMETRO+(1074)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '244102',
+    descripcion: 'ENUCLEACION DE QUISTE ODONTOGENICO DE MAS DE TRES CENTIMETROS DE DIAMETRO(1075)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '244103',
+    descripcion: 'RESECCION DE TUMOR BENIGNO O MALIGNO ODONTOGENICO(1076)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '244108',
+    descripcion: 'MARSUPIALIZACION DE QUISTE ODONTOGENICO +(1081)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '244109',
+    descripcion: 'RESECCION DE LESION ODONTOGENICA SOD(29802)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '255007',
+    descripcion: 'DRENAJE DE COLECCION EN LENGUA(42967)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '260101',
+    descripcion: 'SIALOLITOTOMIA VIA ABIERTA(42969)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '260201',
+    descripcion: 'EXPLORACION DE GLANDULA SALIVAL VIA ABIERTA(42970)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '260301',
+    descripcion: 'DRENAJE DE GLANDULA SALIVAL VIA ABIERTA(42972)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '262001',
+    descripcion: 'MARSUPIALIZACION DE LA RANULA(42973)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '263101',
+    descripcion: 'PAROTIDECTOMIA DEL LOBULO SUPERFICIAL(1127)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '263102',
+    descripcion: 'SIALOADENECTOMIA PARCIAL(29388)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '263201',
+    descripcion: 'PAROTIDECTOMIA TOTAL(1128)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '263203',
+    descripcion: 'SIALOADENECTOMIA DE GLANDULA SUBLINGUAL(1130)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '263204',
+    descripcion: 'SIALOADENECTOMIA DE GLANDULA SUBMAXILAR (SUBMANDIBULAR)(1131)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '263206',
+    descripcion: 'SIALOADENECTOMIA DE GLANDULAS SALIVALES MENORES(1134)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '264001',
+    descripcion: 'CIERRE O REPARACION DE FISTULA SALIVAL CON INJERTO VIA ABIERTA(42975)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '264003',
+    descripcion: 'CIERRE O REPARACION DE FISTULA SALIVAL SIN INJERTO VIA ABIERTA(42976)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '264005',
+    descripcion: 'SIALOPLASTIA (REPARACION DEL CONDUCTO) CON INJERTO(42977)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '264006',
+    descripcion: 'FISTULIZACION DE GLANDULA SALIVAL(42978)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '264007',
+    descripcion: 'SIALOPLASTIA (REPARACION DEL CONDUCTO) VIA ABIERTA(42979)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '271101',
+    descripcion: 'DRENAJE DE COLECCION DE PALADAR VIA ABIERTA(42980)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '274101',
+    descripcion: 'FRENILLECTOMIA LABIAL VIA ABIERTA(42984)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '274301',
+    descripcion:
+      'RESECCION DE LESION BENIGNA DE LA MUCOSA ORAL. HASTA DE DOS CENTIMETROS DE DIAMETRO(1173)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '274303',
+    descripcion: 'RESECCION DE TUMOR MALIGNO DE MUCOSA ORAL +(1175)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '274305',
+    descripcion: 'RESECCION DE LESION EN MUCOSA ORAL(29671)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '274901',
+    descripcion: 'REMOCION DE CUERPO EXTRAÑO EN TEJIDOS BLANDOS DE LA BOCA(1178)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '275101',
+    descripcion:
+      'SUTURA O REPARACION DE LACERACIÒN (HERIDA) EN LABIOS HASTA DE CINCO CENTIMETROS +(1182)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '275102',
+    descripcion:
+      'SUTURA O REPARACION DE LACERACION (HERIDA) EN LABIOS DE MAS DE CINCO CENTIMETROS +(1183)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '275103',
+    descripcion: 'SUTURA O PLASTIA EN AVULSION DE LABIOS(1185)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '275104',
+    descripcion: 'SUTURA DE LACERACION EN LABIOS(29504)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '275201',
+    descripcion:
+      'ESTOMATORRAFIA (SUTURA DE HERIDA EN MUCOSA ORAL) DE MENOS DE CINCO CENTIMETROS(1188)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '275202',
+    descripcion:
+      'ESTOMATORRAFIA (SUTURA DE HERIDA EN MUCOSA ORAL) DE MASDE CINCO CENTIMETROS(1189)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '275203',
+    descripcion: 'SUTURA DE LACERACION DE OTRA PARTE DE LA BOCA(29389)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '275302',
+    descripcion: 'RESECCION EXTRAORAL DE FISTULA DE BOCA(1191)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '275500',
+    descripcion: 'INJERTO DE PIEL DE GROSOR TOTAL APLICADO AL LABIO Y CAVIDAD BUCAL SOD(1198)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '275601',
+    descripcion: 'LIPOINJERTO EN CARA(29142)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '275701',
+    descripcion: 'INJERTO DE PIEL EN LABIOS CON ADHESION DE COLGAJO PEDICULADO(1200)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '276102',
+    descripcion: 'SUTURA DE LACERACION DE PALADAR(29505)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '276202',
+    descripcion: 'CIERRE DE HENDIDURA ALVEOLAR CON INJERTO(1214)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '276203',
+    descripcion: 'CIERRE DE HENDIDURA ALVEOLAR SIN INJERTO(1216)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '276206',
+    descripcion: 'INJERTO OSEO DE PALADAR O ALVEOLAR(1220)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '276207',
+    descripcion: 'UVULO-PALATO-FARINGOPLASTIA(1221)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '276210',
+    descripcion: 'UVULO-PALATO-FARINGOPLASTIA POR ABLACION(41869)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '277101',
+    descripcion: 'INCISION DE LA UVULA(41871)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '277201',
+    descripcion: 'RESECCION PARCIAL DE UVULA(1227)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '277202',
+    descripcion: 'RESECCION TOTAL DE UVULA(42305)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '277203',
+    descripcion: 'RESECCION DE UVULA POR ABLACION(42306)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '277301',
+    descripcion: 'UVULORRAFIA(1228)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '280001',
+    descripcion: 'DRENAJE EN AMIGDALAS O ESTRUCTURAS PERIAMIGDALARES VIA TRANSORAL(41872)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '280002',
+    descripcion: 'DRENAJE EN AMIGDALAS O ESTRUCTURAS PERIAMIGDALARES VIA TRANSCERVICAL(41873)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '284101',
+    descripcion: 'RESECCION DE RESTOS ADENOAMIGDALINOS(41875)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '286101',
+    descripcion: 'ADENOIDECTOMIA VIA ABIERTA(41877)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '287101',
+    descripcion: 'CONTROL DE HEMORRAGIA POS AMIGDALECTOMIA(41878)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '287102',
+    descripcion: 'CONTROL DE HEMORRAGIA POS ADENOIDECTOMIA VIA ABIERTA(42985)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '290301',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO ENCLAVADO EN FARINGE. VIA EXTERNA +(1246)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '290401',
+    descripcion: 'DRENAJE DE FARINGE VIA ABIERTA(41881)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '294001',
+    descripcion: 'DILATACION DE NASOFARINGE(41889)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '294002',
+    descripcion: 'DILATACION DE OROFARINGE(41890)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '294003',
+    descripcion: 'DILATACION DE HIPOFARINGE(41891)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '300101',
+    descripcion: 'RESECCION DE QUISTE VENTRICULAR VIA EXTERNA +(1284)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '300401',
+    descripcion: 'RESECCION O LISIS DE ADHERENCIAS DE LARINGE VIA ANTERIOR(1291)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '301401',
+    descripcion: 'CORDECTOMIA PARCIAL VIA ABIERTA(42130)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '301403',
+    descripcion: 'CORDECTOMIA TOTAL VIA ABIERTA(42131)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '302001',
+    descripcion: 'SUTURA DE LACERACION DE LARINGE VIA ABIERTA(42132)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '302303',
+    descripcion: 'REDUCCION DE LUXACION DE ARITENOIDES VIA ABIERTA(42135)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '302403',
+    descripcion: 'EPIGLOTOPEXIA VIA ABIERTA(42136)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '302405',
+    descripcion: 'ARITENOPLASTIA VIA ABIERTA(42137)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '302407',
+    descripcion: 'ARITENOPEXIA VIA ABIERTA(42138)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '385920',
+    descripcion: 'OCLUSION DE VENAS DE MIEMBROS INFERIORES. VIA ENDOVASCULAR(1820)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '389001',
+    descripcion: 'COLOCACION DE CATETER ARTERIAL FEMORAL O BRAQUIAL(1834)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '389002',
+    descripcion: 'COLOCACION CATETER ARTERIAL PERIFERICO (LINEA ARTERIAL)(1835)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '389102',
+    descripcion: 'INSERCION DE CATETER YUGULAR(1837)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '389104',
+    descripcion: 'INSERCION DE CATETER CENTRAL VIA ABIERTA(36666)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '389108',
+    descripcion: 'INSERCION DE CATETER EN VENA CAVA VIA TRANSLUMBAR (TRANSCAVO)(36670)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '389400',
+    descripcion: 'DISECCION VENOSA SOD +(1842)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '428100',
+    descripcion: 'INSERCION DE TUBO O PROTESIS (STENT) PERMANENTE EN ESOFAGO SOD(2061)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '468501',
+    descripcion: 'DILATACION DEL COLON POR COLONOSCOPIA(2245)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '469500',
+    descripcion: 'PERFUSION LOCAL DE INTESTINO DELGADO SOD(2251)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '469600',
+    descripcion: 'PERFUSION LOCAL DE INTESTINO GRUESO SOD(2253)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '486500',
+    descripcion: 'RESECCION DE MUÑON RECTAL POST- DUHAMEL SOD(2292)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '487901',
+    descripcion: 'REPARACION DE LESION OBSTETRICA ANTIGUA DE RECTO(2309)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '487902',
+    descripcion: 'REPARACION DE RECTO PROLAPSADO POR INFILTRACION PERIRRECTAL(2311)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '488101',
+    descripcion: 'DRENAJE DE COLECCION RECTAL(2315)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '488103',
+    descripcion: 'DRENAJE DE COLECCION PERIRRECTAL, RETRORECTAL O PELVICA VIA ABIERTA(46160)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '489001',
+    descripcion: 'PERINEOPLASTIA O COLGAJO MAYOR (PIEL MUSCULO) VÍA ABIERTA(42447)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '490100',
+    descripcion: 'DRENAJE DE COLECCION ISQUIORRECTAL SOD(2323)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '490201',
+    descripcion: 'DRENAJE DE COLECCIÓN PERIANAL VÍA ABIERTA(42449)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '490401',
+    descripcion: 'ESCISIÓN DE LESIÓN O TEJIDO PERIANAL VÍA ABIERTA(42450)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '494003',
+    descripcion: 'HEMORROIDOPEXIA(41759)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '494005',
+    descripcion: 'RESECCION DE HEMORROIDES EXTERNAS(46168)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '494300',
+    descripcion: 'CAUTERIZACION DE HEMORROIDES SOD(2336)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '494701',
+    descripcion: 'EVACUACIÓN EN HEMORROIDES TROMBOSADAS(42454)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '495001',
+    descripcion: 'ESFINTEROTOMÍA ANAL VÍA ABIERTA(42455)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '497101',
+    descripcion: 'SUTURA DE LACERACION O DESGARRO DE ANO(30000)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '497201',
+    descripcion: 'IMPLANTACIÓN DE UN DISPOSITIVO ANAL(42456)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '497503',
+    descripcion: 'ESFINTEROPLASTIA ANAL(2365)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '497509',
+    descripcion: 'PLASTIA DE ANO [ANOPLASTIA](30053)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '497510',
+    descripcion: 'COLGAJO LOCAL (MUCOSO O SUBMUCOSO) ENDORECTAL(41958)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '497511',
+    descripcion: 'COLGAJO O TRANSPOSICION MUSCULAR PERINEAL O PERIRRECTAL(41959)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '497601',
+    descripcion: 'REVISIÓN DE DISPOSITIVO EN ANO(42457)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '497602',
+    descripcion: 'RETIRO DE DISPOSITIVO EN ANO(42458)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '499100',
+    descripcion: 'INCISION DE TABIQUE ANAL SOD(2371)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '499400',
+    descripcion: 'REDUCCION DE PROLAPSO ANAL SOD(2372)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '499600',
+    descripcion: 'RETIRO DE MATERIAL DE CERCLAJE SOD(2374)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '509300',
+    descripcion: 'PERFUSION LOCALIZADA DE HIGADO SOD(2426)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '509400',
+    descripcion: 'INYECCION DE SUSTANCIA TERAPEUTICA EN HIGADO SOD(2427)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '511601',
+    descripcion: 'COLANGIOGRAFÍA VÍA ABIERTA(43030)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '519700',
+    descripcion: 'INSERCION DE CATETER BILIAR SOD(32062)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '530003',
+    descripcion: 'HERNIORRAFIA INGUINAL INDIRECTA UNILATERAL POR MICROCIRUGIA(46181)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '530601',
+    descripcion: 'HERNIORRAFIA UNILATERAL INGUINO ESCROTAL VÍA ABIERTA(42520)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '531003',
+    descripcion: 'HERNIORRAFIA INGUINAL INDIRECTA BILATERAL POR MICROCIRUGIA(46182)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '531701',
+    descripcion: 'HERNIORRAFIA BILATERAL INGUINO ESCROTAL VÍA ABIERTA(42526)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '549201',
+    descripcion:
+      'EXTRACCION DE CUERPO EXTRAÑO INTRAPERITONEAL (O DIU PERDIDO). POR LAPAROTOMIA(2604)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '549300',
+    descripcion: 'CREACION DE FISTULA CUTANEOPERITONEAL SOD(32003)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '553105',
+    descripcion: 'DIVERTICULECTOMIA U OBLITERACION DE DIVERTICULO DE CALIZ VIA ABIERTA(46222)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '558202',
+    descripcion: 'CIERRE DE NEFROSTOMIA O PIELOSTOMIA VIA ABIERTA(46247)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '559300',
+    descripcion: 'REEMPLAZO DE CATETER DE NEFROSTOMIA SOD(2681)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '559500',
+    descripcion: 'PERFUSION LOCAL DE RIÑÓN SOD(2685)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '564120',
+    descripcion: 'ESCISION DE LESION URETERAL O PARA URETERAL(2707)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '567501',
+    descripcion: 'TRANSURETERO-URETEROSTOMIA VIA ABIERTA(46279)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '568201',
+    descripcion: 'SUTURA DE LACERACION DE URETER O URETERORRAFIA VIA ABIERTA(46281)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '569001',
+    descripcion: 'DILATACION DE MEATO URETERAL(2734)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '569101',
+    descripcion: 'LIGADURA DE URETER VIA ABIERTA(46296)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '570501',
+    descripcion: 'HEMOSTASIA O CONTROL DE HEMORRAGIA VESICAL VIA ABIERTA(46300)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '570504',
+    descripcion: 'HEMOSTASIA O CONTROL DE HEMORRAGIA POR ABLACION(46303)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '572101',
+    descripcion: 'VESICOSTOMIA [CUTANEA](2744)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '574100',
+    descripcion: 'ABLACION TRANSURETRAL DE ADHERENCIAS INTRALUMINALES VESICALES SOD(2753)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '576060',
+    descripcion: 'RESECCION DE CUELLO VESICAL TRANSVESICAL(2761)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '578101',
+    descripcion: 'SUTURA DE LACERACION O DESGARRO VESICAL [CISTORRAFIA] VIA ABIERTA(36754)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '578202',
+    descripcion: 'CIERRE DE VESICOSTOMIA(2771)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '578501',
+    descripcion: 'PLICATURA DE ESFINTER VESICAL(2779)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '579102',
+    descripcion: 'ESFINTEROTOMIA DE VEJIGA(31991)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '579200',
+    descripcion: 'DILATACION DE CUELLO VESICAL SOD(32020)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '579950',
+    descripcion: 'PROCEDIMIENTO ANTI-INCONTINENCIA URINARIA MASCULINA(2795)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '580010',
+    descripcion: 'RESECCION O ESCISION DE TABIQUE URETRAL(2796)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '580101',
+    descripcion: 'URETROSTOMIA(36757)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '580110',
+    descripcion: 'URETROSTOMIA PERINEAL(2800)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '581010',
+    descripcion: 'MEATOTOMIA URETRAL EXTERNA +(2801)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '584101',
+    descripcion: 'URETRORRAFIA FEMENINA(2815)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '584102',
+    descripcion: 'URETRORRAFIA PENEANA(2816)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '584103',
+    descripcion: 'URETRORRAFIA PERINEAL(2817)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '584200',
+    descripcion: 'CIERRE DE URETROSTOMIA SOD(2818)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '584700',
+    descripcion: 'MEATOPLASTIA URETRAL SOD(2831)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '584901',
+    descripcion: 'MARSUPIALIZACION DE DIVERTICULO URETRAL(2832)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '585010',
+    descripcion: 'MEATOTOMIA URETRAL INTERNA +(2834)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '586101',
+    descripcion: 'DILATACION DE URETRA POR URETROTOMIA EXTERNA(2835)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '586200',
+    descripcion: 'DILATACION DE UNION URETROVESICAL SOD(2837)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '586300',
+    descripcion: 'DILATACION DE URETRA POR SONDEO SOD(2838)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '589110',
+    descripcion: 'DRENAJE DE GLANDULA BULBOURETRAL(2843)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '589120',
+    descripcion: 'INCISION Y DRENAJE DE COLECCIONES PERIURETRALES O URINOSOS +(2844)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '589200',
+    descripcion: 'ESCISION DE TEJIDO PERIURETRAL SOD(2845)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '590400',
+    descripcion: 'INCISION Y DRENAJE DE COLECCION PERIRENAL SOD +(2856)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '591920',
+    descripcion:
+      'INCISION Y DRENAJE DE COLECCION EN TEJIDO PERIVESICAL Y ESPACIO DE RETZIUS +(2860)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '593100',
+    descripcion: 'PLICATURA URETRAL SOD(2862)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '595102',
+    descripcion: 'PEXIA URETRAL RETROPUBICA(32080)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '596102',
+    descripcion: 'PEXIA PARAURETRAL O PERIURETRAL(31990)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '597105',
+    descripcion: 'AJUSTE DE DISPOSITIVO DE CISTOURETROPEXIA(46378)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '599101',
+    descripcion: 'RESECCION DE TEJIDO PERIRRENAL O PERIVESICAL(36762)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '599301',
+    descripcion: 'REEMPLAZO DE DISPOSITIVO DE URETEROSTOMÍA(43041)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '599401',
+    descripcion: 'REEMPLAZO DE DISPOSITIVO DE CISTOSTOMÍA(43042)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '600201',
+    descripcion: 'PROSTATOLITOTOMIA VIA ABIERTA(46382)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '607201',
+    descripcion: 'RESECCION DE VESICULA SEMINAL [VESICULOTOMIA](36765)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '607301',
+    descripcion: 'VESICULECTOMIA O ESPERMATOCISTECTOMIA +(2904)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '608101',
+    descripcion: 'DRENAJE DE COLECCION PERIPROSTATICA +(2905)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '608201',
+    descripcion: 'ESCISION DE LESION DE TEJIDO PERIPROSTATICO(2906)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '609301',
+    descripcion: 'REVISION Y REPARACION DE CAPSULA VIA TRANSVESICAL(2910)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '609501',
+    descripcion: 'COLOCACION DE DISPOSITIVO TRANSURETRAL EN URETRA PROSTATICA VIA ABIERTA(46398)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '610101',
+    descripcion: 'INCISION Y DRENAJE DE ESCROTO Y TUNICA VAGINALIS +(2914)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '613101',
+    descripcion: 'RESECCION DE QUISTE SEBACEO EN ESCROTO(2920)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '613103',
+    descripcion: 'RESECCION O ABLACION DE LESION EN ESCROTO(36766)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '613401',
+    descripcion: 'RESECCION PARCIAL DEL ESCROTO(2922)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '614100',
+    descripcion: 'SUTURA DE LACERACION DE ESCROTO Y TUNICA VAGINALIS SOD(2924)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '619201',
+    descripcion: 'DRENAJE DE COLECCION DE TUNICA VAGINALIS +(2928)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '619202',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO DEL ESCROTO POR INCISION(2929)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '620100',
+    descripcion: 'DRENAJE POR INCISION EN TESTICULO SOD(2930)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '622100',
+    descripcion: 'RESECCION DE LESION TESTICULAR SOD +(2937)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '625101',
+    descripcion: 'ORQUIDOPEXIA CON DESTORSION DE TESTICULO O DE CORDON ESPERMATICO(2940)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '625104',
+    descripcion: 'FIJACION TESTICULAR PROFILACTICA(2941)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '625201',
+    descripcion: 'IMPLANTACION DEL TESTICULO EN TEJIDOS VECINOS(2942)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '625203',
+    descripcion: 'ORQUIDOPEXIA UNILATERAL VIA ABIERTA(46401)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '626100',
+    descripcion: 'ORQUIDORRAFIA O SUTURA DE TESTICULO SOD(2946)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '627100',
+    descripcion: 'IMPLANTE DE PROTESIS TESTICULAR SOD +(2947)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '629101',
+    descripcion: 'ASPIRACION DE TESTICULO VIA ABIERTA(46405)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '629300',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO DEL TESTICULO SOD(2949)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '631201',
+    descripcion: 'CLIPAJE DE ARTERIA ESPERMATICA VIA RETROPERITONEAL(2957)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '631302',
+    descripcion: 'DRENAJE DE LIQUIDO [HIDROCELECTOMIA] DE CORDON ESPERMATICO(36768)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '633200',
+    descripcion: 'RESECCION DE HEMATOCELE DE CORDON ESPERMATICO SOD(2962)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '635100',
+    descripcion: 'SUTURA DE LACERACION EN CORDON ESPERMATICO Y EPIDIDIMO SOD(2965)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '635200',
+    descripcion: 'REDUCCION DE TORSION TESTICULAR O CORDON ESPERMATICO SOD(2966)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '636100',
+    descripcion: 'VASOTOMIA SOD +(2967)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '637100',
+    descripcion: 'LIGADURA O SECCION DE CONDUCTO DEFERENTE SOD(2968)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '637200',
+    descripcion: 'LIGADURA DE CORDON ESPERMATICO SOD(2969)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '638100',
+    descripcion: 'SUTURA DE LACERACION DE CONDUCTO DEFERENTE Y EPIDIDIMO SOD(2972)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '638201',
+    descripcion:
+      'RECONSTRUCCION DEL CONDUCTO DEFERENTE SECCIONADO O VASO-VASOSTOMIA VIA ABIERTA(46407)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '639201',
+    descripcion: 'INCISION DEL EPIDIDIMO [EPIDIDIMOTOMIA] Y DRENAJE VIA ABIERTA(46411)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '639300',
+    descripcion: 'INCISION Y DRENAJE DE CORDON ESPERMATICO SOD(2977)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '639600',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO DE CORDON ESPERMATICO Y EPIDIDIMO SOD(2978)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '644100',
+    descripcion: 'SUTURA DE LACERACION O HERIDA EN PENE SOD(2986)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '644902',
+    descripcion: 'ESCISION DE NODULOS DE ENFERMEDAD DE PEYRONIE SIN INJERTO(46415)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '644903',
+    descripcion: 'ESCISION DE NODULOS DE ENFERMEDAD DE PEYRONIE CON INJERTO(46416)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '644930',
+    descripcion: 'INYECCION EN PLACAS DE FIBROSIS DE PENE(2993)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '649100',
+    descripcion: 'CORTE DORSAL O LATERAL EN PREPUCIO SOD +(2995)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '649300',
+    descripcion: 'SECCION O CORTE DE ADHERENCIAS PENEANAS SOD +(2996)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '649601',
+    descripcion: 'RETIRO DE PROTESIS PENEANA INFLABLE(62127)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '649602',
+    descripcion: 'RETIRO DE PROTESIS PENEANA NO INFLABLE(62128)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '649701',
+    descripcion: 'INSERCION DE PROTESIS DE PENE INFLABLE(62129)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '649702',
+    descripcion: 'REVISION O SUSTITUCION DE PROTESIS DE PENE INFLABLE(62130)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '649803',
+    descripcion: 'IRRIGACION. PUNCION O DRENAJE DE CUERPO CAVERNOSO(3002)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '649805',
+    descripcion: 'INCISION Y DRENAJE DE FLEGMON PENEANO(3004)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '670101',
+    descripcion: 'DILATACION Y CURETAJE DEL MUÑON CERVICAL(46474)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '673102',
+    descripcion: 'RESECCION DE LESION CUELLO UTERINO(32077)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '674002',
+    descripcion: 'AMPUTACION DE CUELLO O TRAQUELECTOMIA POR LAPAROTOMIA(46476)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '674501',
+    descripcion: 'TRAQUELECTOMIA RADICAL POR LAPAROTOMIA(30140)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '675101',
+    descripcion: 'CERCLAJE DE ISTMO UTERINO POR LAPAROTOMIA(46482)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '675103',
+    descripcion: 'CERCLAJE DE ISTMO UTERINO POR VIA VAGINAL(46484)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '676101',
+    descripcion: 'SUTURA DE LACERACION O DESGARRO DE CUELLO UTERINO CERVIX VIA VAGINAL(46485)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '676103',
+    descripcion: 'SUTURA DE ANILLO PERICERVICAL VIA VAGINAL(46487)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '676920',
+    descripcion: 'TRAQUELOPLASTIA CON TRAQUELORRAFIA(3126)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '682101',
+    descripcion: 'LIBERACION DE ADHERENCIAS INTRALUMINALES DEL UTERO(29676)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '682303',
+    descripcion: 'ESCISION DE POLIPO ENDOMETRIAL POR LEGRADO(46496)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '692110',
+    descripcion: 'INTERPOSICION UTERINA [WATKINS](29115)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '698001',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO INTRAUTERINO POR LAPAROTOMIA(46525)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '698004',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO INTRAUTERINO POR LEGRADO(46528)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '699602',
+    descripcion: 'RETIRO DE MATERIAL DE CERCLAJE DE CUELLO UTERINO VIA VAGINAL(46532)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '699701',
+    descripcion: 'RETIRO DE DISPOSITIVO EN CUELLO UTERINO VIA VAGINAL(46533)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '699702',
+    descripcion: 'RETIRO CUERPO EXTRAÑO PENETRANTE EN CUELLO UTERINO VIA VAGINAL(46534)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '701204',
+    descripcion: 'COLPOTOMIA(46536)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '701301',
+    descripcion: 'LIBERACION DE ADHERENCIAS INTRALUMINALES EN VAGINA(46537)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '701430',
+    descripcion: 'VAGINOPERINEOTOMIA(3219)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '703101',
+    descripcion: 'HIMENECTOMIA(46541)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '703102',
+    descripcion: 'HIMENOTOMIA(46542)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '707110',
+    descripcion:
+      'REPARACION DE DESGARRO VAGINAL NO OBSTETRICO GRADO I-II (COMPROMISO MUCOSO O MUSCULAR)(3244)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '707920',
+    descripcion: 'CORRECCION DE LACERACION OBSTETRICA ANTIGUA EN VAGINA(3256)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '707930',
+    descripcion: 'CORRECCION DE SENO UROGENITAL(3257)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '709101',
+    descripcion: 'EXTRACCION DE DISPOSITIVO O CUERPO EXTRAÑO EN VAGINA SIN INCISION(46562)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '709102',
+    descripcion: 'EXTRACCION DE DISPOSITIVO O CUERPO EXTRAÑO EN VAGINA CON INCISION(46563)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '710101',
+    descripcion: 'LISIS DE ADHERENCIAS EN LA VULVA(46570)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '710921',
+    descripcion: 'INCISION Y DRENAJE DE COLECCION DE VULVA O DE GLANDULA DE SKENE(3267)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '710922',
+    descripcion: 'MARSUPIALIZACION O DRENAJE EN GLANDULA DE SKENE(46571)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '712001',
+    descripcion: 'DRENAJE POR PUNCION DE LA GLANDULA DE BARTHOLIN(46574)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '712002',
+    descripcion: 'INCISION Y DRENAJE DE LA GLANDULA DE BARTHOLIN(46575)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '713101',
+    descripcion: 'RESECCION O ABLACION DE GLANDULA DE SKENE(46577)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '713501',
+    descripcion: 'RESECCION DE GRANULOMA VULVO PERINEAL(46579)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '717201',
+    descripcion: 'CORRECCION DE FISTULA DE VULVA(46590)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '717202',
+    descripcion: 'CORRECCION DE FISTULA DE PERINE(46591)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '717301',
+    descripcion: 'DRENAJE DE COLECCION VULVOPERINEAL(46592)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '717902',
+    descripcion: 'CORRECCION DE DESGARRO ANTIGUO EN VULVA Y PERINE(46593)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '717920',
+    descripcion:
+      'SUTURA DE DESGARRO O LACERACION NO OBSTETRICA RECIENTE QUE INVOLUCRA VULVA O PERINE (MUCOSA O MUSCULO) (GRADO I-II)(3291)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '718101',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO DE VULVA O PERINE SIN INCISION(46594)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '718102',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO DE VULVA O PERINE CON INCISION(46595)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '750105',
+    descripcion: 'LEGRADO UTERINO OBSTETRICO POSTPARTO O POSTABORTO POR ASPIRACION AL VACIO+(3308)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '754101',
+    descripcion:
+      'REMOCION MANUAL DE PLACENTA RETENIDA O REVISION UTERINA, SIN ATENCION DEL PARTO(3318)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '755001',
+    descripcion:
+      'REPARACION DE DESGARRO OBSTETRICO RECIENTE DE CUELLO UTERINO [CERVIX] POR LAPAROTOMIA(46652)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '755003',
+    descripcion:
+      'REPARACION DE DESGARRO OBSTETRICO RECIENTE DE CUERPO UTERINO POR LAPAROTOMIA(46654)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '756901',
+    descripcion: 'PLASTIA O REPARACION DE DESGARRO OBSTETRICO DE PERINE(3324)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '756902',
+    descripcion: 'PLASTIA O REPARACION DE DESGARRO OBSTETRICO VAGINAL(3326)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '756903',
+    descripcion: 'PLASTIA O REPARACION DE DESGARRO OBSTETRICO VULVAR(3328)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '756910',
+    descripcion: 'REPARO SECUNDARIO DE EPISIOTOMIA +(3329)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '759101',
+    descripcion:
+      'DRENAJE DE COLECCION OBSTETRICA (DE EPISIOTOMIA O EPISIORRAFIA) EN PERINE POR INCISION(3331)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '759401',
+    descripcion: 'CORRECCION O REPOSICION MANUAL DE UTERO INVERTIDO POR LAPAROTOMIA(46661)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '762101',
+    descripcion:
+      'ENUCLEACION. RESECCION Y CURETAJE DE LESIONES BENIGNAS EN MAXILAR SUPERIOR O INFERIOR. DE MENOS DE TRES CMS. VIA TRANSMUCOSA(3344)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '762102',
+    descripcion:
+      'ENUCLEACION. RESECCION Y CURETAJE DE LESIONES BENIGNAS EN MAXILAR SUPERIOR O INFERIOR. DE MENOS DE TRES CMS. VIA TRANSCUTANEA(3345)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '762103',
+    descripcion:
+      'ENUCLEACION. RESECCION Y CURETAJE DE LESIONES BENIGNAS EN MAXILAR SUPERIOR O INFERIOR. DE MAS DE TRES CMS. VIA TRANSMUCOSA(3346)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '762104',
+    descripcion:
+      'ENUCLEACION. RESECCION Y CURETAJE DE LESIONES BENIGNAS EN MAXILAR SUPERIOR O INFERIOR. DE MAS DE TRES CMS. VIA TRANSCUTANEA(3347)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '762105',
+    descripcion:
+      'ELIMINACION DE EXOSTOSIS O TUBEROSIDADES FIBROSAS EN MAXILAR SUPERIOR O INFERIOR(3348)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '762201',
+    descripcion: 'RESECCION DE TUMOR MALIGNO MAXILAR O MANDIBULAR(3349)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '763902',
+    descripcion: 'CONDILECTOMIA DE LA MANDIBULA(3356)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '763903',
+    descripcion: 'HEMIMAXILECTOMIA(3357)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '765105',
+    descripcion: 'MENISCOPEXIA TEMPOROMANDIBULAR. VIA EXTERNA(3369)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '766100',
+    descripcion: 'OSTEOPLASTIA CERRADA (OSTEOTOMIA) DE RAMA MANDIBULAR SOD(3374)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '766203',
+    descripcion: 'OSTEOTOMIA DE RAMA MANDIBULAR VIA TRANS MUCOSA O VIA TRANSCUTANEA(29719)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '766205',
+    descripcion: 'CORONOIDECTOMIA(3380)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '766303',
+    descripcion: 'OSTEOTOMIA DE CUERPO MANDIBULAR VIA TRANS MUCOSA O TRANSCUTANEA(29720)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '766701',
+    descripcion: 'GENIOPLASTIA CON FIJACION INTERNA(36776)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '766901',
+    descripcion: 'SUSPENSION ESQUELETICA EN FRACTURAS U OSTEOTOMIAS FACIALES(3402)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '766902',
+    descripcion: 'OSTEOTOMIA DESLIZANTE (VISERA)(3403)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '766903',
+    descripcion: 'OSTEOPLASTIA SIMULTANEA DE VARIOS HUESOS FACIALES(3404)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '767701',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURAS DENTOALVEOLARES. CON FIJACION(3423)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '767705',
+    descripcion:
+      'REDUCCION Y FIJACION DE LUXACION DENTO ALVEOLAR QUE COMPROMETE HASTA TRES DIENTES(3427)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '767706',
+    descripcion:
+      'REDUCCION Y FIJACION DE LUXACION DENTO ALVEOLAR QUE COMPROMETE MAS DE TRES DIENTES(3429)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '767801',
+    descripcion: 'REDUCCION CERRADA DE FRACTURA ORBITAL(3430)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '768401',
+    descripcion:
+      'REDUCCION ABIERTA DE LUXACION TEMPOROMANDIBULAR RECIDIVANTE POR CONDILECTOMIA DEL TEMPORAL +(3443)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '768702',
+    descripcion: 'RETIRO DE CERCLAJE INTER O INTRA MAXILAR(3447)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '768801',
+    descripcion: 'ARTRECTOMIA TEMPOROMANDIBULAR(3448)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '768901',
+    descripcion: 'RETIRO DE DISPOSITIVO DE FIJACION INTERNA EN MANDIBULA(36781)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '768902',
+    descripcion: 'RETIRO DE DISPOSITIVO DE FIJACION EXTERNA EN MANDIBULA(36782)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '770401',
+    descripcion: 'DRENAJE. CURETAJE O SECUESTRECTOMIA EN HUESOS DEL CARPO (UNO O MAS)(3453)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '770402',
+    descripcion: 'DRENAJE. CURETAJE O SECUESTRECTOMIA EN METACARPIANOS (UNO O MAS)(3454)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '770902',
+    descripcion: 'SECUESTRECTOMIA. DRENAJE. DESBRIDAMIENTO DE FALANGES DE MANO (UNA O MAS)(3462)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '775401',
+    descripcion:
+      'REPARACION DE DEDO DE PIE EN MARTILLO O EN GARRA CON ARTRODESIS O ARTROPLASTIA (CADA ARTEJO) VIA ABIERTA(46762)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '775402',
+    descripcion:
+      'REPARACION DE DEDO DE PIE EN MARTILLO O EN GARRA CON TRANSFERENCIA TENDINOSA (CADA ARTEJO) VIA ABIERTA(46763)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '775403',
+    descripcion:
+      'REPARACION DE DEDO DE PIE EN MARTILLO O EN GARRA CON REPARACION DE LA PLACA PLANTAR (CADA ARTEJO) VIA ABIERTA(46764)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '775404',
+    descripcion: 'REVISION DE DEDO DE PIE EN MARTILLO O EN GARRA (CADA ARTEJO) VIA ABIERTA(46765)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '776001',
+    descripcion: 'RESECCION DE EXOSTOSIS EN HUESO NO ESPECIFICADO (UNA O MAS)(3524)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '776101',
+    descripcion: 'ESCISION TUMOR BENIGNO DE CLAVICULA(3525)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '776104',
+    descripcion: 'ESCISION TUMOR BENIGNO DE ESCAPULA(3527)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '776201',
+    descripcion: 'ESCISION TUMOR BENIGNO EN HUMERO +(3533)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '776202',
+    descripcion: 'ESCISION TUMOR BENIGNO EN HUMERO CON INJERTO(3534)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '776301',
+    descripcion: 'ESCISION TUMOR BENIGNO EN RADIO O CUBITO(3536)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '776501',
+    descripcion: 'ESCISION TUMOR BENIGNO EN FEMUR +(3540)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '776601',
+    descripcion: 'ESCISION TUMOR BENIGNO EN ROTULA(3543)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '776701',
+    descripcion: 'ESCISION TUMOR BENIGNO EN TIBIA O PERONE(3545)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '776802',
+    descripcion: 'RESECCION DE TUMOR BENIGNO EN TARSIANOS O METATARSIANOS(3548)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '776803',
+    descripcion: 'RESECCION DEL ESPOLON CALCANEO(3549)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '776901',
+    descripcion: 'ESCISION DE TUMOR BENIGNO EN FALANGES DE PIE O DE MANO(3552)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '776902',
+    descripcion: 'ESCISION DE TUMOR MALIGNO EN FALANGES DE PIE O DE MANO(3553)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '776920',
+    descripcion: 'ESCISION DE TUMOR BENIGNO EN HUESOS PELVIANOS(3554)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '777101',
+    descripcion: 'TOMA DE INJERTO OSEO DE ESCAPULA(30124)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '777102',
+    descripcion: 'TOMA DE INJERTO OSEO DE CLAVICULA(29605)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '777103',
+    descripcion: 'TOMA DE INJERTO OSEO DE COSTILLA (COSTOCONDRAL) O ESTERNON(29113)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '777300',
+    descripcion: 'TOMA DE INJERTO OSEO EN RADIO O CUBITO SOD(3563)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '777500',
+    descripcion: 'TOMA DE INJERTO OSEO DE FEMUR SOD(3565)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '777700',
+    descripcion: 'TOMA DE INJERTO DE TIBIA O PERONE SOD+(3566)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '777800',
+    descripcion: 'TOMA DE INJERTO OSEO DE TARSO O METATARSO SOD(3568)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '777902',
+    descripcion: 'TOMA DE INJERTO DE HUESO ILIACO(3569)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '778101',
+    descripcion: 'RESECCION PARCIAL DE ESCAPULA(3570)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '778102',
+    descripcion: 'RESECCION PARCIAL DE CLAVICULA(3571)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '778201',
+    descripcion: 'RESECCION DE EPICONDILO O EPITROCLEA HUMERAL(3575)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '778301',
+    descripcion: 'RESECCION PARCIAL DE DIAFISIS EN CUBITO (HEMIDIAFISECTOMIA)(3578)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '778302',
+    descripcion: 'RESECCION DE EPIFISIS DE CUBITO(3579)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '778303',
+    descripcion: 'RESECCION PARCIAL DE DIAFISIS EN RADIO(3580)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '778304',
+    descripcion: 'RESECCION DE CUPULA DE RADIO(3581)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '778306',
+    descripcion: 'RESECCION DE CABEZA DE RADIO(3583)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '778600',
+    descripcion: 'RESECCION PARCIAL DE ROTULA O HEMIPATELECTOMIA SOD(3587)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '778901',
+    descripcion: 'HEMIDIAFISECTOMIA FALANGES DE MANO (UNA O MAS)(3592)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '778902',
+    descripcion: 'RESECCION CABEZA DE FALANGE DE MANO (UNA O MAS)(3593)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '778912',
+    descripcion: 'RESECCION CABEZA DE FALANGE DE PIE (UNA O MAS)(3595)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '779600',
+    descripcion: 'RESECCION TOTAL DE ROTULA O PATELECTOMIA SOD(3620)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '779802',
+    descripcion: 'ASTRAGALECTOMIA(3623)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '780401',
+    descripcion: 'INJERTO OSEO EN HUESOS DEL CARPO (EXCEPTO ESCAFOIDES)(3639)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '780402',
+    descripcion: 'INJERTO OSEO EN ESCAFOIDES(3640)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '780403',
+    descripcion: 'INJERTO OSEO EN METACARPIANOS (UNO O MAS)(3641)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '780901',
+    descripcion: 'APLICACION DE INJERTO OSEO EN FALANGE DE LA MANO(3651)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '780903',
+    descripcion: 'INJERTO OSEO EN MANO CON FIJACION INTERNA(46882)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '780904',
+    descripcion: 'INJERTO OSEO CON CARTILAGO EN MANO CON FIJACION INTERNA(46883)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '780905',
+    descripcion: 'APLICACION DE INJERTO ESTRUCTURAL EN PIE(46884)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '782103',
+    descripcion: 'GRAPADO EPIFISIARIO DE HUMERO(29608)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '782211',
+    descripcion: 'EPIFISIODESIS ABIERTA DE CUBITO O RADIO(3678)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '782213',
+    descripcion: 'EPIFISIODESIS ABIERTA DE CUBITO Y RADIO(3679)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '782231',
+    descripcion: 'GRAPADO EPIFISIARIO DE CUBITO O RADIO(30128)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '782233',
+    descripcion: 'GRAPADO EPIFISIARIO DE RADIO Y CUBITO(29725)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '782311',
+    descripcion: 'EPIFISIODESIS ABIERTA DE METACARPIANOS(29726)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '782341',
+    descripcion: 'RESECCION/OSTEOTOMIA DE CARPIANOS O METACARPIANOS PARA ACORTAMIENTO(3684)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '782403',
+    descripcion: 'GRAPADO EPIFISIARIO DE FEMUR(3687)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '782531',
+    descripcion: 'GRAPADO EPIFISIARIO DE TIBIA O PERONE(29657)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '782533',
+    descripcion: 'GRAPADO EPIFISIARIO DE TIBIA Y PERONE(29610)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '782611',
+    descripcion: 'EPIFISIODESIS ABIERTA DE TARSIANOS O METATARSIANOS (UNA O MAS)(34239)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '782631',
+    descripcion: 'GRAPADO EPIFISIARIO DE TARSIANOS O METATARSIANOS (UNA O MAS)(32027)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '782751',
+    descripcion: 'EPIFISIODESIS ABIERTA DE FALANGES DE PIE (UNA O MAS)(32025)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '782771',
+    descripcion: 'GRAPADO EPIFISIARIO DE FALANGES DE PIE (UNA O MAS)(32005)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '786801',
+    descripcion:
+      'EXTRACCION DE DISPOSITIVO IMPLANTADO EN TARSIANOS O METATARSIANOS (CADA UNO)(3761)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '786802',
+    descripcion:
+      'EXTRACCION DE CUERPO EXTRAÑO EN TARSIANOS O METATARSIANOS (CADA UNO) VIA ABIERTA(3762)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '786902',
+    descripcion:
+      'EXTRACCION DE CUERPO EXTRAÑO EN FALANGES (UNO O MAS) DE MANO. VIA ABIERTA +(3764)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '786911',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO EN FALANGES (UNO O MAS) DE PIE. VIA ABIERTA+(3766)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '792401',
+    descripcion: 'REDUCCION ABIERTA SIN FIJACION DE FRACTURA DE HUESO DEL CARPO O METACARPO(3841)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '792901',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA SIN FIJACION INTERNA DE FALANGES DE MANO(3849)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '796301',
+    descripcion:
+      'LAVADO Y DESBRIDAMIENTO DE FRACTURA ABIERTA O EXPUESTA EN MANO (EXCEPTO FALANGES) +(3940)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '796400',
+    descripcion: 'LAVADO Y DESBRIDAMIENTO DE FRACTURAS EXPUESTAS DE FALANGES EN MANO SOD+(3941)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '798401',
+    descripcion: 'REDUCCION CON FIJACION DE LUXACION CARPIANA VIA ABIERTA(46942)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '798403',
+    descripcion: 'REDUCCION CON FIJACION DE LUXACION CARPO- METACARPIANA VIA ABIERTA(46944)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '798405',
+    descripcion:
+      'REDUCCION CON FIJACION DE LUXACION METACARPOFALANGICA O INTERFALANGICA VIA ABIERTA(46946)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '799401',
+    descripcion:
+      'REDUCCION ABIERTA CON FIJACION DE FRACTURA INTRAARTICULAR DE MANO (UNA O MAS ARTICULACIONES)(3991)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '800402',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO EN ARTICULACION DE MANO POR ARTROTOMIA(4009)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '800802',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO EN PIE O ARTEJOS POR ARTROTOMIA(4017)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '801200',
+    descripcion: 'ARTROTOMIA DE CODO SOD(4019)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '801300',
+    descripcion: 'ARTROTOMIA DE MUÑECA SOD(4020)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '801400',
+    descripcion: 'ARTROTOMIA EN MANO SOD(4021)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '801800',
+    descripcion: 'ARTROTOMIA EN PIE SOD(4026)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '804301',
+    descripcion: 'CAPSULOTOMIA METACARPOFALANGICA (UNA O MAS)(4047)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '804302',
+    descripcion: 'CAPSULOTOMIA INTERFALANGICA (UNA O MAS)(4048)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '804310',
+    descripcion: 'LIBERACION DE BANDAS CONSTRICTIVAS(4051)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '804803',
+    descripcion: 'LIBERACION DE PIE TALO DE GOLDNER(4060)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '805201',
+    descripcion: 'QUIMIONUCLEOLISIS DISCAL CERVICAL(46988)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '807001',
+    descripcion: 'RESECCION COMPLETA O PARCIAL DE MEMBRANA SINOVIAL(4082)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '807403',
+    descripcion: 'SINOVECTOMIA METACARPOFALANGICA (UNA O MAS) VIA ABIERTA +(4097)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '807801',
+    descripcion: 'SINOVECTOMIA DE ARTICULACIONES DEL TARSO (CADA UNA) VIA ABIERTA(47013)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '807803',
+    descripcion: 'SINOVECTOMIA DE ARTICULACIONES METATARSOFALANGICA (CADA UNA) VIA ABIERTA(47015)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '808041',
+    descripcion:
+      'DESBRIDAMIENTO, LAVADO Y LIMPIEZA DE ARTICULACION EN MANO O DEDOS VIA ABIERTA(4118)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '808073',
+    descripcion: 'DESBRIDAMIENTO, LAVADO Y LIMPIEZA DEL TARSO VIA ABIERTA(47017)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '808075',
+    descripcion: 'DESBRIDAMIENTO, LAVADO Y LIMPIEZA METATARSOFALANGICA VIA ABIERTA(47019)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '808077',
+    descripcion:
+      'DESBRIDAMIENTO, LAVADO Y LIMPIEZA DE FALANGES DE DEDO DEL PIE (CADA UNO) VIA ABIERTA(47021)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '808201',
+    descripcion: 'RESECCION DE HIGROMA DE CODO(4130)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '812503',
+    descripcion: 'ARTRODESIS RADIOCARPIANA SIN INJERTO OSEO VIA ABIERTA(47247)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '812504',
+    descripcion: 'ARTRODESIS RADIOCARPIANA CON INJERTO OSEO VIA ABIERTA(47248)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '812601',
+    descripcion: 'ARTRODESIS TRAPECIO-METACARPIANO(4204)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '812602',
+    descripcion: 'ARTRODESIS CARPO-METACARPIANA(36786)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '812700',
+    descripcion: 'ARTRODESIS METACARPO-FALANGICA SOD +(4205)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '812801',
+    descripcion: 'ARTRODESIS INTERFALANGICA EN MANO SIN INJERTO (UNA O MAS)(4206)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '812802',
+    descripcion: 'ARTRODESIS INTERFALANGICA EN MANO CON INJERTO (UNA O MAS)(4207)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '812908',
+    descripcion: 'ARTRODESIS INTERCARPIANA SIN INJERTO OSEO VIA ABIERTA(47251)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '812909',
+    descripcion: 'ARTRODESIS INTERCARPIANA CON INJERTO OSEO VIA ABIERTA(47252)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '814410',
+    descripcion: 'REALINEAMIENTO DE ROTULA CON CIRUGIA DE TEJIDOS BLANDOS(4222)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '814420',
+    descripcion: 'REALINEAMIENTO DE ROTULA CON OSTEOTOMIA DE TUBEROSIDAD ANTERIOR(4223)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '814703',
+    descripcion: 'RETINACULOPLASTIA (PARA LIBERACION DE LA ROTULA)(4231)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '817201',
+    descripcion: 'ARTROPLASTIA POR INTERPOSICION O RESECCION MUÑECA(4270)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '817202',
+    descripcion: 'ARTROPLASTIA RESECCION TRAPECIO-METACARPIANA(4271)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '817203',
+    descripcion: 'ARTROPLASTIA METACARPO-FALANGICA (UNA O MAS)(4272)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '817208',
+    descripcion: 'ARTROPLASTIA RADIOCARPIANA (MUÑECA O PUÑO)(4275)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '817901',
+    descripcion: 'ARTROPLASTIAS INTERFALANGICAS (POR CADA DEDO)(4278)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '818603',
+    descripcion: 'LIBERACION ANTERIOR O POSTERIOR DE CODO PARA CONTRACTURA(4294)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '818604',
+    descripcion: 'REPARACION AGUDA DE LIGAMIENTO COLATERAL CODO(4295)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '820200',
+    descripcion: 'MIOTOMIA DE MANO SOD(4313)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '821101',
+    descripcion: 'TENOTOMIA DE MANO PALMAR(4315)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '821102',
+    descripcion: 'TENOTOMIA DE MANO DORSAL(4316)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '821200',
+    descripcion: 'FASCIOTOMIA DE MANO SOD(4317)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '822101',
+    descripcion: 'RESECCION DE GANGLION EN DEDOS DE MANO(4319)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '822106',
+    descripcion: 'RESECCIÓN DE GANGLIÓN PALMAR DE MUÑECA VIA ABIERTA(47336)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '822201',
+    descripcion: 'ESCISION DE TUMOR BENIGNO EN MUSCULO DE MANO(4322)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '822202',
+    descripcion: 'ESCISION DE TUMOR MALIGNO EN MUSCULO DE MANO(4323)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '823100',
+    descripcion: 'BURSECTOMIA DE MANO SOD(4324)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '823200',
+    descripcion: 'ESCISION DE TENDON DE MANO PARA INJERTO (DIFERENTE REGION OPERATORIA) SOD+(4325)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '823307',
+    descripcion: 'TENOSINOVECTOMIA [TIPO ENFERMEDAD DE QUERVAIN](4328)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '823311',
+    descripcion: 'TENOSINOVECTOMIA EN DEDOS DE MANO (UNO O MAS)(4329)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '823501',
+    descripcion: 'ESCISION DE APONEUROSIS EN MANO +(4331)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '824202',
+    descripcion:
+      'TENORRAFIA DE FLEXORES DE DEDOS (CADA UNO) CON NEURORRAFIA Y VASCULARIZACION +(4335)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '824203',
+    descripcion: 'TENORRAFIA DE FLEXORES DE DEDOS (CADA UNO) SIN NEURORRAFIA(4336)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '824211',
+    descripcion:
+      'TENORRAFIA DE FLEXORES DE MANO (UNO O MAS) CON NEURORRAFIA Y VASCULARIZACION +(4337)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '824215',
+    descripcion: 'TENORRAFIA DE FLEXORES DE MANO (UNO O MAS) SIN NEURORRAFIA(4339)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '824321',
+    descripcion: 'TENORRAFIA DE EXTENSORES DE MANO (UNO O MAS)(4341)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '824601',
+    descripcion: 'MIORRAFIA DE EXTENSORES DE MANO (UNO O MAS)(4342)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '824611',
+    descripcion: 'MIORRAFIA DE FLEXORES DE MANO (UNO O MAS)(4343)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '825306',
+    descripcion: 'REINSERCION DE TENDON EN MANO (UNO O MAS)(4350)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '825307',
+    descripcion: 'TRASFERENCIA DE TENDON EN MANO O MUÑECA (UNO O MAS)(4351)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '826100',
+    descripcion: 'PULGARIZACION O POLICITACION CON SUMINISTRO NEUROVASCULAR SOD +(4354)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '827901',
+    descripcion: 'INJERTO DE TENDON EXTENSOR DE MANO O DEDOS (UNO O MAS)(4358)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '827902',
+    descripcion: 'INJERTO DE TENDON FLEXOR DE MANO O DEDOS (UNO O MAS)(4359)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '827910',
+    descripcion: 'INJERTO TENDINOSO CON IMPLANTE EN DEDOS DE LA MANO (CADA UNO) +(4360)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '828101',
+    descripcion: 'TRASPOSICION DE DEDO(4361)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '828401',
+    descripcion: 'CORRECCION QUIRURGICA DE DEDO EN BOTONERA(4373)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '828402',
+    descripcion: 'CORRECCION QUIRURGICA DE DEDO EN CUELLO DE CISNE(4374)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '828403',
+    descripcion: 'CORRECCION QUIRURGICA DE DEDO EN MARTILLO(4375)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '828501',
+    descripcion: 'TENODESIS EN MANO (UNO O MAS) +(4377)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '828907',
+    descripcion: 'RECONSTRUCCION DE LIGAMENTOS EN MANO CON AUTOINJERTO VIA ABIERTA(47342)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '829111',
+    descripcion: 'TENOLISIS EN EXTENSORES DE DEDO (UNO O MAS)(4380)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '829121',
+    descripcion: 'TENOLISIS EN EXTENSORES DE MANO (UNO O MAS)(4382)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '829125',
+    descripcion: 'TENOLISIS EN FLEXORES DE MANO (UNO O MAS)(4383)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '829901',
+    descripcion: 'DESBRIDAMIENTO DE MUSCULO TENDON Y FASCIA EN MANO(36787)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '829911',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO EN REGION TENAR O TUNEL CARPIANO +(4389)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '830101',
+    descripcion: 'EXPLORACION DE VAINA DE TENDON(4391)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '830102',
+    descripcion: 'ELIMINACION DE CUERPOS RICIFORMES DE VAINA DE TENDON(4392)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '830231',
+    descripcion: 'MIOTOMIA DEL TEMPORAL(4393)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '830232',
+    descripcion: 'MIOTOMIA PTERIGOIDEO(4394)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '830233',
+    descripcion: 'MIOTOMIA DE MASETERO(4395)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '830301',
+    descripcion:
+      'EXTRACCION DE DEPOSITOS CALCANEOS O BURSA-SUBDELTOIDEOS O INTRATENDINOSOS +(4396)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '831101',
+    descripcion: 'TENOTOMIAS EN PIE (UNA O MAS)(4397)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '831202',
+    descripcion: 'LIBERACION PERIARTICULAR DE LA CADERA. CON TENOTOMIAS (CADERA COLGANTE)(4399)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '831203',
+    descripcion: 'LIBERACION DE FLEXORES DE CADERA(4400)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '831204',
+    descripcion: 'LIBERACION DE MUSCULATURA PELVITROCANTERICA(4401)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '831303',
+    descripcion: 'TENOTOMIAS EN BRAZO (UNA O MAS)(4403)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '831304',
+    descripcion: 'TENOTOMIAS EN ANTEBRAZO (UNA O MAS)(4404)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '831306',
+    descripcion: 'TENOTOMIA MULTIPLE EN CUELLO(4406)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '831307',
+    descripcion: 'TENOTOMIA DE MUSCULOS ESPASTICOS (EXCEPTO MANO)(4407)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '831308',
+    descripcion: 'TENOTOMIA EN PIERNA (UNA O MAS)(4408)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '831309',
+    descripcion: 'TENOTOMIAS DE ISQUIOTIBIALES (UNA O MAS)(4409)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '831310',
+    descripcion: 'TENOTOMIA TORACICA (EN DESCOMPRESION)(32038)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '831402',
+    descripcion: 'INCISION DE BANDA ILIOTIBIAL(4412)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '831403',
+    descripcion: 'ESCISION PARCIAL DE FASCIA(4413)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '831901',
+    descripcion: 'INCISION DE MUSCULO(32070)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '831902',
+    descripcion: 'LIBERACION DE MUSCULO(4420)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '831905',
+    descripcion:
+      'ESCALENOTOMIA O SECCION DE ESCALENO ANTERIOR SIN RESECCION DE COSTILLA CERVICAL(4421)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '831910',
+    descripcion: 'SECCION DE ESTERNOCLEIDOMASTOIDEO +(4422)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '833101',
+    descripcion: 'ESCISION DE GANGLION DE ENVOLTURA DE TENDON. EXCEPTO DE MANO(4426)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '833201',
+    descripcion: 'ESCISION DE MIOSITIS OSIFICANTE(4427)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '833202',
+    descripcion:
+      'ESCISION O RESECCION DE: HUESO HETEROTOPICO O CALCIFICACIONES HETEROTOPICAS EN MUSCULO(4428)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '833203',
+    descripcion: 'ESCISION DE CICATRIZ DE MUSCULO(31984)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '833901',
+    descripcion: 'ESCISION DE QUISTE POPLITEO O DE BAKER(4429)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '834100',
+    descripcion: 'ESCISION DE TENDON PARA INJERTO (DIFERENTE REGION OPERATORIA) SOD(4430)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '834201',
+    descripcion: 'ESCISION DE APONEUROSIS O VAINA DE TENDON(4433)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '834203',
+    descripcion: 'DESBRIDAMIENTO DE MUSCULO TENDON Y FASCIA EXCEPTO MANO(36788)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '834300',
+    descripcion: 'ESCISION DE MUSCULO O FASCIA PARA INJERTO SOD(4435)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '834501',
+    descripcion: 'DESBRIDAMIENTO DE MUSCULO(4437)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '834502',
+    descripcion: 'ESCALENECTOMIA(4439)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '834601',
+    descripcion:
+      'RESECCION DE VAINA TENDINOSA FASCIA MUSCULO O TENDON EXCEPTO MANO Y PIE VIA ABIERTA(47352)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '834910',
+    descripcion:
+      'LIMPIEZA Y DESBRIDAMIENTO QUIRURGICOS DE MUSCULOS. TENDONES Y FASCIA EN BRAZO(4442)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '834920',
+    descripcion:
+      'LIMPIEZA Y DESBRIDAMIENTO QUIRURGICOS DE MUSCULOS. TENDONES Y FASCIA EN ANTEBRAZO(4443)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '834930',
+    descripcion:
+      'LIMPIEZA Y DESBRIDAMIENTO QUIRURGICOS DE MUSCULOS. TENDONES Y FASCIA EN MUSLO(4444)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '834940',
+    descripcion:
+      'LIMPIEZA Y DESBRIDAMIENTO QUIRURGICOS DE MUSCULOS. TENDONES Y FASCIA EN PIERNA(4445)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '834950',
+    descripcion:
+      'LIMPIEZA Y DESBRIDAMIENTO QUIRURGICOS DE MUSCULOS. TENDONES Y FASCIA EN PIE(4446)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '836001',
+    descripcion: 'SUTURA DE MUSCULO O TENDON O FASCIA O APONEUROSIS VIA ABIERTA(47354)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '836100',
+    descripcion: 'SUTURA DE ENVOLTURA DE TENDON SOD(4452)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '836201',
+    descripcion: 'TENORRAFIA DE FLEXORES DE ANTEBRAZO (UNO O MAS)(4453)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '836202',
+    descripcion: 'TENORRAFIA DE EXTENSORES DE ANTEBRAZO (UNO O MAS)(4454)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '837100',
+    descripcion: 'AVANZAMIENTO DE TENDON SOD(29070)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '837200',
+    descripcion: 'RETROCESO DE TENDON SOD(32037)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '837300',
+    descripcion: 'REFIJACION DE TENDON SOD(32016)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '837400',
+    descripcion: 'REFIJACION DE MUSCULO SOD(32015)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '837501',
+    descripcion: 'TRANSFERENCIAS DEL PRONADOR REDONDO(4458)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '837502',
+    descripcion: 'TRANSFERENCIAS DE TENDON EN PARALISIS RADIAL(4459)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '837503',
+    descripcion: 'TRANSFERENCIA TENDINOSA O MIOTENDINOSA CON ESCAPULOPEXIA(4460)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '837601',
+    descripcion: 'TRANSFERENCIAS MIOTENDINOSAS DE HOMBRO(4461)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '837602',
+    descripcion: 'TRANSFERENCIAS MIOTENDINOSAS DE ANTEBRAZO(4462)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '837603',
+    descripcion: 'TRANSFERENCIAS MIOTENDINOSAS DE CODO(4463)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '837605',
+    descripcion: 'TRANSFERENCIAS MIOTENDINOSAS DE CADERA(4465)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '837606',
+    descripcion: 'TRANSFERENCIAS MIOTENDINOSAS DE MUSLO(4466)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '837607',
+    descripcion: 'TRANSFERENCIAS MIOTENDINOSAS DE RODILLA(4467)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '837608',
+    descripcion: 'TRANSFERENCIAS MIOTENDINOSAS DE PIERNA(4468)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '837609',
+    descripcion: 'TRANSFERENCIAS MIOTENDINOSAS DE PIE(4469)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '837702',
+    descripcion: 'TRANSPOSICION DE MUSCULO(33835)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '838200',
+    descripcion: 'INJERTO DE MUSCULO O FASCIA SOD(31983)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '838401',
+    descripcion: 'LIBERACION DE MUSCULO TENDON Y FASCIA DE PIE TALO(31977)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '838710',
+    descripcion: 'MUSCULOPLASTIA O MIOPLASTIA(29069)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '838810',
+    descripcion: 'MIOTENOPLASTIA(32036)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '838830',
+    descripcion: 'TENODESIS(4479)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '838960',
+    descripcion: 'PLICATURA DE FASCIA(32057)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '839101',
+    descripcion: 'LISIS DE ADHERENCIAS DE TENDON O TENOLISIS(4480)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '839901',
+    descripcion:
+      'EXTRACCION DE CUERPO EXTRAÑO EN TEJIDOS BLANDOS DE HOMBRO (MUSCULOS. TENDON. SINOVIAL) +(4485)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '839902',
+    descripcion:
+      'EXTRACCION DE CUERPO EXTRAÑO EN TEJIDOS BLANDOS DE BRAZO (MUSCULOS. TENDON. SINOVIAL) +(4486)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '839903',
+    descripcion:
+      'EXTRACCION DE CUERPO EXTRAÑO EN TEJIDOS BLANDOS DE ANTEBRAZO (MUSCULO. TENDON. SINOVIAL) +(4487)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '839906',
+    descripcion:
+      'EXTRACCION DE CUERPO EXTRAÑO EN TEJIDOS BLANDOS DE CADERA (MUSCULO. TENDON. SINOVIAL)(4488)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '839907',
+    descripcion:
+      'EXTRACCION DE CUERPO EXTRAÑO EN TEJIDOS BLANDOS DE MUSLO (MUSCULO. TENDON. SINOVIAL) +(4489)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '839908',
+    descripcion:
+      'EXTRACCION DE CUERPO EXTRAÑO EN TEJIDOS BLANDOS DE PIERNA (MUSCULO. TENDON. SINOVIAL) +(4490)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '839909',
+    descripcion:
+      'EXTRACCION DE CUERPO EXTRAÑO EN TEJIDOS BLANDOS DE PIE (MUSCULO. TENDON. SINOVIAL) +(4491)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '840400',
+    descripcion: 'DESARTICULACION DE MUÑECA SOD(4500)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '842100',
+    descripcion: 'REIMPLANTE DE PULGAR SOD(4517)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '842202',
+    descripcion: 'REIMPLANTE DE UN DEDO EN MANO(4518)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '842203',
+    descripcion: 'REIMPLANTE DE DOS DEDOS EN MANO(4519)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '842204',
+    descripcion: 'REIMPLANTE DE TRES DEDOS EN MANO(4520)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '842205',
+    descripcion: 'REIMPLANTE DE CUATRO O MAS DEDOS EN MANO(4521)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '842302',
+    descripcion: 'REIMPLANTE DE MANO A NIVEL DEL METACARPO(4523)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '842303',
+    descripcion: 'REIMPLANTE DE MANO A NIVEL DE LA MUÑECA(4524)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '842500',
+    descripcion: 'REIMPLANTE DE ARTEJOS SOD(32056)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '861101',
+    descripcion:
+      'DRENAJE DE COLECCION SUPERFICIAL DE PIEL O TEJIDO CELULAR SUBCUTANEO POR INCISION O ASPIRACION(4600)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '862007',
+    descripcion:
+      'DESBRIDAMIENTO ESCISIONAL ENTRE EL 10% AL 19% DE SUPERFICIE CORPORAL EN AREA GENERAL(47389)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '862101',
+    descripcion: 'DRENAJE DE QUISTE PILONIDAL(4616)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '862102',
+    descripcion: 'MARSUPIALIZACION DE QUISTE PILONIDAL(4617)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '862103',
+    descripcion: 'RESECCION QUISTE PILONIDAL (CIERRE PARCIAL O ESCISION ABIERTA)(4618)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '862104',
+    descripcion: 'RESECCIÓN QUISTE PILONIDAL CON RECONSTRUCCIÓN CON COLGAJO(43064)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '862801',
+    descripcion:
+      'DESBRIDAMIENTO NO ESCISIONAL DE TEJIDO DESVITALIZADO HASTA DEL 5% DE SUPERFICIE CORPORAL(4661)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '862802',
+    descripcion:
+      'DESBRIDAMIENTO NO ESCISIONAL DE TEJIDO DESVITALIZADO ENTRE EL 5%AL 10% DE SUPERFICIE CORPORAL(4662)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '862803',
+    descripcion:
+      'DESBRIDAMIENTO NO ESCISIONAL DE TEJIDO DESVITALIZADO ENTRE EL 10% AL 20% DE SUPERFICIE CORPORAL(4663)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '862900',
+    descripcion: 'FISTULECTOMIA DE PIEL Y TEJIDO CELULAR SUBCUTANEO SOD(4668)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '864106',
+    descripcion:
+      'RESECCION DE TUMOR MALIGNO DE PIEL O TEJIDO CELULAR SUBCUTANEO AREA GENERAL, CON REPARACION (COLGAJO O INJERTO)(4682)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '865102',
+    descripcion: 'SUTURA DE HERIDA MULTIPLE. EN AREA GENERAL +(4691)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '865201',
+    descripcion: 'SUTURA DE HERIDA UNICA DE CARA(4693)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '865202',
+    descripcion: 'SUTURA DE HERIDA ÚNICA DE CARA SIN COMPROMISO DE LABIOS O PÁRPADOS(4694)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '865203',
+    descripcion: 'SUTURA DE HERIDA UNICA DE PLIEGUES DE FLEXION. GENITALES. MANOS Y PIES +(4695)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '865204',
+    descripcion: 'SUTURA DE HERIDA MULTIPLE DE CARA(4696)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '865205',
+    descripcion: 'SUTURA DE HERIDA MÚLTIPLE DE CARA SIN COMPROMISO DE LABIOS O PÁRPADOS(4698)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '865206',
+    descripcion: 'SUTURA DE HERIDA MULTIPLE DE PLIEGUES DE FLEXION, GENITALES, MANOS Y PIES(4700)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '865207',
+    descripcion: 'SUTURA DE HERIDA PARCIAL DE CUERO CABELLUDO (ESCALPE) +(4701)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '866300',
+    descripcion: 'INJERTO CONDROCUTANEO SOD(4718)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '866401',
+    descripcion: 'INJERTO DE CUERO CABELLUDO [ALOPECIA SECUELA POST-TRAUMA](4721)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '867004',
+    descripcion: 'COLGAJO LOCAL SIMPLE DE PIEL DE MÁS DE DIEZ CENTÍMETROS CUADRADOS(43065)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '868101',
+    descripcion: 'RESECCION SIMPLE DE CICATRIZ EN AREA GENERAL +(4744)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '868102',
+    descripcion: 'RESECCION SIMPLE DE CICATRIZ EN AREA ESPECIAL +(4745)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '868401',
+    descripcion: 'PLASTIA EN Z O W EN AREA GENERAL. ENTRE UNA A DOS(4757)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '868402',
+    descripcion: 'PLASTIA EN Z O W EN AREA GENERAL. ENTRE TRES A CINCO(4758)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '868403',
+    descripcion: 'PLASTIA EN Z O W EN AREA GENERAL. MAS DE CINCO(4759)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '868501',
+    descripcion:
+      'PLASTIA EN Z O W EN AREA ESPECIAL (CARA. CUELLO. MANOS. PIES. PLIEGUES DE FLEXION. GENITALES). ENTRE UNO A DOS +(4760)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '868502',
+    descripcion:
+      'PLASTIA EN Z O W EN AREA ESPECIAL (CARA. CUELLO. MANOS. PIES. PLIEGUES DE FLEXION. GENITALES). ENTRE TRES A CINCO +(4761)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '868503',
+    descripcion:
+      'PLASTIA EN Z O W EN AREA ESPECIAL (CARA. CUELLO. MANOS. PIES. PLIEGUES DE FLEXION. GENITALES). MAS DE CINCO +(4762)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '868504',
+    descripcion: 'PLASTIA EN Z O W EN MANO (SIN INCLUIR DEDOS). ENTRE UNA A DOS(4763)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '868505',
+    descripcion: 'PLASTIA EN Z O W EN MANO (SIN INCLUIR DEDOS). ENTRE TRES A CINCO(4764)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '868506',
+    descripcion: 'PLASTIA EN Z O W EN MANO (SIN INCLUIR DEDOS). MAS DE CINCO(4765)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '868507',
+    descripcion: 'PLASTIA EN Z. EN CADA DEDO DE LA MANO O DEL PIE(4766)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '868510',
+    descripcion: 'PLASTIA EN Z O W. EN ZONAS DE FLEXION(4767)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '869103',
+    descripcion: 'RESECCION PARCIAL DE GLANDULAS SUDORIPARAS(4774)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '869201',
+    descripcion: 'DERIVACION LINFATICA [MANEJO DE LINFEDEMA] +(4776)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '869205',
+    descripcion: 'REDUCCION DE TEJIDO CELULAR SUBCUTANEO (MANEJO DE LINFEDEMA)(36846)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '869601',
+    descripcion:
+      'INSERCION (SUBCUTANEA) (TEJIDO BLANDO) DE EXPANSOR DE TEJIDOS (UNICO O MULTIPLE)(4780)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '869700',
+    descripcion: 'RETIRO DE EXPANSOR TISULAR [UNICO O MULTIPLE] SOD(4781)',
+    grupo: 'CIRUGIA AMBULATORIA',
+  },
+  {
+    cups: '389500',
+    descripcion: 'CATETERIZACION VENOSA PARA DIALISIS RENAL SOD(1843)',
+    grupo: 'INTERNACION MEDICA',
+  },
+  {
+    cups: '392702',
+    descripcion:
+      'FORMACION DE FISTULA AV (PERIFERICA) PARA DIALISIS RENAL CON PROTESIS [DERIVACION AV POR CANULA EXTERNA DE SCRIBNER] [INSERCION DE CANULA VASO A VASO] +(1868)',
+    grupo: 'INTERNACION MEDICA',
+  },
+  {
+    cups: '549005',
+    descripcion: 'COLOCACION DE CATETER PARA DIALISIS PERITONEAL VIA ABIERTA(46192)',
+    grupo: 'INTERNACION MEDICA',
+  },
+  {
+    cups: '10A003',
+    descripcion: 'INTERNACION COMPLEJIDAD ALTA TRES CAMAS(56280)',
+    grupo: 'INTERNACION MEDICA',
+  },
+  {
+    cups: '397400',
+    descripcion: 'EXPLORACION DE AORTA ABDOMINAL SOD(1941)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '045103',
+    descripcion: 'INJERTO DE NERVIO PERIFERICO A NERVIO FACIAL IPSILATERAL(42948)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '045104',
+    descripcion: 'INJERTO DE NERVIO PERIFERICO A NERVIO FACIAL CONTRALATERAL(42949)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '052101',
+    descripcion: 'GANGLIONECTOMIA ESFENOPALATINA(418)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '052102',
+    descripcion: 'GANGLIONECTOMIA(29564)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '052200',
+    descripcion: 'SIMPATECTOMIA CERVICAL SOD(419)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '052300',
+    descripcion: 'SIMPATECTOMIA LUMBAR SOD(420)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '055101',
+    descripcion: 'EXPLORACION SUPRA E INFRACLAVICULAR DE PLEJO BRAQUIAL +(473)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '055102',
+    descripcion: 'EXPLORACION DE PLEJO O TRONCO (CERVICAL, LUMBAR O SACRO)(29698)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '055200',
+    descripcion: 'DESCOMPRESION DE PLEJO O TRONCO (CERVICAL. LUMBAR O SACRO) SOD +(474)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '060901',
+    descripcion: 'DRENAJE DE COLECCION EN AREA TIROIDEA POR INCISION(477)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '060903',
+    descripcion: 'EXPLORACION DE CUELLO O AREA TIROIDEA POR INCISION(479)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '064101',
+    descripcion: 'TIROIDECTOMIA TOTAL VIA ABIERTA(42954)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '068101',
+    descripcion: 'PARATIROIDECTOMIA TOTAL VIA ABIERTA(42958)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '068901',
+    descripcion: 'PARATIROIDECTOMIA PARCIAL VIA ABIERTA(42959)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '072001',
+    descripcion: 'SUPRARRENALECTOMÍA PARCIAL UNILATERAL VÍA ABIERTA(42249)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '072401',
+    descripcion: 'SUPRARRENALECTOMÍA PARCIAL BILATERAL VÍA ABIERTA(42250)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '072501',
+    descripcion: 'SUPRARRENALECTOMÍA TOTAL UNILATERAL VÍA ABIERTA(42251)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '072601',
+    descripcion: 'SUPRARRENALECTOMÍA TOTAL BILATERAL VÍA ABIERTA(42252)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '074101',
+    descripcion: 'DRENAJE DE GLÁNDULA SUPRARRENAL VÍA ABIERTA(42255)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '078203',
+    descripcion: 'RESECCION TOTAL DEL TIMO VIA ABIERTA(45852)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '204001',
+    descripcion: 'ATICO ANTROMASTOIDECTOMIA(41837)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '204003',
+    descripcion: 'MASTOIDECTOMIA CON EPITIMPANECTOMIA O TIMPANOTOMIA POSTERIOR(41838)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '218301',
+    descripcion: 'RECONSTRUCCION NASAL TOTAL CON INJERTO +(901)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '218304',
+    descripcion:
+      'RECONSTRUCCION PROTESICA DE NARIZ CON MINIPLACAS DE FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS] +(903)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '218305',
+    descripcion: 'RECONSTRUCCION PROTESICA DE NARIZ CON IMPLANTE OSEOINTEGRADO(30135)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '218901',
+    descripcion: 'REIMPLANTACION DE NARIZ AMPUTADA(913)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '226101',
+    descripcion: 'ESCISION DE LESION DE SENO MAXILAR VIA OROANTRAL(41743)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '226208',
+    descripcion: 'RESECCION DE LESION MALIGNA EN SENO MAXILAR VIA ABIERTA(41746)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '226301',
+    descripcion: 'FRONTO ETMOIDECTOMIA EXTERNA [OPERACION DE LYNCH](947)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '226303',
+    descripcion: 'ETMOIDECTOMIA ANTERIOR TRANSNASAL(949)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '226403',
+    descripcion: 'ESFENOIDECTOMIA VIA TRANSNASAL(41748)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '227101',
+    descripcion: 'CIERRE DE FISTULA OROANTRAL +(957)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '252501',
+    descripcion: 'HEMIGLOSECTOMIA CON CIERRE PRIMARIO +(1100)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '253401',
+    descripcion: 'GLOSECTOMIA TOTAL VIA ABIERTA(42961)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '254001',
+    descripcion: 'GLOSECTOMIA RADICAL VIA ABIERTA(42962)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '255001',
+    descripcion: 'GLOSOPLASTIA CON INJERTO CUTANEO O MUCOSO(42963)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '255002',
+    descripcion: 'GLOSOPEXIA ANTERIOR(42964)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '275303',
+    descripcion:
+      'CIERRE DE FISTULA OROSINUSAL U ORONASAL. CON COLGAJO PALATINO. LINGUAL O BUCAL(1192)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '275304',
+    descripcion:
+      'CIERRE DE FISTULA OROSINUSAL CON SINUSOTOMIA. CON O SIN REMOCION DE CUERPO EXTRAÑO O COLGAJO PALATINO. LINGUAL O BUCAL(1193)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '275802',
+    descripcion: 'PROFUNDIZACION DE PISO DE BOCA(29390)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '275901',
+    descripcion: 'PROFUNDIZACION DE SURCO VESTIBULAR CON INJERTO MUCOSO(1205)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '275902',
+    descripcion: 'PROFUNDIZACION DE SURCO VESTIBULAR CON INJERTO CUTANEO(1206)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '293305',
+    descripcion: 'RESECCION DE LESION O TUMOR BENIGNO DE FARINGE VIA ABIERTA(41884)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '293402',
+    descripcion: 'FARINGECTOMIA TOTAL VIA ABIERTA(41887)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '293501',
+    descripcion: 'RESECCION RADICAL DE OROFARINGE (TEJIDOS BLANDOS Y DUROS) VIA ABIERTA(41888)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '294301',
+    descripcion: 'FISTULECTOMIA FARINGEA(41894)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '295101',
+    descripcion: 'FARINGOPLASTIA CON COLGAJO FARINGEO(1262)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '295601',
+    descripcion: 'FARINGOPLASTIA POR IMPLANTE FARINGEO(1271)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '295602',
+    descripcion: 'FARINGOPLASTIA POR COLGAJO FARINGEO DE BASE SUPERIOR O INFERIOR(1273)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '295603',
+    descripcion: 'FARINGOPLASTIA POR ENTRECRUZAMIENTO DE PILARES(1275)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '295604',
+    descripcion:
+      'FARINGOPLASTIA CON COLGAJO FARINGEO POSTERIOR Y DESPLAZAMIENTO DE PILARES [TECNICA HOGAN](1277)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '295605',
+    descripcion: 'FARINGOPLASTIA LATERAL(42695)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '295606',
+    descripcion: 'ESFINTEROPLASTIA DE EXPANSION(42696)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '295608',
+    descripcion: 'FARINGOPLASTIA DE TRACCION CON SUTURAS(42698)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '300201',
+    descripcion: 'RESECCION DE LESION EN LARINGE VIA ABIERTA(1287)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '301001',
+    descripcion: 'LARINGECTOMIA SUPRACRICOIDEA CON CRICOHIODOEPIGLOTOPEXIA(42124)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '301105',
+    descripcion: 'HEMILARINGECTOMIA SUPRAGLOTICA VIA ABIERTA(42125)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '301109',
+    descripcion: 'HEMILARINGECTOMIA VERTICAL VIA ABIERTA(42127)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '301111',
+    descripcion: 'HEMILARINGECTOMIA VERTICAL AMPLIADA VIA ABIERTA(42128)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '301201',
+    descripcion: 'EPIGLOTIDECTOMIA VIA ABIERTA(42129)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '302301',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA LARINGEA CON SUTURA O ALAMBRE(42133)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '302302',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA LARINGEA CON MINIPLACAS DE FIJACION INTERNA (DISPOSITIVOS DE FIJACION U OSTEOSINTESIS)(42134)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '302409',
+    descripcion: 'LARINGOPLASTIA DE MEDIALIZACION VIA ABIERTA(42720)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '303104',
+    descripcion: 'LARINGOFARINGECTOMIA CON RECONSTRUCCION CON COLGAJO MICROVASCULAR(42140)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '303201',
+    descripcion: 'LARINGECTOMIA TOTAL VIA ABIERTA(42141)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '304101',
+    descripcion: 'LARINGECTOMIA RADICAL VIA ABIERTA(42142)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '305101',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO DE LARINGE VIA ABIERTA(42143)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '306301',
+    descripcion: 'INSERCION O SUSTITUCION DE DISPOSITIVO EN LARINGE VIA ABIERTA(42146)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '306401',
+    descripcion: 'EXTRACCION DE DISPOSITIVO LARINGEO VIA ABIERTA(42147)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '311301',
+    descripcion: 'TRAQUEOSTOMIA VIA ABIERTA(42989)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '313101',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO DE TRAQUEA VIA ABIERTA +(1316)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '315002',
+    descripcion:
+      'RESECCION O ABLACION DE LESION DE TRAQUEA CON RECONSTRUCCION E INTERPOSICION DE COLGAJO VIA ABIERTA(42741)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '317101',
+    descripcion: 'SUTURA DE LACERACION DE TRAQUEA VIA ABIERTA(42745)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '317304',
+    descripcion:
+      'CIERRE DE FISTULA TRAQUEOESOFAGICA CON RECONSTRUCCION DE ESOFAGO VIA ABIERTA(46056)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '317306',
+    descripcion:
+      'CIERRE DE FISTULA TRAQUEOESOFAGICA CON RECONSTRUCCION TRAQUEAL VIA ABIERTA(46058)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '319203',
+    descripcion: 'DILATACION DE LA TRAQUEA VIA TRANSLARINGEA(42749)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '321001',
+    descripcion: 'CIERRE DE FISTULA BRONCOCUTANEA O BRONCOPLEURAL VIA ABIERTA(42752)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '321201',
+    descripcion: 'BRONCOPLASTIA VIA ABIERTA(42755)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '321301',
+    descripcion: 'BRONCORRAFIA VIA ABIERTA(42756)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '321303',
+    descripcion: 'NEUMORRAFIA VIA ABIERTA(42757)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '325101',
+    descripcion: 'NEUMONECTOMIA SIMPLE VIA ABIERTA(42765)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '325201',
+    descripcion: 'NEUMONECTOMIA RADICAL VIA ABIERTA(42766)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '325302',
+    descripcion: 'PLEURONEUMOPERICARDIECTOMIA EXTRAPLEURAL CON RECONSTRUCCION VIA ABIERTA(42768)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '340201',
+    descripcion: 'TORACOTOMIA EXPLORATORIA(42783)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '340905',
+    descripcion: 'TORACOPLASTIA CON CIERRE DE FISTULA BRONCOPLEURAL(42797)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '340906',
+    descripcion: 'TORACOPLASTIA EXTRAPLEURAL(42798)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '341001',
+    descripcion: 'MEDIASTINOSCOPIA DIAGNOSTICA(43003)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '341101',
+    descripcion: 'EXPLORACION Y DRENAJE DE MEDIASTINO POR MEDIASTINOTOMIA(1410)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '341104',
+    descripcion: 'EXPLORACION Y DRENAJE DE MEDIASTINO POR ESTERNOTOMIA(42803)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '341401',
+    descripcion: 'RESECCION DE TUMOR MALIGNO DEL MEDIASTINO POR TORACOTOMIA(42814)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '341402',
+    descripcion: 'RESECCION DE TUMOR MALIGNO DEL MEDIASTINO POR ESTERNOTOMIA(42815)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '380602',
+    descripcion: 'TROMBOLISIS ARTERIAL ABDOMINAL VIA ENDOVASCULAR +(1681)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '380702',
+    descripcion: 'TROMBOLISIS VENOSA ABDOMINAL. VIA ENDOVASCULAR +(1684)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '380810',
+    descripcion: 'TROMBOLISIS DE ARTERIAS DE MIEMBROS INFERIORES. VIA ENDOVASCULAR(1689)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '380910',
+    descripcion: 'TROMBOLISIS DE VENAS DE MIEMBROS INFERIORES. VIA ENDOVASCULAR(1695)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '381203',
+    descripcion:
+      'ENDARTERECTOMIA DE ARTERIA CAROTIDA INTERNA O ARTERIA VERTEBRAL PORCION CERVICAL(1703)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '385205',
+    descripcion: 'OCLUSION, PINZAMIENTO O LIGADURA DE VASOS DE CABEZA Y CUELLO(29567)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '385601',
+    descripcion:
+      'OCLUSION. PINZAMIENTO O LIGADURA DE ARTERIAS ABDOMINALES. UNA O MAS (SELECTIVAS)(1808)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '387300',
+    descripcion: 'INSERCION DE IMPLANTE O FILTRO EN VENA CAVA (SUPERIOR O INFERIOR) SOD +(1827)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '391703',
+    descripcion: 'DERIVACION ESPLENO-RENAL(29071)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '391704',
+    descripcion: 'DERIVACION PORTO-SISTEMICA TRANSYUGULAR INTRAHEPATICA(62047)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '395018',
+    descripcion: 'ANGIOPLASTIA DE VASOS CERVICALES CON O SIN IMPLANTE DE DISPOSITIVO(46095)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '395031',
+    descripcion:
+      'ANGIOPLASTIA CON BALON DE VASOS DE MIEMBROS SUPERIORES. CON PROTESIS (STENT) O INJERTO (S) PROTESICO (S)(25052)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '395060',
+    descripcion: 'ANGIOPLASTIA O ATERECTOMIA DE VASOS ABDOMINALES CON BALON(1904)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '395301',
+    descripcion: 'CIERRE DE FISTULA ARTERIOVENOSA VIA ABIERTA(1918)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '397700',
+    descripcion: 'EXPLORACION DE VENAS ABDOMINALES SOD(1946)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '402600',
+    descripcion: 'ESCISION DE LINFANGIOMA DE CUELLO SOD(1981)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '414301',
+    descripcion: 'ESPLENECTOMÍA PARCIAL VÍA ABIERTA(42347)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '415102',
+    descripcion: 'ESPLENECTOMÍA TOTAL VÍA ABIERTA(42350)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '416102',
+    descripcion: 'ESPLENORRAFIA VÍA ABIERTA(42351)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '420101',
+    descripcion: 'DRENAJE DE COLECCIÓN DE ESÓFAGO POR ESOFAGOTOMÍA VÍA ABIERTA(42353)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '421101',
+    descripcion: 'ESOFAGOSTOMÍA CON MIOTOMÍA CERVICAL VÍA ABIERTA(42354)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '422001',
+    descripcion: 'ESOFAGOSCOPIA OPERATORIA POR INCISION(43017)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '423001',
+    descripcion: 'DIVERTICULOSTOMIA DE ESOFAGO TRANSORAL(42175)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '423103',
+    descripcion: 'DIVERTICULECTOMÍA DE ESÓFAGO CERVICAL VÍA ABIERTA(42355)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '423105',
+    descripcion: 'DIVERTICULECTOMÍA DE ESÓFAGO TORÁCICO VÍA ABIERTA(42356)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '423204',
+    descripcion: 'RESECCIÓN DE LESIÓN O TUMOR DE ESÓFAGO CERVICAL VÍA ABIERTA(42357)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '423205',
+    descripcion: 'RESECCIÓN DE LESIÓN O TUMOR DE ESÓFAGO TORÁCICO VÍA ABIERTA(42358)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '424101',
+    descripcion: 'ESOFAGECTOMÍA PARCIAL VÍA ABIERTA(42361)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '424201',
+    descripcion: 'ESOFAGECTOMÍA TOTAL VÍA ABIERTA(42362)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '425206',
+    descripcion:
+      'RECONSTRUCCION O ANASTOMOSIS ESOFAGICA CON ASCENSO GASTRICO RETROESTERNAL VIA ABIERTA(46105)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '427401',
+    descripcion: 'ESOFAGOCARDIOMIOTOMIA ABDOMINAL O TORACICA [HELLER] VIA ABIERTA(2058)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '429103',
+    descripcion: 'LIGADURA DE VARICES ESOFAGICAS POR TORACOTOMIA(46113)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '429401',
+    descripcion:
+      'EXTRACCION DE CUERPO EXTRAÑO O LESION LOCALIZADA EN ESOFAGO CON REPARO PRIMARIO. VIA CERVICAL+(2081)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '434001',
+    descripcion: 'ESCISIÓN DE PÓLIPOS GÁSTRICOS VÍA ENDOSCÓPICA(42370)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '436101',
+    descripcion: 'GASTRODUODENOSTOMÍA VÍA ABIERTA(42371)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '437101',
+    descripcion: 'GASTROYEYUNOSTOMÍA VÍA ABIERTA(42372)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '438101',
+    descripcion: 'GASTRECTOMÍA SUBTOTAL RADICAL VÍA ABIERTA(42373)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '438201',
+    descripcion: 'GASTRECTOMÍA PARCIAL CON RECONSTRUCCIÓN CON VAGOTOMÍA VÍA ABIERTA(42374)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '438203',
+    descripcion: 'GASTRECTOMÍA PARCIAL CON RECONSTRUCCIÓN SIN VAGOTOMÍA VÍA ABIERTA(42375)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '439001',
+    descripcion: 'GASTRECTOMÍA TOTAL VÍA ABIERTA(42378)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '439003',
+    descripcion: 'GASTRECTOMÍA TOTAL RADICAL VÍA ABIERTA(42379)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '439201',
+    descripcion: 'RECONSTRUCCIÓN GASTROINTESTINAL EN Y DE ROUX VÍA ABIERTA(42381)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '439301',
+    descripcion: 'ESOFAGOGASTRECTOMÍA VÍA ABIERTA(42382)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '440201',
+    descripcion: 'VAGOTOMIA SELECTIVA O SUPRASELECTIVA VIA ABIERTA(43020)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '442201',
+    descripcion: 'DILATACIÓN DE PÍLORO VÍA ENDOSCÓPICA(42385)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '442401',
+    descripcion: 'PILOROPLASTIA VÍA ABIERTA(42386)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '446101',
+    descripcion: 'SUTURA DE DESGARRO O HERIDA DE ESTÓMAGO [GASTRORRAFIA] VÍA ABIERTA(42391)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '446301',
+    descripcion: 'CIERRE DE OTRA FÍSTULA GÁSTRICA VÍA ABIERTA(42393)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '446501',
+    descripcion: 'ESOFAGOGASTROPLASTIA VÍA ABIERTA(42395)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '446601',
+    descripcion:
+      'CIRUGIA ANTIRREFLUJO GASTROESOFAGICO CON RECONSTRUCCION DEL ESFINTER ESOFAGICO VIA INFERIOR TRANSTORACICA(2127)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '446602',
+    descripcion:
+      'CIRUGIA ANTIRREFLUJO GASTROESOFAGICO CON RECONSTRUCCION DEL ESFINTER ESOFAGICO INFERIOR VIA ABDOMINAL(2128)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '449201',
+    descripcion:
+      'MANIPULACIÓN INTRAOPERATORIA DE ESTÓMAGO (REDUCCIÓN DE VÓLVULO) VÍA ABIERTA(42397)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '450001',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO INTESTINAL POR ENTEROTOMIA +(2136)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '450601',
+    descripcion: 'DRENAJE DE COLECCION DE DIVERTICULO VIA ABIERTA(43022)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '453100',
+    descripcion: 'OTRA ELIMINACION O ESCISION DE LESION DE DUODENO SOD(2161)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '453304',
+    descripcion:
+      'RESECCIÓN LOCAL DE LESIÓN O TEJIDO DE INTESTINO DELGADO SALVO DUODENO VÍA ABIERTA(42400)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '453306',
+    descripcion: 'RESECCIÓN INTESTINAL DE DIVERTICULOS VÍA ABIERTA(42401)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '454101',
+    descripcion: 'RESECCIÓN DE LESIÓN O TEJIDO DE INTESTINO GRUESO VÍA ABIERTA(42402)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '454208',
+    descripcion: 'RESECCIÓN DE LESIÓN DE INTESTINO GRUESO VÍA ENDOSCÓPICA (4 - 10)(42404)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '456201',
+    descripcion: 'DUODENECTOMIA(2173)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '456202',
+    descripcion: 'YEYUNECTOMIA(2174)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '457101',
+    descripcion: 'COLECTOMIA PARCIAL CON COLOSTOMIA O ILEOSTOMIA Y FISTULA MUCOSA(2179)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '457301',
+    descripcion: 'HEMICOLECTOMIA DERECHA VIA ABIERTA(32277)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '457501',
+    descripcion: 'HEMICOLECTOMIA IZQUIERDA VÍA ABIERTA(42415)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '457601',
+    descripcion: 'SIGMOIDECTOMIA VÍA ABIERTA(42417)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '458101',
+    descripcion: 'COLECTOMÍA TOTAL CON ILEOSTOMÍA Y PROCTECTOMÍA VÍA ABIERTA(42418)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '458301',
+    descripcion: 'COLECTOMÍA TOTAL VÍA ABIERTA(42419)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '458401',
+    descripcion:
+      'COLECTOMÍA TOTAL CON ILEOSTOMÍA Y CIERRE DE SEGMENTO DISTAL [HARTMAN] VÍA ABIERTA(42420)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '459101',
+    descripcion: 'ANASTOMOSIS DE INTESTINO DELGADO A INTESTINO DELGADO VÍA ABIERTA(42421)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '459201',
+    descripcion: 'ANASTOMOSIS DE INTESTINO DELGADO AL MUÑON RECTAL VÍA ABIERTA(42422)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '459301',
+    descripcion: 'ANASTOMOSIS DE INTESTINO DELGADO A INTESTINO GRUESO VIA ABIERTA(2192)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '459501',
+    descripcion:
+      'ANASTOMOSIS DE INTESTINO DELGADO AL ANO. CON FORMACION DE RESERVORIO (EN J . H O S )(2196)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '459504',
+    descripcion: 'ANASTOMOSIS DE INTESTINO GRUESO AL ANO VÍA ABIERTA(42424)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '465101',
+    descripcion: 'CIERRE DE ESTOMA DE INTESTINO DELGADO POR LAPAROTOMIA(2215)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '465201',
+    descripcion: 'CIERRE DE ESTOMA DE INTESTINO GRUESO POR LAPAROTOMIA(2217)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '466200',
+    descripcion: 'PLICATURA INTESTINAL [OPERACION DE NOBLE] SOD +(62088)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '468011',
+    descripcion: 'REDUCCION INTESTINAL SIN RESECCION INTESTINAL POR LAPAROTOMIA +(2238)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '468012',
+    descripcion: 'REDUCCION INTESTINAL CON RESECCION INTESTINAL POR LAPAROTOMIA +(2239)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '480100',
+    descripcion: 'PROCTOTOMIA. VIA ABDOMINAL O PERINEAL SOD(2263)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '483801',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO EN RECTO. VIA RECTAL ABIERTA +(2278)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '483802',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO EN RECTO. VIA ABDOMINAL +(2279)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '485001',
+    descripcion: 'PROCTECTOMÍA ABORDAJE PERINEAL (TRANS-ANAL) VÍA ABIERTA(42435)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '485003',
+    descripcion: 'PROCTECTOMÍA VÍA TRANS-SACRA(42436)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '485004',
+    descripcion: 'PROCTOSIGMOIDECTOMÍA ABORDAJE PERINEAL(42437)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '485401',
+    descripcion: 'PROCTECTOMÍA CON DESCENSO ABDOMINO-PERINEAL VÍA ABIERTA(42438)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '487101',
+    descripcion: 'SUTURA DE LACERACIÓN DE RECTO [PROCTORRAFIA] VÍA ABIERTA(42442)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '487301',
+    descripcion: 'FISTULECTOMIA RECTO-VAGINAL CON COLOSTOMIA(2297)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '487302',
+    descripcion: 'FISTULECTOMIA RECTO-VESICAL CON COLOSTOMIA(2298)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '487303',
+    descripcion: 'FISTULECTOMIA RECTO-URETRAL CON COLOSTOMIA(2299)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '487501',
+    descripcion: 'PROCTOPEXIA ABDOMINAL VÍA ABIERTA(42443)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '487602',
+    descripcion:
+      'CORRECCION DE PROLAPSO POR RESECCION DE PROCIDENCIA RECTAL CON ANASTOMOSIS. VIA PERINEAL(2304)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '489301',
+    descripcion: 'REPARACIÓN DE FÍSTULA PERIRRECTAL VÍA ABIERTA(42448)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '497110',
+    descripcion:
+      'REPARACION DE LACERACIONES O DESGARROS NO OBSTETRICOS QUE INVOLUCRAN RECTO Y ESFINTER ANAL (GRADO III)(2351)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '497301',
+    descripcion: 'FISTULECTOMIA ANO-VESTIBULAR(2353)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '497303',
+    descripcion: 'FISTULECTOMIA ANO-VAGINAL(2355)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '497402',
+    descripcion: 'TRANSPOSICION DEL MUSCULO RECTO INTERNO PARA INCONTINENCIA ANAL(30001)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '502101',
+    descripcion: 'DRENAJE O MARSUPIALIZACION DE LESION HEPATICA POR LAPAROTOMIA(2380)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '502206',
+    descripcion: 'RESECCIÓN EN CUÑA DE HÍGADO VÍA ABIERTA(42461)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '502208',
+    descripcion: 'HEPATECTOMÍA DE UN SEGMENTO VÍA ABIERTA(42462)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '502210',
+    descripcion: 'HEPATECTOMÍA DE DOS SEGMENTOS VÍA ABIERTA(42463)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '502212',
+    descripcion: 'HEPATECTOMÍA TRISEGMENTARIA VÍA ABIERTA(42464)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '502214',
+    descripcion: 'HEMIHEPATECTOMÍA VÍA ABIERTA(42465)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '502403',
+    descripcion: 'ABLACIÓN DE LESIÓN HEPÁTICA VÍA ABIERTA(41968)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '506103',
+    descripcion: 'HEPATORRAFIA SIMPLE VÍA ABIERTA(42466)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '506105',
+    descripcion: 'HEPATORRAFIA MÚLTIPLE VÍA ABIERTA(42467)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '510001',
+    descripcion: 'COLECISTOSTOMÍA VÍA ABIERTA(42469)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '510101',
+    descripcion:
+      'HEPÁTICOTOMÍA O HEPÁTICOSTOMÍA CON DRENAJE O EXTRACCIÓN DE CÁLCULOS VÍA ABIERTA(42471)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '510302',
+    descripcion: 'DRENAJE BILIAR VÍA ENDOSCÓPICA Y COLOCACIÓN DE DISPOSITIVO(42472)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '512301',
+    descripcion: 'LITOTRIPSIA BILIAR POR COLANGIOPANCREATOGRAFÍA RETRÓGRADA ENDOSCÓPICA(42473)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '512601',
+    descripcion: 'RESECCIÓN DE LESIÓN BENIGNA O MALIGNA DE VÍAS BILIARES VÍA ABIERTA(42476)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '513201',
+    descripcion: 'ANASTOMOSIS DE VESÍCULA BILIAR A INTESTINO VÍA ABIERTA(42477)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '513601',
+    descripcion: 'COLEDOCODUODENOSTOMÍA VÍA ABIERTA(42478)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '514001',
+    descripcion: 'EXPLORACIÓN DE VÍAS BILIARES VÍA ABIERTA(42480)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '514301',
+    descripcion: 'RE EXPLORACIÓN DE VÍAS BILIARES VÍA ABIERTA(42481)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '516201',
+    descripcion:
+      'ESCISION DE LA AMPOLLA DE VATER (AMPULECTOMIA) CON REIMPLANTACION DE COLEDOCO VIA ABIERTA(42483)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '516401',
+    descripcion: 'ESCISIÓN DE LESIÓN EN LAS VÍAS BILIARES VÍA ENDOSCÓPICA(42484)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '517301',
+    descripcion: 'RECONSTRUCCIÓN DE VÍAS BILIARES VÍA ABIERTA(42487)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '518301',
+    descripcion: 'ESFINTEROPLASTIA VÍA ABIERTA(42489)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '520101',
+    descripcion: 'DRENAJE DE COLECCIÓN DE PÁNCREAS VÍA ABIERTA(42496)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '520201',
+    descripcion: 'MARSUPIALIZACIÓN DE QUISTE DEL PÁNCREAS VÍA ABIERTA(42497)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '522201',
+    descripcion: 'RESECCIÓN DE LESIÓN O TEJIDO DE PÁNCREAS VÍA ABIERTA(42498)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '525203',
+    descripcion: 'PANCREATECTOMIA DISTAL VIA ABIERTA(42003)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '525205',
+    descripcion: 'PANCREATECTOMÍA DISTAL CON PRESERVACIÓN DE BAZO VÍA ABIERTA(42507)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '525301',
+    descripcion: 'PANCREATECTOMÍA SUBTOTAL VÍA ABIERTA(42508)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '527101',
+    descripcion: 'PANCREATICODUODENECTOMÍA TOTAL VÍA ABIERTA(42510)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '527201',
+    descripcion: 'PANCREATICODUODENECTOMÍA PROXIMAL VÍA ABIERTA(42511)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '529503',
+    descripcion: 'FISTULECTOMÍA DE PÁNCREAS VÍA ABIERTA(42512)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '529606',
+    descripcion: 'ANASTOMOSIS PANCREATOENTÉRICA VÍA ABIERTA(42514)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '529608',
+    descripcion: 'PANCREATOYEYUNOSTOMÍA TÉRMINO LATERAL VÍA ABIERTA(42515)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '531601',
+    descripcion: 'HERNIORRAFIA BILATERAL INGUINAL ENCARCELADA VÍA ABIERTA(42525)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '535001',
+    descripcion: 'REPARACIÓN DE HERNIA INCISIONAL (EVENTRACIÓN) ENCARCELADA VÍA ABIERTA(42531)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '535101',
+    descripcion: 'REPARACIÓN DE HERNIA INCISIONAL (EVENTRACIÓN) VÍA ABIERTA(42533)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '536201',
+    descripcion: 'HERNIORRAFIA ISQUIÁTICA VÍA ABIERTA(42539)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '536501',
+    descripcion: 'HERNIORRAFIA LUMBAR ENCARCELADA VÍA ABIERTA(42542)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '536601',
+    descripcion: 'HERNIORRAFIA OBTURADORA ENCARCELADA VÍA ABIERTA(42543)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '537001',
+    descripcion: 'REPARACION DE HERNIA DIAFRAGMATICA VIA ABIERTA(41761)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '540007',
+    descripcion: 'DRENAJE DE COLECCIÓN RETROPERITONEAL VÍA ABIERTA(42554)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '543302',
+    descripcion: 'ESCISION DE LESION AMPLIA EN LA PARED ABDOMINAL CON PROTESIS(2576)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '544106',
+    descripcion: 'OMENTECTOMÍA TOTAL VÍA ABIERTA(42573)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '549501',
+    descripcion: 'PLICATURA DE PERITONEO [NOBLE MODIFICADA](2607)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '550101',
+    descripcion: 'MARSUPIALIZACION DE QUISTE RENAL POR NEFROTOMIA POR VIA ABIERTA(2614)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '550201',
+    descripcion: 'NEFROSTOMIA VIA ABIERTA(46195)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '551201',
+    descripcion: 'PIELOSTOMIA O INSERCION DE TUBO PARA DRENAJE DE PELVIS RENAL VIA ABIERTA(46201)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '554001',
+    descripcion: 'NEFRECTOMIA PARCIAL POR LAPAROTOMIA(46226)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '555101',
+    descripcion: 'NEFROURETERECTOMIA CON SEGMENTO DE VEJIGA VIA ABIERTA(2643)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '555102',
+    descripcion: 'NEFRO-URETERECTOMIA TOTAL (UNILATERAL)(2644)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '555201',
+    descripcion: 'NEFRECTOMIA DE RIÑON RESIDUAL O UNICO POR LUMBOTOMIA(46232)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '555607',
+    descripcion: 'RESECCION DE RIÑON UNILATERAL TOTAL [NEFRECTOMIA SIMPLE] POR LAPAROTOMIA(46241)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '557001',
+    descripcion: 'NEFROPEXIA POR VIA ABIERTA(2657)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '558101',
+    descripcion: 'NEFRORRAFIA O SUTURA DE LACERACION RENAL VIA ABIERTA(2658)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '558605',
+    descripcion: 'ANASTOMOSIS URETERO CALICIAL O NEFROCALICOSTOMIA VIA ABIERTA(46257)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '558701',
+    descripcion: 'PIELOPLASTIA VIA ABIERTA(2667)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '558801',
+    descripcion: 'LIBERACION DE ADHERENCIAS PIELICAS O URETEROPIELICAS POR VIA ABIERTA(2675)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '561101',
+    descripcion: 'MEATOTOMIA URETERAL VIA ABIERTA(2690)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '562101',
+    descripcion: 'EXPLORACION DE URETER POR URETEROTOMIA (VIA ABIERTA)(2692)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '564101',
+    descripcion: 'URETERECTOMIA PARCIAL VIA ABIERTA(2706)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '564201',
+    descripcion: 'URETERECTOMIA TOTAL O RESIDUAL POR VIA ABIERTA(2711)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '565410',
+    descripcion: 'URETERONEOCECOCISTOPLASTIA(2715)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '565601',
+    descripcion: 'URETEROENTEROSTOMIA CUTANEA(36751)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '565710',
+    descripcion:
+      'URETERONEOPROCTOSTOMIA (ANASTOMOSIS DE URETERES A RECTO AISLADO IN SITU) [OPERACION DE HEINZ-BOYER](2718)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '566001',
+    descripcion: 'URETEROSTOMIA CUTANEA VIA ABIERTA(46269)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '567401',
+    descripcion:
+      'URETERONEOCISTOSTOMIA POR ANASTOMOSIS O REIMPLANTACION URETEROVESICAL VIA ABIERTA(46273)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '567403',
+    descripcion:
+      'URETERONEOCISTOSTOMIA CON TECNICA DE ALARGAMIENTO VESICAL (CON COLGAJO O PLIEGUE VESICAL) VIA ABIERTA(46275)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '568401',
+    descripcion: 'CIERRE DE FISTULA URETERO-ENTERICA O URETEROVISCERAL VIA ABIERTA(46284)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '568701',
+    descripcion: 'URETEROPLASTIA O ANASTOMOSIS TERMINO-TERMINAL VIA ABIERTA(36752)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '577301',
+    descripcion: 'EXTIRPACION TOTAL DE VEJIGA URINARIA [CISTECTOMIA] VIA ABIERTA(46320)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '577303',
+    descripcion: 'CISTECTOMIA TOTAL CON URETRECTOMIA VIA ABIERTA(46322)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '577305',
+    descripcion: 'EXENTERACION PELVICA MASCULINA (CON RECTO) VIA ABIERTA(46324)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '577307',
+    descripcion:
+      'ESCISION O REMOCION DE VEJIGA PROSTATA VESICULAS SEMINALES Y TEJIDO GRASO [CISTOPROSTATECTOMIA] VIA ABIERTA(46326)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '578303',
+    descripcion: 'FISTULECTOMIA RECTO-VESICAL O RECTO-VESICO-VAGINAL VIA ABIERTA(46336)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '578402',
+    descripcion: 'FISTULECTOMIA VESICO-VAGINAL(2775)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '578403',
+    descripcion: 'FISTULECTOMIA UTERO-VESICAL (VESICOUTERINA)(2776)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '578502',
+    descripcion: 'CISTOURETROPLASTIA Y PLASTIA DE CUELLO VESICAL(36755)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '578600',
+    descripcion: 'REPARACION DE EXTROFIA VESICAL SOD(2780)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '578701',
+    descripcion: 'AMPLIACION DE VEJIGA CON SEGMENTO AISLADO DE ILEON(2781)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '578702',
+    descripcion: 'AMPLIACION DE VEJIGA CON SEGMENTO DE COLON(2782)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '578704',
+    descripcion: 'ILEO-CECO-CISTOPLASTIA(2783)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '583201',
+    descripcion: 'FULGURACION DE LESIONES URETRALES. VIA ABIERTA +(2811)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '583230',
+    descripcion: 'URETRECTOMIA SIMPLE. VIA ABIERTA(2813)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '583240',
+    descripcion: 'URETRECTOMIA RADICAL. VIA ABIERTA(2814)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '584301',
+    descripcion: 'CIERRE DE FISTULA URETRORECTAL(2819)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '584302',
+    descripcion: 'CIERRE DE FISTULA URETRO-PERINEO-ESCROTAL(2820)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '584601',
+    descripcion: 'URETROPLASTIA TRANSPUBICA(2828)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '584602',
+    descripcion: 'URETROPLASTIA CON OTROS TEJIDOS (CON INJERTO LIBRE DE MUCOSA VESICAL)(2829)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '584603',
+    descripcion: 'URETROPLASTIA PERINEAL(2830)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '590101',
+    descripcion: 'EXPLORACION RETROPERITONEAL (LUMBOTOMIA EXPLORADORA) VIA ABIERTA(2849)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '590200',
+    descripcion: 'URETEROLISIS CON LIBERACION O REPOSICIONAMIENTO DE URETER SOD +(2852)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '590301',
+    descripcion:
+      'LIBERACION DE ADHERENCIAS PERIURETERALES Y PERICALICIALES [URETEROLISIS] O [PIELOURETEROLISIS](36761)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '592001',
+    descripcion: 'NEFROLITOTOMIA O EXTRACCION DE CUERPO EXTRAÑO EN RIÑON VIA ABIERTA(46357)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '592005',
+    descripcion: 'PIELOLITOTOMIA O EXTRACCION DE CUERPO EXTRAÑO EN PELVIS RENAL VIA ABIERTA(46361)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '592101',
+    descripcion: 'URETEROLITOTOMIA O EXTRACCION DE CUERPO EXTRAÑO EN URETER VIA ABIERTA(46365)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '592201',
+    descripcion: 'CISTOLITOTOMIA O EXTRACCION DE CUERPO EXTRAÑO EN VEJIGA VIA ABIERTA(46368)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '592301',
+    descripcion: 'URETROLITOTOMIA O EXTRACCION DE CUERPO EXTRAÑO EN URETRA VIA ABIERTA(46372)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '597101',
+    descripcion: 'CISTOURETROPEXIA CON DISPOSITIVO (SUSPENSION DEL MUSCULO ELEVADOR)(2871)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '597920',
+    descripcion: 'URETROPLASTIA DE AMPLIACION(2874)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '597941',
+    descripcion: 'URETROCOLPOPEXIA REPRODUCIDA VIA VAGINAL O ABDOMINAL(2876)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '600110',
+    descripcion: 'DRENAJE DE COLECCIÒN EN PROSTATA VIA ABIERTA +(2884)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '602002',
+    descripcion: 'ADENOMECTOMIA O PROSTATECTOMIA TRANSVESICAL(46392)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '602003',
+    descripcion: 'ADENOMECTOMIA O PROSTATECTOMIA RETROPUBICA O TRANSVESICOCAPSULAR(46393)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '609401',
+    descripcion: 'CONTROL DE HEMORRAGIA (POSTQUIRURGICA) DE PROSTATA VIA ABIERTA +(2911)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '614200',
+    descripcion: 'FISTULECTOMIA DEL ESCROTO SOD(2925)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '614910',
+    descripcion: 'RECONSTRUCCION DE ESCROTO CON COLGAJO O INJERTO PEDICULAR(2926)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '623002',
+    descripcion: 'RESECCION DE TESTICULO [ORQUIECTOMIA](36767)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '634000',
+    descripcion: 'EPIDIDIMECTOMIA SOD(2963)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '638300',
+    descripcion: 'EPIDIDIMOVASOSTOMIA SOD +(2974)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '643100',
+    descripcion: 'AMPUTACION PARCIAL DEL PENE O PENECTOMIA PARCIAL SOD(2984)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '643200',
+    descripcion: 'AMPUTACION TOTAL DEL PENE O PENECTOMIA TOTAL SOD(2985)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '644300',
+    descripcion: 'CONSTRUCCION (DE NOVO) DE PENE SOD +(2988)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '644400',
+    descripcion: 'RECONSTRUCCION PENEANA SOD(2989)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '646001',
+    descripcion: 'CIRUGIA DE GENITALES AMBIGUOS FEMINIZANTE(46419)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '646002',
+    descripcion: 'CIRUGIA DE GENITALES AMBIGUOS VIRILIZANTE(46420)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '652203',
+    descripcion: 'RESECCION PARCIAL DE OVARIO VIA VAGINAL(46433)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '652303',
+    descripcion: 'RESECCION DE TUMOR DE OVARIO VIA VAGINAL(48871)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '652410',
+    descripcion: 'OFOROSTOMIA(3022)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '652804',
+    descripcion: 'RESECCION DE QUISTE PARAOVARICO VIA VAGINAL(46437)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '655101',
+    descripcion: 'OOFORECTOMIA BILATERAL POR LAPAROTOMIA(3041)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '657001',
+    descripcion: 'OFOROPLASTIA POR LAPAROTOMIA(46440)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '657801',
+    descripcion: 'OOFOROPEXIA UNILATERAL POR LAPAROTOMIA(3048)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '657803',
+    descripcion: 'OOFOROPEXIA BILATERAL POR LAPAROTOMIA(3051)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '660201',
+    descripcion: 'SALPINGOSTOMIA POR LAPAROTOMIA(3063)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '667101',
+    descripcion: 'SUTURA SIMPLE DE TROMPA DE FALOPIO POR LAPAROTOMIA(3083)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '667401',
+    descripcion: 'SALPINGOHISTEROTOMIA SALPINGO-UTEROSTOMIA POR LAPAROTOMIA(46457)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '667901',
+    descripcion: 'SALPINGOPLASTIA (FIMBROPLASTIA) POR LAPAROTOMIA +(3092)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '669410',
+    descripcion: 'SALPINGO-OOFOROPLASTIA [OPERACION DE ESTES](3103)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '669901',
+    descripcion:
+      'LIBERACION O LISIS DE ADHERENCIAS DE OVARIO Y TROMPAS DE FALOPIO POR LAPAROTOMIA(3104)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '680101',
+    descripcion: 'HISTEROTOMIA(46488)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '684001',
+    descripcion:
+      'HISTERECTOMIA TOTAL ABDOMINAL CON REMOCION DE MOLA O FETO MUERTO POR LAPAROTOMIA(3157)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '685102',
+    descripcion: 'HISTERECTOMIA POR VIA VAGINAL(46501)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '686102',
+    descripcion: 'HISTERECTOMIA RADICAL MODIFICADA POR LAPAROTOMIA(46502)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '687001',
+    descripcion: 'HISTERECTOMIA RADICAL POR VIA VAGINAL(46503)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '688101',
+    descripcion: 'EXENTERACION O EVISCERACION PELVICA FEMENINA TOTAL O COMPLETA +(3169)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '691901',
+    descripcion: 'DRENAJE DE COLECCION DE LIGAMENTO ANCHO POR LAPAROTOMIA +(3186)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '692201',
+    descripcion: 'HISTEROPEXIA POR LAPAROTOMIA(46510)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '692204',
+    descripcion: 'CERVICOPEXIA POR LAPAROTOMIA(46513)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '694101',
+    descripcion: 'HISTERORRAFIA POR LAPAROTOMIA(3196)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '694901',
+    descripcion: 'HISTEROPLASTIA OPERACION DE STRASMAN POR LAPAROTOMIA(46522)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '703302',
+    descripcion: 'RESECCION O ABLACION DE LESION O TEJIDO VAGINAL(46544)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '704001',
+    descripcion: 'VAGINECTOMIA O COLPECTOMIA TOTAL(46545)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '704002',
+    descripcion: 'VAGINECTOMIA O COLPECTOMIA PARCIAL(46546)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '705110',
+    descripcion: 'COLPORRAFIA ANTERIOR CON PLASTIA O REPARACION DE URETROCELE(3234)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '705303',
+    descripcion: 'COLPORRAFIA ANTERIOR Y POSTERIOR CON AMPUTACION DE CUELLO(3238)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '706001',
+    descripcion: 'RECONSTRUCCION DE VAGINA(46551)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '706102',
+    descripcion: 'VAGINOPLASTIA VIA PERINEAL(3241)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '706103',
+    descripcion: 'VAGINOPLASTIA VIA ABDOMINOPERINEAL(3242)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '706104',
+    descripcion: 'VAGINOPLASTIA POR LAPAROTOMIA(46552)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '707201',
+    descripcion: 'CORRECCION DE FISTULA COLOVAGINAL(46554)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '707301',
+    descripcion: 'CORRECCION DE FISTULA RECTO VAGINAL O PERINEAL(46555)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '707501',
+    descripcion: 'CIERRE DE FISTULA URETROVAGINAL O VESICO VAGINAL POR LAPAROTOMIA(46557)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '707503',
+    descripcion: 'CIERRE DE FISTULA URETROVAGINAL O VESICO VAGINAL VIA VAGINAL(46559)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '713401',
+    descripcion: 'RESECCION DE ENDOMETRIOMA EN PERINE(46578)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '760101',
+    descripcion:
+      'SECUESTRECTOMIA INTRAORAL CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS] +(3334)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '760102',
+    descripcion:
+      'SECUESTRECTOMIA EXTRAORAL CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS] +(3335)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '760901',
+    descripcion: 'OSTEOTOMIA MAXILAR PARA EXTRACCION DE CUERPO EXTRAÑO(3336)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '763101',
+    descripcion: 'MANDIBULECTOMIA PARCIAL SIMPLE. MARGINAL(3351)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '763102',
+    descripcion: 'MANDIBULECTOMIA PARCIAL SIMPLE. SEGMENTARIA(3352)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '763104',
+    descripcion: 'HEMIMANDIBULECTOMIA CON DESARTICULACION(3354)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '764101',
+    descripcion: 'MANDIBULECTOMIA TOTAL CON RECONSTRUCCION OSEA(3358)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '764201',
+    descripcion: 'MANDIBULECTOMIA TOTAL SIN RECONSTRUCCION OSEA(53951)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '764301',
+    descripcion: 'RECONSTRUCCION MANDIBULAR (TOTAL O PARCIAL)(3360)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '764302',
+    descripcion:
+      'RECONSTRUCCION MANDIBULAR (TOTAL O PARCIAL) CON INJERTO OSEO AUTOLOGO O HETEROLOGO +(3361)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '764303',
+    descripcion:
+      'RECONSTRUCCION MANDIBULAR (TOTAL O PARCIAL) CON INJERTO LIBRE OSEO AUTOLOGO O HETEROLOGO +(3362)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '764304',
+    descripcion:
+      'RECONSTRUCCION MANDIBULAR (TOTAL O PARCIAL) CON INJERTO OSEO AUTOLOGO O HETEROLOGO. COLGAJO PEDICULADO(3363)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '764402',
+    descripcion: 'RESECCION TOTAL DE MAXILAR CON RECONSTRUCCION SIMULTANEA(3366)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '766201',
+    descripcion:
+      'OSTEOTOMIA DE RAMA MANDIBULAR VIA TRANS MUCOSA. CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS](3377)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '766202',
+    descripcion:
+      'OSTEOTOMIA RAMA MANDIBULAR VIA TRANSCUTANEA. CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS](3378)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '766301',
+    descripcion:
+      'OSTEOTOMIA DE CUERPO MANDIBULAR VIA TRANS MUCOSA, CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS](3382)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '766302',
+    descripcion:
+      'OSTEOTOMIA DE CUERPO MANDIBULAR VIA TRANSCUTANEA. CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS](3383)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '766401',
+    descripcion: 'OSTEOTOMIA SUBAPICAL MANDIBULAR(3385)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '766403',
+    descripcion:
+      'OSTEOTOMIA DE MENTON. CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS](3388)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '766501',
+    descripcion:
+      'OSTEOTOMIA LEFORT I SEGMENTARIA. CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS] +(3389)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '766601',
+    descripcion:
+      'OSTEOTOMIA LEFORT I. CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS] +(3390)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '766603',
+    descripcion:
+      'OSTEOTOMIA LEFORT II. CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS] +(3393)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '766604',
+    descripcion:
+      'OSTEOMIA LEFORT III. CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS] +(3394)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '766605',
+    descripcion: 'CORTICOTOMIA TIPO LEFORT I (DISYUNCION PALATINA)(3395)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '766606',
+    descripcion: 'CORTICOTOMIA TIPO LEFORT II(3397)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '766607',
+    descripcion: 'CORTICOTOMIA TIPO LEFORT III(3399)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '767201',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA DE ARCO CIGOMATICO CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS] +(3407)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '767202',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE ARCO CIGOMATICO(29651)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '767401',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA HEMI LEFORT I. CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS] +(3413)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '767602',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA SIMPLE DE CUERPO O RAMA MANDIBULAR. CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS] +(3421)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '767604',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA MULTIPLE DE CUERPO O RAMA MANDIBULAR CON FIJACION EXTERNA(36777)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '767903',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE DOS O MAS PAREDES ORBITARIAS CON INJERTO(3434)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '767908',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURAS MULTIPLES DE HUESOS FACIALES. CON IMPLANTE O INJERTO DEL PISO ORBITARIO(3438)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '770100',
+    descripcion:
+      'SECUESTRECTOMIA. DRENAJE. DESBRIDAMIENTO O CURETAJE DE ESCAPULA. CLAVICULA O TORAX (COSTILLAS Y ESTERNON) SOD(3449)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772101',
+    descripcion:
+      'OSTEOTOMIA DE CLAVICULA CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS](3468)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772102',
+    descripcion: 'OSTEOTOMIA DE CLAVICULA(29652)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772103',
+    descripcion: 'OSTEOTOMIA DE COSTILLA (UNA O MAS)(3469)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772104',
+    descripcion: 'OSTEOTOMIA DE ESCAPULA(3470)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772203',
+    descripcion: 'OSTEOTOMIA DE HUMERO CON FIJACION INTERNA(46668)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772204',
+    descripcion: 'OSTEOTOMIA DE HUMERO CON FIJACION EXTERNA(46669)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772305',
+    descripcion: 'OSTEOTOMIA EN RADIO O CUBITO CON FIJACION EXTERNA(46671)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772306',
+    descripcion: 'OSTEOTOMIA EN RADIO Y CUBITO CON FIJACION INTERNA(46672)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772307',
+    descripcion: 'OSTEOTOMIA EN RADIO Y CUBITO CON FIJACION EXTERNA(46673)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772403',
+    descripcion: 'OSTEOTOMIA EN CARPIANO O METACARPIANO CON FIJACION INTERNA(46674)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772404',
+    descripcion: 'OSTEOTOMIA EN CARPIANO O METACARPIANO CON FIJACION EXTERNA(46675)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772405',
+    descripcion: 'OSTEOTOMIA EN CARPIANO Y METACARPIANO CON FIJACION INTERNA(46676)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772406',
+    descripcion: 'OSTEOTOMIA EN CARPIANO Y METACARPIANO CON FIJACION EXTERNA(46677)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772506',
+    descripcion: 'OSTEOTOMIA EN FEMUR MULTIPLE CON FIJACION INTERNA O EXTERNA(30121)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772507',
+    descripcion:
+      'OSTEOTOMIA EN FEMUR PROXIMAL (CUELLO DE FEMUR O INTERTROCANTERICA O SUBTROCANTERICA) CON FIJACION INTERNA(46678)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772508',
+    descripcion:
+      'OSTEOTOMIA EN FEMUR PROXIMAL (CUELLO DE FEMUR O INTERTROCANTERICA O SUBTROCANTERICA) CON FIJACION EXTERNA(46679)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772509',
+    descripcion: 'OSTEOTOMIA EN DIAFISIS DE FEMUR CON FIJACION INTERNA(46680)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772512',
+    descripcion: 'OSTEOTOMIA EN FEMUR DISTAL (SUPRA O INTERCONDILEA) CON FIJACION EXTERNA(46683)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772706',
+    descripcion: 'OSTEOTOMIA DE DIAFISIS DE TIBIA CON FIJACION INTERNA(46691)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772707',
+    descripcion: 'OSTEOTOMIA DE DIAFISIS DE TIBIA CON FIJACION EXTERNA(46692)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772710',
+    descripcion: 'OSTEOTOMIA DE PERONE PROXIMAL CON FIJACION INTERNA(46695)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772711',
+    descripcion: 'OSTEOTOMIA DIAFISIARIA DE PERONE CON FIJACION INTERNA(46696)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772712',
+    descripcion: 'OSTEOTOMIA DE PERONE DISTAL CON FIJACION INTERNA(46697)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772713',
+    descripcion: 'OSTEOTOMIA MULTIPLE DE TIBIA O PERONE(46698)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772806',
+    descripcion: 'OSTEOTOMIA DE HUESO DEL METATARSO CON FIJACION INTERNA(46710)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772807',
+    descripcion: 'OSTEOTOMIA DE HUESO DEL METATARSO CON FIJACION EXTERNA(46711)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772808',
+    descripcion: 'OSTEOTOMIA DE HUESO DEL TARSO SIN FIJACION(46712)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772809',
+    descripcion: 'OSTEOTOMIA DE HUESO DEL METATARSO SIN FIJACION(46713)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772903',
+    descripcion: 'OSTEOTOMIA EN FALANGES DE MANO (UNO O MAS HUESOS) CON FIJACION INTERNA(46714)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772906',
+    descripcion: 'OSTEOTOMIA EN FALANGES DE GRUESO ARTEJO CON FIJACION INTERNA(46717)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772907',
+    descripcion: 'OSTEOTOMIA EN FALANGE DE DEDO DE PIE (EXCEPTO GRUESO ARTEJO) SIN FIJACION(46718)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772908',
+    descripcion: 'OSTEOTOMIA EN FALANGES DE GRUESO ARTEJO SIN FIJACION(46719)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772909',
+    descripcion: 'OSTEOTOMIA DE PELVIS VIA ABIERTA(46720)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '775104',
+    descripcion:
+      'CORRECCION HALLUX VALGUS CON OSTEOTOMIA DISTAL DEL PRIMER METATARSIANO CON FIJACION INTERNA(46758)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '775105',
+    descripcion:
+      'CORRECCION HALLUX VALGUS CON OSTEOTOMIA DIAFISIARIA DEL PRIMER METATARSIANO CON FIJACION INTERNA(46759)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '775106',
+    descripcion:
+      'CORRECCION HALLUX VALGUS CON OSTEOTOMIA PROXIMAL DEL PRIMER METATARSIANO CON FIJACION INTERNA(46760)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '775107',
+    descripcion:
+      'CORRECCION HALLUX VALGUS CON OSTEOTOMIA COMBINADA DEL PRIMER METATARSIANO CON FIJACION INTERNA(46761)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776204',
+    descripcion: 'RESECCION DE LESION OSEA EN HUMERO(30123)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776302',
+    descripcion: 'ESCISION TUMOR MALIGNO EN RADIO O CUBITO(3537)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776502',
+    descripcion:
+      'ESCISION TUMOR BENIGNO EN FEMUR CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS] +(3541)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776702',
+    descripcion: 'ESCISION TUMOR MALIGNO EN TIBIA O PERONE(3546)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776921',
+    descripcion: 'ESCISION DE TUMOR MALIGNO EN HUESOS PELVIANOS(3555)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '778202',
+    descripcion: 'HEMI O DIAFISECTOMIA DE HUMERO(3576)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '778501',
+    descripcion: 'HEMIDIAFISECTOMIA EN FEMUR(3586)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '778703',
+    descripcion: 'HEMIDIAFISECTOMIA EN TIBIA Y PERONE(3590)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '778911',
+    descripcion: 'HEMIDIAFISECTOMIA FALANGES DE PIE (UNA O MAS)(3594)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '778922',
+    descripcion: 'HEMI-HEMIPELVECTOMIA(3597)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '778923',
+    descripcion: 'HEMIPELVECTOMIA(3598)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '779402',
+    descripcion: 'CARPECTOMIA (CADA UNO) VIA ABIERTA(46846)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '779404',
+    descripcion: 'RESECCION TOTAL DE HUESO DE METACARPO VIA ABIERTA(46848)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '780101',
+    descripcion: 'INJERTO OSEO EN CLAVICULA(3635)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '780201',
+    descripcion: 'INJERTO OSEO EN HUMERO(29723)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '780800',
+    descripcion: 'INJERTO OSEO EN HUESOS TARSIANOS O METATARSIANOS SOD+(3650)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '780902',
+    descripcion: 'INJERTO OSEO EN FALANGES DEL PIE (UNA O MAS)(3652)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '780920',
+    descripcion: 'INJERTO OSEO EN PELVIS(3653)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '781201',
+    descripcion: 'APLICACION DE TUTORES EXTERNOS EN HUMERO(3658)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '781302',
+    descripcion: 'APLICACION DE TUTORES EXTERNOS EN RADIO Y CUBITO +(3661)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '781304',
+    descripcion: 'APLICACION DE TUTORES EXTERNOS EN PUÑO O MUÑECA(3662)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '781501',
+    descripcion: 'APLICACION DE TUTOR EXTERNO EN FEMUR(3664)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '781502',
+    descripcion: 'APLICACION DE TUTORES EXTERNOS EN MUSLO(3665)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '781701',
+    descripcion: 'APLICACION DE TUTORES EXTERNOS EN TIBIA O PERONE(3668)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '781702',
+    descripcion: 'APLICACION DE TUTORES EXTERNOS EN TIBIA Y PERONE(3669)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '781920',
+    descripcion: 'APLICACION DE TUTORES EXTERNOS EN PELVIS. POR VIA ANTERIOR O POSTERIOR(3676)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '782511',
+    descripcion: 'EPIFISIODESIS ABIERTA DE TIBIA O PERONE(3689)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '782513',
+    descripcion: 'EPIFISIODESIS ABIERTA DE TIBIA Y PERONE(3690)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '782641',
+    descripcion:
+      'ACORTAMIENTO DE TARSIANOS O METATARSIANOS MEDIANTE RESECCION/OSTEOTOMIA (UNA O MAS) +(3696)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783001',
+    descripcion: 'TRANSPOSICION OSEA EN HUESOS LARGOS CON COLOCACION DE TUTOR EXTERNO(3701)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783201',
+    descripcion:
+      'ALARGAMIENTO DE HUMERO POR INJERTO SIN DISPOSITIVOS INTERNOS DE FIJACION U OSTEOTOMIA(32064)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783202',
+    descripcion:
+      'ALARGAMIENTO DE HUMERO POR INJERTO CON DISPOSITIVOS INTERNOS DE FIJACION U OSTEOTOMIA(3703)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '786202',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO EN HUMERO. VIA ABIERTA +(3750)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '786501',
+    descripcion: 'EXTRACCION DE DISPOSITIVO IMPLANTADO EN FEMUR +(3755)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '786502',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO EN FEMUR. VIA ABIERTA +(3756)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '786601',
+    descripcion: 'EXTRACCION DE DISPOSITIVO IMPLANTADO EN ROTULA +(3757)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '786602',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO EN ROTULA. VIA ABIERTA +(3758)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '786920',
+    descripcion: 'EXTRACCION DE DISPOSITIVO IMPLANTADO EN HUESOS PELVIANOS +(3767)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '786921',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO EN HUESOS PELVIANOS. VIA ABIERTA +(3768)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '787100',
+    descripcion: 'OSTEOCLASTIA DE ESCAPULA. CLAVICULA O TORAX [COSTILLAS Y ESTERNON] SOD +(3773)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '791101',
+    descripcion:
+      'REDUCCION INDIRECTA DE FRACTURA CON FIJACION INTERNA DE ESCAPULA CLAVICULA O TORAX (COSTILLAS Y ESTERNON)(46912)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '791502',
+    descripcion:
+      'REDUCCION INDIRECTA DE FRACTURA DE FEMUR SUPRACONDILEA CON FIJACION INTERNA(3820)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '791503',
+    descripcion:
+      'REDUCCION INDIRECTA DE FRACTURA DE FEMUR SUPRACONDILEA E INTERCONDILEA CON FIJACION INTERNA(3821)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '791601',
+    descripcion: 'REDUCCION INDIRECTA DE FRACTURA CON FIJACION INTERNA DE ROTULA(46917)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '792102',
+    descripcion: 'REDUCCION ABIERTA SIN FIJACION INTERNA DE FRACTURA DE ESCAPULA O CLAVICULA(3836)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '792103',
+    descripcion: 'REDUCCION ABIERTA SIN FIJACION INTERNA DE FRACTURA CUELLO Y GLENOIDES(3837)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '792200',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA SIN FIJACION INTERNA DE HUMERO SOD(3838)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '792301',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA SIN FIJACION INTERNA DE RADIO O CUBITO(3839)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '792302',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA SIN FIJACION INTERNA DE RADIO Y CUBITO(3840)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '792600',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE ROTULA SIN FIJACION INTERNA SOD +(3843)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793103',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA CON FIJACION INTERNA DE COSTILLA O ESTERNON(3858)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793202',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA DE TUBEROSIDAD PROXIMAL DE HUMERO CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS](3860)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793203',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA CONMINUTA DE TERCIO PROXIMAL HUMERO CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS](3861)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793204',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA SUPRACONDILEA DE HUMERO CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS](3862)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793205',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA SUPRACONDILEA E INTERCONDILEA DE HUMERO CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS](3863)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793206',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA DE EPICONDILO O EPITROCLEA DE HUMERO CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS](3864)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793210',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA EN DIAFISIS DE HUMERO CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS](3865)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793302',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA EN SEGMENTO PROXIMAL DE CUBITO O DE OLECRANON CON FIJACION INTERNA(3867)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793304',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA EN SEGMENTO PROXIMAL DE RADIO (CUPULA RADIAL) CON FIJACION INTERNA(3869)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793305',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA EN SEGMENTO PROXIMAL DE RADIO Y CUBITO CON FIJACION INTERNA(3870)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793502',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA EN DIAFISIS DE FEMUR CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS](3876)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793600',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA EN ROTULA CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS] SOD +(3877)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793707',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE PERONE PROXIMAL CON FIJACION INTERNA(46925)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793710',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE PERONE DIAFISIARIO CON FIJACION EXTERNA(46928)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793712',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE PERONE DISTAL CON FIJACION EXTERNA(46930)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793713',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE TIBIA PROXIMAL CON FIJACION INTERNA(46931)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793719',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE TIBIA DISTAL CON FIJACION EXTERNA(46937)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793910',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA DEL ILIACO CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS](3889)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793921',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA COMPLEJA EN PELVIS [ACETABULO. REBORDE ANTERIOR. POSTERIOR Y SUPERIOR] CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS](3893)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '794102',
+    descripcion: 'REDUCCION CERRADA DE EPIFISIS SEPARADA EN HUMERO CON FIJACION(3915)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '794202',
+    descripcion: 'REDUCCION CERRADA DE EPIFISIS SEPARADA EN CUBITO O RADIO CON FIJACION(3917)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '794204',
+    descripcion: 'REDUCCION CERRADA DE EPIFISIS SEPARADA EN RADIO Y CUBITO CON FIJACION(3919)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '794502',
+    descripcion: 'REDUCCION CERRADA DE EPIFISIS SEPARADA EN FEMUR CON FIJACION(3921)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '794602',
+    descripcion: 'REDUCCION INDIRECTA DE EPIFISIS SEPARADA DE TIBIA O PERONE CON FIJACION(3923)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '794604',
+    descripcion: 'REDUCCION INDIRECTA DE EPIFISIS SEPARADA DE TIBIA Y PERONE CON FIJACION(3925)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '795101',
+    descripcion: 'REDUCCION ABIERTA SIN FIJACION INTERNA DE EPIFISIS SEPARADA DE HUMERO +(3926)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '795102',
+    descripcion: 'REDUCCION ABIERTA CON FIJACION INTERNA DE EPIFISIS SEPARADA DE HUMERO +(3927)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '795202',
+    descripcion: 'REDUCCION ABIERTA DE EPIFISIS SEPARADA DE RADIO O CUBITO CON FIJACION(3929)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '795203',
+    descripcion: 'REDUCCION ABIERTA DE EPIFISIS SEPARADA DE RADIO Y CUBITO SIN FIJACION(3930)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '795204',
+    descripcion: 'REDUCCION ABIERTA DE EPIFISIS SEPARADA DE RADIO Y CUBITO CON FIJACION(3931)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '795603',
+    descripcion: 'REDUCCION ABIERTA DE EPIFISIS SEPARADA DE TIBIA Y PERONE SIN FIJACION(3936)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '796100',
+    descripcion: 'LAVADO Y DESBRIDAMIENTO DE FRACTURA ABIERTA DE HUMERO SOD +(3938)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '796500',
+    descripcion: 'LAVADO Y DESBRIDAMIENTO DE FRACTURA ABIERTA DE FEMUR SOD(3942)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '796700',
+    descripcion:
+      'LAVADO Y DESBRIDAMIENTO DE FRACTURA ABIERTA DE TARSIANOS O METATARSIANOS SOD(3944)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '796800',
+    descripcion: 'LAVADO Y DESBRIDAMIENTO DE FRACTURA ABIERTA DE DEDOS DE PIE SOD +(3945)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '796902',
+    descripcion: 'LAVADO Y DESBRIDAMIENTO DE FRACTURA EXPUESTA DE ROTULA(3946)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '796903',
+    descripcion: 'LAVADO Y DESBRIDAMIENTO DE FRACTURA EXPUESTA DE PELVIS(3947)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '796905',
+    descripcion: 'LAVADO Y DESBRIDAMIENTO DE FRACTURA ABIERTA DE RAQUIS O COLUMNA(3948)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '798102',
+    descripcion: 'REDUCCION ABIERTA DE LA LUXACION GLENOHUMERAL(3969)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '798302',
+    descripcion: 'REDUCCION DE LUXACION RADIOCUBITAL VIA ABIERTA(46940)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '798502',
+    descripcion: 'REDUCCION ABIERTA DE LUXACION TRAUMATICA DE CADERA(3978)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '798602',
+    descripcion: 'REDUCCION ABIERTA DE LUXACION DE ROTULA(3980)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '799203',
+    descripcion:
+      'REDUCCION ABIERTA FRACTURA CODO SIN FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS](3987)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '799301',
+    descripcion: 'REDUCCION ABIERTA Y FIJACION DE LUXOFRACTURA DE BENNET(3989)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '799601',
+    descripcion:
+      'REDUCCION DE FRACTURAS INTRAARTICULARES Y LUXOFRACTURAS EN RODILLA POR ARTROTOMIA(3993)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '799701',
+    descripcion:
+      'REDUCCION ABIERTA DE LUXO-FRACTURA TOBILLO SIN FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS](3995)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '799703',
+    descripcion:
+      'REDUCCION ABIERTA CON FIJACION DE LUXO FRACTURA O FRACTURA (UNI O BIMALEOLAR) DE TOBILLO(3997)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '800102',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO INTRAARTICULAR EN HOMBRO POR ARTROTOMIA(4003)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '800202',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO INTRAARTICULAR EN CODO POR ARTROTOMIA(4005)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '800302',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO INTRAARTICULAR EN MUÑECA POR ARTROTOMIA(4007)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '800502',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO INTRAARTICULAR EN CADERA POR ARTROTOMIA(4011)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '800601',
+    descripcion: 'EXTRACCION DE DISPOSITIVO IMPLANTADO EN RODILLA POR ARTROTOMIA +(4012)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '800602',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO INTRAARTICULAR EN RODILLA POR ARTROTOMIA(4013)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '800702',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO INTRAARTICULAR EN TOBILLO POR ARTROTOMIA(4015)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '801101',
+    descripcion:
+      'ARTROTOMIA DE HOMBRO CON EXPLORACION DE ARTICULACION ACROMIOCLAVICULAR O ESTERNO CLAVICULAR(4018)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '801500',
+    descripcion: 'ARTROTOMIA DE PELVIS SOD(4022)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '801700',
+    descripcion: 'ARTROTOMIA DE TOBILLO O CUELLO DE PIE SOD(4024)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '806101',
+    descripcion: 'MENISCECTOMIA SIMPLE MEDIAL O LATERAL DE RODILLA VIA ABIERTA +(4078)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '806102',
+    descripcion: 'MENISECTOMIA MEDIAL Y LATERAL DE RODILLA VIA ABIERTA(4079)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '807101',
+    descripcion: 'SINOVECTOMIA DE HOMBRO PARCIAL VIA ABIERTA(4083)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '807102',
+    descripcion: 'SINOVECTOMIA DE HOMBRO TOTAL VIA ABIERTA(4084)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '807201',
+    descripcion: 'SINOVECTOMIA DE CODO PARCIAL VIA ABIERTA(4087)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '807202',
+    descripcion: 'SINOVECTOMIA DE CODO TOTAL VIA ABIERTA(4088)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '807301',
+    descripcion: 'SINOVECTOMIA DE MUÑECA PARCIAL VIA ABIERTA(4091)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '807302',
+    descripcion: 'SINOVECTOMIA DE MUÑECA TOTAL VIA ABIERTA(4092)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '807401',
+    descripcion: 'SINOVECTOMIA INTERFALANGICA (UNA O MAS) VIA ABIERTA(4095)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '807502',
+    descripcion: 'SINOVECTOMIA TOTAL DE CADERA. VIA ABIERTA +(4100)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '807601',
+    descripcion: 'SINOVECTOMIA DE RODILLA PARCIAL VIA ABIERTA(4103)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '807705',
+    descripcion: 'SINOVECTOMIA DE TOBILLO ANTERIOR VIA ABIERTA(47009)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '807706',
+    descripcion: 'SINOVECTOMIA DE TOBILLO POSTERIOR VIA ABIERTA(47010)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '808011',
+    descripcion: 'DESBRIDAMIENTO. LAVADO Y LIMPIEZA DE ARTICULACION DE HOMBRO VIA ABIERTA(4112)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '808021',
+    descripcion: 'DESBRIDAMIENTO. LAVADO Y LIMPIEZA DE ARTICULACION DE CODO VIA ABIERTA(4114)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '808031',
+    descripcion:
+      'DESBRIDAMIENTO. LAVADO Y LIMPIEZA DE ARTICULACION DE MUÑECA O PUÑO VIA ABIERTA(4116)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '808061',
+    descripcion: 'DESBRIDAMIENTO. LAVADO Y LIMPIEZA DE RODILLA VIA ABIERTA(4122)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '808071',
+    descripcion: 'DESBRIDAMIENTO. LAVADO Y LIMPIEZA DE TOBILLO VIA ABIERTA(4124)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '811202',
+    descripcion: 'ARTRODESIS SUBTALAR VIA ABIERTA(47232)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '811207',
+    descripcion: 'ARTRODESIS TALONAVICULAR VIA ABIERTA(47237)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '811210',
+    descripcion: 'ARTRODESIS METATARSOFALANGICA (CADA UNA) VIA ABIERTA(47240)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '811212',
+    descripcion: 'ARTRODESIS INTERFALANGICA DE DEDO DEL PIE (CADA UNO) VIA ABIERTA(47242)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '812100',
+    descripcion: 'ARTRODESIS DE CADERA SOD +(4195)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '812301',
+    descripcion: 'ARTRODESIS DE HOMBRO VIA ABIERTA(4197)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '812401',
+    descripcion: 'ARTRODESIS RADIOCUBITAL DISTAL(4200)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '812402',
+    descripcion: 'ARTRODESIS DE CODO(36785)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '813101',
+    descripcion: 'ARTROPLASTIA DE PIE Y ARTEJOS CON PROTESIS(47257)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '813102',
+    descripcion: 'ARTROPLASTIA DE PIE Y ARTEJOS SIN PROTESIS(47258)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '813103',
+    descripcion: 'ARTROPLASTIA POR INTERPOSICION DE HUESOS DEL TARSO(47259)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '813104',
+    descripcion: 'ARTROPLASTIA POR INTERPOSICION DE HUESOS DEL METATARSO(47260)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '814221',
+    descripcion: 'CAPSULORRAFIA DE RODILLA(47263)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '814502',
+    descripcion:
+      'RECONSTRUCCION DE LIGAMENTO CRUZADO ANTERIOR CON AUTOINJERTO O ALOINJERTO VIA ABIERTA(4225)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '814503',
+    descripcion:
+      'RECONSTRUCCION DE LIGAMENTO CRUZADO POSTERIOR CON AUTOINJERTO O ALOINJERTO VIA ABIERTA(4226)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '814602',
+    descripcion: 'OTRA RECONSTRUCCION O TRANSFERENCIAS PARA LIGAMENTOS MEDIAL O LATERAL(4230)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '814711',
+    descripcion: 'SUTURA DE MENISCO MEDIAL O LATERAL. ABIERTA(4238)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '818301',
+    descripcion: 'ACROMIOPLASTIA VIA ABIERTA(4285)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '818305',
+    descripcion: 'ARTROPLASTIA ACROMIO- CLAVICULAR(4287)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '819520',
+    descripcion: 'REPARACION O RECONSTRUCCION DEL TENDON ROTULIANO +(4304)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '825501',
+    descripcion: 'ALARGAMIENTO DE TENDON EN MANO (UNO O MAS)(4353)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '831205',
+    descripcion: 'TENOTOMIA DE CADERA VIA ABIERTA(47344)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '831401',
+    descripcion: 'FASCIOTOMIA O INCISION DE FASCIA(4411)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '831451',
+    descripcion: 'FASCIOTOMIA DESCOMPRESIVA DE LA ARTERIA BRAQUIAL(4415)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '831461',
+    descripcion: 'FASCIOTOMIA EN MUSLO. POR UNA O MAS INCISIONES(4416)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '831471',
+    descripcion: 'FASCIOTOMIA EN PIERNA POR UNA O MAS INCISIONES(4417)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '831481',
+    descripcion: 'FASCIOTOMIA EN PIE. UNA O MAS INCISIONES(4418)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '838502',
+    descripcion: 'ALARGAMIENTO O ACORTAMIENTO DEL TENDON DE AQUILES(4475)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '838505',
+    descripcion: 'REPARACION DEL TENDON DEL CUADRICEPS CON FIJACION +(4476)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '838601',
+    descripcion: 'CUADRICESPLASTIA ABIERTA(4477)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '840100',
+    descripcion: 'AMPUTACION Y DESARTICULACION DE DEDOS DE LA MANO (UNO O MAS) SOD +(4497)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '840300',
+    descripcion: 'AMPUTACION A TRAVES DE MANO (CARPO) SOD(4499)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '840500',
+    descripcion: 'AMPUTACION A TRAVES DE ANTEBRAZO SOD(4501)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '840600',
+    descripcion: 'DESARTICULACION DE CODO SOD(4502)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '840701',
+    descripcion: 'AMPUTACION DE BRAZO(4503)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '840800',
+    descripcion: 'DESARTICULACION DE HOMBRO SOD(4504)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '840900',
+    descripcion: 'AMPUTACION INTERTORACO ESCAPULAR SOD +(4505)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '841101',
+    descripcion: 'AMPUTACION O DESARTICULACION DE DEDO DE PIE (CADA UNO)(47363)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '841203',
+    descripcion: 'AMPUTACION O DESARTICULACION DE ANTEPIE(47366)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '841600',
+    descripcion: 'DESARTICULACION DE RODILLA SOD(4514)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '841700',
+    descripcion: 'AMPUTACION POR ENCIMA DE RODILLA SOD §(4515)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '841800',
+    descripcion: 'DESARTICULACION DE CADERA SOD(4516)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '843100',
+    descripcion:
+      'REMODELACION [REVISION] [RECONSTRUCCION] DEL MUÑON DE AMPUTACION DE HOMBRO SOD(4528)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '843200',
+    descripcion:
+      'REMODELACION [REVISION] [RECONSTRUCCION] DEL MUÑON DE AMPUTACION DE ANTEBRAZO SOD(4529)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '843400',
+    descripcion:
+      'REMODELACION [REVISION] [RECONSTRUCCION] DEL MUÑON DE AMPUTACION DE MANO SOD(4531)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '843600',
+    descripcion:
+      'REMODELACION [REVISION] [RECONSTRUCCION] DEL MUÑON DE AMPUTACION DE MUSLO SOD(4533)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '843700',
+    descripcion:
+      'REMODELACION [REVISION] [RECONSTRUCCION] DEL MUÑON DE AMPUTACION DE LA PIERNA SOD(4534)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '843800',
+    descripcion:
+      'REMODELACION [RECONSTRUCCION] (REVISION) DEL MUÑON DE AMPUTACION DEL PIE O ARTEJOS SOD(4535)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '843900',
+    descripcion:
+      'REMODELACION [REVISION] [RECONSTRUCCION] DEL MUÑON DE AMPUTACION DE CADERA SOD(4536)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '852202',
+    descripcion: 'RESECCIÓN DE CUADRANTE DE MAMA CON CONDUCTOS TERMINALES(43051)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '852300',
+    descripcion: 'MASTECTOMIA SUBTOTAL SOD(4556)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '854001',
+    descripcion: 'MASTECTOMIA SUBCUTANEA CON RECONSTRUCCION SIMULTANEA(36800)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '854103',
+    descripcion:
+      'MASTECTOMÍA SIMPLE UNILATERAL CON PRESERVACIÓN DE PIEL O COMPLEJO AREOLA PEZÓN(43055)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '854201',
+    descripcion: 'MASTECTOMÍA SIMPLE BILATERAL(43056)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '854203',
+    descripcion:
+      'MASTECTOMÍA SIMPLE BILATERAL CON PRESERVACIÓN DE PIEL O COMPLEJO AREOLA PEZÓN(43058)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '854301',
+    descripcion: 'MASTECTOMIA SIMPLE CON ESCISION DE GANGLIOS LINFATICOS REGIONALES(4565)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '854401',
+    descripcion: 'MASTECTOMÍA SIMPLE AMPLIADA BILATERAL VÍA ABIERTA(43059)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '854501',
+    descripcion: 'ESCISION DE MAMA. MUSCULOS PECTORALES Y GANGLIO LINFATICO REGIONALES(4567)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '854502',
+    descripcion: 'MASTECTOMIA RADICAL MODIFICADA UNILATERAL(4568)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '854601',
+    descripcion: 'MASTECTOMÍA RADICAL BILATERAL VÍA ABIERTA(43060)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '854801',
+    descripcion: 'MASTECTOMÍA RADICAL AMPLIADA BILATERAL VÍA ABIERTA(43061)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '857101',
+    descripcion: 'RECONSTRUCCION DE MAMA UNILATERAL CON DISPOSITIVO(62190)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '857102',
+    descripcion: 'RECONSTRUCCION DE MAMA BILATERAL CON DISPOSITIVO(62191)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '858403',
+    descripcion: 'COLGAJO LOCAL MUSCULOCUTANEO EN LA MAMA(4586)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '858701',
+    descripcion: 'RECONSTRUCCION DEL COMPLEJO AREOLA. PEZON(4589)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '859401',
+    descripcion: 'EXTRACCION DE DISPOSITIVO DE MAMA UNILATERAL(62194)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862002',
+    descripcion:
+      'DESBRIDAMIENTO ESCISIONAL EN AREA ESPECIAL EN PLIEGUES DE FLEXION AXILA ANTECUBITAL HUECOS POPLITEOS INGUINAL(47384)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862005',
+    descripcion: 'DESBRIDAMIENTO ESCISIONAL EN AREA ESPECIAL EN GENITALES(47387)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862008',
+    descripcion:
+      'DESBRIDAMIENTO ESCISIONAL ENTRE EL 20% AL 29% DE SUPERFICIE CORPORAL EN AREA GENERAL(47390)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862010',
+    descripcion:
+      'DESBRIDAMIENTO ESCISIONAL DEL 50% O MAS DE SUPERFICIE CORPORAL EN AREA GENERAL(47392)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862312',
+    descripcion: 'DESBRIDAMIENTO DE LESION PROFUNDA (ULCERA) CON COCCIGECTOMIA +(4635)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862505',
+    descripcion:
+      'DERMOABRASION (QUIMICA O MECANICA) DE AREA GENERAL MENOR DEL 10% DE SUPERFICIE CORPORAL(24783)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862510',
+    descripcion: 'DERMOABRASION (QUIMICA O MECANICA) EN AREA ESPECIAL EN CARA O CUELLO(47404)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862805',
+    descripcion:
+      'DESBRIDAMIENTO NO ESCISIONAL DE TEJIDO DESVITALIZADO ENTRE EL 30% AL 40% DE SUPERFICIE CORPORAL(4665)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862806',
+    descripcion:
+      'DESBRIDAMIENTO NO ESCISIONAL DE TEJIDO DESVITALIZADO ENTRE EL 40% AL 50% DE SUPERFICIE CORPORAL(4666)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862807',
+    descripcion:
+      'DESBRIDAMIENTO NO ESCISIONAL DE TEJIDO DESVITALIZADO MAYOR DEL 50% DE SUPERFICIE CORPORAL(4667)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '866103',
+    descripcion:
+      'INJERTO DE PIEL PARCIAL EN AREA GENERAL DEL VEINTE 20% AL 29% DE SUPERFICIE CORPORAL TOTAL(4708)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '866104',
+    descripcion:
+      'INJERTO DE PIEL PARCIAL EN AREA GENERAL MAYOR DEL TREINTA 30% DE SUPERFICIE CORPORAL TOTAL +(4709)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '866106',
+    descripcion:
+      'INJERTO DE PIEL TOTAL EN AREA ESPECIAL EN PLIEGUES DE FLEXION (AXILA, ANTECUBITAL, HUECOS POPLITEOS, INGUINAL)(47410)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '866107',
+    descripcion: 'INJERTO DE PIEL TOTAL EN AREA ESPECIAL EN MUÑECAS O MANOS(47411)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '866108',
+    descripcion: 'INJERTO DE PIEL TOTAL EN AREA ESPECIAL EN TOBILLO O PIES(47412)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '866109',
+    descripcion: 'INJERTO DE PIEL TOTAL EN AREA ESPECIAL EN GENITALES(47413)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '866201',
+    descripcion:
+      'INJERTO DE PIEL TOTAL EN AREA GENERAL MENOR DEL DIEZ 10% DE SUPERFICIE CORPORAL TOTAL(4712)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '866202',
+    descripcion:
+      'INJERTO DE PIEL TOTAL EN AREA GENERAL DEL DIEZ 10% AL 19% DE SUPERFICIE CORPORAL TOTAL(4713)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '866203',
+    descripcion:
+      'INJERTO DE PIEL TOTAL EN AREA GENERAL DEL 20% AL 29% DE SUPERFICIE CORPORAL TOTAL(4714)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '866204',
+    descripcion:
+      'INJERTO DE PIEL TOTAL EN AREA GENERAL DEL 30% O MAS DE SUPERFICIE CORPORAL TOTAL(4715)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '867101',
+    descripcion: 'COLGAJO UNICO DE CUERO CABELLUDO(4730)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '867102',
+    descripcion: 'COLGAJO MULTIPLE DE CUERO CABELLUDO(4731)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '867103',
+    descripcion: 'COLGAJO CUTANEO A DISTANCIA. EN VARIOS TIEMPOS(4732)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '867105',
+    descripcion: 'COLGAJO LIBRE CUTANEO CON TECNICA MICROVASCULAR(4734)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '040703',
+    descripcion: 'ESCISION [RESECCION] DE NERVIO CRANEAL O PERIFERICO(30061)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '040713',
+    descripcion: 'NEURECTOMIA DE OTRO NERVIO PERIFERICO VIA ABIERTA(42597)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '045102',
+    descripcion: 'INJERTO DE NERVIO PERIFERICO(29547)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '052401',
+    descripcion: 'SIMPATECTOMIA PRESACRA POR LAPAROTOMIA +(421)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '052403',
+    descripcion: 'SIMPATECTOMIA PRESACRA(29660)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '052500',
+    descripcion: 'SIMPATECTOMIA PERIARTERIAL SOD(425)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '052601',
+    descripcion: 'RESECCION DE TUMOR EN NERVIO O GANGLIO SIMPATICO(428)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '052602',
+    descripcion: 'RESECCION DE TUMOR EN NERVIO O GANGLIO SIMPATICO CERVICAL(429)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '052603',
+    descripcion: 'SIMPATECTOMIA DIGITAL (DEDO) +(25039)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '052605',
+    descripcion: 'SIMPATECTOMIA O GANGLIECTOMIA(29591)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '060201',
+    descripcion: 'REAPERTURA DE HERIDA DE AREA TIROIDEA VIA ABIERTA(42952)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '060902',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO POR INCISION(478)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '060904',
+    descripcion: 'DRENAJE EN CUELLO (EXCEPTO AREA TIROIDEA) POR INCISION(480)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '065101',
+    descripcion: 'TIROIDECTOMIA RETROESTERNAL PARCIAL VIA ABIERTA(42955)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '069101',
+    descripcion: 'REEXPLORACION DE CUELLO Y MEDIASTINO VIA ABIERTA(42960)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '070001',
+    descripcion: 'EXPLORACIÓN DE ÁREA SUPRARENAL VÍA ABIERTA(42245)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '071001',
+    descripcion: 'BIOPSIA DE GLÁNDULA SUPRARRENAL VÍA ABIERTA(42610)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '072701',
+    descripcion: 'REIMPLANTE DE TEJIDO SUPRARRENAL VÍA ABIERTA(42253)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '078205',
+    descripcion: 'RESECCION PARCIAL DEL TIMO VIA ABIERTA(45854)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '170006',
+    descripcion: 'RESECCION PARCIAL DE HUESO TEMPORAL(41816)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '170007',
+    descripcion: 'RESECCION SUBTOTAL DE HUESO TEMPORAL(41817)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '170008',
+    descripcion: 'RESECCION TOTAL DE HUESO TEMPORAL(41818)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '170009',
+    descripcion: 'RESECCION DE TUMOR O LESION DE OIDO MEDIO VIA TRANSCANAL(41819)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '170010',
+    descripcion: 'RESECCION DE TUMOR O LESION DE OIDO MEDIO Y MASTOIDES VIA TRANSMASTOIDEA(41820)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '170011',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DE OIDO MEDIO Y DEL FORAMEN YUGULAR VIA FOSA INFRATEMPORAL(41821)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '170012',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DE OIDO MEDIO Y DEL FORAMEN YUGULAR VIA TRANSMASTOIDEA(41822)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '170013',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DE OIDO MEDIO Y DEL FORAMEN YUGULAR VIA TRANSLABERINTICA(41823)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '170014',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DE OIDO MEDIO Y DEL FORAMEN YUGULAR VIA TRANSCOCLEAR O TRANSCONDILAR O TRANSOTICO(41824)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '194201',
+    descripcion:
+      'RECONSTRUCCION DE CADENA OSEA [OSICULOPLASTIA] CON INJERTO O PROTESIS SOBRE REMANENTE DE CADENA OSEA(41831)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '194203',
+    descripcion:
+      'RECONSTRUCCION DE CADENA OSEA [OSICULOPLASTIA] CON INJERTO O PROTESIS SOBRE VENTANA SIN CADENA OSEA(41832)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '199101',
+    descripcion: 'CIERRE DE FISTULA PERILINFATICA DE OIDO MEDIO(41833)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '199300',
+    descripcion: 'MASTOIDOPLASTIA SOD(30133)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '204301',
+    descripcion: 'DESFUNCIONALIZACION DE LA MASTOIDES(42276)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '204303',
+    descripcion: 'CORRECCION DE DIVERTICULO DEL SENO SIGMOIDES(42278)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '218302',
+    descripcion: 'RECONSTRUCCION NASAL TOTAL CON COLGAJO FRONTAL +(902)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '218306',
+    descripcion:
+      'RECONSTRUCCION NASAL LIBERACION DE COLGAJOS REMODELACIONES EN OTROS TIEMPOS(36398)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '218307',
+    descripcion: 'RECONSTRUCCION NASAL CON TEJIDO HETEROLOGO U HOMOLOGO O DISPOSITIVO(41856)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '219005',
+    descripcion: 'RESECCION DE TUMOR MALIGNO DE FOSA NASAL VIA CRANEOFACIAL(41780)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '219006',
+    descripcion: 'RESECCION DE TUMOR MALIGNO DE FOSA NASAL VIA TRANSORBITARIA(41781)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '219007',
+    descripcion: 'RESECCION DE TUMOR MALIGNO DE FOSA NASAL POR RINOTOMIA LATERAL(41782)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '219008',
+    descripcion:
+      'RESECCION DE TUMOR MALIGNO DE FOSA NASAL POR DESPEGAMIENTO FACIAL VIA SUBLABIAL(41783)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '219106',
+    descripcion: 'RESECCION DE TUMOR BENIGNO DE CAVUM CON EXTENSION INTRACRANEANA(41789)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '226203',
+    descripcion: 'RESECCION DE LESION BENIGNA EN SENO MAXILAR VIA TRANSNASAL(41744)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '226205',
+    descripcion: 'RESECCION DE LESION MALIGNA EN SENO MAXILAR VIA TRANSNASAL(42656)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '226302',
+    descripcion: 'ETMOIDECTOMIA EXTERNA(948)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '243107',
+    descripcion:
+      'ESCISION DE LESION MALIGNA DE ENCIA CON VACIAMIENTO GANGLIONAR, PISO DE BOCA O LENGUA Y RECONSTRUCCION CON COLGAJO PEDICULADO(1058)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '243108',
+    descripcion:
+      'ESCISION DE LESION MALIGNA DE ENCIA CON VACIAMIENTO GANGLIONAR. RESECCION OSEA Y RECONSTRUCCION CON PLACA Y COLGAJO PEDICULADO(1059)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '243109',
+    descripcion:
+      'ESCISION DE LESION MALIGNA DE ENCIA CON VACIAMIENTO GANGLIONAR. RESECCION OSEA Y RECONSTRUCCION CON PLACA Y COLGAJO LIBRE(1060)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '244104',
+    descripcion:
+      'RESECCION DE TUMOR BENIGNO O MALIGNO ODONTOGENICO Y RECONSTRUCCION INMEDIATA CON INJERTO OSEO LIBRE(1077)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '244105',
+    descripcion:
+      'RESECCION DE TUMOR BENIGNO O MALIGNO ODONTOGENICO Y RECONSTRUCCION CON COLGAJO OSEO PEDICULADO(1078)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '244106',
+    descripcion:
+      'RESECCION DE TUMOR BENIGNO O MALIGNO ODONTOGENICO Y RECONSTRUCCION CON COLGAJO OSEO LIBRE(1079)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '244107',
+    descripcion:
+      'RESECCION DE TUMOR BENIGNO O MALIGNO ODONTOGENICO Y RECONSTRUCCION CON PLACA(1080)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '252002',
+    descripcion: 'RESECCION O ABLACION PARCIAL DE LENGUA(42123)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '252506',
+    descripcion: 'HEMIGLOSECTOMIA CON COLGAJO LOCAL O A DISTANCIA VIA ABIERTA(42672)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '252508',
+    descripcion: 'HEMIGLOSECTOMIA CON RESECCION OSEA VIA ABIERTA(41755)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '273105',
+    descripcion: 'ESCISION O RESECCION O ABLACION DE LESION SUPERFICIAL DE PALADAR OSEO(42981)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '273201',
+    descripcion: 'ESCISION DE LESION PROFUNDA DE PALADAR(1161)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '273202',
+    descripcion: 'RESECCION EN BLOQUE DE APOFISIS ALVEOLAR Y PALADAR(1162)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '273203',
+    descripcion: 'PALATECTOMIA PARCIAL(1163)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '273204',
+    descripcion: 'PALATECTOMIA TOTAL(1164)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '273301',
+    descripcion: 'ESCISION O RESECCION O ABLACION DE LESION SUPERFICIAL DE PALADAR BLANDO(42982)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '273401',
+    descripcion: 'ESCISION O RESECCION O ABLACION DE LESION PROFUNDA DE PALADAR BLANDO(42983)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '273402',
+    descripcion: 'PALATECTOMIA DE PALADAR BLANDO PARCIAL(41867)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '273403',
+    descripcion: 'PALATECTOMIA DE PALADAR BLANDO TOTAL(41868)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '274304',
+    descripcion: 'RESECCION DE TUMOR MALIGNO DE MUCOSA ORAL. CON COLGAJO LOCAL O A DISTANCIA(1176)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '275305',
+    descripcion: 'ALARGAMIENTO DE PALADAR CON COLGAJO EN ISLA(29804)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '275903',
+    descripcion: 'PROFUNDIZACION DE SURCO VESTIBULAR(29449)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '276205',
+    descripcion: 'CORRECCION DE FISURA PALATINA. CON COLGAJO VOMERIANO(1219)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '290201',
+    descripcion: 'FARINGOSTOMIA VIA ABIERTA(41879)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '293101',
+    descripcion: 'MIOTOMIA CRICOFARINGEA VIA ABIERTA(41883)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '293309',
+    descripcion: 'DIVERTICULECTOMIA FARINGEA VIA ABIERTA(41886)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '294401',
+    descripcion: 'LISIS DE ADHERENCIAS FARINGEAS VIA ABIERTA(42986)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '295607',
+    descripcion: 'ZPLASTIA FARINGEA LATERAL(42697)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '295701',
+    descripcion:
+      'RECONSTRUCCION DE FARINGE CON COLGAJO FASCIOCUTANEO O MIOCUTANEO A DISTANCIA(41896)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '295702',
+    descripcion: 'RECONSTRUCCION DE FARINGE CON COLGAJO LIBRE MICROVASCULAR(41897)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '301107',
+    descripcion: 'HEMILARINGECTOMIA SUPRAGLOTICA AMPLIADA VIA ABIERTA(42126)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '302102',
+    descripcion: 'FISTULECTOMIA LARINGOTRAQUEAL VIA ABIERTA(42987)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '303103',
+    descripcion:
+      'LARINGOFARINGECTOMIA CON RECONSTRUCCION CON COLGAJO FASCIOCUTANEO O MIOCUTANEO A DISTANCIA(42139)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '304102',
+    descripcion: 'EXANTERACION CERVICAL(42307)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '311101',
+    descripcion: 'CRICOTIROTOMIA VIA ABIERTA(42988)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '315001',
+    descripcion: 'RESECCION O ABLACION DE LESION DE TRAQUEA VIA ABIERTA(42740)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '315003',
+    descripcion: 'RESECCION DE CARINA CON REIMPLANTACION BRONQUIAL(42742)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '317308',
+    descripcion: 'CIERRE DE FISTULA TRAQUEOESOFAGICA SIN RECONSTRUCCION POR CERVICOTOMIA(46060)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '317309',
+    descripcion: 'CIERRE DE FISTULA TRAQUEOESOFAGICA SIN RECONSTRUCCION POR TORACOTOMIA(46061)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '317507',
+    descripcion: 'RECONSTRUCCION TRAQUEAL TERMINOTERMINAL VIA ABIERTA(46066)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '317511',
+    descripcion: 'LARINGOTRAQUEOESOFAGOPLASTIA(46070)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '325301',
+    descripcion:
+      'NEUMONECTOMIA CON DECORTICACION CONCOMITANTE [PLEURONEUMONECTOMIA] VIA ABIERTA(42767)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '340301',
+    descripcion: 'TORACOSTOMIA VIA ABIERTA CON RESECCION COSTAL(42785)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '341301',
+    descripcion: 'RESECCION DE QUISTE O TUMOR BENIGNO DEL MEDIASTINO POR TORACOTO(42811)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '341302',
+    descripcion: 'RESECCION DE QUISTE O TUMOR BENIGNO DEL MEDIASTINO POR ESTERNOTOMI(42812)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '341501',
+    descripcion:
+      'EXTRACCION DE CUERPO EXTRAÑO DE MEDIASTINO POR TORACOTOMIA CON O SIN RESECCION DE COSTILLA(42817)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '385220',
+    descripcion: 'OCLUSION DE VASOS DE CABEZA Y CUELLO. VIA ENDOVASCULAR(1797)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '385401',
+    descripcion: 'OCLUSION DE VASOS ESPINALES. VIA ENDOVASCULAR(1803)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '385402',
+    descripcion: 'CIERRE, PINZAMIENTO O LIGADURA DE VASOS ESPINALES(29763)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '391701',
+    descripcion: 'DERIVACION PORTO-CAVA(29073)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '391702',
+    descripcion: 'DERIVACION MESENTERICO-CAVA(29072)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '392801',
+    descripcion: 'DERIVACION (INJERTO) AXILAR-BRAQUIAL(1871)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '395061',
+    descripcion:
+      'ANGIOPLASTIA O ATERECTOMIA DE VASOS ABDOMINALES CON BALON, CON PROTESIS (STENT) O INJERTO (S) PROTESICO (S)(25053)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '397502',
+    descripcion: 'EXPLORACION DE VASOS TORACICOS POR TORACOTOMIA(42836)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '397601',
+    descripcion: 'EXPLORACION DE ARTERIAS ABDOMINALES(1945)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '398001',
+    descripcion:
+      'RESECCION DE TUMOR DE CUERPO CAROTIDEO (QUEMODECTOMIA) SIN ESCISION DE LA CAROTIDA(1955)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '398002',
+    descripcion:
+      'RESECCION DE TUMOR DE CUERPO CAROTIDEO (QUEMODECTOMIA) CON ESCISION DE LA CAROTIDA(1956)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '414201',
+    descripcion: 'ESCISIÓN O ABLACIÓN DE LESIÓN O TEJIDO DE BAZO VÍA ABIERTA(42346)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '414401',
+    descripcion: 'EXTRACCIÓN DE CUERPO EXTRAÑO DEL BAZO VÍA ABIERTA(42348)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '423207',
+    descripcion: 'RESECCIÓN DE LESIÓN O TUMOR DE ESÓFAGO ABDOMINAL VÍA ABIERTA(42359)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '425101',
+    descripcion: 'ESOFAGOESOFAGOSTOMÍA INTRATORÁCICA O CERVICAL VÍA ABIERTA(42363)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '425204',
+    descripcion: 'RECONSTRUCCION O ANASTOMOSIS ESOFAGICA CON TUBO GASTRICO VIA ABIERTA(46103)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '425208',
+    descripcion:
+      'RECONSTRUCCION O ANASTOMOSIS ESOFAGICA CON ASCENSO GASTRICO MEDIASTINAL VIA ABIERTA(46107)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '427300',
+    descripcion: 'ESOFAGOTOMIA CON MIOTOMIA EN ESPIRAL SOD(2057)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '428300',
+    descripcion: 'CIERRE DE ESOFAGOSTOMIA SOD(2064)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '428500',
+    descripcion: 'REPARACION DE ESTENOSIS ESOFAGICA SOD(2065)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '429102',
+    descripcion: 'LIGADURA DE VARICES ESOFAGICAS POR TRANSECCION GASTRICA(2069)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '430102',
+    descripcion:
+      'EXTRACCION DE CUERPO EXTRAÑO MULTIPLE (BEZOARD) POR GASTROTOMIA VIA ABIERTA(46120)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '433101',
+    descripcion: 'PILOROMIOTOMÍA VÍA ABIERTA(42369)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '438301',
+    descripcion:
+      'GASTROENTEROANASTOMOSIS DERIVATIVA (DUODENO O YEYUNO) CON EXCLUSIÓN PILÓRICA VÍA ABIERTA(42376)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '438303',
+    descripcion:
+      'GASTROENTEROANASTOMOSIS DERIVATIVA (DUODENO O YEYUNO) SIN EXCLUSIÓN PILÓRICA VÍA ABIERTA(42377)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '439101',
+    descripcion: 'RECONSTRUCCIÓN GÁSTRICA CON INTERPOSICIÓN INTESTINAL VÍA ABIERTA(42380)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '440102',
+    descripcion:
+      'DISECCIÓN DEL VAGO TRONCAL [VAGOTOMÍA TRONCAL] CON O SIN PILOROPLASTIA VÍA ABIERTA(42383)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '441101',
+    descripcion: 'GASTROSCOPIA TRANSABDOMINAL (INTRAQUIRURGICA) VIA ABIERTA(43021)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '442101',
+    descripcion: 'DILATACIÓN DE PÍLORO MEDIANTE INCISIÓN VÍA ABIERTA(42384)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '444001',
+    descripcion:
+      'SUTURA DE ÚLCERA PERFORADA CON O SIN VAGOTOMÍA CON EPIPLOPLASTIA VÍA ABIERTA(42387)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '444101',
+    descripcion: 'SUTURA DE ÚLCERA GÁSTRICA VÍA ABIERTA(42388)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '444201',
+    descripcion: 'SUTURA DE ÚLCERA DUODENAL VÍA ABIERTA(42389)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '445101',
+    descripcion: 'REANASTOMOSIS DEL ESTÓMAGO POR DEHISCENCIA DE LA SUTURA VÍA ABIERTA(42390)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '446201',
+    descripcion: 'CIERRE DE GASTROSTOMÍA VÍA ABIERTA(42392)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '446401',
+    descripcion: 'GASTROPEXIA VÍA ABIERTA(42394)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '446603',
+    descripcion:
+      'REINTERVENCION EN ANTIRREFLUJO GASTROESOFAGICO CON RECONSTRUCCION DEL ESFINTER ESOFAGICO INFERIOR(2129)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '449101',
+    descripcion: 'LIGADURA DE VÁRICES GÁSTRICAS VÍA ABIERTA(42396)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '449501',
+    descripcion:
+      'BAIPÁS O DERIVACIÓN O PUENTE DUODENAL PARA REFLUJO DUODENOGÁSTRICO VÍA ABIERTA(42398)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '451304',
+    descripcion: 'ENTEROSCOPIA (INTRAQUIRURGICA) TRANSABDOMINAL VIA ABIERTA(43023)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '454209',
+    descripcion: 'RESECCIÓN DE LESIÓN DE INTESTINO GRUESO VÍA ENDOSCÓPICA (11 O MÁS)(42405)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '456101',
+    descripcion: 'RESECCIÓN SEGMENTARIA MÚLTIPLE DE INTESTINO DELGADO VÍA ABIERTA(42407)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '456203',
+    descripcion: 'ILECTOMIA(2175)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '456301',
+    descripcion: 'RESECCIÓN TOTAL DE INTESTINO DELGADO VÍA ABIERTA(42408)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '457201',
+    descripcion: 'CECECTOMÍA VÍA ABIERTA(42410)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '457401',
+    descripcion: 'RESECCIÓN DE COLON TRANSVERSO VÍA ABIERTA(42413)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '460103',
+    descripcion: 'EXTERIORIZACIÓN DE INTESTINO DELGADO VÍA ABIERTA(42425)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '464001',
+    descripcion: 'REMODELACION DE ESTOMA INTESTINAL(2213)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '464003',
+    descripcion: 'REUBICACIÓN DE ESTOMA INTESTINAL VÍA ABIERTA(42428)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '466302',
+    descripcion: 'CECOCOLOPEXIA(2220)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '467201',
+    descripcion: 'CIERRE DE FÍSTULA DE DUODENO VÍA ABIERTA(42430)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '467401',
+    descripcion: 'CIERRE DE FÍSTULA DE INTESTINO DELGADO, SALVO DUODENO VÍA ABIERTA(42431)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '467601',
+    descripcion: 'CIERRE DE FISTULA ENTEROCOLICA (UNA O MAS)(2226)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '467701',
+    descripcion: 'CIERRE DE FÍSTULA ENTEROCUTÁNEA VÍA ABIERTA(42432)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '468013',
+    descripcion: 'MOVILIZACION DE INTESTINO GRUESO VIA ABIERTA(41944)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '468022',
+    descripcion: 'DESCOMPRESION HIDROSTATICA DE INVAGINACION DE INTESTINO(36743)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '469401',
+    descripcion: 'REINTERVENCIÓN DE ANASTOMOSIS INTESTINAL VÍA ABIERTA(42433)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '486201',
+    descripcion: 'RESECCIÓN ANTERIOR DE RECTO VÍA ABIERTA(42439)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '486801',
+    descripcion: 'RESECCIÓN DE RECTO CON RECONSTRUCCIÓN TIPO PULL-THROUGH(42441)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '487603',
+    descripcion: 'RECTOPEXIA VENTRAL ANTERIOR VÍA ABIERTA(42444)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '487605',
+    descripcion: 'COLPOPROCTOPEXIA VENTRAL ANTERIOR VIA ABIERTA(41954)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '487607',
+    descripcion: 'PROCTOSIGMOIDOPEXIA VÍA ABIERTA(42446)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '497401',
+    descripcion:
+      'TRANSPOSICION DEL MUSCULO RECTO INTERNO PARA INCONTINENCIA ANAL. VIA SAGITAL POSTERIOR +(2359)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '497504',
+    descripcion: 'ANOPLASTIA POR ESTENOSIS(2366)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '500101',
+    descripcion: 'EXTRACCIÓN DE CUERPO EXTRAÑO INTRAHEPÁTICO VÍA ABIERTA(42459)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '502001',
+    descripcion: 'RESECCIÓN DEL DOMO DE QUISTE HEPÁTICO VÍA ABIERTA(42460)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '502405',
+    descripcion: 'ENUCLEACIÓN DE LESIÓN HEPÁTICA VÍA ABIERTA(43029)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '510004',
+    descripcion: 'CIERRE DE COLECISTOSTOMIA VIA ABIERTA(46170)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '512302',
+    descripcion: 'LITOTRIPSIA INTRADUCTAL POR COLEDOSCOPIA(42474)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '512503',
+    descripcion:
+      'RESECCION DE QUISTE DEL COLEDOCO CON DERIVACION BILIODIGESTIVA VIA ABIERTA(42475)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '512505',
+    descripcion:
+      'RESECCION DE QUISTES DEL COLEDOCO CON DERIVACION BILIODIGESTIVA Y VALVULA ANTIRREFLUJO VIA ABIERTA(46173)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '513701',
+    descripcion: 'HEPATICOYEYUNOSTOMÍA VÍA ABIERTA(42479)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '514004',
+    descripcion: 'COLEDOCOSCOPÍA INTRAOPERATORIA(43032)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '514401',
+    descripcion: 'INSERCIÓN DE DISPOSITIVO COLEDOCOHEPÁTICO PARA DESCOMPRESIÓN VÍA ABIERTA(42482)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '517101',
+    descripcion: 'SUTURA SIMPLE DE COLÉDOCO VÍA ABIERTA(42485)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '517201',
+    descripcion: 'COLEDOCOPLASTIA VÍA ABIERTA(42486)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '518101',
+    descripcion: 'DILATACIÓN DE ESFÍNTER DE ODDI(42488)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '518901',
+    descripcion: 'INSERCIÓN DE DISPOSITIVO EN VÍA BILIAR VÍA ABIERTA(42491)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '519100',
+    descripcion: 'REPARACION DE LESION DE VESICULA BILIAR SOD(2481)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '519401',
+    descripcion: 'REVISIÓN DE ANASTOMOSIS DE LAS VÍAS BILIARES VÍA ABIERTA(42494)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '519501',
+    descripcion: 'EXTRACCIÓN DE DISPOSITIVO DE VÍA BILIAR VÍA ABIERTA(42495)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '523101',
+    descripcion: 'EXTRACCIÓN DE CUERPO EXTRAÑO DE PÁNCREAS VÍA ABIERTA(42500)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '524001',
+    descripcion: 'DRENAJE DE QUISTE O SEUDOQUISTE PANCREÁTICO VÍA ABIERTA(42502)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '524401',
+    descripcion: 'DRENAJE INTERNO DE QUISTE PANCREÁTICO POR CISTOENTEROSTOMÍA VÍA ABIERTA(42504)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '525001',
+    descripcion: 'PANCREATECTOMÍA CENTRAL VÍA ABIERTA(42505)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '525101',
+    descripcion: 'PANCREATECTOMÍA PROXIMAL VÍA ABIERTA(42506)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '526101',
+    descripcion: 'PANCREATECTOMÍA TOTAL VÍA ABIERTA(42509)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '529505',
+    descripcion: 'SUTURA SIMPLE DE PÁNCREAS VÍA ABIERTA(42513)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '536001',
+    descripcion: 'HERNIORRAFIA LUMBAR VÍA ABIERTA(42537)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '536101',
+    descripcion: 'HERNIORRAFIA OBTURADORA VÍA ABIERTA(42538)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '536301',
+    descripcion: 'HERNIORRAFIA PERINEAL VÍA ABIERTA(42540)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '536303',
+    descripcion: 'HERNIORRAFIA PERINEAL ABORDAJE PERINEAL(42541)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '536701',
+    descripcion: 'HERNIORRAFIA PERINEAL ENCARCELADA VÍA ABIERTA(42544)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '536801',
+    descripcion: 'HERNIORRAFIA PARAESTOMAL VÍA ABIERTA(42545)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '536803',
+    descripcion: 'HERNIORRAFIA SEMILUNAR [SPIEGEL] VÍA ABIERTA(42547)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '536901',
+    descripcion: 'HERNIORRAFIA PARAESTOMAL ENCARCELADA VÍA ABIERTA(42549)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '536903',
+    descripcion: 'HERNIORRAFIA SEMILUNAR [SPIEGEL] ENCARCELADA VÍA ABIERTA(42551)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '537301',
+    descripcion: 'REPARACIÓN DE HERNIA DIAFRAGMÁTICA ENCARCELADA VÍA ABIERTA(43033)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '537304',
+    descripcion: 'REPARACIÓN DE HERNIA DIAFRAGMÁTICA REPRODUCIDA VÍA ABIERTA(43034)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '540004',
+    descripcion: 'DRENAJE DE COLECCIÓN EXTRAPERITONEAL VÍA ABIERTA(42553)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '540101',
+    descripcion: 'LIBERACIÓN DE PLASTRÓN EN ABDOMEN VÍA ABIERTA(42558)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '541101',
+    descripcion: 'LAPAROTOMÍA DE PRECISIÓN (ESTADIFICACIÓN)(42559)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '541501',
+    descripcion: 'EXPLORACION DE ESPACIO RETROPERITONEAL(2561)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '541703',
+    descripcion: 'LAVADO PERITONEAL DIAGNÓSTICO VÍA ABIERTA(42565)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '541801',
+    descripcion: 'MARSUPIALIZACION ABDOMINAL POR PANCREATITIS(2565)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '542001',
+    descripcion: 'EXPLORACIÓN INGUINAL VÍA ABIERTA(42566)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '543201',
+    descripcion: 'RESECCIÓN DE TUMOR MALIGNO EN LA PARED ABDOMINAL VÍA ABIERTA(42571)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '543301',
+    descripcion: 'ESCISION DE LESION AMPLIA EN LA PARED ABDOMINAL CON ROTACION DE COLGAJO(2575)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '543303',
+    descripcion: 'RESECCION DE LESION AMPLIA EN LA PARED ABDOMINAL(32061)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '544200',
+    descripcion: 'ONFALECTOMIA SOD(2581)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '546200',
+    descripcion: 'CIERRE RETARDADO DE HERIDA ABDOMINAL EN FASE DE GRANULACION SOD(2587)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '547001',
+    descripcion: 'CORRECCION PARCIAL DE GASTROSQUISIS CON DISPOSITIVO(46184)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '547501',
+    descripcion: 'REPARACION DE DIASTASIS DE RECTOS ABDOMINALES VÍA ABIERTA(42575)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '547503',
+    descripcion: 'PLASTIA DE PARED ABDOMINAL VÍA ABIERTA(42576)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '547505',
+    descripcion: 'RECONSTRUCCIÓN DE PARED ABDOMINAL ANATÓMICA Y FUNCIONAL VÍA ABIERTA(42577)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '547701',
+    descripcion: 'CIERRE TEMPORAL DE PARED ABDOMINAL CON O SIN DISPOSITIVO VÍA ABIERTA(42578)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '547702',
+    descripcion: 'RETIRO DE DISPOSITIVO PARA CIERRE TEMPORAL DE PARED ABDOMINAL VÍA ABIERTA(42579)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '547703',
+    descripcion:
+      'SUSTITUCIÓN O CAMBIO DE DISPOSITIVO PARA CIERRE TEMPORAL DE PARED ABDOMINAL VÍA ABIERTA(42580)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '550102',
+    descripcion: 'EXPLORACION DE RIÑON POR NEFROTOMIA(2615)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '550104',
+    descripcion: 'DRENAJE DE COLECCION RENAL POR NEFROTOMIA +(2617)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '551101',
+    descripcion: 'EXPLORACION DE PELVIS RENAL POR PIELOTOMIA VIA ABIERTA(46199)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '553101',
+    descripcion: 'ESCISION LOCAL O ABLACIÒN DE LESION RENAL VIA ABIERTA(2633)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '554102',
+    descripcion: 'HEMINEFRECTOMIA POR LUMBOTOMIA(46229)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '555606',
+    descripcion: 'RESECCION DE RIÑON UNILATERAL TOTAL [NEFRECTOMIA SIMPLE] POR LUMBOTOMIA(46240)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '558301',
+    descripcion: 'CIERRE DE FISTULA NEFROVISCERAL VIA ABIERTA(46249)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '558601',
+    descripcion: 'NEFRO-PIELO-URETEROSTOMIA VIA ABIERTA(46253)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '558603',
+    descripcion: 'ANASTOMOSIS PIELO-URETERO-VESICAL VIA ABIERTA(46255)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '558607',
+    descripcion: 'NEFROENTEROSTOMIA CUTANEA VIA ABIERTA(46259)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '559101',
+    descripcion: 'COLOCACION DE DISPOSITIVO (CATETER DOBLE J) ANTEROGRADO DE RIÑON A VEJIGA(32002)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '564130',
+    descripcion: 'ACORTAMIENTO O REMODELACION DE URETER CON REIMPLANTACION URETEROVESICAL(2708)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '565101',
+    descripcion: 'URETEROILEOSTOMIA CUTANEA [CIRUGIA DE BRICKER](2712)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '565201',
+    descripcion: 'URETEROSIGMOIDOSTOMIA(2714)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '565202',
+    descripcion: 'ANASTOMOSIS URETEROCOLONICA TUNELIZADA(32001)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '565610',
+    descripcion: 'URETEROCOLOSTOMIA(2717)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '565901',
+    descripcion: 'REVISION DE ANASTOMOSIS URETERO INTESTINAL VIA ABIERTA(46267)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '566201',
+    descripcion: 'REVISION DE ESTOMA DE URETEROSTOMIA CUTANEA VIA ABIERTA(46271)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '567405',
+    descripcion: 'REANASTOMOSIS URETERO-VESICAL VIA ABIERTA(46277)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '568301',
+    descripcion: 'CIERRE DE URETEROSTOMIA VIA ABIERTA(46283)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '568403',
+    descripcion: 'FISTULECTOMIA VESICO-URETERO-VAGINAL Y REIMPLANTE URETERAL VIA ABIERTA(46286)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '568901',
+    descripcion: 'INJERTO DE URETER VIA ABIERTA(46288)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '568903',
+    descripcion: 'RESECCION DE URETEROCELE Y REIMPLANTE DE URETER IPSILATERAL VIA ABIERTA(46290)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '568906',
+    descripcion: 'REEMPLAZO DE URETER CON SEGMENTO ILEAL IMPLANTADO EN VEJIGA VIA ABIERTA(46293)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '571102',
+    descripcion: 'CISTOTOMIA VIA ABIERTA(46304)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '572201',
+    descripcion: 'REVISION DE VESICOSTOMIA VIA ABIERTA(46308)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '575202',
+    descripcion: 'RESECCION O FULGURACION SUPRAPUBICA DE LESION VESICAL. VIA ABIERTA(2759)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '575203',
+    descripcion: 'ENDOMETRECTOMIA DE VEJIGA VIA ABIERTA(46316)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '576001',
+    descripcion: 'CISTECTOMIA PARCIAL, VIA ABIERTA(28946)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '577309',
+    descripcion: 'ESCISION O REMOCION DE VEJIGA URETRA Y TEJIDO GRASO EN MUJER VIA ABIERTA(46328)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '577313',
+    descripcion:
+      'CISTOPROSTATECTOMIA RADICAL MAS DERIVACION URINARIA (BOLSA CONTINENTE ORTOTOPICA) VIA ABIERTA(46332)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '577315',
+    descripcion:
+      'CISTOPROSTATECTOMIA RADICAL MAS DERIVACION URINARIA (BOLSA CONTINENTE NO ORTOTOPICA) VIA ABIERTA(46334)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '578201',
+    descripcion: 'CIERRE DE CISTOSTOMIA [FISTULECTOMIA VESICO-CUTANEA](2770)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '578305',
+    descripcion: 'FISTULECTOMIA VESICO-SIGMOIDO-VAGINAL VIA ABIERTA(46338)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '578401',
+    descripcion: 'FISTULECTOMIA CERVICO-VESICAL(2774)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '578450',
+    descripcion: 'FISTULECTOMIA URETRO-PERINEO-VESICAL(2777)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '578703',
+    descripcion: 'AMPLIACION DE VEJIGA CON SEGMENTO DE ESTOMAGO(31980)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '578801',
+    descripcion: 'ANASTOMOSIS DE VEJIGA CON SEGMENTO INTESTINAL(2784)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '578802',
+    descripcion: 'ANASTOMOSIS CISTOCOLICA(2785)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '578910',
+    descripcion:
+      'REPARACION DE LACERACIONES O DESGARROS NO OBSTETRICOS QUE INVOLUCRAN VEJIGA Y URETRA (GRADO IV)(2788)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '579930',
+    descripcion: 'LIBERACION DE ADHERENCIAS EN VEJIGA(2794)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '580051',
+    descripcion: 'URETROTOMIA INTERNA POR ABLACION(46341)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '583203',
+    descripcion: 'RESECCION O ABLACION ABIERTA DE LESION O TEJIDO URETRAL(36759)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '584303',
+    descripcion: 'RESECCION DE FISTULA URETROCUTANEA(2821)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '584304',
+    descripcion: 'CIERRE DE FISTULA URETRO-VAGINAL(2822)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '584305',
+    descripcion: 'CIERRE DE FISTULA DE NEOURETRA(2823)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '584401',
+    descripcion: 'ANASTOMOSIS DE URETRA-URETRA(2824)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '584402',
+    descripcion: 'REVISION DE ANASTOMOSIS DE URETRA(2825)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '585001',
+    descripcion: 'LIBERACION DE ADHERENCIAS EN URETRA [URETROLISIS](36760)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '588201',
+    descripcion: 'INSERCION DE DISPOSITIVO MEDICO URETRAL VIA ABIERTA(62109)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '591100',
+    descripcion: 'LIBERACION O LISIS DE ADHERENCIAS PERIVESICALES SOD(2858)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '591910',
+    descripcion: 'EXPLORACION DE TEJIDO PERIVESICAL(2859)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '595101',
+    descripcion: 'SUSPENSION URETRO VESICAL RETROPUBICA(2864)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '597910',
+    descripcion: 'URETROPEXIA ANTERIOR(2873)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '599110',
+    descripcion: 'ESCISION DE TUMOR RETROPERITONEAL CON DISECCION DE GRANDES VASOS(2880)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '613402',
+    descripcion: 'RESECCION TOTAL DEL ESCROTO(2923)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '621910',
+    descripcion: 'EXPLORACION ABDOMINAL DE TESTICULO NO DESCENDIDO VIA ABIERTA(2934)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '631001',
+    descripcion: 'LIGADURA ALTA DE VENA ESPERMATICA VIA RETROPERITONEAL(2953)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '645002',
+    descripcion: 'TRANSFORMACION DE GENITALES EXTERNOS DE HOMBRE A MUJER(62125)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '649501',
+    descripcion:
+      'INSERCION O REEMPLAZO DE PROTESIS INTERNA DE PENE NO INFLABLE RIGIDA O SEMIRIGIDA(62126)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '649801',
+    descripcion: 'DERIVACION CUERPO CAVERNOSA - CUERPO ESPONJOSA O BULBO - CAVERNOSA(3000)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '649802',
+    descripcion: 'DERIVACION CUERPO-SAFENA O SAFENO-CAVERNOSA(3001)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '652201',
+    descripcion: 'RESECCION PARCIAL DE OVARIO POR LAPAROTOMIA(46431)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '652404',
+    descripcion: 'PUNCION Y DRENAJE DE LESION DE OVARIO VIA VAGINAL(46436)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '653104',
+    descripcion: 'OOFORECTOMIA UNILATERAL VIA VAGINAL(46438)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '655104',
+    descripcion: 'OOFORECTOMIA BILATERAL VIA VAGINAL(46439)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '659510',
+    descripcion: 'LIBERACION DE TORSION DE OVARIO POR LAPAROTOMIA(3059)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '664003',
+    descripcion: 'SALPINGECTOMIA UNILATERAL TOTAL POR VIA VAGINAL(46454)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '665003',
+    descripcion: 'SALPINGECTOMIA BILATERAL TOTAL POR VIA VAGINAL(46455)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '666101',
+    descripcion: 'RESECCION DE LESION EN TROMPA DE FALOPIO POR LAPAROTOMIA(36770)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '666110',
+    descripcion: 'ESCISION DE LESION CON SALPINGECTOMIA PARCIAL +(3079)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '666210',
+    descripcion: 'RESECCION DE LESION EN MESOSALPINX POR LAPAROTOMIA +(3080)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '667301',
+    descripcion: 'SALPINGO-SALPINGOSTOMIA POR LAPAROTOMIA(3087)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '667601',
+    descripcion: 'SALPINGOLISIS POR LAPAROTOMIA(3090)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '669103',
+    descripcion: 'SALPINGO OOFORECTOMIA UNILATERAL POR VIA VAGINAL(46462)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '669203',
+    descripcion: 'SALPINGO OOFORECTOMIA BILATERAL POR VIA VAGINAL(46465)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '674101',
+    descripcion: 'ESCISION DE MUÑON CERVICAL POR LAPAROTOMIA(46479)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '676210',
+    descripcion: 'FISTULECTOMIA CERVICOSIGMOIDAL(30142)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '676910',
+    descripcion: 'CORRECCION DE DESGARRO OBSTETRICO ANTIGUO DE CUELLO UTERINO(3125)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '688201',
+    descripcion: 'EXENTERACION ANTERIOR UTERO Y VEJIGA(46504)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '688301',
+    descripcion: 'EXENTERACION POSTERIOR UTERO Y RECTO(46505)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '691101',
+    descripcion: 'ESCISION Y ABLACION DE ENDOMETRIOSIS POR LAPAROTOMIA(3175)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '691102',
+    descripcion: 'ESCISION O ABLACION DE LESION O TEJIDO EN ESTRUCTURAS DE SOPORTE(29808)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '691110',
+    descripcion: 'RESECCION DE TUMOR DE LIGAMENTO ANCHO POR LAPAROTOMIA(3176)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '691130',
+    descripcion: 'SECCION DE LIGAMENTO UTERO SACRO POR LAPAROTOMIA(3177)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '691910',
+    descripcion: 'CITORREDUCCION DE TUMOR DE LIGAMENTO ANCHO O DE LIGAMENTO UTERO SACRO(3189)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '692203',
+    descripcion: 'HISTEROPEXIA POR VIA VAGINAL(46512)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '694201',
+    descripcion: 'CIERRE DE FISTULA DE UTERO ISTMOCELE POR LAPAROTOMIA(46516)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '694301',
+    descripcion: 'REPARACION DE UTERO BICORNE POR LAPAROTOMIA(46520)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '703340',
+    descripcion: 'RESECCION DE TUMOR MALIGNO DE VAGINA(3232)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '704003',
+    descripcion: 'OBLITERACION VAGINAL COLPOCLEISIS(46547)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '704201',
+    descripcion: 'VAGINECTOMIA RADICAL POR LAPAROTOMIA(46548)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '704203',
+    descripcion: 'VAGINECTOMIA RADICAL VIA VAGINAL(46550)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '707120',
+    descripcion:
+      'REPARACION DE DESGARRO VAGINAL NO OBSTETRICO GRADO III (RECTOVAGINAL CON COMPROMISO DE ESFINTER ANAL)(3245)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '707130',
+    descripcion:
+      'REPARACION DE DESGARRO VAGINAL NO OBSTETRICO GRADO IV (ESTALLIDO DE VEJIGA CON O SIN EVISCERACION)(3246)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '707401',
+    descripcion: 'CORRECCION DE OTRA FISTULA VAGINOINTESTINAL(46556)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '709201',
+    descripcion: 'REPARACION DE ENTEROCELE POR LAPAROTOMIA(46564)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '709203',
+    descripcion: 'REPARACION DE ENTEROCELE VIA VAGINAL(46566)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '715001',
+    descripcion: 'VULVECTOMIA SUPERFICIAL UNILATERAL(46583)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '715002',
+    descripcion: 'VULVECTOMIA SUPERFICIAL BILATERAL(46584)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '715004',
+    descripcion: 'VULVECTOMIA SIMPLE BILATERAL(46586)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '715005',
+    descripcion: 'VULVECTOMIA TOTAL UNILATERAL(46587)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '715006',
+    descripcion: 'VULVECTOMIA TOTAL BILATERAL(46588)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '715007',
+    descripcion: 'VULVECTOMIA RADICAL(46589)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '743201',
+    descripcion:
+      'REMOCION DE FETO EN CAVIDAD PERITONEAL SUBSIGUIENTE A RUPTURA UTERINA O TUBARICA POR LAPAROTOMIA(46603)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '756101',
+    descripcion:
+      'REPARACION DE LACERACIONES O DESGARROS OBSTETRICOS RECIENTES QUE INVOLUCRAN VEJIGA Y URETRA POR LAPAROTOMIA(46655)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '756201',
+    descripcion:
+      'REPARACION DE LACERACIONES O DESGARROS OBSTETRICOS RECIENTES QUE INVOLUCRAN RECTO Y ESFINTER ANAL VIA VAGINAL(46657)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '760103',
+    descripcion: 'SECUESTRECTOMIA INTRAORAL O EXTRAORAL(29717)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '760902',
+    descripcion: 'DECORTICACION O CURETAJE OSEO EN HUESO FACIAL(3337)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '762202',
+    descripcion: 'RESECCION RADICAL DE TUMOR MALIGNO MAXILAR O MANDIBULAR(3350)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '763103',
+    descripcion: 'HEMIMANDIBULECTOMIA SIN DESARTICULACION(3353)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '763901',
+    descripcion: 'RESECCION PARCIAL MAXILAR SIN RECONSTRUCCION(3355)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '764305',
+    descripcion:
+      'RECONSTRUCCION MANDIBULAR (TOTAL O PARCIAL) CON INJERTO OSEO VASCULARIZADO AUTOLOGO O HETEROLOGO +(3364)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '765201',
+    descripcion: 'MENISECTOMIA TEMPOROMANDIBULAR CON INJERTO(3370)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '765202',
+    descripcion: 'MENISECTOMIA TEMPOROMANDIBULAR CON COLGAJO(3371)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '766402',
+    descripcion: 'CORTICOTOMIA MANDIBULAR(3387)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '766602',
+    descripcion:
+      'OSTEOTOMIA SUBAPICAL, CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS](3392)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '767301',
+    descripcion:
+      'REDUCCION CERRADA DE FRACTURA HEMI LEFORT I. CON FIJACION INTERMAXILAR. TUTORES Y HALOS DE TRACCION(3409)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '767302',
+    descripcion:
+      'REDUCCION CERRADA DE FRACTURA LEFORT I. CON FIJACION INTERMAXILAR. TUTORES Y HALOS DE TRACCION(3410)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '767303',
+    descripcion:
+      'REDUCCION CERRADA DE FRACTURA LEFORT II. CON FIJACION INTERMAXILAR. TUTORES Y HALOS DE TRACCION(3411)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '767304',
+    descripcion:
+      'REDUCCION CERRADA DE FRACTURA LEFORT III. CON FIJACION INTERMAXILAR. TUTORES Y HALOS DE TRACCION(3412)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '767402',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA LEFORT I. CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS] +(3414)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '767403',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA LEFORT II. CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS] +(3415)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '767404',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA LEFORT III. CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS] +(3416)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '767601',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA DE CONDILO. CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS] +(3420)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '767901',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE BORDE O PARED ORBITAL(3432)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '767902',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE UNA PARED ORBITARIA CON INJERTO(3433)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '767904',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA DE PISO DE ORBITA Y RECONSTRUCCION CON INJERTO(3435)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '767905',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA DE PARED MEDIAL DE ORBITA Y RECONSTRUCCION CON INJERTO(3436)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '767907',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA NASO-ORBITO-ETMOIDAL. CON FIJACION INTERNA [DISPOSITIVOS DE FIJACION U OSTEOSINTESIS] +(3437)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '768001',
+    descripcion: 'FIJACION INTERMAXILAR O CERCLAJE INTER MAXILAR(36779)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '768002',
+    descripcion: 'FIJACION INTERMAXILAR O CERCLAJE INTRA MAXILAR(36780)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '768101',
+    descripcion: 'INJERTO OSEO EN HUESO FACIAL(30117)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '768110',
+    descripcion: 'INJERTO OSEO AUTOLOGO O HETEROLOGO POR REBORDE ALVEOLAR +(3440)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '770501',
+    descripcion: 'SECUESTRECTOMIA DRENAJE DESBRIDAMIENTO DE FEMUR VIA ABIERTA(46663)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '770601',
+    descripcion: 'SECUESTRECTOMIA DRENAJE DESBRIDAMIENTO DE ROTULA VIA ABIERTA(46664)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '770920',
+    descripcion: 'SECUESTRECTOMIA. DRENAJE. DESBRIDAMIENTO DE HUESOS PELVIANOS(3463)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '770934',
+    descripcion: 'DRENAJE EN COLUMNA VERTEBRAL VIA ABIERTA(46665)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772105',
+    descripcion: 'OSTEOTOMIA DE ESTERNON +(3471)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772510',
+    descripcion: 'OSTEOTOMIA EN DIAFISIS DE FEMUR CON FIJACION EXTERNA(46681)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772513',
+    descripcion: 'OSTEOTOMIA CON DESCENSO DEL TROCANTER MAYOR CON FIJACION INTERNA(46684)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772601',
+    descripcion: 'OSTEOTOMIA EN ROTULA CON FIJACION(46688)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772704',
+    descripcion: 'OSTEOTOMIA DE TIBIA PROXIMAL CON FIJACION INTERNA(46689)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772705',
+    descripcion: 'OSTEOTOMIA DE TIBIA PROXIMAL CON FIJACION EXTERNA(46690)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772708',
+    descripcion: 'OSTEOTOMIA DE TIBIA DISTAL CON FIJACION INTERNA(46693)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772709',
+    descripcion: 'OSTEOTOMIA DE TIBIA DISTAL CON FIJACION EXTERNA(46694)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772714',
+    descripcion: 'OSTEOTOMIA DE TIBIA PROXIMAL SIN FIJACION(46699)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772715',
+    descripcion: 'OSTEOTOMIA DE DIAFISIS DE TIBIA SIN FIJACION(46700)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772716',
+    descripcion: 'OSTEOTOMIA DE TIBIA DISTAL SIN FIJACION(46701)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772717',
+    descripcion: 'OSTEOTOMIA DE PERONE PROXIMAL SIN FIJACION(46702)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772718',
+    descripcion: 'OSTEOTOMIA DE PERONE DISTAL SIN FIJACION(46703)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772719',
+    descripcion: 'REVISION DE OSTEOTOMIA UNICA DE TIBIA(46704)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772720',
+    descripcion: 'REVISION DE OSTEOTOMIA MULTIPLE DE TIBIA(46705)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772721',
+    descripcion: 'REVISION DE OSTEOTOMIA UNICA DE PERONE(46706)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772722',
+    descripcion: 'REVISION DE OSTEOTOMIA MULTIPLE DE PERONE(46707)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772804',
+    descripcion: 'OSTEOTOMIA DE HUESO DEL TARSO CON FIJACION INTERNA(46708)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772805',
+    descripcion: 'OSTEOTOMIA DE HUESO DEL TARSO CON FIJACION EXTERNA(46709)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772904',
+    descripcion: 'OSTEOTOMIA EN FALANGES DE MANO (UNO O MAS HUESOS) CON FIJACION EXTERNA(46715)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772914',
+    descripcion: 'REVISION DE OSTEOTOMIA MULTIPLE DE PELVIS(46723)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772952',
+    descripcion: 'TORACOPLASTIA UNILATERAL(46743)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '772953',
+    descripcion: 'TORACOPLASTIA BILATERAL(46744)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '773002',
+    descripcion: 'OSTEOCONDROPLASTIA DE CUELLO FEMORAL VIA ABIERTA(46746)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '773004',
+    descripcion: 'OSTEOCONDROPLASTIA ACETABULAR VIA ABIERTA(46748)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '773101',
+    descripcion: 'OSTEOTOMIA PERIARTICULAR UNICA(46754)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '773103',
+    descripcion: 'OSTEOTOMIA INTRAARTICULAR UNICA(46756)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776102',
+    descripcion: 'ESCISION TUMOR MALIGNO DE CLAVICULA(3526)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776105',
+    descripcion: 'ESCISION TUMOR MALIGNO DE ESCAPULA(3528)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776110',
+    descripcion: 'RESECCION TUMOR MALIGNO DE TORAX (REJA COSTAL Y ESTERNON)(3530)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776203',
+    descripcion: 'ESCISION TUMOR MALIGNO EN HUMERO(3535)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776503',
+    descripcion: 'ESCISION TUMOR MALIGNO EN FEMUR(3542)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776602',
+    descripcion: 'ESCISION TUMOR MALIGNO EN ROTULA(3544)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776801',
+    descripcion: 'RESECCION DE LESION MALIGNA OSEA EN TARSIANOS O METATARSIANOS(3547)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776932',
+    descripcion: 'ESCISION DE TUMOR (BENIGNO O MALIGNO) SACROCOCCIGEO VIA ANTERIOR(3558)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776933',
+    descripcion:
+      'ESCISION DE TUMOR (BENIGNO O MALIGNO) SACROCOCCIGEO VIA POSTERIOR O POSTEROLATERAL +(3559)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776934',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DEL CUERPO O DISCO VERTEBRAL NIVEL C1 C2 VIA TRANSORAL ABIERTA(46766)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776936',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DEL CUERPO O DISCO VERTEBRAL NIVEL C1 C2 VIA ANTERIOR O LATERAL(46768)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776937',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DEL CUERPO O DISCO VERTEBRAL SUBAXIAL VIA ANTERIOR O LATERAL HASTA DOS VERTEBRAS(46769)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776938',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DEL CUERPO O DISCO VERTEBRAL SUBAXIAL VIA ANTERIOR O LATERAL MAS DE DOS VERTEBRAS(46770)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776939',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DEL CUERPO O DISCO VERTEBRAL DE LA UNION CERVICOTORACICA VIA ANTERIOR O LATERAL(46771)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776940',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DEL CUERPO O DISCO VERTEBRAL TORACICO HASTA DOS VERTEBRAS ANTERIOR O LATERAL VIA ABIERTA(46772)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776943',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DEL CUERPO O DISCO VERTEBRAL TORACICO MAS DE DOS VERTEBRAS ANTERIOR O LATERAL VIA ABIERTA(46775)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776946',
+    descripcion: 'RESECCION DE TUMOR O LESION DEL CUERPO O DISCO(46778)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776949',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DEL CUERPO O DISCO VERTEBRAL TORACICO HASTA DOS VERTEBRAS VIA POSTERIOR(46781)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '776952',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DEL CUERPO O DISCO VERTEBRAL TORACICO MAS DE DOS VERTEBRAS VIA POSTERIOR ABIERTA(46784)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '778104',
+    descripcion: 'RESECCION PARCIAL DE COSTILLAS(3573)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '778105',
+    descripcion: 'RESECCION PARCIAL DE ESTERNON(3574)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '778203',
+    descripcion: 'RESECCION DE CABEZA HUMERAL(3577)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '778305',
+    descripcion: 'RESECCION DE OLECRANON(3582)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '778403',
+    descripcion: 'RESECCION PARCIAL DE HUESO DE CARPO VIA ABIERTA(46826)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '778405',
+    descripcion: 'RESECCION PARCIAL DE HUESO DE METACARPO VIA ABIERTA(46828)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '778701',
+    descripcion: 'RESECCION PARCIAL DE LA TIBIA (HEMIDIAFISECTOMIA)(3588)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '778702',
+    descripcion: 'RESECCION PARCIAL DE PERONE (HEMIDIAFISECTOMIA)(3589)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '778800',
+    descripcion: 'RESECCION PARCIAL DE TARSIANOS O METATARSIANOS (UNO O MAS) SOD +(3591)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '778921',
+    descripcion: 'RESECCION PARCIAL DE HUESOS PELVIANOS(3596)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '778931',
+    descripcion: 'RESECCION DE APOFISIS ODONTOIDES POR ABORDAJE TRANSORAL(3599)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '778942',
+    descripcion: 'CERVICOTOMÍA CERVICAL ANTERIOR(43046)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '779101',
+    descripcion: 'RESECCION TOTAL DE ESCAPULA(3606)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '779102',
+    descripcion: 'RESECCION TOTAL DE CLAVICULA(3607)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '779105',
+    descripcion: 'RESECCION TOTAL DE ESTERNON(29112)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '779131',
+    descripcion: 'RESECCION TOTAL DE COSTILLA O COSTOCONDRECTOMIA (UNA O MAS)(3609)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '779201',
+    descripcion: 'RESECCION DE HUMERO (PROXIMAL O DISTAL) +(3611)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '779202',
+    descripcion: 'RESECCION RADICAL DE HUMERO SIN INJERTO +(3612)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '779203',
+    descripcion: 'RESECCION TOTAL O RADICAL DE HUMERO CON INJERTO(3613)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '779301',
+    descripcion: 'RESECCION TOTAL O RADICAL DE CUBITO O RADIO(3615)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '779500',
+    descripcion: 'RESECCION TOTAL DE FEMUR SOD(29111)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '779701',
+    descripcion: 'RESECCION TOTAL DE LA TIBIA O PERONE(3621)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '779801',
+    descripcion: 'RESECCION TOTAL RADICAL DEL TARSO O METATARSO(3622)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '779941',
+    descripcion: 'RESECCION TOTAL DE COCCIX [COCCIGECTOMIA] +(3634)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '780202',
+    descripcion: 'APLICACION DE ALOINJERTO ESTRUCTURAL EN HUMERO(3637)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '780502',
+    descripcion: 'APLICACION DE ALOINJERTO ESTRUCTURAL EN DIAFISIS DE FEMUR(3643)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '780503',
+    descripcion: 'APLICACION DE ALOINJERTO ESTRUCTURAL OSTEOCONDRAL EN FEMUR(3644)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '780702',
+    descripcion: 'APLICACION DE ALOINJERTO ESTRUCTURAL EN DIAFISIS DE TIBIA(3647)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '780703',
+    descripcion: 'APLICACION DE ALOINJERTO ESTRUCTURAL OSTEOCONDRAL EN TIBIA(3648)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '780705',
+    descripcion: 'INJERTO OSEO VASCULARIZADO (MICRO) DE PERONE(29607)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '780706',
+    descripcion: 'APLICACION DE ALOINJERTO ESTRUCTURAL EN DIAFISIS DE PERONE(3649)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '780921',
+    descripcion: 'APLICACION DE ALOINJERTO ESTRUCTURAL EN PELVIS(3654)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '781202',
+    descripcion: 'COLOCACION DE DISPOSITIVO DE FIJACION EN CODO +(3659)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '781401',
+    descripcion: 'APLICACION DE TUTOR EXTERNO EN MANO(3663)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '781503',
+    descripcion:
+      'COLOCACION QUIRURGICA DE DISPOSITIVO PARA TRACCION ESQUELETICA EN MUSLO (TRANSCONDILEA)(3666)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '781601',
+    descripcion: 'APLICACION DE TUTOR EXTERNO RODILLA(3667)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '781703',
+    descripcion: 'APLICACION DE TUTOR EXTERNO EN CUELLO DE PIE(3670)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '781704',
+    descripcion: 'COLOCACION DE DISPOSITIVO EXTERNO DE FIJACION TRANSTIBIAL +(3671)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '781801',
+    descripcion: 'APLICACION DE TUTOR EXTERNO PIE(3672)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '781802',
+    descripcion: 'COLOCACION DE DISPOSITIVO EXTERNO EN PIE (CALCANEO) +(3673)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '781901',
+    descripcion: 'APLICACION DE DISPOSITIVO EXTERNO DE FIJACION DE FALANGES DE MANO(3674)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '781902',
+    descripcion: 'APLICACION DE DISPOSITIVO EXTERNO DE FIJACION DE FALANGES DE PIE(3675)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '782101',
+    descripcion: 'EPIFISIODESIS ABIERTA DE HUMERO(30127)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '782104',
+    descripcion: 'ACORTAMIENTO DE HUMERO MEDIANTE RESECCION/OSTEOTOMIA(3677)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '782241',
+    descripcion: 'ACORTAMIENTO DE CUBITO O RADIO MEDIANTE RESECCION/OSTEOTOMIA(3682)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '782243',
+    descripcion: 'ACORTAMIENTO DE RADIO Y CUBITO MEDIANTE RESECCION/OSTEOTOMIA(3683)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '782404',
+    descripcion: 'ACORTAMIENTO DE FEMUR MEDIANTE RESECCION/OSTEOTOMIA(3688)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '782541',
+    descripcion: 'ACORTAMIENTO DE TIBIA O PERONE MEDIANTE RESECCION/OSTEOTOMIA(3693)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '782543',
+    descripcion: 'ACORTAMIENTO DE TIBIA Y PERONE MEDIANTE RESECCION/OSTEOTOMIA(3694)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '782741',
+    descripcion:
+      'ACORTAMIENTO DE FALANGES DE MANO MEDIANTE RESECCION/ OSTEOTOMIA (UNA O MAS)(3698)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '782781',
+    descripcion: 'ACORTAMIENTO DE FALANGES DE PIE MEDIANTE RESECCION/ OSTEOTOMIA (UNA O MAS)(3699)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783301',
+    descripcion:
+      'ALARGAMIENTO DE RADIO O CUBITO POR INJERTO SIN DISPOSITIVOS INTERNOS DE FIJACION Y OSTEOTOMIA(32063)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783501',
+    descripcion:
+      'ALARGAMIENTO DE FEMUR POR INJERTO SIN DISPOSITIVOS INTERNOS DE FIJACION Y OSTEOTOMIA(3707)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783502',
+    descripcion:
+      'ALARGAMIENTO DE FEMUR POR INJERTO CON DISPOSITIVOS INTERNOS DE FIJACION Y OSTEOTOMIA(3708)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783503',
+    descripcion:
+      'ALARGAMIENTO DE FEMUR POR TECNICA DE DISTRACCION SIN CORTICOTOMIA/OSTEOTOMIA(3709)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783504',
+    descripcion:
+      'ALARGAMIENTO DE FEMUR POR TECNICA DE DISTRACCION CON CORTICOTOMIA/OSTEOTOMIA(3710)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783701',
+    descripcion:
+      'ALARGAMIENTO DE TIBIA POR INJERTO SIN DISPOSITIVOS INTERNOS DE FIJACION Y OSTEOTOMIA(3711)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783702',
+    descripcion:
+      'ALARGAMIENTO DE TIBIA POR INJERTO CON DISPOSITIVOS INTERNOS DE FIJACION Y OSTEOTOMIA(3712)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783703',
+    descripcion:
+      'ALARGAMIENTO DE PERONE POR INJERTO SIN DISPOSITIVOS INTERNOS DE FIJACION Y OSTEOTOMIA(3713)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783704',
+    descripcion:
+      'ALARGAMIENTO DE PERONE POR INJERTO CON DISPOSITIVOS INTERNOS DE FIJACION Y OSTEOTOMIA(3714)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783705',
+    descripcion:
+      'ALARGAMIENTO DE TIBIA POR TECNICA DE DISTRACCION SIN CORTICOTOMIA/OSTEOTOMIA(3715)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783706',
+    descripcion:
+      'ALARGAMIENTO DE TIBIA POR TECNICA DE DISTRACCION CON CORTICOTOMIA/OSTEOTOMIA(3716)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783707',
+    descripcion:
+      'ALARGAMIENTO DE PERONE POR TECNICA DE DISTRACCION SIN CORTICOTOMIA/OSTEOTOMIA(3717)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783708',
+    descripcion:
+      'ALARGAMIENTO DE PERONE POR TECNICA DE DISTRACCION CON CORTICOTOMIA/OSTEOTOMIA(3718)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783801',
+    descripcion:
+      'ALARGAMIENTO DE TARSIANOS (UNO O MAS) POR INJERTO SIN DISPOSITIVOS INTERNOS DE FIJACION Y OSTEOTOMIA(3720)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783802',
+    descripcion:
+      'ALARGAMIENTO DE TARSIANOS (UNO O MAS) POR INJERTO CON DISPOSITIVOS INTERNOS DE FIJACION Y OSTEOTOMIA(3722)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783803',
+    descripcion:
+      'ALARGAMIENTO DE METATARSIANOS (UNO O MAS) POR INJERTO SIN DISPOSITIVOS INTERNOS DE FIJACION Y OSTEOTOMIA(3724)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783804',
+    descripcion:
+      'ALARGAMIENTO DE METATARSIANOS (UNO O MAS) POR INJERTO CON DISPOSITIVOS INTERNOS DE FIJACION Y OSTEOTOMIA(3726)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783805',
+    descripcion:
+      'ALARGAMIENTO DE TARSIANOS (UNO O MAS) POR TECNICA DE DISTRACCIÓN SIN CORTICOTOMIA/OSTEOTOMIA(3728)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783806',
+    descripcion:
+      'ALARGAMIENTO DE TARSIANOS (UNO O MAS) POR TECNICA DE DISTRACCIÓN CON CORTICOTOMIA/OSTEOTOMIA(3730)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783807',
+    descripcion:
+      'ALARGAMIENTO DE METATARSIANOS (UNO O MAS) POR TECNICA DE DISTRACCION SIN (CORTICOTOMIA, OSTEOTOMIA)(31982)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783911',
+    descripcion:
+      'ALARGAMIENTO DE FALANGES DE PIE POR INJERTO SIN DISPOSITIVOS INTERNOS DE FIJACION Y OSTEOTOMIA(3734)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783912',
+    descripcion:
+      'ALARGAMIENTO DE FALANGES DE PIE POR INJERTO CON DISPOSITIVOS INTERNOS DE FIJACION Y OSTEOTOMIA(3736)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783913',
+    descripcion:
+      'ALARGAMIENTO DE FALANGES DE PIE POR TECNICA DE DISTRACCION SIN (CORTICOTOMIA OSTEOTOMIA)(36783)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '783914',
+    descripcion:
+      'ALARGAMIENTO DE FALANGES DE PIE POR TECNICA DE DISTRACCION CON CORTICOTOMIA/OSTEOTOMIA(3738)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '785100',
+    descripcion:
+      'FIJACION INTERNA SIN REDUCCION DE FRACTURA EN ESCAPULA. CLAVICULA O TORAX (COSTILLAS Y ESTERNON) SOD +(3739)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '785200',
+    descripcion: 'FIJACION INTERNA SIN REDUCCION DE FRACTURA DE HUMERO SOD +(3740)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '785300',
+    descripcion: 'FIJACION INTERNA SIN REDUCCION DE FRACTURA DE RADIO O CUBITO SOD +(3741)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '785500',
+    descripcion: 'FIJACION INTERNA SIN REDUCCION DE FRACTURA DE FEMUR SOD +(3743)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '785600',
+    descripcion: 'FIJACION INTERNA SIN REDUCCION DE FRACTURA DE ROTULA SOD +(3744)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '785800',
+    descripcion:
+      'FIJACION INTERNA SIN REDUCCION DE FRACTURA DE TARSIANOS O METATARSIANOS SOD +(3746)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '786001',
+    descripcion: 'EXTRACCION DE DISPOSITIVO IMPLANTADO EN HUESO NO ESPECIFICADO(32004)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '786002',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO EN HUESO NO ESPECIFICADO, VIA ABIERTA(32024)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '786302',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO EN RADIO O CUBITO. VIA ABIERTA +(3752)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '787200',
+    descripcion: 'OSTEOCLASTIA DE HUMERO SOD(3775)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '787300',
+    descripcion: 'OSTEOCLASTIA DE RADIO O CUBITO SOD(3777)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '787500',
+    descripcion: 'OSTEOCLASTIA DE FEMUR SOD(3781)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '787700',
+    descripcion: 'OSTEOCLASTIA DE TIBIA O PERONE SOD(3783)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '787800',
+    descripcion: 'OSTEOCLASTIA DE TARSIANOS O METATARSIANOS SOD +(3784)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '787902',
+    descripcion: 'OSTEOCLASTIA DE FALANGES (UNO O MAS) DE PIE +(3787)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '791301',
+    descripcion: 'REDUCCION INDIRECTA DE FRACTURA DE CUBITO O RADIO CON FIJACION(3815)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '791302',
+    descripcion: 'REDUCCION INDIRECTA DE FRACTURA DE CUBITO Y RADIO CON FIJACION(46914)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '791701',
+    descripcion: 'REDUCCION INDIRECTA DE PILON CON FIJACION EXTERNA(3823)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '791703',
+    descripcion:
+      'REDUCCION INDIRECTA DE FRACTURAS DEL TERCIO PROXIMAL DE LA TIBIA CON FIJACION INTERNA(3825)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '791704',
+    descripcion:
+      'REDUCCION INDIRECTA DE FRACTURAS DE LA TIBIA DIAFISIARIA CON FIJACION INTERNA(46918)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '791705',
+    descripcion: 'REDUCCION INDIRECTA DE FRACTURAS DE PERONE CON FIJACION INTERNA(46919)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '792500',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE FEMUR SIN FIJACION INTERNA SOD +(3842)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '792801',
+    descripcion:
+      'REDUCCION ABIERTA FRACTURA SIN FIJACION INTERNA. DE HUESOS DEL TARSO O METATARSO (UNO O MAS) +(3848)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793102',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA CON FIJACION INTERNA DE ESCAPULA(32044)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793403',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE HUESOS DE CARPO CON FIJACION INTERNA(46921)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793714',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE ESPINA TIBIAL CON FIJACION INTERNA(46932)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793715',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE TIBIA PROXIMAL CON FIJACION EXTERNA(46933)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793716',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE TIBIA DIAFISIARIA CON FIJACION INTERNA(46934)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793717',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA DE TIBIA DIAFISIARIA CON FIJACION EXTERNA(46935)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793801',
+    descripcion:
+      'REDUCCION ABIERTA DE FRACTURA DE TARSO (CADA UNO) CON FIJACION INTERNA (DISPOSITIVOS DE FIJACION U OSTEOSINTESIS)(3883)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '793804',
+    descripcion: 'REDUCCION ABIERTA DE FRACTURA CALCANEO CON FIJACION INTERNA(3886)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '795501',
+    descripcion: 'REDUCCION ABIERTA SIN FIJACION INTERNA DE EPIFISIS SEPARADA DE FEMUR(3932)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '795502',
+    descripcion: 'REDUCCION ABIERTA CON FIJACION INTERNA DE EPIFISIS SEPARADA DE FEMUR(3933)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '796201',
+    descripcion: 'LAVADO Y DESBRIDAMIENTO DE FRACTURA ABIERTA DE CUBITO O RADIO +(3939)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '798601',
+    descripcion: 'REDUCCION ABIERTA DE LUXACION DE RODILLA(3979)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '798801',
+    descripcion:
+      'REDUCCION ABIERTA DE LUXACION TARSO-METARSIANOS (UNO O MAS) CON DISPOSITIVO DE FIJACION +(3982)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '799100',
+    descripcion: 'REDUCCION DE FRACTURAS INTRAARTICULARES Y LUXOFRACTURAS EN HOMBRO SOD(3984)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '799501',
+    descripcion: 'REDUCCION DE FRACTURA INTRAARTICULAR Y LUXOFRACTURA DE CADERA(46949)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '799803',
+    descripcion:
+      'REDUCCION ABIERTA DE LUXOFRACTURA CON FIJACION DE HUESOS DEL TARSO (CADA UNO)(46956)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '799804',
+    descripcion:
+      'REDUCCION ABIERTA DE LUXOFRACTURA CON FIJACION DE HUESOS DEL METATARSO (CADA UNO)(46957)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '799805',
+    descripcion: 'REDUCCION ABIERTA DE LUXOFRACTURA CON FIJACION DE HALLUX(46958)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '799807',
+    descripcion:
+      'REDUCCION ABIERTA DE LUXOFRACTURA CON FIJACION DE HUESO DE DEDO DE PIE (CADA UNO)(46960)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '800701',
+    descripcion: 'EXTRACCION DE DISPOSITIVO IMPLANTADO EN TOBILLO POR ARTROTOMIA +(4014)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '804001',
+    descripcion: 'DIVISIÓN DE CÁPSULA, LIGAMENTO O CARTÍLAGO ARTICULAR(43047)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '804002',
+    descripcion: 'COLOCACION DE DISPOSITIVO INTERESPINOSO O INTERFACETARIO O INTERLAMINAR(42066)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '804200',
+    descripcion: 'DIVISION DE CAPSULA, LIGAMENTO O CARTÍLAGO ARTICULAR DE CODO SOD(4046)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '804501',
+    descripcion: 'DIVISION DE CAPSULA LIGAMENTO O CARTILAGO ARTICULAR DE CADERA VIA ABIERTA(46964)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '804600',
+    descripcion: 'DIVISION DE CAPSULA, LIGAMENTO O CARTÍLAGO ARTICULAR DE RODILLA SOD(4056)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '804802',
+    descripcion: 'CORRECCION DE VARO METATARSIANO O PIE ADUCTO [HEYMAN-HERNDON-STRONG](4058)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '805912',
+    descripcion: 'ABLACION DE FORAMEN NEURAL CERVICAL (FORAMINOPLASTIA) VIA ABIERTA(47000)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '808101',
+    descripcion: 'RESECCION DE LESION O TEJIDO DE HOMBRO VIA ABIERTA(47022)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '808601',
+    descripcion: 'RESECCION DE HIGROMA DE RODILLA VIA ABIERTA(4136)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '810310',
+    descripcion: 'LAMINOPLASTIA CERVICAL HASTA DOS SEGMENTOS VIA POSTERIOR(47075)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '810311',
+    descripcion: 'LAMINOPLASTIA CERVICAL MAS DE DOS SEGMENTOS VIA POSTERIOR(47076)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '810435',
+    descripcion: 'LAMINOPLASTIA TORACICA HASTA TRES SEGMENTOS VIA POSTERIOR(47107)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '810436',
+    descripcion: 'LAMINOPLASTIA TORACICA MAS DE TRES SEGMENTOS VIA POSTERIOR(47108)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '810901',
+    descripcion: 'REFUSION DE COLUMNA OCCIPITOCERVICAL ANTERIOR O LATERAL(47216)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '811101',
+    descripcion: 'ARTRODESIS TIBIO-TALAR VIA ABIERTA(4186)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '812001',
+    descripcion: 'ARTRODESIS DE ARTICULACION(32018)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '814101',
+    descripcion: 'ARTROPLASTIA POR INTERPOSICION O RESECCION DE CADERA(4217)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '814103',
+    descripcion: 'OSTEOCONDROPLASTIA DE CADERA VIA ABIERTA(47261)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '814721',
+    descripcion: 'SUTURA DE MENISCO MEDIAL Y LATERAL ABIERTA(4241)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '814907',
+    descripcion: 'RECONSTRUCCION PRIMARIA DE LIGAMENTOS DEL TOBILLO VIA ABIERTA(47274)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '814908',
+    descripcion:
+      'RECONSTRUCCION SECUNDARIA DE LIGAMENTOS DE TOBILLO CON AUTO O ALOINJERTO O DISPOSTIVO VIA ABIERTA(47275)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '814911',
+    descripcion: 'CAPSULORRAFIA DE TOBILLO(47278)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '818201',
+    descripcion: 'REPARACION DE LUXACION RECURRENTE DE HOMBRO VIA ABIERTA(47300)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '818306',
+    descripcion: 'ARTROPLASTIA POR INTERPOSICION O RESECCION HOMBRO(4288)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '818601',
+    descripcion: 'ARTROPLASTIA POR INTERPOSICION O RESECCION DEL CODO(4292)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '818602',
+    descripcion: 'RECONSTRUCCION SECUNDARIA DE LIGAMENTOS DE CODO CON AUTO O ALOINJERTO(4293)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '818607',
+    descripcion: 'CONDROPLASTIA DE HOMBRO VIA ABIERTA(47305)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '819601',
+    descripcion: 'ARTRODIASTASIS CON FIJADOR EXTERNO(32043)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '831207',
+    descripcion: 'CAPSULORRAFIA DE CADERA(47346)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '831311',
+    descripcion: 'TENOTOMIAS EN HOMBRO UNA O MAS VIA ABIERTA(47347)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '837901',
+    descripcion: 'TRANSPOSICION DE MUSCULO CON DESCENSO DE TROCANTER MAYOR Y OSTEOTOMIA(4473)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '838501',
+    descripcion: 'ALARGAMIENTO TENDON POPLITEO(4474)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '838940',
+    descripcion: 'FASCIOPLASTIA(32058)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '840002',
+    descripcion: 'AMPUTACION KINEPLÁSTICA DE MIEMBRO SUPERIOR SITIO NO ESPECIFICADO(4494)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '840003',
+    descripcion:
+      'AMPUTACION ABIERTA O DE GUILLOTINA DE MIEMBRO SUPERIOR SITIO NO ESPECIFICADO(4496)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '840200',
+    descripcion: 'AMPUTACION Y DESARTICULACION DE PULGAR SOD(4498)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '841003',
+    descripcion:
+      'AMPUTACION ABIERTA O DE GUILLOTINA DE MIEMBRO INFERIOR SITIO NO ESPECIFICADO(36789)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '841201',
+    descripcion: 'AMPUTACION O DESARTICULACION DE RETROPIE(47364)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '841202',
+    descripcion: 'AMPUTACION O DESARTICULACION DE MEDIOPIE(47365)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '841300',
+    descripcion: 'DESARTICULACION DE TOBILLO SOD(4511)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '841400',
+    descripcion: 'AMPUTACION DE TOBILLO A TRAVES DEL MALEOLO DE TIBIA Y PERONE SOD(4512)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '842301',
+    descripcion: 'REIMPLANTE DEL MIEMBRO SUPERIOR A NIVEL DEL ANTEBRAZO(4522)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '842401',
+    descripcion: 'REIMPLANTE DE MIEMBRO SUPERIOR A NIVEL DEL BRAZO SOD(4525)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '842600',
+    descripcion: 'REIMPLANTE DE PIE SOD +(4526)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '842700',
+    descripcion: 'REIMPLANTE DE PIERNA SOD +(4527)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '842800',
+    descripcion: 'REIMPLANTE DE MUSLO SOD(31999)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '843300',
+    descripcion:
+      'REMODELACION [REVISION] [RECONSTRUCCION] DEL MUÑON DE AMPUTACION DE BRAZO SOD(4530)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '844300',
+    descripcion: 'IMPLANTACION DE PROTESIS POR ENCIMA DE RODILLA SOD(31976)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '844400',
+    descripcion: 'IMPLANTACION DE PROTESIS POR DEBAJO DE RODILLA SOD(31998)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '844500',
+    descripcion: 'IMPLANTACION DE PROTESIS DE PIERNA SOD(32055)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '849101',
+    descripcion: 'OTRA AMPUTACION(32035)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862310',
+    descripcion:
+      'ESCISION DE ULCERA (SACRA. ISQUIATICA. TROCANTERICA Y OTRAS LOCALIZACIONES). CON CIERRE PRIMARIO(4633)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862311',
+    descripcion:
+      'ESCISION DE ULCERA (SACRA, ISQUIATICA, TROCANTERICA Y OTRAS LOCALIZACIONES) CON OSTECTOMIA, RESECCION DE BURSA POR ULCERA Y CIERRE CON COLGAJO COMPUESTO(4634)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862320',
+    descripcion: 'ESCAROTOMIA DESCOMPRESIVA EN MUÑECA O MANOS(4636)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862326',
+    descripcion: 'ESCARECTOMIA DEL 10% AL 19% DE SUPERFICIE CORPORAL(4642)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862328',
+    descripcion: 'ESCARECTOMIA DEL 20% AL 29% DE SUPERFICIE CORPORAL(47393)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862351',
+    descripcion: 'ESCAROTOMIA DESCOMPRESIVA EN MUÑECAS O MANOS(47395)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862352',
+    descripcion: 'ESCAROTOMIA DESCOMPRESIVA EN TOBILLOS O PIES(47396)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862353',
+    descripcion: 'ESCAROTOMIA DESCOMPRESIVA EN EXTREMIDAD SUPERIOR EXCEPTO MUÑECA MANOS(47397)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862354',
+    descripcion: 'ESCAROTOMIA DESCOMPRESIVA EN EXTREMIDAD INFERIOR EXCEPTO TOBILLO PIE(47398)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862355',
+    descripcion: 'ESCAROTOMIA DESCOMPRESIVA EN TRONCO (TORAX O ABDOMEN)(47399)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862506',
+    descripcion:
+      'DERMOABRASION (QUIMICA O MECANICA) DE AREA GENERAL ENTRE EL 10% AL 19 % DE SUPERFICIE CORPORAL(47400)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862507',
+    descripcion:
+      'DERMOABRASION (QUIMICA O MECANICA) DE AREA GENERAL ENTRE EL 20% AL 29 % DE SUPERFICIE CORPORAL(47401)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862508',
+    descripcion:
+      'DERMOABRASION (QUIMICA O MECANICA) DE AREA GENERAL DEL 30 % AL 49% DE SUPERFICIE CORPORAL(47402)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862509',
+    descripcion:
+      'DERMOABRASION (QUIMICA O MECANICA) DE AREA GENERAL DEL 50% O MAS DE SUPERFICIE CORPORAL(47403)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862511',
+    descripcion:
+      'DERMOABRASION (QUIMICA O MECANICA) EN AREA ESPECIAL EN PLIEGUES DE FLEXION (AXILA , ANTECUBITAL, HUECOS POPLITEOS, INGUINAL)(47405)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862512',
+    descripcion: 'DERMOABRASION (QUIMICA O MECANICA) EN AREA ESPECIAL EN MUÑECAS Y MANOS(47406)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862513',
+    descripcion: 'DERMOABRASION (QUIMICA O MECANICA) EN AREA ESPECIAL EN TOBILLOS Y PIES(47407)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862514',
+    descripcion: 'DERMOABRASION (QUIMICA O MECANICA) EN AREA ESPECIAL EN GENITALES(47408)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '862804',
+    descripcion:
+      'DESBRIDAMIENTO NO ESCISIONAL DE TEJIDO DESVITALIZADO ENTRE EL 20% AL 30% DE SUPERFICIE CORPORAL(4664)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '865209',
+    descripcion:
+      'RECONSTRUCCION DE AVULSION [TOTAL O PARCIAL] DE CUERO CABELLUDO O AREA ESPECIAL CON TECNICA MICROVASCULAR(4704)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '867108',
+    descripcion: 'COLGAJO COMPUESTO CON TECNICA MICROVASCULAR (EN PROPELA)(36825)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '549004',
+    descripcion:
+      'COLOCACION DE CATETER PERITONEAL IMPLANTABLE PARA QUIMIOTERAPIA INTRAARTERIAL +(2598)',
+    grupo: 'INTERNACION QUIRURGICA',
+  },
+  {
+    cups: '011101',
+    descripcion: 'BIOPSIA OSEA EN CRANEO POR CRANEOTOMIA +(16)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '011102',
+    descripcion: 'BIOPSIA ÓSEA EN CRÁNEO POR CRANIECTOMIA(18)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '011103',
+    descripcion: 'BIOPSIA DE CRANEO(29417)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '011201',
+    descripcion: 'BIOPSIA DE MENINGE. POR CRANEOTOMIA(21)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '011202',
+    descripcion: 'BIOPSIA DE MENINGE CEREBRAL(29897)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '011302',
+    descripcion: 'BIOPSIA ABIERTA (CRANEOTOMIA) DE CEREBRO(26)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '011303',
+    descripcion: 'BIOPSIA DE CEREBRO POR TREPANACION(27)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '033201',
+    descripcion:
+      'BIOPSIA DE TUMOR INTRADURALES (INTRAMEDULARES Y EXTRAMEDULARES) CERVICALES. DORSALES. LUMBOSACROS O COCCIGEOS +(262)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '033202',
+    descripcion: 'BIOPSIA ABIERTA DE TUMOR DEL FORAMEN MAGNO, VIA LATERAL(264)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '033203',
+    descripcion: 'BIOPSIA DE MEDULA ESPINAL O MENINGES ESPINALES(29908)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '039001',
+    descripcion:
+      'INSERCION DE CATETER EPIDURAL EN CANAL ESPINAL PARA INFUSION DE SUSTANCIA TERAPEUTICA O PALIATIVA(313)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '039003',
+    descripcion:
+      'INSERCION DE CATETER SUBARACNOIDEO EN CANAL ESPINAL PARA INFUSION DE SUSTANCIA TERAPEUTICA O PALIATIVA(315)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '039004',
+    descripcion:
+      'INSERCION DE CATETER SUBARACNOIDEO EN CANAL ESPINAL CON PUERTO DE ENTRADA IMPLANTABLE PARA INFUSION DE SUSTANCIA TERAPEUTICA O PALIATIVA(316)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '039101',
+    descripcion: 'INYECCION DE ANESTESICO EN EL CANAL ESPINAL(45760)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '039500',
+    descripcion: 'PARCHE HEMATICO EPIDURAL EN CANAL ESPINAL SOD(323)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '041200',
+    descripcion: 'BIOPSIA ABIERTA DE NERVIO O GANGLIO PERIFERICO SOD +(353)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '051100',
+    descripcion: 'BIOPSIA DE NERVIO O GANGLIO SIMPATICO SOD(415)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053102',
+    descripcion: 'BLOQUEO DE PLEJO BRAQUIAL(435)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053103',
+    descripcion: 'BLOQUEO DE PLEJO LUMBOSACRO(436)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053104',
+    descripcion: 'BLOQUEO DE SENO CAROTIDEO(437)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053106',
+    descripcion: 'BLOQUEO PARACERVICAL BILATERAL(439)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053107',
+    descripcion: 'BLOQUEO DE NERVIO FRENICO(440)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053108',
+    descripcion: 'BLOQUEO DE PLEJO CELIACO(441)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053110',
+    descripcion: 'BLOQUEO DE NERVIO VAGO(443)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053111',
+    descripcion: 'BLOQUEO DEL NERVIO HIPOGASTRICO SUPERIOR(444)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053112',
+    descripcion: 'BLOQUEO DE NERVIO ESPLACNICO(445)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053113',
+    descripcion: 'BLOQUEO REGIONAL CONTINUO(446)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053114',
+    descripcion: 'BLOQUEO SIMPATICO REGIONAL (CERVICAL. TORACICO O LUMBAR) +(447)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053115',
+    descripcion: 'BLOQUEO DEL SIMPATICO PRESACRO (GANGLIO IMPAR DE WALTER)(448)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053116',
+    descripcion: 'INYECCION DE ANESTESICO EN NERVIO SIMPATICO(29697)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '053121',
+    descripcion: 'INYECCION DE ANESTESICO EN GANGLIO SIMPATICO CILIAL(449)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '061301',
+    descripcion: 'BIOPSIA DE GLÁNDULA PARATIROIDES VÍA ABIERTA(42601)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '071300',
+    descripcion: 'BIOPSIA DE HIPOFISIS. VIA TRANSFRONTAL SOD(504)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '071401',
+    descripcion: 'BIOPSIA DE HIPÓFISIS VÍA TRANSESFENOIDAL(42612)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '071601',
+    descripcion: 'BIOPSIA DE TIMO VIA ABIERTA(45850)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '071700',
+    descripcion: 'BIOPSIA DE GLANDULA PINEAL SOD(507)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '102102',
+    descripcion: 'CITOLOGIA DE CONJUNTIVA(36367)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '147103',
+    descripcion: 'ASPIRACION DIAGNOSTICA DE VITREO(36383)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '181101',
+    descripcion: 'BIOPSIA DE AURICULA (PABELLON AURICULAR)(801)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '181102',
+    descripcion: 'BIOPSIA DE CONDUCTO AUDITIVO EXTERNO(802)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '181103',
+    descripcion: 'BIOPSIA DE OIDO EXTERNO(30112)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '202501',
+    descripcion: 'INYECCION DE SUSTANCIA TERAPEUTICA INTRATIMPANICA(42272)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '210001',
+    descripcion: 'CONTROL DE EPISTAXIS POR ABLACION VIA TRANSNASAL(41840)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '210201',
+    descripcion: 'CONTROL DE EPISTAXIS, POR TAPONAMIENTO POSTERIOR VIA TRANSNASAL(41842)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '210203',
+    descripcion: 'CONTROL DE EPISTAXIS, POR TAPONAMIENTO ANTERIOR Y POSTERIOR(41843)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '212001',
+    descripcion: 'BIOPSIA NASAL VIA TRANSNASAL(41850)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '212101',
+    descripcion: 'BIOPSIA NASAL VIA ABIERTA(41851)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '218101',
+    descripcion: 'SUTURA DE LACERACION DE NARIZ(41855)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '218914',
+    descripcion: 'REDUCCION CERRADA DE FRACTURA NASAL(41865)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '219009',
+    descripcion: 'ESCISION O ABLACION DE LESION INTRANASAL(41784)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '219010',
+    descripcion: 'ABLACION DE LESION INTRANASAL POR INFILTRACION(41785)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '221101',
+    descripcion: 'BIOPSIA DE SENO PARANASAL VIA OROANTRAL(41801)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '221102',
+    descripcion: 'BIOPSIA DE SENO PARANASAL VIA TRANSNASAL(41802)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '221402',
+    descripcion: 'ANTROSCOPIA(921)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '236100',
+    descripcion: 'IMPLANTE ALOPLASTICO CERAMICO SOD(1005)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '236200',
+    descripcion: 'IMPLANTE ALOPLASTICO METALICO SOD(1006)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '236300',
+    descripcion: 'IMPLANTE DENTAL ALOPLASTICO (OSEOINTEGRACION) SOD(61992)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '237902',
+    descripcion: 'EXPLORACION Y MOVILIZACION DE NERVIO DENTARIO INFERIOR(1031)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '241101',
+    descripcion: 'BIOPSIA INCISIONAL DE ENCIA(1038)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '241102',
+    descripcion: 'BIOPSIA ESCISIONAL DE ENCIA CON CIERRE PRIMARIO(1039)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '241103',
+    descripcion: 'BIOPSIA ESCISIONAL DE ENCIA Y RECUBRIMIENTO CON COLGAJO O INJERTO(1040)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '241104',
+    descripcion: 'BIOPSIA DE ENCIA(29867)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '243110',
+    descripcion: 'RESECCION DE LESION DE ENCIA(29920)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '250001',
+    descripcion: 'BIOPSIA CERRADA (PUNCION O ASPIRACION) DE LENGUA(41752)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '250002',
+    descripcion: 'BIOPSIA INCISIONAL DE LENGUA (EN CUÑA)(41753)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '261001',
+    descripcion:
+      'BIOPSIA CERRADA DE GLÁNDULA O CONDUCTO SALIVAL (PUNCIÓN O ASPIRACIÓN CON AGUJA FINA O TRUCUT)(42673)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '261002',
+    descripcion: 'BIOPSIA ABIERTA DE GLÁNDULA SALIVAL MENOR (CON CONDUCTO SALIVAL)(42674)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '270101',
+    descripcion: 'INCISION Y DRENAJE INTRAORAL EN CAVIDAD BUCAL(1145)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '270102',
+    descripcion: 'INCISION Y DRENAJE EXTRAORAL EN CAVIDAD BUCAL(1146)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '270103',
+    descripcion: 'INCISION Y DRENAJE EN CAVIDAD BUCAL(29668)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '272101',
+    descripcion: 'BIOPSIA DE UVULA(1148)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '272102',
+    descripcion: 'BIOPSIA INCISIONAL DE PALADAR(1149)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '272103',
+    descripcion: 'BIOPSIA ESCISIONAL DE PALADAR(1150)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '272301',
+    descripcion: 'BIOPSIA INCISIONAL DE LABIO(1153)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '272302',
+    descripcion: 'BIOPSIA ESCISIONAL DE LABIO(1154)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '272402',
+    descripcion: 'BIOPSIA DE PARED DE CAVIDAD BUCAL(29448)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '289101',
+    descripcion: 'BIOPSIA POR ASPIRACION CON AGUJA FINA DE AMIGDALAS Y ADENOIDES +(1242)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '289102',
+    descripcion: 'BIOPSIA DE AMIGDALAS O VEGETACIONES ADENOIDES(29874)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '290001',
+    descripcion: 'EXPLORACION DE AREA FARINGEA E HIPOFARINGEA VIA ABIERTA(42681)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '291101',
+    descripcion: 'FARINGOSCOPIA DIAGNOSTICA(41882)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '291203',
+    descripcion: 'BIOPSIA DE NASOFARINGE(42683)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '291204',
+    descripcion: 'BIOPSIA DE OROFARINGE(42684)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '291205',
+    descripcion: 'BIOPSIA DE HIPOFARINGE(42685)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '306004',
+    descripcion: 'LARINGOSCOPIA(41900)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '306101',
+    descripcion: 'BIOPSIA DE LARÍNGE VÍA ABIERTA(42728)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '306102',
+    descripcion: 'BIOPSIA DE LARÍNGE VÍA ENDOSCÓPICA(42729)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '306201',
+    descripcion: 'DILATACION DE LARINGE(42145)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '314601',
+    descripcion: 'BIOPSIA DE TRÁQUEA VÍA ABIERTA(42738)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '314602',
+    descripcion: 'BIOPSIA DE TRÁQUEA VÍA ENDOSCÓPICA(42739)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '332501',
+    descripcion: 'BIOPSIA DE BRONQUIO VÍA ABIERTA(42778)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '332801',
+    descripcion: 'BIOPSIA DE PULMON POR TORACOTOMIA(1393)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '340502',
+    descripcion: 'BIOPSIA DE LESIÓN DE PARED TORÁCICA VÍA ABIERTA(42788)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '341202',
+    descripcion: 'BIOPSIA DE ÓRGANO O TEJIDO DE MEDIASTINO VÍA ABIERTA(42807)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '341203',
+    descripcion: 'BIOPSIA DE ORGANO O TEJIDO DE MEDIASTINO POR MEDIASTINOSCOPIA(42808)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '341205',
+    descripcion: 'BIOPSIA DE ÓRGANO O TEJIDO DE MEDIASTINO POR BRONCOSCOPIA(42810)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '348001',
+    descripcion: 'BIOPSIA DE DIAFRAGMA VÍA ABIERTA(42830)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '372601',
+    descripcion: 'BIOPSIA DE PERICARDIO VIA ABIERTA(36592)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '372602',
+    descripcion: 'BIOPSIA DE PERICARDIO MINIMAMENTE INVASIVA(36593)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '372701',
+    descripcion: 'BIOPSIA DE CORAZON VIA ABIERTA(36594)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '382101',
+    descripcion: 'BIOPSIA DE VASO SANGUINEO SUPERFICIAL(1721)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '382102',
+    descripcion: 'BIOPSIA DE VASO SANGUINEO PROFUNDO(1722)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '389105',
+    descripcion: 'INSERCION DE CATETER CENTRAL MINIMAMENTE INVASIVA(36667)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '389200',
+    descripcion: 'CATETERISMO DE VENA UMBILICAL SOD(1840)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '399200',
+    descripcion: 'INYECCION DE AGENTE ESCLEROSANTE EN VENA (ESCLEROTERAPIA) SOD(1960)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '399400',
+    descripcion: 'SUSTITUCION O REVISION DE CANULA VASO A VASO SOD(1961)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '399701',
+    descripcion: 'PERFUSION LOCAL [REGIONAL] DIRIGIDA CON CATETER(1967)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '399901',
+    descripcion: 'RETIRO DE CATETER INTRARTERIAL(1973)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '401001',
+    descripcion: 'BIOPSIA DE GANGLIO LINFÁTICO CENTINELA CON TINCIÓN(42838)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '401002',
+    descripcion: 'BIOPSIA DE GANGLIO LINFÁTICO CENTINELA CON RADIOMARCACIÓN(42839)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '413202',
+    descripcion: 'BIOPSIA ABIERTA DE BAZO(2011)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '422002',
+    descripcion: 'ESOFAGOSCOPIA A TRAVES DE ESTOMA ARTIFICIAL(43018)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '422003',
+    descripcion: 'ESOFAGOSCOPIA VIA ORAL EXPLORATORIA O DIAGNOSTICA SIN BIOPSIA(43019)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '422601',
+    descripcion: 'BIOPSIA DE ESÓFAGO VÍA ABIERTA(42848)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '429209',
+    descripcion: 'DILATACION ESOFAGICA CON DISPOSITIVO(46115)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '441501',
+    descripcion: 'BIOPSIA DE ESTOMAGO VIA ABIERTA(46126)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '451501',
+    descripcion: 'BIOPSIA DE INTESTINO DELGADO VÍA ABIERTA(42859)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '452601',
+    descripcion: 'BIOPSIA DE INTESTINO GRUESO VÍA ABIERTA(42862)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '482101',
+    descripcion: 'PROCTOSIGMOIDOSCOPIA TRANSABDOMINAL(46153)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '482500',
+    descripcion: 'BIOPSIA ABIERTA DE RECTO O SIGMOIDE SOD(2269)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '482600',
+    descripcion: 'BIOPSIA DE TEJIDO PERIRRECTAL SOD(2270)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '492101',
+    descripcion: 'ANOSCOPIA CON MAPEO(43164)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '492200',
+    descripcion: 'BIOPSIA DE TEJIDO PERIANAL SOD(2330)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '492300',
+    descripcion: 'BIOPSIA DE ANO SOD(2331)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '501001',
+    descripcion: 'BIOPSIA ABIERTA DE HIGADO(30028)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '511500',
+    descripcion: 'MEDICION DE LA PRESION DEL ESFINTER DE ODDI SOD(62099)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '511701',
+    descripcion: 'BIOPSIA DE VESÍCULA BILIAR O VÍAS BILIARES VÍA ABIERTA(42868)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '511704',
+    descripcion: 'BIOPSIA ESFÍNTER DE ODDI VÍA ABIERTA(42870)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '511705',
+    descripcion: 'BIOPSIA ESFÍNTER DE ODDI VÍA ENDOSCÓPICA(42871)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '521001',
+    descripcion: 'BIOPSIA DE PÁNCREAS VÍA ABIERTA(42876)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '542201',
+    descripcion: 'BIOPSIA DE PARED ABDOMINAL VÍA ABIERTA(42884)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '542302',
+    descripcion: 'BIOPSIA DE PERITONEO VIA ABIERTA(43249)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '542401',
+    descripcion: 'BIOPSIA DE MASA INTRAABDOMINAL VÍA ABIERTA(42885)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '549013',
+    descripcion: 'RETIRO DE OTRO CATETER PERITONEAL(2602)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '549700',
+    descripcion:
+      'INYECCCION DE SUSTANCIA TERAPEUTICA DE ACCION LOCAL EN CAVIDAD PERITONEAL SOD(2609)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '552601',
+    descripcion: 'BIOPSIA RIÑON POR LUMBOTOMIA(46211)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '552606',
+    descripcion: 'BIOPSIA TEJIDOS PERIRRENALES POR LUMBOTOMIA(46216)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '552607',
+    descripcion: 'BIOPSIA TEJIDOS PERIRRENALES POR LAPAROTOMIA(46217)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '563101',
+    descripcion: 'URETEROSCOPIA ANTEROGRADA DIAGNOSTICA(46261)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '563102',
+    descripcion: 'URETEROSCOPIA RETROGRADA DIAGNOSTICA(46262)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '563401',
+    descripcion: 'BIOPSIA DE URETER VIA ABIERTA(46263)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '573101',
+    descripcion: 'CISTOSCOPIA A TRAVÉS DE ESTOMA ARTIFICIAL O CISTOSTOMÍA(43036)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '573102',
+    descripcion: 'CISTOSCOPIA A TRAVÉS DE ESTOMA CONGÉNITO(43037)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '573103',
+    descripcion: 'CISTOSCOPIA A TRAVÉS DE ESTOMA TRAUMÁTICO(43038)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '573301',
+    descripcion: 'BIOPSIA UNICA O SIMPLE DE VEJIGA POR CISTOSCOPIA +(2749)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '573302',
+    descripcion: 'BIOPSIA MULTIPLE O MAPEO VESICAL POR CISTOSCOPIA +(2750)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '573401',
+    descripcion: 'BIOPSIA ÚNICA DE VEJIGA VÍA ABIERTA(42886)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '573402',
+    descripcion: 'BIOPSIA MÚLTIPLE DE VEJIGA VÍA ABIERTA(42887)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '573500',
+    descripcion: 'BIOPSIA DE TEJIDO PERIVESICAL SOD(2752)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '582101',
+    descripcion: 'URETROSCOPIA PERINEAL(46342)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '582301',
+    descripcion: 'BIOPSIA DE URETRA VIA ABIERTA(2803)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '582401',
+    descripcion: 'BIOPSIA DE TEJIDO PERIURETRALVIA ABIERTA(2804)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '592402',
+    descripcion:
+      'LITOTRICIA (FRAGMENTACION) EXTRACORPOREA DE CALCULOS SIMPLES EN VIA URINARIA(46376)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '601103',
+    descripcion: 'BIOPSIA CERRADA DE PROSTATA POR SATURACION ABORDAJE TRANSRECTAL(46385)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '601104',
+    descripcion: 'BIOPSIA CERRADA DE PROSTATA POR SATURACION ABORDAJE PERINEAL(46386)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '601201',
+    descripcion: 'BIOPSIA DE PROSTATA VIA ABIERTA(46387)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '601401',
+    descripcion: 'BIOPSIA DE VESICULA SEMINAL VIA ABIERTA(46388)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '601501',
+    descripcion: 'BIOPSIA DE TEJIDO PERIPROSTATICO VIA ABIERTA(46389)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '611101',
+    descripcion: 'BIOPSIA DE ESCROTO(2915)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '611102',
+    descripcion: 'BIOPSIA DE TUNICA VAGINALIS(2916)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '621200',
+    descripcion: 'BIOPSIA ABIERTA DE TESTICULO SOD(2932)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '630100',
+    descripcion: 'BIOPSIA DE EPIDIDIMO SOD(2950)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '630200',
+    descripcion: 'BIOPSIA DE CORDON ESPERMATICO SOD(2951)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '630300',
+    descripcion: 'BIOPSIA DE CONDUCTO DEFERENTE SOD(2952)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '641100',
+    descripcion: 'BIOPSIA DE PENE SOD(2980)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '651201',
+    descripcion: 'BIOPSIA EN OVARIO POR LAPAROTOMIA(3007)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '651204',
+    descripcion: 'BIOPSIA DE OVARIO VIA VAGINAL(46429)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '661110',
+    descripcion: 'BIOPSIA DE TROMPAS DE FALOPIO POR LAPAROTOMIA(3065)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '681101',
+    descripcion: 'BIOPSIA DE UTERO POR LAPAROTOMIA(46489)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '701420',
+    descripcion: 'DRENAJE DE COLECCION DE FONDO DE SACO (CUPULA VAGINAL) +(3218)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '702101',
+    descripcion: 'VAGINOSCOPIA(46538)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '702401',
+    descripcion: 'BIOPSIA DE VAGINA(46540)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '711120',
+    descripcion: 'BIOPSIA DE CLITORIS(3269)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '711130',
+    descripcion: 'BIOPSIA DE GLANDULA DE BARTHOLIN(3270)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '711301',
+    descripcion: 'BIOPSIA EN PERINE(46573)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '753101',
+    descripcion: 'AMNIOSCOPIA(3316)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '761101',
+    descripcion: 'BIOPSIA DE HUESOS MAXILARES(3338)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '767501',
+    descripcion: 'REDUCCION CERRADA FRACTURA DE CONDILO +(3417)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '767502',
+    descripcion: 'REDUCCION CERRADA DE FRACTURA SIMPLE DE CUERPO O RAMA MANDIBULAR(3418)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '767503',
+    descripcion: 'REDUCCION CERRADA DE FRACTURA MULTIPLE DE CUERPO O RAMA MANDIBULAR(3419)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '768301',
+    descripcion: 'REDUCCION CERRADA DE LUXACION ARTICULACION TEMPORO MANDIBULAR(3441)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '768302',
+    descripcion:
+      'REDUCCION CERRADA DE LUXACION ARTICULACION TEMPORO MANDIBULAR CON FIJACION INTERMAXILAR(3442)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '768600',
+    descripcion: 'INYECCION DE SUSTANCIA TERAPEUTICA EN ARTICULACION TEMPOROMANDIBULAR SOD(3445)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '774001',
+    descripcion: 'BIOPSIA DE HUESO EN SITIO NO ESPECIFICADO. VIA ABIERTA(3508)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '774910',
+    descripcion: 'BIOPSIA DE VERTEBRA. VIA ABIERTA(3512)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '790100',
+    descripcion:
+      'REDUCCION CERRADA DE FRACTURA SIN FIJACION INTERNA DE ESCAPULA. CLAVICULA O TORAX (COSTILLAS O ESTERNON) SOD +(3788)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '790200',
+    descripcion: 'REDUCCION CERRADA DE FRACTURA SIN FIJACION INTERNA DE HUMERO SOD +(3789)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '790301',
+    descripcion:
+      'REDUCCION CERRADA SIN FIJACION DE FRACTURA DE RADIO Y CUBITO (RADIOCUBITAL PROXIMAL O DISTAL)(3791)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '790302',
+    descripcion: 'REDUCCION CERRADA DE FRACTURA SIN FIJACION INTERNA DE CUBITO O RADIO(36784)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '790401',
+    descripcion:
+      'REDUCCION CERRADA DE FRACTURA SIN FIJACION DE FRACTURA DE HUESOS DEL CARPO (UNO O MAS) +(3792)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '790402',
+    descripcion:
+      'REDUCCION CERRADA DE FRACTURA SIN FIJACION DE FRACTURA DE METACARPIANOS (UNO O MAS) +(3793)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '790500',
+    descripcion: 'REDUCCION CERRADA DE FRACTURADE FEMUR SIN FIJACION INTERNA SOD +(3794)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '790600',
+    descripcion: 'REDUCCION CERRADA DE FRACTURA SIN FIJACION INTERNA DE ROTULA SOD +(3795)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '790703',
+    descripcion: 'REDUCCION CERRADA DE FRACTURA DE TIBIA(46909)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '790704',
+    descripcion: 'REDUCCION CERRADA DE FRACTURA DE PERONE(46910)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '790801',
+    descripcion: 'REDUCCION CERRADA SIN FIJACION INTERNA FRACTURA TARSO O METATARSO(46911)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '790901',
+    descripcion:
+      'REDUCCION CERRADA DE FRACTURA SIN FIJACION INTERNA DE FALANGES DE MANO (UNA O MAS)(3799)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '790902',
+    descripcion:
+      'REDUCCION CERRADA DE FRACTURA SIN FIJACION INTERNA DE FALANGES DE PIE (UNA O MAS)(3800)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '790920',
+    descripcion:
+      'REDUCCION CERRADA DE FRACTURA SIN FIJACION INTERNA DE FRACTURA DE HUESOS PELVIANOS(3806)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '790930',
+    descripcion:
+      'REDUCCION CERRADA DE FRACTURA CERVICAL E INMOVILIZACION CON HALOYESO O HALOCHAQUETA(3807)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '790931',
+    descripcion:
+      'REDUCCION CERRADA DE FRACTURA DE COLUMNA CERVICAL E INMOVILIZACION CON DISPOSITIVO(3808)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '790932',
+    descripcion:
+      'REDUCCION CERRADA DE FRACTURA COLUMNA VERTEBRAL [DORSAL O LUMBAR] E INMOVILIZACION(3810)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '790933',
+    descripcion: 'REDUCCION CERRADA DE FRACTURA DE SACRO O SACROILIACA O COCCIGEA(3812)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '794101',
+    descripcion: 'REDUCCION CERRADA DE EPIFISIS SEPARADA EN HUMERO SIN FIJACION(3914)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '794201',
+    descripcion: 'REDUCCION CERRADA DE EPIFISIS SEPARADA EN CUBITO O RADIO SIN FIJACION(3916)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '794203',
+    descripcion: 'REDUCCION CERRADA DE EPIFISIS SEPARADA EN RADIO Y CUBITO SIN FIJACION(3918)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '794501',
+    descripcion: 'REDUCCION CERRADA DE EPIFISIS SEPARADA EN FEMUR SIN FIJACION(3920)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '794601',
+    descripcion: 'REDUCCION CERRADA DE EPIFISIS SEPARADA DE TIBIA O PERONE SIN FIJACION(3922)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '794603',
+    descripcion: 'REDUCCION CERRADA DE EPIFISIS SEPARADA DE TIBIA Y PERONE SIN FIJACION(3924)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '797100',
+    descripcion: 'REDUCCION CERRADA DE LUXACION EN HOMBRO SOD +(3949)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '797401',
+    descripcion: 'REDUCCION CERRADA DE LUXACION CARPIANA(3952)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '797402',
+    descripcion: 'REDUCCION CERRADA DE LUXACION CARPOMETACARPIANA(3953)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '797403',
+    descripcion: 'REDUCCION CERRADA DE LUXACION METACARPOFALANGICA (UNA O MAS)(3954)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '797404',
+    descripcion: 'REDUCCION CERRADA DE LUXACION INTERFALANGICA (UNA O MAS)(3955)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '797502',
+    descripcion: 'REDUCCION CERRADA DE LUXACION TRAUMATICA DE CADERA(3957)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '797601',
+    descripcion: 'REDUCCION CERRADA DE LUXACION TRAUMATICA DE RODILLA(3959)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '797602',
+    descripcion: 'REDUCCION CERRADA DE LUXACION TIBIOPERONERA PROXIMAL(3960)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '797603',
+    descripcion: 'REDUCCION CERRADA DE LUXACION TRAUMATICA DE ROTULA(3961)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '797701',
+    descripcion: 'REDUCCION CERRADA DE LUXACION TRAUMATICA TOBILLO (CUELLO DE PIE)(3962)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '797801',
+    descripcion: 'REDUCCION CERRADA DE LUXACION TARSO-METARSIANOS(3963)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '797803',
+    descripcion:
+      'REDUCCION CERRADA DE LUXACIONES METATARSO-FALANGICAS O INTERFALANGICAS EN PIE(3965)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '797901',
+    descripcion: 'REDUCCION CERRADA DE LUXACION DE COLUMNA TORACCICA O LUMBAR(3966)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '797902',
+    descripcion: 'REDUCCION CERRADA DE LUXACION DE SACRO Y COCCIX(3967)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '799201',
+    descripcion: 'REDUCCION CERRADA DE LUXOFRACTURA RADIOCUBITAL [MONTEGGIA-GALLEAZI](3985)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '799202',
+    descripcion: 'REDUCCION CERRADA DE FRACTURA DE CODO(3986)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '799302',
+    descripcion: 'REDUCCION CERRADA Y FIJACION DE LUXOFRACTURA DE BENNET(3990)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '803101',
+    descripcion: 'BIOPSIA ARTICULAR DE HOMBRO VIA ABIERTA(4036)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '803201',
+    descripcion: 'BIOPSIA ARTICULAR DE CODO VIA ABIERTA(4037)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '803301',
+    descripcion: 'BIOPSIA ARTICULAR DE MUÑECA VIA ABIERTA(4038)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '803401',
+    descripcion: 'BIOPSIA ARTICULAR EN MANO Y DEDO VIA ABIERTA(4039)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '803501',
+    descripcion: 'BIOPSIA ARTICULAR DE CADERA VIA ABIERTA(4040)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '803601',
+    descripcion: 'BIOPSIA ARTICULAR DE RODILLA VIA ABIERTA(4041)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '803701',
+    descripcion: 'BIOPSIA ARTICULAR DE TOBILLO VIA ABIERTA(4042)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '803801',
+    descripcion: 'BIOPSIA ARTICULAR EN PIE Y ARTEJOS VIA ABIERTA(4043)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '819801',
+    descripcion: 'OTROS PROCEDIMIENTOS DIAGNOSTICOS EN ESTRUCTURAS ARTICULARES(32042)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '829200',
+    descripcion: 'ASPIRACION DE BURSA DE MANO SOD(4384)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '829400',
+    descripcion: 'INYECCION DE SUSTANCIA TERAPEUTICA DENTRO DE BURSA DE MANO SOD(4385)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '829500',
+    descripcion: 'INYECCION DE SUSTANCIA TERAPEUTICA DENTRO DE TENDON DE MANO SOD +(4386)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '832101',
+    descripcion:
+      'BIOPSIA DE TEJIDO BLANDO: MÚSCULOS, TENDÓN, FASCIA Y BURSA (INCLUYENDO MANO) VÍA ABIERTA(42895)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '832103',
+    descripcion: 'BIOPSIA DE DISCO INTERVERTEBRAL VÍA ABIERTA(42896)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '839400',
+    descripcion: 'ASPIRACION DE BURSA SOD(4481)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '839500',
+    descripcion: 'ASPIRACION DE OTRO TEJIDO BLANDO SOD(4482)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '860102',
+    descripcion:
+      'BIOPSIA INCISIONAL O ESCISIONAL DE PIEL. TEJIDO CELULAR SUBCUTANEO O MUCOSA (CON SUTURA)(4596)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '861103',
+    descripcion: 'DRENAJE DE HEMATOMA SUBUNGUEAL POR INCISION O ASPIRACION +(4603)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '861803',
+    descripcion: 'INSERCION DE CATETER SUBDERMICO (EPIDERMOCLISIS)(29103)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '861805',
+    descripcion: 'INSERCION DE BOMBA DE INFUSION TOTALMENTE IMPLANTABLE(4615)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '863102',
+    descripcion:
+      'RESECCION DE LESIONES CUTANEAS POR CAUTERIZACION. FULGURACION O CRIOTERAPIA EN AREA GENERAL. MAS DE SEIS LESIONES +(4670)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '886014',
+    descripcion: 'MORFOMETRIA VERTEBRAL(42097)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '892903',
+    descripcion: 'PENOSCOPIA(31912)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '893300',
+    descripcion: 'EXAMEN DIGITAL DE ESTOMA DE ENTEROSTOMIA SOD(31904)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '894104',
+    descripcion: 'PRUEBA DE ESFUERZO EN FASES DE MASTERS(36914)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '930200',
+    descripcion: 'EVALUACION ORTÉSICA SOD(9914)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '930300',
+    descripcion: 'EVALUACION PROTESICA EN EXTREMIDADES SOD(9916)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '934101',
+    descripcion: 'TRACCIÓN ESPINAL CON EMPLEO DEL DISPOSITIVO CRANEAL(43072)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '934201',
+    descripcion: 'TRACCION CUTANEA PARA DESCOMPRESION DE CANAL RAQUIDEO SEGMENTO LUMBAR(9941)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '934501',
+    descripcion: 'TRACCIÓN ESQUELÉTICA DE MIEMBROS(43073)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '934601',
+    descripcion: 'TRACCIÓN CUTÁNEA DE MIEMBROS(43074)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '935201',
+    descripcion: 'APLICACION O CAMBIO DE SOPORTE CERVICAL MOLDEADO(29761)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '935202',
+    descripcion: 'APLICACION O CAMBIO DE SOPORTE CERVICAL PREVIAMENTE FABRICADO(30165)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '935307',
+    descripcion:
+      'APLICACION O CAMBIO DE YESO PARA INMOVILIZACION DE PELVIS (CADERA) Y COCCIX(9950)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '935700',
+    descripcion: 'APLICACION DE OTRO VENDAJE (NO COMPRESIVO) EN HERIDA SOD(9953)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '935901',
+    descripcion: 'APLICACION DE VENDAJE DE VELPEAU(9955)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '939000',
+    descripcion: 'RESPIRACION DE PRESION POSITIVA CONTINUA (RPPC) SOD(9987)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '939300',
+    descripcion:
+      'METODOS DE RESUCITACION NO MECANICOS (RESPIRACION ARTIFICIAL, BOCA A BOCA, MANUAL) SOD(9991)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '960100',
+    descripcion: 'INSERCION DE VIA AEREA NASOFARINGEA SOD(10090)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '960200',
+    descripcion: 'INSERCION DE VIA AEREA OROFARINGEA SOD(10091)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '960300',
+    descripcion: 'INSERCION DE VIA AEREA OBTURADA ESOFÁGICA SOD(10093)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '960401',
+    descripcion: 'INSERCION DE TUBO ENDOTRAQUEAL CON TECNICA RETROGRADA(10094)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '960402',
+    descripcion: 'INSERCION DE TUBO ENDOTRAQUEAL DOBLE LUZ(10095)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '960403',
+    descripcion: 'INSERCION DE TUBO ENDOTRAQUEAL CON BLOQUEADOR SELECTIVO(10097)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '960404',
+    descripcion: 'INSERCION DE TUBO ENDOTRAQUEAL CON SONDA LUMINOSA(10099)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '960405',
+    descripcion: 'INSERCION DE CANULA JET TRANSTRAQUEAL(10101)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '960503',
+    descripcion: 'INSERCION DE DISPOSITIVO SUPRAGLOTICO(47528)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '960600',
+    descripcion: 'INSERCION DE TUBO O SONDA (TAPONAMIENTO ESOFAGICO) SOD(10105)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '960700',
+    descripcion:
+      'INSERCION DE OTRO TUBO O SONDA NASO-GASTRICA (INTUBACION PARA DECOMPRESION) SOD(10107)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '961400',
+    descripcion: 'TAPONAMIENTO VAGINAL SOD(10110)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '962100',
+    descripcion: 'DILATACION DEL RECTO SOD(10113)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '962600',
+    descripcion: 'REDUCCION MANUAL DE PROLAPSO RECTAL SOD(10118)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '962700',
+    descripcion: 'REDUCCION MANUAL DE HERNIA SOD(29779)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '963100',
+    descripcion: 'LAVADO GASTRICO PARA HIPOTERMIA O CONGELACION GASTRICA SOD(10119)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '963300',
+    descripcion: 'LAVADO GASTRICO DE LIMPIEZA SOD(10120)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '963800',
+    descripcion: 'EXTRACCION DIGITAL O MANUAL DE HECES IMPACTADAS SOD(10122)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '964100',
+    descripcion:
+      'IRRIGACION, LAVADO O LIMPIEZA E INSTILACION LOCAL DE COLECISTOSMIA Y OTRO TUBO BILIAR SOD(10126)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '964900',
+    descripcion: 'INSTILACION GENITOURINARIA SOD +(10127)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '965100',
+    descripcion: 'IRRIGACION Y LAVADO DEL OJO SOD(10129)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '965202',
+    descripcion: 'CURACIÓN DE OIDO(43087)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '970500',
+    descripcion:
+      'SUSTITUCION DE TUBO O DISPOSITIVO EN VIAS BILIARES O CONDUCTO PANCREATICO SOD(10903)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '972400',
+    descripcion: 'SUSTITUCION DE DIAFRAGMA VAGINAL SOD(30179)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '975100',
+    descripcion: 'EXTRACCION DE TUBO DE GASTROSTOMIA SOD(10927)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '975200',
+    descripcion: 'EXTRACCION DE TUBO DE INTESTINO DELGADO SOD(10929)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '975300',
+    descripcion: 'EXTRACCION DE TUBO DE INTESTINO GRUESO O APENDICE SOD(10931)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '975400',
+    descripcion: 'EXTRACCION DE TUBO DE COLECISTOSTOMIA SOD(10933)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '975500',
+    descripcion: 'EXTRACCION DE TUBO EN T U OTRO TUBO DE VIA BILIAR O TUBO HEPATICO SOD(10935)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '975600',
+    descripcion: 'EXTRACCION DE TUBO O DREN PANCREATICO SOD(10937)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '976101',
+    descripcion: 'EXTRACCIÓN DE DISPOSITIVO DE PIELOSTOMÍA(43089)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '976201',
+    descripcion: 'EXTRACCIÓN DE DISPOSITIVO DE URETEROSTOMÍA(43091)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '976301',
+    descripcion: 'EXTRACCIÓN DE DISPOSITIVO DE CISTOSTOMÍA(43094)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '977200',
+    descripcion: 'EXTRACCION DE TAPON INTRAUTERINO SOD(10947)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '977300',
+    descripcion: 'EXTRACCION DE DIAFRAGMA VAGINAL SOD(29781)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '978100',
+    descripcion: 'EXTRACCION DE DISPOSITIVO DE DRENAJE RETROPERITONEAL SOD(10951)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '978200',
+    descripcion: 'EXTRACCION DE DISPOSITIVO DE DRENAJE PERITONEAL SOD(10953)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '978300',
+    descripcion: 'EXTRACCION DE SUTURAS DE PARED ABDOMINAL SOD(10955)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '978801',
+    descripcion: 'EXTRACCIÓN NO QUIRÚRGICA DE DISPOSITIVO DE INMOVILIZACIÓN EXTERN(43096)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '981300',
+    descripcion: 'EXTRACCION SIN INCISION DE CUERPO EXTRAÑO INTRALUMINAL DE LA FARINGE SOD(10960)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '981400',
+    descripcion: 'EXTRACCION SIN INCISION DE CUERPO EXTRAÑO INTRALUMINAL DE LA LARINGE SOD(10962)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '981600',
+    descripcion: 'EXTRACCION SIN INCISION DE CUERPO EXTRAÑO INTRALUMINAL DEL UTERO SOD(10964)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '981700',
+    descripcion: 'EXTRACCION SIN INCISION DE CUERPO EXTRAÑO INTRALUMINAL DE LA VAGINA SOD(10966)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '981901',
+    descripcion: 'EXTRACCION SIN INCISION DE CUERPO EXTRAÑO INTRALUMINAL DE LA URETRA(29964)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '982200',
+    descripcion:
+      'EXTRACCION SIN INCISION DE CUERPO EXTRAÑO NO INTRALUMINAL EN CUELLO O CABEZA SOD(10973)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '982400',
+    descripcion:
+      'EXTRACCION SIN INCISION DE CUERPO EXTRAÑO NO INTRALUMINAL EN PENE O ESCROTO SOD(10977)',
+    grupo: 'PROCEDIMIENTOS',
+  },
+  {
+    cups: '010101',
+    descripcion: 'PUNCION CISTERNAL. VIA LATERAL(5)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '010102',
+    descripcion: 'PUNCION CISTERNAL. VIA MEDIAL(6)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '010103',
+    descripcion: 'PUNCION CISTERNAL(29524)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '010201',
+    descripcion:
+      'PUNCION [ASPIRACION DE LIQUIDO] VENTRICULAR A TRAVES DE CATETER PREVIAMENTE IMPLANTADO(9)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '010202',
+    descripcion: 'PUNCION [ASPIRACION DE LIQUIDO] VENTRICULAR POR TREPANACION (SIN CATETER)(10)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '010203',
+    descripcion: 'PUNCION [ASPIRACION DE LIQUIDO] VENTRICULAR A TRAVES DE UN RESERVORIO(11)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '010204',
+    descripcion: 'PUNCIÓN [ASPIRACIÓN DE LIQUIDO] VENTRICULAR, VÍA TRANSFONTANELAR(13)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '010205',
+    descripcion: 'PUNCION (ASPIRACION DE LIQUIDO) VENTRICULAR(29896)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '010901',
+    descripcion: 'PUNCION SUBDURAL(14)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '010902',
+    descripcion: 'OTRA PUNCION CRANEAL(30055)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012201',
+    descripcion: 'RETIRO O SUSTITUCION DE ELECTRODO CRANEAL PROFUNDO O INTRAPARENQUIMATOSO(45558)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012402',
+    descripcion: 'DRENAJE DE ESPACIO EPIDURAL FOSA POSTERIOR. POR CRANEOTOMIA(38)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012410',
+    descripcion: 'EXTRACCION DE CUERPO EXTRAÑO INTRACRANEAL. POR CRANEOTOMIA(39)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012501',
+    descripcion: 'SECUESTRECTOMIA DE CRANEO. POR CRANIECTOMIA(42)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012502',
+    descripcion: 'DRENAJE DE COLECCION EPIDURAL SUPRATENTORIAL. POR CRANIECTOMIA +(43)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012503',
+    descripcion: 'DRENAJE DE COLECCION EPIDURAL FOSA POSTERIOR. POR CRANIECTOMIA +(44)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012505',
+    descripcion: 'CRANIECTOMIA DESCOMPRESIVA BIFRONTAL(53610)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '013103',
+    descripcion: 'DRENAJE DE ESPACIO SUBDURAL EN FOSA POSTERIOR. POR CRANIECTOMIA(49)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '013106',
+    descripcion: 'DRENAJE DE ESPACIO SUBDURAL. POR DERIVACION SUBDURO PERITONEAL(52)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '013107',
+    descripcion: 'INCISION DE MENINGES CEREBRALES(29419)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '017004',
+    descripcion:
+      'DRENAJE DE COLECCIONES INTRACEREBRALES DE FOSA POSTERIOR. POR CRANEOTOMIA SUBOCCIPITAL(114)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '018103',
+    descripcion: 'HEMISFERECTOMIA CEREBRAL ANATOMICA POR CRANEOTOMIA(45598)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '019201',
+    descripcion: 'LOBECTOMIA POR CRANIECTOMIA(45604)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '020109',
+    descripcion: 'APERTURA DE SUTURA CRANEAL(29905)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '020201',
+    descripcion: 'ESQUIRLECTOMIA CRANEAL A TRAVES DE TREPANACION(170)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '020401',
+    descripcion:
+      'CORRECCION DE DEFECTO OSEO PRE-EXISTENTE POR CRANEOPLASTIA. CON INJERTO AUTOLOGO O HETEROLOGO +(176)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '020402',
+    descripcion: 'INJERTO OSEO EN CRANEO(36357)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '020501',
+    descripcion:
+      'INSERCION O SUSTITUCION DE DISPOSITIVO DE FIJACION U OSTEOSINTESIS EN CRANEO(53614)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '021215',
+    descripcion: 'REPARACION DE MENINGE CEREBRAL(30205)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '022101',
+    descripcion: 'DERIVACION DE VENTRICULO A CISTERNA MAGNA(201)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '022202',
+    descripcion: 'DERIVACION VENTRICULAR A ESPACIO SUBARACNOIDEO CERVICAL(205)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '022203',
+    descripcion: 'VENTRICULOSTOMIA EXTERNA(29530)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '023403',
+    descripcion: 'DERIVACION VENTRICULAR A CAVIDAD Y ORGANOS ABDOMINALES(29431)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '024100',
+    descripcion: 'IRRIGACION DE DERIVACION VENTRICULAR SOD(214)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '024201',
+    descripcion: 'REEMPLAZO PARCIAL DE DERIVACION(217)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '024202',
+    descripcion: 'REEMPLAZO TOTAL DE DERIVACION(218)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '024203',
+    descripcion: 'SUSTITUCION DE DERIVACION VENTRICULAR(29907)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '030105',
+    descripcion:
+      'EXTRACCION DE CUERPO EXTRAÑO DEL CANAL RAQUIDEO POR LAMINECTOMIA VIA ABIERTA(45634)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '030108',
+    descripcion:
+      'EXTRACCION DE CUERPO EXTRAÑO DEL CANAL RAQUIDEO POR HEMILAMINECTOMIA VIA ABIERTA(45384)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '030208',
+    descripcion:
+      'EXPLORACION Y DESCOMPRESION DEL CANAL RAQUIDEO Y RAICES ESPINALES HASTA DOS SEGMENTOS POR LAMINECTOMIA VIA ABIERTA(45642)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '030220',
+    descripcion:
+      'EXPLORACION Y DESCOMPRESION DEL CANAL RAQUIDEO Y RAICES ESPINALES HASTA DOS SEGMENTOS POR LAMINOTOMIA VIA ABIERTA(45654)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '030226',
+    descripcion:
+      'EXPLORACION Y DESCOMPRESION HASTA DOS SEGMENTOS POR FORAMINOTOMIA VIA ABIERTA(45660)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '031101',
+    descripcion: 'RIZOTOMIA DE RAIZ NERVIO ESPINAL VIA ABIERTA(45673)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '032304',
+    descripcion: 'LESIÓN DE TRACTOS DE ENTRADA DE RAÍCES POSTERIORES [DREZ](42939)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '035402',
+    descripcion: 'ESQUIRLECTOMIA CON PLASTIA O INJERTO DE MENINGE ESPINAL(299)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '036101',
+    descripcion:
+      'LISIS O RESECCIÓN DE ADHERENCIAS EXTRADURALES EN MÉDULA ESPINAL O RAÍCES DE NERVIOS ESPINALES VÍA ABIERTA(42941)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '039401',
+    descripcion: 'RETIRO DE ELECTRODOS O RECEPTOR DE NEUROESTIMULACION ESPINAL(42944)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '043001',
+    descripcion: 'ANASTOMOSIS DE NERVIO FACIAL +(374)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '044207',
+    descripcion: 'DESCOMPRESION DE NERVIO FACIAL INTRATEMPORAL VIA TRANSLABERINTICA(390)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '044208',
+    descripcion: 'DESCOMPRESION DE NERVIO FACIAL INTRATEMPORAL VIA TRANSMASTOIDEA(391)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '380105',
+    descripcion: 'TROMBECTOMIA DE VASOS INTRACRANEALES VIA ENDOVASCULAR(29943)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '380110',
+    descripcion: 'TROMBOLISIS FARMACOLOGICA DE VASOS INTRACRANEALES VIA ENDOVASCULAR(1661)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '381101',
+    descripcion: 'ENDARTERECTOMIA DE LA CAROTIDA INTERNA PORCION INTRACRANEAL(1698)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '395010',
+    descripcion: 'ANGIOPLASTIA DE VASOS INTRACRANEALES CON O SIN IMPLANTE DE DISPOSITIVO(1892)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012101',
+    descripcion: 'CRANEALIZACION DE SENO FRONTAL(30)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012102',
+    descripcion: 'INCISION Y DRENAJE DE SENO FRONTAL(29525)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012103',
+    descripcion: 'DESFUNCIONALIZACION DE SENO FRONTAL(36356)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012202',
+    descripcion: 'RETIRO O SUSTITUCION DE ELECTRODO EPIDURAL(45559)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012203',
+    descripcion: 'RETIRO O SUSTITUCION DE ELECTRODO SUBDURAL(45560)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012204',
+    descripcion: 'RETIRO O SUSTITUCION DE ELECTRODO A NERVIO CRANEAL O PERIFERICO(45561)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012205',
+    descripcion: 'RETIRO O SUSTITUCION DE NEUROESTIMULADOR INTRACRANEAL(45562)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012300',
+    descripcion: 'REAPERTURA DE CRANEOTOMIA SOD(34)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012401',
+    descripcion: 'DRENAJE DE ESPACIO EPIDURAL SUPRATENTORIAL. POR CRANEOTOMIA(37)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '012403',
+    descripcion: 'CRANEOTOMIA (DESCOMPRESIVA O EXPLORATORIA)(29475)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '013102',
+    descripcion: 'DRENAJE DE ESPACIO SUBDURAL. POR TREPANACION(48)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '013104',
+    descripcion: 'DRENAJE DE ESPACIO SUBDURAL. POR DRENAJE EXTERNO(50)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '013105',
+    descripcion: 'DRENAJE DE ESPACIO SUBARACNOIDEO. POR DERIVACION CISTO PERITONEAL(51)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '013202',
+    descripcion: 'SECCION DE TEJIDO CEREBRAL (TRACTOS CEREBRALES). POR CRANEOTOMIA +(57)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '015101',
+    descripcion: 'RESECCION TUMOR OSEO. POR CRANEOTOMIA +(62)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '015102',
+    descripcion: 'RESECCION TUMOR OSEO. POR CRANIECTOMIA +(63)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '015103',
+    descripcion: 'ESCISION DE LESION CRANEAL(29421)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '015406',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DE LA BASE DEL CRANEO FOSA POSTERIOR VIA TRANSLABERINTICA(90)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '015407',
+    descripcion:
+      'RESECCION DE TUMOR O LESION DE LA BASE DEL CRANEO FOSA POSTERIOR VIA TRANSCOCLEAR(91)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '016402',
+    descripcion: 'RESECCION DE OTRA LESION DE MENINGE CEREBRAL(29479)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '017003',
+    descripcion: 'DRENAJE DE COLECCIONES INTRACEREBRALES, POR PUNCION DIRIGIDA(113)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '017006',
+    descripcion: 'DRENAJE DE COLECCIONES INTRACEREBRAL(29528)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '018104',
+    descripcion: 'HEMISFERECTOMIA CEREBRAL FUNCIONAL POR CRANEOTOMIA(45599)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '018106',
+    descripcion: 'HEMISFEROTOMIA CEREBRAL POR CRANEOTOMIA(45601)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '020202',
+    descripcion: 'DESBRIDAMIENTO DE FRACTURA COMPUESTA (CONMINUTA) DE CRANEO(171)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '020204',
+    descripcion:
+      'REDUCCION DE FRACTURA COMPUESTA (CONMINUTA) DE CRANEO. CON PLASTIA DURAL Y LIMPIEZA HEMOSTASIA CEREBRAL (DESBRIDAMIENTO) EN UN SOLO TIEMPO(173)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '020205',
+    descripcion: 'ELEVACION DE FRAGMENTOS DE FRACTURA DE CRANEO(29430)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '020602',
+    descripcion: 'OSTEOPLASTIA CRANEAL(29906)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '020701',
+    descripcion:
+      'EXTRACCION O SUSTITUCION DE DISPOSITIVO DE FIJACION U OSTEOSINTESIS EN CRANEO(53617)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '021101',
+    descripcion:
+      'CORRECCION DE DESGARRO DURAL POST TRAUMATICO EN BOVEDA CRANEANA. POR CRANEOTOMIA(183)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '021104',
+    descripcion:
+      'CORRECCION DE DESGARRO DURAL EN BASE DE CRANEO. CON PLASTIA AUTOLOGA O HETEROLOGA. POR CRANEOTOMIA +(186)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '021105',
+    descripcion: 'SUTURA SIMPLE DE DURAMADRE CEREBRAL(30058)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '021201',
+    descripcion: 'CORRECCION FISTULA LCR EN BOVEDA CRANEANA. POR CRANEOTOMIA Y CRANEOPLASTIA(187)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '021202',
+    descripcion: 'CORRECCION FISTULA LCR EN BOVEDA CRANEANA, POR DUROPLASTIA(188)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '022201',
+    descripcion: 'COLOCACION DE CATETER VENTRICULAR AL EXTERIOR(204)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '022401',
+    descripcion: 'COLOCACION DE CATETER VENTRICULO PERITONEAL SIN VALVULA POR CRANEOTOMIA(45618)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '023402',
+    descripcion: 'DERIVACION CISTO PERITONEAL [QUISTE VENTRICULAR A PERITONEO](212)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '025000',
+    descripcion:
+      'IMPLANTE DE CATETER (INTRAVENTRICULAR. INTRACISTICO) CON RESERVORIO SUBCUTANEO SOD +(220)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '028100',
+    descripcion: 'LISIS DE ADHERENCIAS CORTICALES SOD(222)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '028201',
+    descripcion: 'IMPLANTACION DE CATETER INTRACEREBRAL(225)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '028202',
+    descripcion: 'IMPLANTACION DE DISPOSITIVO EXTRADURAL(226)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '028309',
+    descripcion: 'IMPLANTACION DE ELECTRODO SUBDURAL POR CRANEOTOMIA(45625)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '028311',
+    descripcion: 'IMPLANTACION DE ELECTRODO EPIDURAL (PERMANENTE)(45627)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '028312',
+    descripcion: 'IMPLANTACION DE ELECTRODO INTRACRANEAL PARENQUIMATOSO(45628)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '028313',
+    descripcion:
+      'IMPLANTACION DE ELECTRODO INTRACRANEAL PROFUNDO PARA ESTEREOELECTROENCEFALOGRAFIA(45629)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '028401',
+    descripcion: 'COLOCACIÓN DE TRACTOR CEFÁLICO(42936)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '028402',
+    descripcion: 'COLOCACIÓN DE TRACTOR ESQUELÉTICO CERVICAL(42937)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '028602',
+    descripcion: 'INJERTO INTRACEREBRAL(30005)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '030111',
+    descripcion:
+      'EXTRACCION DE CUERPO EXTRAÑO DEL CANAL RAQUIDEO POR LAMINOTOMIA VIA ABIERTA(45639)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '030301',
+    descripcion: 'EXPLORACIÓN Y DESCOMPRESIÓN DE RAÍZ DEL NERVIO ESPINAL(42938)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '030302',
+    descripcion: 'ESCISION DE QUISTE SINOVIAL FACETARIO VIA POSTERIOR(45666)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '030404',
+    descripcion: 'DRENAJE DE COLECCION EPIDURAL CERVICAL(45667)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '030407',
+    descripcion: 'DRENAJE DE COLECCION SUBDURAL CERVICAL(45670)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '035401',
+    descripcion: 'PLASTIA O INJERTO DE MENINGE ESPINAL(298)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '037101',
+    descripcion: 'DERIVACION SIRINGO PERITONEAL O RETROPERITONEAL(45755)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '037201',
+    descripcion: 'DERIVACION SIRINGO SUBDURAL ESPINAL VIA ABIERTA(45756)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '037301',
+    descripcion: 'DERIVACIÓN LUMBO PERITONEAL(42942)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '037302',
+    descripcion: 'DERIVACIÓN LUMBO RETROPERITONEAL(42943)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '037401',
+    descripcion: 'DERIVACION Y DRENAJE LUMBAR EXTERNA(45758)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '037501',
+    descripcion: 'DERIVACION SIRINGO PLEURAL ESPINAL(45759)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '039304',
+    descripcion: 'IMPLANTACION DE ELECTRODOS DE NEUROESTIMULACION ESPINAL POR LAMINECTOMIA(45766)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '039307',
+    descripcion: 'IMPLANTACION DE NEUROESTIMULADOR ESPINAL VIA ABIERTA(45767)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '039308',
+    descripcion: 'IMPLANTACION DE NEUROESTIMULADOR ESPINAL POR LAMINECTOMIA(45768)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '039800',
+    descripcion: 'RETIRO DE DERIVACION ESPINAL SOD +(325)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '042103',
+    descripcion: 'RIZOTOMIA DE NERVIO CRANEAL(29919)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '042201',
+    descripcion: 'NEUROLISIS DE NERVIO XI POR AMIGDALECTOMIA ESTEREOTACTICA(29158)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '048101',
+    descripcion: 'BLOQUEO DE NERVIO TRIGEMINAL O ESFENOPALATINO(412)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '793935',
+    descripcion: 'REDUCCION DE FRACTURA OCCIPITOCERVICAL VIA ANTERIOR(3898)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '793937',
+    descripcion: 'REDUCCION DE FRACTURA OCCIPITOCERVICAL VIA POSTERIOR(3900)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '793940',
+    descripcion: 'REDUCCION DE FRACTURA COLUMNA CERVICAL EN C1 VIA ANTERIOR(3902)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '793942',
+    descripcion: 'REDUCCION DE FRACTURA COLUMNA CERVICAL EN C1 VIA POSTERIOR(3904)',
+    grupo: 'SISTEMA NERVIOSO CENTRAL',
+  },
+  {
+    cups: '278402',
+    descripcion: 'CORRECCION DE MICROSTOMA(36404)',
+    grupo: 'TRATAMIENTO QUIRURGICO ENFERMEDADES CONGENITAS',
+  },
+  {
+    cups: '547102',
+    descripcion: 'CORRECCION TOTAL DE GASTROSQUISIS(46186)',
+    grupo: 'TRATAMIENTO QUIRURGICO ENFERMEDADES CONGENITAS',
+  },
+  {
+    cups: '547202',
+    descripcion: 'CORRECCION TOTAL DE ONFALOCELE(46189)',
+    grupo: 'TRATAMIENTO QUIRURGICO ENFERMEDADES CONGENITAS',
+  },
+  {
+    cups: '828200',
+    descripcion: 'REPARACION DE DEFORMIDADES CONGENITAS DE LA MANO SOD +(4363)',
+    grupo: 'TRATAMIENTO QUIRURGICO ENFERMEDADES CONGENITAS',
+  },
+  {
+    cups: '828302',
+    descripcion: 'CORRECCION DE SINDACTILIA SIMPLE (UNO O MAS ESPACIOS)(4364)',
+    grupo: 'TRATAMIENTO QUIRURGICO ENFERMEDADES CONGENITAS',
+  },
+  {
+    cups: '828310',
+    descripcion: 'CORRECCION QUIRURGICA DE LA MACRODACTILIA(4366)',
+    grupo: 'TRATAMIENTO QUIRURGICO ENFERMEDADES CONGENITAS',
+  },
+  {
+    cups: '828320',
+    descripcion: 'CORRECCION SIMPLE DE CAMPTODACTILIA (UNO O MAS DEDOS)(4367)',
+    grupo: 'TRATAMIENTO QUIRURGICO ENFERMEDADES CONGENITAS',
+  },
+  {
+    cups: '828340',
+    descripcion: 'CORRECCION QUIRURGICA DE CLINODACTILIA (UNO O MAS DEDOS)(4369)',
+    grupo: 'TRATAMIENTO QUIRURGICO ENFERMEDADES CONGENITAS',
+  },
+  {
+    cups: '828351',
+    descripcion: 'CORRECCION DE POLIDACTILIA CON EXCISION SIMPLE(4371)',
+    grupo: 'TRATAMIENTO QUIRURGICO ENFERMEDADES CONGENITAS',
+  },
+  {
+    cups: '828355',
+    descripcion:
+      'CORRECCION DE ACORTAMIENTO Y ARQUEAMIENTO DE RADIO Y CUBITO [DEFORMIDAD DE MADELUNG](4372)',
+    grupo: 'TRATAMIENTO QUIRURGICO ENFERMEDADES CONGENITAS',
+  },
+  {
+    cups: '547103',
+    descripcion:
+      'CORRECCION TOTAL DE GASTROSQUISIS CON SEPARACION DE COMPONENTES DE PARED ABDOMINAL(46187)',
+    grupo: 'TRATAMIENTO QUIRURGICO ENFERMEDADES CONGENITAS',
+  },
+  {
+    cups: '547203',
+    descripcion:
+      'CORRECCION TOTAL DE ONFALOCELE CON SEPARACION DE COMPONENTES DE PARED ABDOMINAL(46190)',
+    grupo: 'TRATAMIENTO QUIRURGICO ENFERMEDADES CONGENITAS',
+  },
+  {
+    cups: '5DSM01',
+    descripcion: 'DERECHOS DE SALA DE OBSERVACION EN URGENCIAS COMPLEJIDAD MEDIANA(57245)',
+    grupo: 'URGENCIAS',
+  },
+  {
+    cups: '5DSA01',
+    descripcion: 'DERECHOS DE SALA DE OBSERVACION EN URGENCIAS COMPLEJIDAD ALTA(57243)',
+    grupo: 'URGENCIAS',
+  },
+];
