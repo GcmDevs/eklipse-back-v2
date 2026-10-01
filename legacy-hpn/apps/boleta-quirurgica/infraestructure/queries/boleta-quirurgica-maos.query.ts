@@ -1,0 +1,5 @@
+export const boletaQuirurgicaMaosQuery = () => `
+    SELECT * FROM GCMCIRDERINTRAHOSPGES WHERE INGRESO = @0 AND FOLIO = @1
+`;
+
+// response ----> INGRESO	MAOS_SOLICITADO	ESTADO_MAOS	CASA_COMERCIAL	FECHA_ENTREGA	OBSERVACION	estado2_MAOS	existencia	folio	folio	PENDIENTE6	PENDIENTE7	SERVICIO	OBSERVACION	FECHA_FIN	cambio_cups	usuario	folio

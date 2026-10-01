@@ -1,0 +1,24 @@
+export const boletaQuirurgicaAuditoriaQuery = () => `
+    SELECT * FROM GCMCIRDERINTRAHOSPAUD WHERE INGRESO = @0 AND FOLIO = @1
+`;
+
+// response{
+// INGRESO
+// FECHA_CAPTACION
+// MUNICIPIO
+// TIPO
+// AUTORIZADO
+// PENDIENTE1
+// PENDIENTE2
+// PENDIENTE3
+// PENDIENTE4
+// PENDIENTE5
+// PENDIENTE6
+// PENDIENTE7
+// SERVICIO
+// OBSERVACION
+// FECHA_FIN
+// cambio_cups
+// usuario
+// folio
+//}
