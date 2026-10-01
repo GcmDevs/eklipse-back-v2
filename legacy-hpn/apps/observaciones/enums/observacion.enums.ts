@@ -1,0 +1,28 @@
+export enum HPNOBS_IMPORTANCIA {
+  BAJA = 1,
+  MEDIA = 2,
+  ALTA = 3,
+  CRITICA = 4,
+}
+
+export enum HPNOBS_TIPO_GESTION {
+  MEDICAMENTO = 1,
+  SEGUIMIENTO = 2,
+  QUIRURGICO = 3,
+}
+
+export enum HPNOBS_DESCRIP_USUARIO_ASIGNADO {
+  NO_REQUERIDO = 0,
+  MEDICO = 1,
+  LIDER = 2,
+  COORDINADOR = 3,
+  RESPONSABLE = 4,
+  SIAU = 5,
+}
+
+export enum HPNOBS_ESTADO {
+  NO_REQUERIDO = 0,
+  ASIGNADA = 1,
+  EN_PROCESO = 2,
+  CERRADA = 3,
+}
