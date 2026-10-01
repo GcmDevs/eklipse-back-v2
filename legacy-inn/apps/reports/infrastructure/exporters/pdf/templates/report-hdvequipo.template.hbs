@@ -1,0 +1,577 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <style type="text/css">
+    @page {
+      size: A4;
+      margin: 10mm 8mm 10mm 8mm;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Arial', Helvetica, sans-serif;
+      font-size: 8pt;
+      color: #000;
+      margin: 0;
+      padding: 0;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+
+    .b-all {
+      border: 1.5px solid #000;
+    }
+
+    .b-t {
+      border-top: 1.5px solid #000;
+    }
+
+    .b-b {
+      border-bottom: 1.5px solid #000;
+    }
+
+    .b-l {
+      border-left: 1.5px solid #000;
+    }
+
+    .b-r {
+      border-right: 1.5px solid #000;
+    }
+
+    .b-tb {
+      border-top: 1.5px solid #000;
+      border-bottom: 1.5px solid #000;
+    }
+
+    .b-lr {
+      border-left: 1.5px solid #000;
+      border-right: 1.5px solid #000;
+    }
+
+    .b-tlr {
+      border-top: 1.5px solid #000;
+      border-left: 1.5px solid #000;
+      border-right: 1.5px solid #000;
+    }
+
+    .b-blr {
+      border-bottom: 1.5px solid #000;
+      border-left: 1.5px solid #000;
+      border-right: 1.5px solid #000;
+    }
+
+    .b-tbl {
+      border-top: 1.5px solid #000;
+      border-bottom: 1.5px solid #000;
+      border-left: 1.5px solid #000;
+    }
+
+    .b-tbr {
+      border-top: 1.5px solid #000;
+      border-bottom: 1.5px solid #000;
+      border-right: 1.5px solid #000;
+    }
+
+    .b-tl {
+      border-top: 1.5px solid #000;
+      border-left: 1.5px solid #000;
+    }
+
+    .b-tr {
+      border-top: 1.5px solid #000;
+      border-right: 1.5px solid #000;
+    }
+
+    .b-bl {
+      border-bottom: 1.5px solid #000;
+      border-left: 1.5px solid #000;
+    }
+
+    .b-br {
+      border-bottom: 1.5px solid #000;
+      border-right: 1.5px solid #000;
+    }
+
+    .bg-header {
+      background-color: #388194;
+      color: #fff;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .bg-subhdr {
+      background-color: #92CDDC;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .bg-asset {
+      background-color: #92CDDC;
+      font-weight: bold;
+      text-align: center;
+      font-size: 11pt;
+    }
+
+    .bg-gray {
+      background-color: #D8D8D8;
+      font-weight: bold;
+    }
+
+    .bg-white {
+      background-color: #fff;
+    }
+
+    td {
+      padding: 2px 3px;
+      vertical-align: middle;
+    }
+
+    .lbl {
+      font-weight: bold;
+      font-size: 8pt;
+    }
+
+    .val {
+      font-size: 7.5pt;
+    }
+
+    .ctr {
+      text-align: center;
+    }
+
+    .mark {
+      text-align: center;
+      font-weight: bold;
+      font-size: 9pt;
+      padding: 1px 2px;
+    }
+
+    table.hdv-grid {
+      table-layout: fixed;
+      width: 100%;
+    }
+
+    .hdv-grid td {
+      overflow: hidden;
+    }
+
+    .cell-clip {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .cell-clip-sm {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 6.5pt;
+    }
+
+    .cell-wrap {
+      overflow: hidden;
+      word-break: break-word;
+      line-height: 1.15;
+      font-size: 7.5pt;
+    }
+
+    .var-slot-lbl {
+      font-size: 6.5pt;
+      padding: 1px 2px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .dt-left {
+      width: 35%;
+    }
+
+    .dt-val {
+      width: 12%;
+    }
+
+    .chk-col {
+      width: 4%;
+    }
+
+    .sec-hdr td {
+      height: 18px;
+      font-size: 9pt;
+    }
+
+    .photo-cell {
+      text-align: center;
+      vertical-align: middle;
+      background: #fafafa;
+    }
+
+    .photo-cell img {
+      max-width: 140px;
+      max-height: 110px;
+      object-fit: contain;
+    }
+
+    .photo-cell .no-photo {
+      color: #aaa;
+      font-size: 7pt;
+      padding: 20px 0;
+    }
+
+    .acc-row td {
+      height: 16px;
+    }
+
+    .doc-row td {
+      height: 15px;
+      font-size: 7.5pt;
+    }
+
+    .sig-area {
+      height: 55px;
+    }
+
+    .fecha-impresion {
+      text-align: right;
+      font-size: 5.5pt;
+      color: #b5b5b5;
+      line-height: 1;
+      padding: 0 1px;
+    }
+
+    .fecha-impresion-top {
+      margin-bottom: 3px;
+    }
+
+    .fecha-impresion-bottom {
+      margin-top: 3px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="fecha-impresion fecha-impresion-top">fecha de impresion: {{fechaImpresion}}</div>
+  <table class="hdv-grid">
+    <tr>
+      <td colspan="5" rowspan="4" class="b-all ctr" style="height:55px;">
+        {{#if images.logo}}
+        <img src="{{images.logo}}" style="max-width:140px; max-height:50px; object-fit:contain;">
+        {{else}}
+        <span style="color:#aaa; font-size:7pt;">LOGO</span>
+        {{/if}}
+      </td>
+
+      <td colspan="9" rowspan="4" class="b-all ctr" style="font-weight:bold; font-size:8.5pt; line-height:1.2;">
+        FORMATO DE HOJA DE VIDA DE EQUIPOS BIOMEDICOS
+      </td>
+      <td colspan="3" class="b-all lbl" style="font-size:6.5pt; text-align:left; padding-left:3px;">
+        Código: BIO-FT-11
+      </td>
+
+    </tr>
+    <tr>
+      <td colspan="3" class="b-all lbl" style="font-size:6.5pt; text-align:left; padding-left:3px;">
+        Vigencia: 04/08/2029
+      </td>
+    </tr>
+
+    <tr>
+      <td colspan="3" class="b-all lbl" style="font-size:6.5pt; text-align:left; padding-left:3px;">
+        Versión: 05
+      </td>
+    </tr>
+    <tr>
+
+      <td colspan="3" class="b-all lbl" style="font-size:6.5pt; text-align:left; padding-left:3px;">
+        Página: {{encabezado.pagina}}
+      </td>
+    </tr>
+    <tr>
+      <td colspan="17" class="b-all bg-asset cell-wrap" style="height:28px; font-size:10pt; padding: 4px 8px;">
+        NOMBRE DEL ACTIVO: &nbsp; {{identificacion.nombreActivo}}
+      </td>
+    </tr>
+
+    <tr class="sec-hdr">
+      <td colspan="8" class="b-all bg-header">IDENTIFICACIÓN</td>
+      <td colspan="9" class="b-all bg-header">REGISTRO FOTOGRÁFICO</td>
+    </tr>
+
+    <tr>
+      <td colspan="3" class="b-tbl lbl">MARCA:</td>
+      <td colspan="5" class="b-all ctr val cell-clip">{{identificacion.marca}}</td>
+      <td colspan="9" rowspan="7" class="b-all photo-cell">
+        {{#if identificacion.fotoEquipo}}
+        <img src="{{identificacion.fotoEquipo}}" alt="Foto equipo">
+        {{else}}
+        <div class="no-photo">SIN FOTO</div>
+        {{/if}}
+      </td>
+    </tr>
+    <tr>
+      <td colspan="3" class="b-lr b-b lbl">MODELO:</td>
+      <td colspan="5" class="b-all ctr val cell-clip">{{identificacion.modelo}}</td>
+    </tr>
+    <tr>
+      <td colspan="3" class="b-lr b-b lbl">SERIE:</td>
+      <td colspan="5" class="b-all ctr val cell-clip">{{identificacion.numeroSerie}}</td>
+    </tr>
+    <tr>
+      <td colspan="3" class="b-lr b-b lbl">No. DE INV.:</td>
+      <td colspan="5" class="b-all ctr val cell-clip">{{identificacion.numeroPlaca}}</td>
+    </tr>
+    <tr>
+      <td colspan="3" class="b-lr b-b lbl">UBICACIÓN:</td>
+      <td colspan="5" class="b-all ctr val cell-clip">{{identificacion.ubicacion}}</td>
+    </tr>
+    <tr>
+      <td colspan="3" class="b-lr b-b lbl">LOCALIZACIÓN:</td>
+      <td colspan="5" class="b-all ctr val cell-clip">{{identificacion.localizacion}}</td>
+    </tr>
+    <tr>
+      <td colspan="3" class="b-blr lbl">PERIODICIDAD DE MANT:</td>
+      <td colspan="5" class="b-all ctr val cell-clip">{{identificacion.periodicidadMantenimiento}}</td>
+    </tr>
+
+    <tr class="sec-hdr">
+      <td colspan="17" class="b-all bg-header">FICHA TÉCNICA</td>
+    </tr>
+
+    <tr class="sec-hdr">
+      <td colspan="8" class="b-all bg-header">CLASIFICACIÓN BIOMÉDICA</td>
+      <td colspan="9" class="b-all bg-header">RIESGO</td>
+    </tr>
+
+    <tr>
+      <td colspan="7" class="b-tbl lbl">PREVENCIÓN</td>
+      <td class="b-all mark">{{mark fichaTecnica.clasificacionBiomedica.prevencion}}</td>
+      <td colspan="8" class="b-tbl lbl">MUY ALTO III</td>
+      <td class="b-all mark">{{mark fichaTecnica.riesgo.muyAltoIII}}</td>
+    </tr>
+    <tr>
+      <td colspan="7" class="b-lr b-b lbl">DIAGNÓSTICO</td>
+      <td class="b-all mark">{{mark fichaTecnica.clasificacionBiomedica.diagnostico}}</td>
+      <td colspan="8" class="b-lr b-b lbl">ALTO IIB</td>
+      <td class="b-all mark">{{mark fichaTecnica.riesgo.altoIIB}}</td>
+    </tr>
+    <tr>
+      <td colspan="7" class="b-lr b-b lbl">REHABILITACIÓN</td>
+      <td class="b-all mark">{{mark fichaTecnica.clasificacionBiomedica.rehabilitacion}}</td>
+      <td colspan="8" class="b-lr b-b lbl">MODERADO IIA</td>
+      <td class="b-all mark">{{mark fichaTecnica.riesgo.moderadoIIA}}</td>
+    </tr>
+    <tr>
+      <td colspan="7" class="b-lr b-b lbl">ANÁLISIS DE LABORATORIO</td>
+      <td class="b-all mark">{{mark fichaTecnica.clasificacionBiomedica.analisisLaboratorio}}</td>
+      <td colspan="8" class="b-lr b-b lbl">BAJO I</td>
+      <td class="b-all mark">{{mark fichaTecnica.riesgo.bajoI}}</td>
+    </tr>
+    <tr>
+      <td colspan="7" class="b-lr b-b lbl">TRATAMIENTO Y MANT. DE VIDA</td>
+      <td class="b-all mark">{{mark fichaTecnica.clasificacionBiomedica.tratamientoMantVida}}</td>
+      <td colspan="8" class="b-blr lbl">NO APLICA</td>
+      <td class="b-all mark">{{mark fichaTecnica.riesgo.noAplica}}</td>
+    </tr>
+    <tr>
+      <td colspan="5" class="b-tl b-b lbl">REGISTRO SANITARIO:</td>
+      <td class="b-all ctr lbl" style="font-size:7pt;">SI</td>
+      <td class="b-all mark">{{mark fichaTecnica.clasificacionBiomedica.registroSanitario.aplica}}</td>
+      <td class="b-all ctr lbl" style="font-size:7pt;">NO</td>
+      <td class="b-all mark">{{markNo fichaTecnica.clasificacionBiomedica.registroSanitario.aplica}}</td>
+      <td colspan="8" class="b-tbr ctr lbl" style="font-size:7pt;">NA</td>
+    </tr>
+    <tr>
+      <td colspan="8" class="b-all lbl">NÚMERO DE REGISTRO SANITARIO:</td>
+      <td colspan="9" class="b-all ctr val cell-clip">{{fichaTecnica.clasificacionBiomedica.registroSanitario.numero}}
+      </td>
+    </tr>
+
+    <tr class="sec-hdr">
+      <td colspan="6" class="b-all bg-header">DATOS TÉCNICOS</td>
+      <td colspan="11" class="b-all bg-header">TIPO DE ADQUISICIÓN</td>
+    </tr>
+
+    <tr>
+      <td colspan="4" class="b-tbl lbl">VOLTAJE (VOLTIOS):</td>
+      <td colspan="2" class="b-all ctr val cell-clip">{{fichaTecnica.datosTecnicos.voltaje}}</td>
+      <td colspan="5" rowspan="2" class="b-all lbl ctr">COMPRA</td>
+      <td rowspan="2" class="b-all mark">{{mark identificacion.adquisicion.tipoAdquisicion.compra}}</td>
+      <td colspan="4" rowspan="2" class="b-all lbl ctr">ALQUILER</td>
+      <td rowspan="2" class="b-all mark">{{mark identificacion.adquisicion.tipoAdquisicion.alquiler}}</td>
+    </tr>
+    <tr>
+      <td colspan="4" class="b-lr b-b lbl">CORRIENTE (AMPERIOS):</td>
+      <td colspan="2" class="b-all ctr val cell-clip">{{fichaTecnica.datosTecnicos.corriente}}</td>
+    </tr>
+    <tr>
+      <td colspan="4" class="b-lr b-b lbl">FRECUENCIA (HERTZ):</td>
+      <td colspan="2" class="b-all ctr val cell-clip">{{fichaTecnica.datosTecnicos.frecuencia}}</td>
+      <td colspan="5" rowspan="2" class="b-all lbl ctr">COMODATO</td>
+      <td rowspan="2" class="b-all mark">{{mark identificacion.adquisicion.tipoAdquisicion.comodato}}</td>
+      <td colspan="4" rowspan="2" class="b-all lbl ctr">OTROS</td>
+      <td rowspan="2" class="b-all mark">{{mark identificacion.adquisicion.tipoAdquisicion.otros}}</td>
+    </tr>
+    <tr>
+      <td colspan="4" class="b-lr b-b lbl">CONDICIONES AMBIENTALES:</td>
+      <td colspan="2" class="b-all ctr val cell-clip" style="font-size:7pt;">
+        {{fichaTecnica.datosTecnicos.condicionesAmbientales}}</td>
+    </tr>
+    <tr>
+      <td colspan="4" class="b-lr b-b lbl">REVOLUCIONES (RPMS):</td>
+      <td colspan="2" class="b-all ctr val cell-clip">{{fichaTecnica.datosTecnicos.revoluciones}}</td>
+      <td colspan="11" class="b-all bg-header">MANUALES</td>
+    </tr>
+    <tr>
+      <td colspan="4" class="b-lr b-b lbl">POTENCIA (WATTS):</td>
+      <td colspan="2" class="b-all ctr val cell-clip">{{fichaTecnica.datosTecnicos.potencia}}</td>
+      <td colspan="5" class="b-all lbl">MANUAL DE SERVICIO:</td>
+      <td class="b-all mark">{{mark fichaTecnica.manuales.servicio}}</td>
+      <td colspan="4" class="b-all lbl">FICHA TÉCNICA O ARCHIVO DIGITAL:</td>
+      <td class="b-all mark">{{mark fichaTecnica.manuales.fichaTecnica}}</td>
+    </tr>
+    {{#each fichaTecnica.datosTecnicos.medidasAdicionales}}
+    <tr>
+      <td colspan="4" class="b-lr b-b lbl cell-clip-sm">{{this.etiqueta}}</td>
+      <td colspan="2" class="b-all ctr val cell-clip">{{this.valor}}</td>
+      <td colspan="11" class="b-all">&nbsp;</td>
+    </tr>
+    {{/each}}
+    {{#if fichaTecnica.manuales}}
+    <tr>
+      <td colspan="6" class="b-all">&nbsp;</td>
+      <td colspan="5" class="b-all lbl">MANUAL DE USUARIO:</td>
+      <td class="b-all mark">{{mark fichaTecnica.manuales.usuario}}</td>
+      <td colspan="4" class="b-all lbl">OTROS:</td>
+      <td class="b-all mark">&nbsp;</td>
+    </tr>
+    {{/if}}
+
+
+    <tr class="sec-hdr">
+      <td colspan="17" class="b-all bg-header">DATOS DE CALIBRACIÓN</td>
+    </tr>
+    <tr>
+      <td colspan="4" class="b-all lbl">REQUIERE CALIBRACIÓN:</td>
+      <td class="b-all ctr lbl" style="font-size:7pt;">SI</td>
+      <td class="b-all mark">{{mark fichaTecnica.datosCalibracion.requiereCalibracion.si}}</td>
+      <td class="b-all ctr lbl" style="font-size:7pt;">NO</td>
+      <td class="b-all mark">{{mark fichaTecnica.datosCalibracion.requiereCalibracion.no}}</td>
+      <td colspan="6" class="b-all ctr lbl">FRECUENCIA DE LA CALIBRACIÓN:</td>
+      <td colspan="3" class="b-all ctr val cell-clip">{{fichaTecnica.datosCalibracion.frecuencia}}</td>
+    </tr>
+    <tr class="sec-hdr">
+      <td colspan="17" class="b-all bg-subhdr ctr lbl">VARIABLE A MEDIR</td>
+    </tr>
+    {{#each fichaTecnica.datosCalibracion.variables.filas}}
+    <tr>
+      {{#each this.slots}}
+      <td colspan="2" class="b-all lbl ctr var-slot-lbl">{{this.etiqueta}}</td>
+      <td class="b-all mark">{{mark this.marcado}}</td>
+      {{/each}}
+      {{#if this.blanks}}
+      <td colspan="{{this.blanks}}" class="b-all">&nbsp;</td>
+      {{/if}}
+    </tr>
+    {{/each}}
+
+    <tr>
+      <td colspan="4" class="b-all lbl">NOMBRE DEL PROVEEDOR</td>
+      <td colspan="5" class="b-all ctr val cell-clip">{{proveedor.nombre}}</td>
+      <td colspan="5" class="b-all ctr lbl">CODI. ÚLTIMA CALIBRACIÓN</td>
+      <td colspan="3" class="b-all ctr val cell-clip">{{fichaTecnica.datosCalibracion.codigoUltimaCalibracion}}</td>
+    </tr>
+
+
+    <tr class="sec-hdr">
+      <td colspan="17" class="b-all bg-header">ACCESORIO PARTES Y/O REPUESTOS</td>
+    </tr>
+    <tr>
+      <td class="b-all ctr lbl" style="font-size:7.5pt;">CANT</td>
+      <td colspan="5" class="b-all ctr lbl" style="font-size:7.5pt;">PARTE</td>
+      <td colspan="5" class="b-all ctr lbl" style="font-size:7.5pt;">MARCA</td>
+      <td colspan="6" class="b-all ctr lbl" style="font-size:7.5pt;">REFERENCIA / OTROS DATOS</td>
+    </tr>
+    {{#each accesorios}}
+    <tr class="acc-row">
+      <td class="b-blr ctr val">{{cantidad}}</td>
+      <td colspan="5" class="b-all ctr val cell-clip">{{parte}}</td>
+      <td colspan="5" class="b-all ctr val cell-clip">{{marca}}</td>
+      <td colspan="6" class="b-all ctr val cell-clip">{{referencia}}</td>
+    </tr>
+    {{/each}}
+    {{#unless accesorios.length}}
+    <tr class="acc-row">
+      <td class="b-blr ctr val">&nbsp;</td>
+      <td colspan="5" class="b-all">&nbsp;</td>
+      <td colspan="5" class="b-all">&nbsp;</td>
+      <td colspan="6" class="b-all">&nbsp;</td>
+    </tr>
+    {{/unless}}
+
+
+    <tr class="sec-hdr">
+      <td colspan="8" class="b-all bg-header">DATOS DE ADQUISICIÓN</td>
+      <td colspan="9" class="b-all bg-header">DATOS DEL FABRICANTE O PROVEEDOR</td>
+    </tr>
+    <tr>
+      <td colspan="4" class="b-tbl lbl">FECHA DE ADQUISICIÓN:</td>
+      <td colspan="4" class="b-all ctr val cell-clip">{{identificacion.adquisicion.fechaAdquisicion}}</td>
+      <td colspan="3" class="b-tbl lbl">NOMBRE:</td>
+      <td colspan="6" class="b-all ctr val cell-clip">{{proveedor.nombre}}</td>
+    </tr>
+    <tr>
+      <td colspan="4" class="b-lr b-b lbl">PUESTA EN FUNCIONAMIENTO:</td>
+      <td colspan="4" class="b-all ctr val cell-clip">{{identificacion.adquisicion.fechaPuestaFuncionamiento}}</td>
+      <td colspan="3" class="b-lr b-b lbl">DIRECCIÓN / TEL:</td>
+      <td colspan="6" class="b-all ctr val cell-clip">{{proveedor.direccion}} &nbsp;{{#if proveedor.telefono}}- Tel:
+        {{proveedor.telefono}}{{/if}}</td>
+    </tr>
+    <tr>
+      <td colspan="4" class="b-lr b-b lbl">VENCIMIENTO DE GARANTÍA:</td>
+      <td colspan="4" class="b-all ctr val cell-clip">{{identificacion.adquisicion.fechaVencimientoGarantia}}</td>
+      <td colspan="3" class="b-lr b-b lbl">E-MAIL:</td>
+      <td colspan="6" class="b-all ctr val cell-clip">{{proveedor.email}}</td>
+    </tr>
+    <tr>
+      <td colspan="4" class="b-blr lbl">VIDA ÚTIL:</td>
+      <td colspan="4" class="b-all ctr val cell-clip">{{identificacion.adquisicion.vidaUtil}}</td>
+      <td colspan="4" class="b-l lbl">FECHA DE FABRICACIÓN:</td>
+      <td colspan="5" class="b-all ctr val cell-clip">{{identificacion.adquisicion.fechaFabricacion}}</td>
+    </tr>
+
+
+    <tr class="sec-hdr">
+      <td colspan="17" class="b-all bg-header">
+        LISTA DE CHEQUEO DE SOPORTES ANEXO A LA HOJA DE VIDA DE EQUIPOS BIOMÉDICOS
+      </td>
+    </tr>
+    <tr>
+      <td colspan="9" class="b-all bg-header ctr" style="font-size:7.5pt;">DOCUMENTOS</td>
+      <td class="b-all bg-header ctr" style="font-size:7.5pt;">APLICA</td>
+      <td colspan="2" class="b-all bg-header ctr" style="font-size:7.5pt;">NO APLICA</td>
+      <td colspan="5" class="b-all bg-header ctr" style="font-size:7.5pt;">OBSERVACIONES</td>
+    </tr>
+
+    {{#each documentos}}
+    <tr class="doc-row">
+      <td colspan="9" class="b-lr b-b val">{{nombre}}</td>
+      <td class="b-all ctr mark">{{mark aplica}}</td>
+      <td colspan="2" class="b-all ctr mark">{{markNo aplica}}</td>
+      <td colspan="5" class="b-all val">{{observaciones}}</td>
+    </tr>
+    {{/each}}
+
+  </table>
+
+  <div class="fecha-impresion fecha-impresion-bottom">fecha de impresion: {{fechaImpresion}}</div>
+</body>
+
+</html>
