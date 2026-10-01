@@ -1,250 +1,222 @@
 import { GcmContextCode } from '@common/domain/types';
 
-export const REPORTE_MESES = [
-  { anio: 2026, mes: 5 },
-  { anio: 2026, mes: 6 },
-  { anio: 2026, mes: 7 },
-] as const;
-
 export type PrioridadReporte = 'NORMAL' | 'CRITICA' | 'ALTA';
 export type PrioridadReporteCode = 1 | 2 | 3;
-
-export const DIAS_MES_REPORTE = 30;
-export const DIAS_SEMANA_REPORTE = 7;
+export type ReporteSolicitudPedidoRawRow = Record<string, unknown>;
 export const DIAS_OBJETIVO_PEDIDO = 15;
-export const DIAS_PRIORIDAD_CRITICA = 2;
-export const DIAS_PRIORIDAD_ALTA = 4;
+export const DIAS_ENTRE_PEDIDOS = 7;
 
-export interface MovimientoMensualReporte {
-  anio: number;
-  mes: number;
-  entrada: number;
-  salidaSinFormula: number;
-  salidaCorregida: number;
-  despachoConsumo: number;
-  salidaFV: number;
+export interface ReferenciaPedidoConsumo {
+  solicitudPedidoId: number;
+  numeroSolicitud: string;
+  cantidadPendiente: number;
+  cantidadDespachadaReciente: number;
+  ultimoDespacho: string | null;
 }
-
 export interface ProductoReporteSolicitudPedido {
+  agrupamientoKey: string;
   codigoAgrupamiento: string;
   nombreAgrupamiento: string;
   codigoProducto: string;
   descripcionProducto: string;
-  aprovechamiento: number;
   grupo: string;
+  presentaciones: { productoId: number; codigo: string; descripcion: string }[];
   existenciaActual: number;
-  movimientosMensuales: MovimientoMensualReporte[];
-  totalSalidas: number;
-  totalConsumo: number;
-  promedioSemanal: number;
-  consumoPromedioMensual: number;
+  cantidadConsumida15Dias: number;
+  cantidadConsumida7Dias: number;
   consumoPromedioDiario: number;
-  rotacionInventario: number | null;
+  consumoDiarioReciente: number;
+  promedioSemanal: number;
+  tendencia: 'AUMENTO' | 'DISMINUCION' | 'ESTABLE' | 'SIN_CONSUMO';
   inventarioDias: number | null;
+  existenciaProyectada7Dias: number;
+  faltanteProyectado7Dias: number;
   diasObjetivo: number;
   existenciaObjetivo: number;
   debePedir: boolean;
+  requiereRevisionManual: boolean;
   cantidadSugerida: number;
   prioridadCode: PrioridadReporteCode;
   prioridad: PrioridadReporte;
+  ultimaFechaSuministro: string | null;
+  ultimaCompra: string | null;
+  referenciasPedidos: ReferenciaPedidoConsumo[];
 }
-
 export interface ReporteSolicitudPedidoResponse {
   contextCode: GcmContextCode;
   sedeId: number;
-  periodo: {
-    desde: string;
-    hasta: string;
-    meses: number;
-  };
+  periodo: { desde: string; hasta: string; fechaCorte: string; dias: number };
+  diasEntrePedidos: number;
   productos: ProductoReporteSolicitudPedido[];
 }
-
-export type ReporteSolicitudPedidoRawRow = Record<string, unknown>;
-
-interface ProductoAcumulado {
-  codigoAgrupamiento: string;
-  nombreAgrupamiento: string;
-  codigoProducto: string;
-  descripcionProducto: string;
-  aprovechamiento: number;
-  grupo: string;
-  existenciaActual: number;
-  movimientos: Map<string, MovimientoMensualReporte>;
-}
-
-const normalizarLlave = (llave: string): string =>
-  llave
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-zA-Z0-9]/g, '')
-    .toUpperCase();
-
-const normalizarFila = (fila: ReporteSolicitudPedidoRawRow): Map<string, unknown> =>
-  new Map(Object.entries(fila).map(([llave, valor]) => [normalizarLlave(llave), valor]));
-
 const numero = (valor: unknown): number => {
   if (valor === null || valor === undefined || valor === '') return 0;
-  const convertido = Number(valor);
-  return Number.isFinite(convertido) ? convertido : 0;
+  const n = Number(valor);
+  if (!Number.isFinite(n)) throw new Error('El reporte contiene una cantidad invalida');
+  return n;
 };
-
-const texto = (valor: unknown): string => String(valor ?? '').trim();
-
-const redondear = (valor: number): number => Number(valor.toFixed(4));
-
-const llaveMes = (anio: number, mes: number): string => `${anio}-${mes}`;
-
-const crearMovimientosVacios = (): Map<string, MovimientoMensualReporte> =>
-  new Map(
-    REPORTE_MESES.map(({ anio, mes }) => [
-      llaveMes(anio, mes),
-      {
-        anio,
-        mes,
-        entrada: 0,
-        salidaSinFormula: 0,
-        salidaCorregida: 0,
-        despachoConsumo: 0,
-        salidaFV: 0,
-      },
-    ])
-  );
+const texto = (valor: unknown) => String(valor ?? '').trim();
+const codigo = (valor: unknown) => texto(valor).toUpperCase();
+const redondear = (valor: number) => Number(valor.toFixed(4));
+const fecha = (valor: unknown): string | null => {
+  if (!valor) return null;
+  const date = valor instanceof Date ? valor : new Date(String(valor));
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+};
+const ultima = (a: string | null, b: string | null) => (!a ? b : !b ? a : a > b ? a : b);
+const desplazarFecha = (corte: string, dias: number): string => {
+  const date = new Date(corte + 'T00:00:00Z');
+  if (Number.isNaN(date.getTime())) throw new Error('Fecha de corte invalida');
+  date.setUTCDate(date.getUTCDate() + dias);
+  return date.toISOString().slice(0, 10);
+};
 
 export const calcularPrioridadReporte = (
-  inventarioDias: number | null
-): { prioridadCode: PrioridadReporteCode; prioridad: PrioridadReporte } => {
-  if (inventarioDias !== null && inventarioDias <= DIAS_PRIORIDAD_CRITICA) {
-    return { prioridadCode: 2, prioridad: 'CRITICA' };
-  }
-
-  if (inventarioDias !== null && inventarioDias <= DIAS_PRIORIDAD_ALTA) {
-    return { prioridadCode: 3, prioridad: 'ALTA' };
-  }
-
-  return { prioridadCode: 1, prioridad: 'NORMAL' };
-};
+  dias: number | null
+): {
+  prioridadCode: PrioridadReporteCode;
+  prioridad: PrioridadReporte;
+} =>
+  dias !== null && dias <= 2
+    ? { prioridadCode: 2, prioridad: 'CRITICA' }
+    : dias !== null && dias <= 4
+      ? { prioridadCode: 3, prioridad: 'ALTA' }
+      : { prioridadCode: 1, prioridad: 'NORMAL' };
 
 export const transformarReporteSolicitudPedido = (
   filas: ReporteSolicitudPedidoRawRow[],
   contextCode: GcmContextCode,
-  sedeId: number
+  sedeId: number,
+  fechaCorte: string,
+  referencias: ReporteSolicitudPedidoRawRow[] = []
 ): ReporteSolicitudPedidoResponse => {
-  const productos = new Map<string, ProductoAcumulado>();
-
-  filas.forEach(filaOriginal => {
-    const fila = normalizarFila(filaOriginal);
-    const codigoProducto = texto(fila.get('IPRCODIGO')).toUpperCase();
-    if (!codigoProducto) return;
-
-    let producto = productos.get(codigoProducto);
-    if (!producto) {
-      producto = {
-        codigoAgrupamiento: texto(fila.get('CODAGRUPAMIENTO')),
-        nombreAgrupamiento: texto(fila.get('NOMAGRUPAMIENTO')),
-        codigoProducto,
-        descripcionProducto: texto(fila.get('IPRDESCOR')),
-        aprovechamiento: 0,
-        grupo: texto(fila.get('IGRNOMBRE')),
-        existenciaActual: 0,
-        movimientos: crearMovimientosVacios(),
-      };
-      productos.set(codigoProducto, producto);
+  const grupos = new Map<string, ProductoReporteSolicitudPedido>();
+  const grupoPorProducto = new Map<number, ProductoReporteSolicitudPedido>();
+  for (const fila of filas) {
+    const productoId = numero(fila.PRODUCTOID);
+    // El SQL retorna una fila por producto, con consumo y stock ya agregados por sede.
+    if (!productoId || grupoPorProducto.has(productoId)) {
+      throw new Error('El reporte contiene un producto invalido o duplicado');
     }
-
-    producto.aprovechamiento += numero(fila.get('APROVECHAMIENTO'));
-    producto.existenciaActual = Math.max(
-      producto.existenciaActual,
-      Math.max(0, numero(fila.get('EXISTENCIAACTUAL')))
-    );
-
-    const anio = numero(fila.get('ANO'));
-    const mes = numero(fila.get('MES'));
-    const movimiento = producto.movimientos.get(llaveMes(anio, mes));
-    if (!movimiento) return;
-
-    movimiento.entrada += numero(fila.get('ENTRADA'));
-    movimiento.salidaSinFormula += numero(fila.get('SALIDASINFORMULA'));
-    movimiento.salidaCorregida += numero(fila.get('SALIDACORREGIDA'));
-    movimiento.despachoConsumo += numero(fila.get('DESPACHOCONSUMO'));
-    movimiento.salidaFV += numero(fila.get('SALIDAFV'));
-  });
-
-  const productosTransformados = [...productos.values()]
-    .map(producto => {
-      const movimientosMensuales = [...producto.movimientos.values()].map(movimiento => ({
-        ...movimiento,
-        entrada: redondear(movimiento.entrada),
-        salidaSinFormula: redondear(movimiento.salidaSinFormula),
-        salidaCorregida: redondear(movimiento.salidaCorregida),
-        despachoConsumo: redondear(movimiento.despachoConsumo),
-        salidaFV: redondear(movimiento.salidaFV),
-      }));
-      const totalSalidasExacto = [...producto.movimientos.values()].reduce(
-        (total, movimiento) => total + movimiento.salidaCorregida,
-        0
-      );
-      const totalSalidas = redondear(totalSalidasExacto);
-      // La macro llama consumo total a salida corregida + despacho de consumo.
-      const totalConsumoExacto = [...producto.movimientos.values()].reduce(
-        (total, movimiento) => total + movimiento.salidaCorregida + movimiento.despachoConsumo,
-        0
-      );
-      const totalConsumo = redondear(totalConsumoExacto);
-      const consumoPromedioMensualExacto = totalConsumoExacto / REPORTE_MESES.length;
-      const consumoPromedioDiarioExacto = consumoPromedioMensualExacto / DIAS_MES_REPORTE;
-      const promedioSemanalExacto = consumoPromedioDiarioExacto * DIAS_SEMANA_REPORTE;
-      const consumoPromedioMensual = redondear(consumoPromedioMensualExacto);
-      const promedioSemanal = redondear(promedioSemanalExacto);
-      const consumoPromedioDiario = redondear(consumoPromedioDiarioExacto);
-      const existenciaActual = redondear(producto.existenciaActual);
-      const inventarioDiasExacto =
-        consumoPromedioDiarioExacto === 0 ? null : existenciaActual / consumoPromedioDiarioExacto;
-      const inventarioDias = inventarioDiasExacto === null ? null : redondear(inventarioDiasExacto);
-      const rotacionInventario =
-        existenciaActual === 0 ? null : redondear(consumoPromedioMensualExacto / existenciaActual);
-      const existenciaObjetivoExacta = consumoPromedioDiarioExacto * DIAS_OBJETIVO_PEDIDO;
-      const existenciaObjetivo = redondear(existenciaObjetivoExacta);
-      const cantidadSugerida = redondear(Math.max(0, existenciaObjetivoExacta - existenciaActual));
-      const debePedir = consumoPromedioDiarioExacto > 0 && cantidadSugerida > 0;
-      const prioridad = calcularPrioridadReporte(inventarioDiasExacto);
-
-      return {
-        codigoAgrupamiento: producto.codigoAgrupamiento,
-        nombreAgrupamiento: producto.nombreAgrupamiento,
-        codigoProducto: producto.codigoProducto,
-        descripcionProducto: producto.descripcionProducto,
-        aprovechamiento: redondear(producto.aprovechamiento),
-        grupo: producto.grupo,
-        existenciaActual,
-        movimientosMensuales,
-        totalSalidas,
-        totalConsumo,
-        promedioSemanal,
-        consumoPromedioMensual,
-        consumoPromedioDiario,
-        rotacionInventario,
-        inventarioDias,
+    const key = fila.AGRUPAMIENTOID ? 'A:' + fila.AGRUPAMIENTOID : 'P:' + productoId;
+    let p = grupos.get(key);
+    if (!p) {
+      const agrupamiento = codigo(fila.CODIGOAGRUPAMIENTO);
+      const nombre = texto(fila.NOMBREAGRUPAMIENTO);
+      p = {
+        agrupamientoKey: key,
+        codigoAgrupamiento: agrupamiento,
+        nombreAgrupamiento: nombre,
+        codigoProducto: agrupamiento || codigo(fila.CODIGOPRODUCTO),
+        descripcionProducto: nombre || texto(fila.DESCRIPCIONPRODUCTO),
+        grupo: texto(fila.GRUPO),
+        presentaciones: [],
+        existenciaActual: 0,
+        cantidadConsumida15Dias: 0,
+        cantidadConsumida7Dias: 0,
+        consumoPromedioDiario: 0,
+        consumoDiarioReciente: 0,
+        promedioSemanal: 0,
+        tendencia: 'SIN_CONSUMO',
+        inventarioDias: null,
+        existenciaProyectada7Dias: 0,
+        faltanteProyectado7Dias: 0,
         diasObjetivo: DIAS_OBJETIVO_PEDIDO,
-        existenciaObjetivo,
-        debePedir,
-        cantidadSugerida,
-        ...prioridad,
+        existenciaObjetivo: 0,
+        debePedir: false,
+        requiereRevisionManual: false,
+        cantidadSugerida: 0,
+        prioridadCode: 1,
+        prioridad: 'NORMAL',
+        ultimaFechaSuministro: null,
+        ultimaCompra: null,
+        referenciasPedidos: [],
       };
-    })
-    .sort((a, b) => a.codigoProducto.localeCompare(b.codigoProducto));
-
-  const primerMes = REPORTE_MESES[0];
-  const ultimoMes = REPORTE_MESES[REPORTE_MESES.length - 1];
-
+      grupos.set(key, p);
+    }
+    grupoPorProducto.set(productoId, p);
+    if (!numero(fila.BLOQUEADO)) {
+      p.presentaciones.push({
+        productoId,
+        codigo: codigo(fila.CODIGOPRODUCTO),
+        descripcion: texto(fila.DESCRIPCIONPRODUCTO),
+      });
+    }
+    p.existenciaActual += numero(fila.EXISTENCIA_ACTUAL);
+    p.cantidadConsumida15Dias += numero(fila.CANTIDAD_15_DIAS);
+    p.cantidadConsumida7Dias += numero(fila.CANTIDAD_7_DIAS);
+    p.ultimaFechaSuministro = ultima(p.ultimaFechaSuministro, fecha(fila.ULTIMA_FECHA_SUMINISTRO));
+    p.ultimaCompra = ultima(p.ultimaCompra, fecha(fila.ULTIMA_COMPRA));
+  }
+  for (const fila of referencias) {
+    const p = grupoPorProducto.get(numero(fila.PRODUCTOID));
+    if (!p) continue;
+    const pendiente = Math.max(0, numero(fila.PENDIENTE));
+    const despachado = Math.max(0, numero(fila.DESPACHADORECIENTE));
+    if (!pendiente && !despachado) continue;
+    const id = numero(fila.SOLICITUDID);
+    let ref = p.referenciasPedidos.find(r => r.solicitudPedidoId === id);
+    if (!ref) {
+      ref = {
+        solicitudPedidoId: id,
+        numeroSolicitud: texto(fila.NUMEROSOLICITUD),
+        cantidadPendiente: 0,
+        cantidadDespachadaReciente: 0,
+        ultimoDespacho: null,
+      };
+      p.referenciasPedidos.push(ref);
+    }
+    ref.cantidadPendiente = redondear(ref.cantidadPendiente + pendiente);
+    ref.cantidadDespachadaReciente = redondear(ref.cantidadDespachadaReciente + despachado);
+    ref.ultimoDespacho = ultima(ref.ultimoDespacho, fecha(fila.ULTIMODESPACHO));
+  }
+  for (const p of grupos.values()) {
+    const consumo15 = p.cantidadConsumida15Dias;
+    const consumo7 = p.cantidadConsumida7Dias;
+    const datosInvalidos =
+      consumo15 < 0 || consumo7 < 0 || consumo7 > consumo15 || p.existenciaActual < 0;
+    p.requiereRevisionManual = datosInvalidos || consumo15 === 0 || !p.presentaciones.length;
+    const diario = Math.max(0, consumo15) / 15;
+    const reciente = Math.max(0, consumo7) / 7;
+    const cobertura = diario > 0 ? Math.max(0, p.existenciaActual) / diario : null;
+    p.consumoPromedioDiario = redondear(diario);
+    p.consumoDiarioReciente = redondear(reciente);
+    p.promedioSemanal = redondear(diario * 7);
+    p.inventarioDias = cobertura === null ? null : redondear(cobertura);
+    // Comparación sin sumar ventanas solapadas ni elevar automáticamente el pedido.
+    p.tendencia =
+      consumo15 === 0
+        ? 'SIN_CONSUMO'
+        : consumo7 * 15 > consumo15 * 7
+          ? 'AUMENTO'
+          : consumo7 * 15 < consumo15 * 7
+            ? 'DISMINUCION'
+            : 'ESTABLE';
+    p.existenciaProyectada7Dias = redondear(Math.max(0, p.existenciaActual - diario * 7));
+    p.faltanteProyectado7Dias = redondear(Math.max(0, diario * 7 - p.existenciaActual));
+    p.existenciaObjetivo = redondear(diario * DIAS_OBJETIVO_PEDIDO);
+    // Despachos y pendientes se muestran aparte: no hay recepción confirmada.
+    p.cantidadSugerida = p.requiereRevisionManual
+      ? 0
+      : redondear(Math.max(0, consumo15 - p.existenciaActual));
+    p.debePedir = p.cantidadSugerida > 0;
+    Object.assign(p, calcularPrioridadReporte(datosInvalidos ? null : cobertura));
+    p.existenciaActual = redondear(p.existenciaActual);
+    p.cantidadConsumida15Dias = redondear(consumo15);
+    p.cantidadConsumida7Dias = redondear(consumo7);
+  }
   return {
     contextCode,
     sedeId,
     periodo: {
-      desde: `${primerMes.anio}-${String(primerMes.mes).padStart(2, '0')}`,
-      hasta: `${ultimoMes.anio}-${String(ultimoMes.mes).padStart(2, '0')}`,
-      meses: REPORTE_MESES.length,
+      desde: desplazarFecha(fechaCorte, -15),
+      hasta: desplazarFecha(fechaCorte, -1),
+      fechaCorte,
+      dias: 15,
     },
-    productos: productosTransformados,
+    diasEntrePedidos: DIAS_ENTRE_PEDIDOS,
+    productos: [...grupos.values()].sort((a, b) =>
+      a.codigoProducto.localeCompare(b.codigoProducto)
+    ),
   };
 };
