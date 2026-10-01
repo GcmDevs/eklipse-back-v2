@@ -12,10 +12,13 @@ export const INN_MODULES = {
     COSTOS: `${inn}007`,
     FARMACIA: `${inn}008`,
     SERVICIO_TECNICO: `${inn}009`,
+    SOLICITUD_MEZCLA: `${inn}010`,
     EQUIPOS: `${inn}011`,
     OFERTAS: `${inn}012`,
     GESTION_ACTIVOS: `${inn}013`,
     CENTRAL_MEZCLAS: `${inn}014`,
     SOLICITUD_PEDIDO: `${inn}015`,
+    GESTION_TANQUEOS: `${inn}016`,
+    RONDAS_HABITACIONES: `${inn}017`,
   },
 };

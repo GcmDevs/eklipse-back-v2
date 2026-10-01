@@ -18,8 +18,13 @@ export class SolicitudCrudSource {
     private _create: CreateSolicitudImpl
   ) {}
 
-  public async fetchResumen(start: Date, end: Date, tipos: TipoCode[]) {
-    return await this._fetchResumen.execute(start, end, tipos);
+  public async fetchResumen(
+    start: Date,
+    end: Date,
+    tipos: TipoCode[],
+    codigoSolicitud?: string
+  ) {
+    return await this._fetchResumen.execute(start, end, tipos, codigoSolicitud);
   }
 
   public async fetchComplemento(id: number, contextCode: GcmContextCode) {

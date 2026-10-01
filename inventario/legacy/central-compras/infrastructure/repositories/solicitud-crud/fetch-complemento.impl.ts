@@ -209,10 +209,13 @@ export class FetchComplementoSolicitudImpl extends CentralComprasSource {
         ce =>
           ce.keyCode === ESTADOS.SOL_REGISTRADA.getCode() &&
           ce.tipoCode === ESTADOS_ESPECIFICOS.SOL_REGISTRADA.getCode()
-      )
+      ).length
     ) {
       createdState.keyCode = ESTADOS_ESPECIFICOS.SOL_CARG_COLABORADOR.getCode();
       createdState.tipoCode = ESTADOS.SOL_CARG_COLABORADOR.getCode();
+    } else {
+      createdState.keyCode = ESTADOS_ESPECIFICOS.SOL_REGISTRADA.getCode();
+      createdState.tipoCode = ESTADOS.SOL_REGISTRADA.getCode();
     }
 
     solicitud.cambiosEstado.unshift(createdState);

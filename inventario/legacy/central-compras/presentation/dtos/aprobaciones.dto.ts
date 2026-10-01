@@ -67,20 +67,3 @@ export class ItemsRecomendadosByCotizadorDto {
   @IsNumber({}, { each: true })
   itemsIds: number[];
 }
-
-export class ConvertirACajaMenorExpressDto {
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsEnum(GcmContexts, { message: `${castDataServices.enumToString(GcmContexts)}` })
-  context: GcmContexts;
-  @ApiProperty()
-  @IsNumber()
-  solicitudId: number;
-  @ApiProperty()
-  @IsNumber()
-  presupuesto: number;
-  @ApiProperty()
-  @IsString()
-  @IsOptional()
-  observacion: string;
-}

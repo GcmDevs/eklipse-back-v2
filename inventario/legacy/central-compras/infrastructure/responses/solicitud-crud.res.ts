@@ -13,6 +13,10 @@ export class BasicInfoSolicitudRes {
   codigo: string;
   @ApiProperty()
   justificacion: string;
+  @ApiProperty({ required: false, nullable: true })
+  valorEstimado: number | null;
+  @ApiProperty()
+  isCompraExpress: boolean;
   @ApiProperty()
   tipoCode: TipoCode;
   @ApiProperty()
@@ -33,8 +37,6 @@ export class BasicInfoSolicitudRes {
   ultimoCambioEstado: Date;
   @ApiProperty()
   totalFacturado: number;
-  @ApiProperty()
-  isPagoPorCajaMenor: boolean;
   @ApiProperty()
   authInSameContext: boolean;
   @ApiProperty()
@@ -252,6 +254,10 @@ export class ComplementoSolicitudRes {
   codigo: string;
   @ApiProperty()
   justificacion: string;
+  @ApiProperty({ required: false, nullable: true })
+  valorEstimado: number | null;
+  @ApiProperty()
+  isCompraExpress: boolean;
   @ApiProperty()
   createdAt: Date;
   @ApiProperty()
@@ -260,10 +266,6 @@ export class ComplementoSolicitudRes {
   isFinished: boolean;
   @ApiProperty()
   isCotizacionUnica: boolean;
-  @ApiProperty()
-  isPagoPorCajaMenor: boolean | null;
-  @ApiProperty()
-  isPagoPorCajaMenorExpress: boolean | null;
   @ApiProperty()
   usuario: UsuarioBasicoRes;
   @ApiProperty()
