@@ -10,6 +10,9 @@ export interface TipoDocCategoriaActivoFindAllFilters {
   limit?: number;
 }
 
-export interface TipoDocCategoriaActivoRepository extends BaseRepository<TipoDocCategoriaActivo, TipoDocCategoriaActivoRead> {
+export interface TipoDocCategoriaActivoRepository extends BaseRepository<
+  TipoDocCategoriaActivo,
+  TipoDocCategoriaActivoRead
+> {
   findAll(filters: TipoDocCategoriaActivoFindAllFilters): Promise<TipoDocCategoriaActivoRead[]>;
 }

@@ -7,11 +7,14 @@ import {
 type QueryRow = Record<string, unknown>;
 
 function mapRow(row: QueryRow) {
-  return Object.entries(row).reduce((accumulator, [key, value]) => {
-    accumulator[sanitizeGestorEstanciaProlongadasKey(key)] =
-      sanitizeGestorEstanciaProlongadasValue(value);
-    return accumulator;
-  }, {} as Record<string, unknown>);
+  return Object.entries(row).reduce(
+    (accumulator, [key, value]) => {
+      accumulator[sanitizeGestorEstanciaProlongadasKey(key)] =
+        sanitizeGestorEstanciaProlongadasValue(value);
+      return accumulator;
+    },
+    {} as Record<string, unknown>
+  );
 }
 
 export function mapGestorEstanciaProlongadasRows<T extends QueryRow>(rows: T[]) {

@@ -60,7 +60,7 @@ export class EntregaTurnoOrm {
   habilitadoId: number;
 
   @ManyToOne(() => UsuarioOrm)
-  @JoinColumn([{ name: 'HABILITADOPOR'}])
+  @JoinColumn([{ name: 'HABILITADOPOR' }])
   habilitador: UsuarioOrm;
 
   @OneToMany(() => CambioTurnoOrm, cambio => cambio.entregaTurno)

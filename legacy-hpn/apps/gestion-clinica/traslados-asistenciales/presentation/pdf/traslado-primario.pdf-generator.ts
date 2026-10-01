@@ -51,14 +51,14 @@ const findImageFromContext = (contexto: GcmContexts) => {
     contexto === GcmContexts.ALTACENTRO
       ? 'alta-centro.jpg'
       : contexto === GcmContexts.AGUACHICA
-      ? 'aguachica.jpg'
-      : contexto === GcmContexts.AMMEDICAL
-      ? 'ammedical.png'
-      : contexto === GcmContexts.SANJUAN
-      ? 'sanjuan.jpg'
-      : contexto === GcmContexts.VALLEDUPAR
-      ? 'valledupar.jpg'
-      : 'undefined.jpg'
+        ? 'aguachica.jpg'
+        : contexto === GcmContexts.AMMEDICAL
+          ? 'ammedical.png'
+          : contexto === GcmContexts.SANJUAN
+            ? 'sanjuan.jpg'
+            : contexto === GcmContexts.VALLEDUPAR
+              ? 'valledupar.jpg'
+              : 'undefined.jpg'
   }`;
 };
 
@@ -877,8 +877,8 @@ export async function generateTrasladoPrimarioPdf(
       tieneMedicas && tieneEnfermeria
         ? 'NOTAS MÉDICAS Y DE ENFERMERÍA'
         : tieneMedicas
-        ? 'NOTAS MÉDICAS'
-        : 'NOTAS DE ENFERMERÍA',
+          ? 'NOTAS MÉDICAS'
+          : 'NOTAS DE ENFERMERÍA',
       tieneMedicas && tieneEnfermeria ? 'ASI-FT-35/36' : tieneMedicas ? 'ASI-FT-36' : 'ASI-FT-35',
       seccionesNotas,
       { M, CW, PH }

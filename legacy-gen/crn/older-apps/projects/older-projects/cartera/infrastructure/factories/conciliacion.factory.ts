@@ -1,7 +1,7 @@
 import { ConciliacionModel } from '@crn/rft/cartera/application/models';
 import { ConciliacionResponse } from '../data-transfers';
 import { ENVIRONMENTS } from 'src/app.environments';
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 
 export const dataToConciliacionModel = (conciliacion: ConciliacionResponse): ConciliacionModel => {
   return {

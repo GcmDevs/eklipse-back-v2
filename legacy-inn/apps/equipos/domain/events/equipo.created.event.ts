@@ -1,5 +1,5 @@
-import { TipoEventoAuditEquipo } from "../enums/tipos-audit-equipo.enum";
-import { DomainEquipoEvent } from "./domain-equipo.base.event";
+import { TipoEventoAuditEquipo } from '../enums/tipos-audit-equipo.enum';
+import { DomainEquipoEvent } from './domain-equipo.base.event';
 
 export class EquipoCreatedEvent extends DomainEquipoEvent {
   readonly tipo = TipoEventoAuditEquipo.EQUIPO_CREADO;
@@ -30,7 +30,7 @@ export class EquipoImportedEvent extends DomainEquipoEvent {
       generalActivoId: number;
       activoId: number;
       numeroPlaca: string;
-    },
+    }
   ) {
     super();
   }

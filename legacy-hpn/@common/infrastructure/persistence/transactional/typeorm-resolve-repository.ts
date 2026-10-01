@@ -7,7 +7,5 @@ export function resolveRepository<T extends ObjectLiteral>(
 ): Repository<T> {
   const qr = TypeOrmTransactionContext.getQueryRunner();
 
-  return qr && qr.connection === ds
-    ? qr.manager.getRepository(entity)
-    : ds.getRepository(entity);
+  return qr && qr.connection === ds ? qr.manager.getRepository(entity) : ds.getRepository(entity);
 }

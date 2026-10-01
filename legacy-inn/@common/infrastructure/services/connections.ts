@@ -127,46 +127,46 @@ const logs = (success: boolean, ctx: string, err?: any): void => {
 };
 
 export const initializeSources = (entities: EntityTarget<unknown>[]) => {
- // if (processEnv.CONNECT_WITH_DB) {
-    if (entities) entities.push(..._PRIV_ORM_AUTH_SEC_ENTITIES);
-    (AGU_DS.options.entities as EntityTarget<unknown>[]).push(...entities);
-    (AC_DS.options.entities as EntityTarget<unknown>[]).push(...entities);
-    (AMM_DS.options.entities as EntityTarget<unknown>[]).push(...entities);
-    (EK_DS.options.entities as EntityTarget<unknown>[]).push(...entities);
-    (SJ_DS.options.entities as EntityTarget<unknown>[]).push(...entities);
-    (VDP_DS.options.entities as EntityTarget<unknown>[]).push(...entities);
+  // if (processEnv.CONNECT_WITH_DB) {
+  if (entities) entities.push(..._PRIV_ORM_AUTH_SEC_ENTITIES);
+  (AGU_DS.options.entities as EntityTarget<unknown>[]).push(...entities);
+  (AC_DS.options.entities as EntityTarget<unknown>[]).push(...entities);
+  (AMM_DS.options.entities as EntityTarget<unknown>[]).push(...entities);
+  (EK_DS.options.entities as EntityTarget<unknown>[]).push(...entities);
+  (SJ_DS.options.entities as EntityTarget<unknown>[]).push(...entities);
+  (VDP_DS.options.entities as EntityTarget<unknown>[]).push(...entities);
 
-    if (!processEnv.DISABLED_DEV) {
-      (DEV_DS.options.entities as EntityTarget<unknown>[]).push(...entities);
+  if (!processEnv.DISABLED_DEV) {
+    (DEV_DS.options.entities as EntityTarget<unknown>[]).push(...entities);
 
-      DEV_DS.initialize()
-        .then(() => logs(true, GCM_CONTEXTS.DEVELOPMENT.getCode()))
-        .catch(err => logs(false, GCM_CONTEXTS.DEVELOPMENT.getCode(), err));
-    }
+    DEV_DS.initialize()
+      .then(() => logs(true, GCM_CONTEXTS.DEVELOPMENT.getCode()))
+      .catch(err => logs(false, GCM_CONTEXTS.DEVELOPMENT.getCode(), err));
+  }
 
-    AGU_DS.initialize()
-      .then(() => logs(true, GCM_CONTEXTS.AGUACHICA.getCode()))
-      .catch(err => logs(false, GCM_CONTEXTS.AGUACHICA.getCode(), err));
+  AGU_DS.initialize()
+    .then(() => logs(true, GCM_CONTEXTS.AGUACHICA.getCode()))
+    .catch(err => logs(false, GCM_CONTEXTS.AGUACHICA.getCode(), err));
 
-    AC_DS.initialize()
-      .then(() => logs(true, GCM_CONTEXTS.ALTACENTRO.getCode()))
-      .catch(err => logs(false, GCM_CONTEXTS.ALTACENTRO.getCode(), err));
+  AC_DS.initialize()
+    .then(() => logs(true, GCM_CONTEXTS.ALTACENTRO.getCode()))
+    .catch(err => logs(false, GCM_CONTEXTS.ALTACENTRO.getCode(), err));
 
-    AMM_DS.initialize()
-      .then(() => logs(true, GCM_CONTEXTS.AMMEDICAL.getCode()))
-      .catch(err => logs(false, GCM_CONTEXTS.AMMEDICAL.getCode(), err));
+  AMM_DS.initialize()
+    .then(() => logs(true, GCM_CONTEXTS.AMMEDICAL.getCode()))
+    .catch(err => logs(false, GCM_CONTEXTS.AMMEDICAL.getCode(), err));
 
-    EK_DS.initialize()
-      .then(() => logs(true, GCM_CONTEXTS.EKLIPSE.getCode()))
-      .catch(err => logs(false, GCM_CONTEXTS.EKLIPSE.getCode(), err));
+  EK_DS.initialize()
+    .then(() => logs(true, GCM_CONTEXTS.EKLIPSE.getCode()))
+    .catch(err => logs(false, GCM_CONTEXTS.EKLIPSE.getCode(), err));
 
-    SJ_DS.initialize()
-      .then(() => logs(true, GCM_CONTEXTS.SANJUAN.getCode()))
-      .catch(err => logs(false, GCM_CONTEXTS.SANJUAN.getCode(), err));
+  SJ_DS.initialize()
+    .then(() => logs(true, GCM_CONTEXTS.SANJUAN.getCode()))
+    .catch(err => logs(false, GCM_CONTEXTS.SANJUAN.getCode(), err));
 
-    VDP_DS.initialize()
-      .then(() => logs(true, GCM_CONTEXTS.VALLEDUPAR.getCode()))
-      .catch(err => logs(false, GCM_CONTEXTS.VALLEDUPAR.getCode(), err));
+  VDP_DS.initialize()
+    .then(() => logs(true, GCM_CONTEXTS.VALLEDUPAR.getCode()))
+    .catch(err => logs(false, GCM_CONTEXTS.VALLEDUPAR.getCode(), err));
 };
 
 export const switchConn = (ctx: GcmContextType) => {

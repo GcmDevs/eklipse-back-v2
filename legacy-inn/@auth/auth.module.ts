@@ -6,17 +6,7 @@ import { PermisosGuard } from './presentation/guards/permisos.guard';
 
 @Global()
 @Module({
-  providers: [
-    PermisoResolverService,
-    PermisoCacheService,
-    DataScopeService,
-    PermisosGuard,
-  ],
-  exports: [
-    PermisoResolverService,
-    PermisoCacheService,
-    DataScopeService,
-    PermisosGuard,
-  ],
+  providers: [PermisoResolverService, PermisoCacheService, DataScopeService, PermisosGuard],
+  exports: [PermisoResolverService, PermisoCacheService, DataScopeService, PermisosGuard],
 })
 export class AuthModule {}

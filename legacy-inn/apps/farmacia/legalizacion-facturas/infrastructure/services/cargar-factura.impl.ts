@@ -9,7 +9,7 @@ import {
 } from '@orm/inn/farmacia/legalizacion-factura';
 import { ESTADOS_CONTROL_GASTO } from '@ctypes/inn/farmacia/control-gastos';
 import { deleteFile } from '@common/presentation/helpers';
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 
 @Injectable()
 export class CargarFacturaLegalizacionFacturaImpl extends BaseSource {

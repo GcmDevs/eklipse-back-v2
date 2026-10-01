@@ -10,7 +10,7 @@ import { OrdenDespachoOrm, TrasladoProductoOrm } from '@orm/inn/documentos';
 import { ESTADOS_CONTROL_GASTO } from '@ctypes/inn/farmacia/control-gastos';
 import { CreateControlGastosPayload } from '@farmacia/control-gastos/application/payloads';
 import { deleteFile } from '@common/presentation/helpers';
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { AREA } from '@farmacia/control-gastos/domain/types';
 import { Repository } from 'typeorm';
 

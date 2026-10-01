@@ -1,5 +1,5 @@
-import { Id } from "@common/domain/value-objects";
-import { EstadoAccesorioUnidad } from "@equipos/domain/enums";
+import { Id } from '@common/domain/value-objects';
+import { EstadoAccesorioUnidad } from '@equipos/domain/enums';
 
 export class AccesorioUnidad {
   private constructor(
@@ -12,7 +12,7 @@ export class AccesorioUnidad {
     private descontinuado: boolean,
     private fechaDescontinuado: Date | undefined,
     private readonly createdAt: Date,
-    private updatedAt: Date,
+    private updatedAt: Date
   ) {}
 
   static create(
@@ -20,13 +20,20 @@ export class AccesorioUnidad {
     accesorioEstandarId: number,
     parteSnap: string,
     estado?: EstadoAccesorioUnidad,
-    observaciones?: string,
+    observaciones?: string
   ): AccesorioUnidad {
     const now = new Date();
     return new AccesorioUnidad(
-      new Id(), new Id(equipoId), new Id(accesorioEstandarId),
-      parteSnap, estado ?? EstadoAccesorioUnidad.ENTREGADO, observaciones,
-      false, undefined, now, now,
+      new Id(),
+      new Id(equipoId),
+      new Id(accesorioEstandarId),
+      parteSnap,
+      estado ?? EstadoAccesorioUnidad.ENTREGADO,
+      observaciones,
+      false,
+      undefined,
+      now,
+      now
     );
   }
 
@@ -40,12 +47,19 @@ export class AccesorioUnidad {
     estado?: EstadoAccesorioUnidad,
     observaciones?: string,
     descontinuado?: boolean,
-    fechaDescontinuado?: Date,
+    fechaDescontinuado?: Date
   ): AccesorioUnidad {
     return new AccesorioUnidad(
-      new Id(id), new Id(equipoId), new Id(accesorioEstandarId),
-      parteSnap, estado ?? EstadoAccesorioUnidad.ENTREGADO, observaciones,
-      descontinuado ?? false, fechaDescontinuado, createdAt, updatedAt,
+      new Id(id),
+      new Id(equipoId),
+      new Id(accesorioEstandarId),
+      parteSnap,
+      estado ?? EstadoAccesorioUnidad.ENTREGADO,
+      observaciones,
+      descontinuado ?? false,
+      fechaDescontinuado,
+      createdAt,
+      updatedAt
     );
   }
 
@@ -65,14 +79,34 @@ export class AccesorioUnidad {
     this.updatedAt = new Date();
   }
 
-  get getId(): Id { return this.id; }
-  get getEquipoId(): Id { return this.equipoId; }
-  get getAccesorioEstandarId(): Id { return this.accesorioEstandarId; }
-  get getParteSnap(): string { return this.parteSnap; }
-  get getEstado(): EstadoAccesorioUnidad { return this.estado; }
-  get getObservaciones(): string | undefined { return this.observaciones; }
-  get getDescontinuado(): boolean { return this.descontinuado; }
-  get getFechaDescontinuado(): Date | undefined { return this.fechaDescontinuado; }
-  get getCreatedAt(): Date { return this.createdAt; }
-  get getUpdatedAt(): Date { return this.updatedAt; }
+  get getId(): Id {
+    return this.id;
+  }
+  get getEquipoId(): Id {
+    return this.equipoId;
+  }
+  get getAccesorioEstandarId(): Id {
+    return this.accesorioEstandarId;
+  }
+  get getParteSnap(): string {
+    return this.parteSnap;
+  }
+  get getEstado(): EstadoAccesorioUnidad {
+    return this.estado;
+  }
+  get getObservaciones(): string | undefined {
+    return this.observaciones;
+  }
+  get getDescontinuado(): boolean {
+    return this.descontinuado;
+  }
+  get getFechaDescontinuado(): Date | undefined {
+    return this.fechaDescontinuado;
+  }
+  get getCreatedAt(): Date {
+    return this.createdAt;
+  }
+  get getUpdatedAt(): Date {
+    return this.updatedAt;
+  }
 }

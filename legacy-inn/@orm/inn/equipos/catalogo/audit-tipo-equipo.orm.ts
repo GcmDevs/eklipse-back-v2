@@ -3,7 +3,6 @@ import { BaseCreatedOrm } from '@common/infrastructure/orm';
 import { TipoAuditTipoEquipo } from '@equipos/domain/enums';
 import { Column, Entity } from 'typeorm';
 
-
 @Entity({ name: TABLE_NAMES.inn.eqp.audit_tipo_equipo })
 export class AuditTipoEquipoOrm extends BaseCreatedOrm {
   @Column({ name: 'TIPOEQUIPOOID', type: 'int' })

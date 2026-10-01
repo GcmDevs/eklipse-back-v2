@@ -8,14 +8,19 @@ import { Injectable } from '@nestjs/common';
 import { SubclaseEquipoOrm } from '@orm/inn/equipos/catalogo/subclase-equipo.orm';
 
 @Injectable()
-export class TypeOrmSubclaseEquipoRepository extends BaseSource implements SubclaseEquipoRepository {
+export class TypeOrmSubclaseEquipoRepository
+  extends BaseSource
+  implements SubclaseEquipoRepository
+{
   private get repository() {
     const qr = TypeOrmTransactionContext.getQueryRunner();
-    return qr ? qr.manager.getRepository(SubclaseEquipoOrm) : this.conn.getRepository(SubclaseEquipoOrm);
+    return qr
+      ? qr.manager.getRepository(SubclaseEquipoOrm)
+      : this.conn.getRepository(SubclaseEquipoOrm);
   }
 
   private relations(): string[] {
-    return ['clase']
+    return ['clase'];
   }
 
   async save(domain: SubclaseEquipo): Promise<SubclaseEquipo> {
@@ -33,8 +38,8 @@ export class TypeOrmSubclaseEquipoRepository extends BaseSource implements Subcl
     const orms = await this.repository.find({
       where: { clase: { id: claseId } },
       order: { nombre: 'DESC' },
-      relations: this.relations()
-    })
+      relations: this.relations(),
+    });
     return SubclaseEquipoMapper.toViewList(orms);
   }
 
@@ -54,7 +59,8 @@ export class TypeOrmSubclaseEquipoRepository extends BaseSource implements Subcl
   async findAllView(page: number, limit: number): Promise<[SubclaseEquipoRead[], number]> {
     const [orms, count] = await this.repository.findAndCount({
       relations: ['clase'],
-      skip: (page - 1) * limit, take: limit,
+      skip: (page - 1) * limit,
+      take: limit,
       order: { nombre: 'ASC' },
     });
     return [SubclaseEquipoMapper.toViewList(orms), count];
@@ -67,8 +73,8 @@ export class TypeOrmSubclaseEquipoRepository extends BaseSource implements Subcl
   async findViewById(id: number): Promise<SubclaseEquipoRead | null> {
     const orm = await this.repository.findOne({
       where: { id: id },
-      relations: this.relations()
-    })
+      relations: this.relations(),
+    });
     return orm ? SubclaseEquipoMapper.toView(orm) : null;
   }
 }

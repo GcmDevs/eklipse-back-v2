@@ -7,7 +7,10 @@ import { RegistrarOfertaDto } from '../dtos';
 @CommonGuards()
 @Controller('v1/terceros/inn/maos/lineas')
 export class LineaController {
-  constructor(private _setCrud: LineaCrudSource, private _registrarOferta: RegistrarOfertaImpl) {}
+  constructor(
+    private _setCrud: LineaCrudSource,
+    private _registrarOferta: RegistrarOfertaImpl
+  ) {}
 
   @Get()
   public async fetch(@Query('pattern') pattern: string) {

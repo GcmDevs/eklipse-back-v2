@@ -1,4 +1,4 @@
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { BadInputError } from '@common/domain/errors';
 import { getCategoriaByMime } from '@core/media/application/factories/mime-categoria-factory';
 import { StagingFileService } from '@core/media/application/services/staging.archivo.service';
@@ -22,14 +22,16 @@ function archivoToRead(archivo: ArchivoAlmacenado): ArchivoAlmacenadoRead {
   };
 }
 
-export function resolveDocumentoStorage(categoriaDoc: string): { module: string; contexto: string } {
+export function resolveDocumentoStorage(categoriaDoc: string): {
+  module: string;
+  contexto: string;
+} {
   if (categoriaDoc === CategoriaDocumento.MANUAL) {
     return {
       module: FILE_LOCATIONS.inn.eqp.catalogo.manuales,
       contexto: TipoContextoArchivo.DOCUMENTO_TIPO_EQUIPO_MANUAL,
     };
-  }
-  else if (categoriaDoc === CategoriaDocumento.TRANSACTIONAL_SUPPORT) {
+  } else if (categoriaDoc === CategoriaDocumento.TRANSACTIONAL_SUPPORT) {
     return {
       module: FILE_LOCATIONS.inn.eqp.catalogo.docsTx,
       contexto: TipoContextoArchivo.DOCUMENTO_TRANSACCIONAL_SOPORTE,
@@ -41,7 +43,10 @@ export function resolveDocumentoStorage(categoriaDoc: string): { module: string;
   };
 }
 
-export function validateArchivoForCategoriaDocumento(archivo: ArchivoAlmacenado, categoriaDoc: string): void {
+export function validateArchivoForCategoriaDocumento(
+  archivo: ArchivoAlmacenado,
+  categoriaDoc: string
+): void {
   const mimeCategoria = getCategoriaByMime(archivo.getTipoMime);
   if (!mimeCategoria) {
     throw new BadInputError(`Formato no soportado: ${archivo.getTipoMime}`);
@@ -71,7 +76,9 @@ export function validateArchivoForCategoriaDocumento(archivo: ArchivoAlmacenado,
     return;
   }
 
-  throw new BadInputError(`Tipo de archivo no permitido para soporte anexo: ${archivo.getTipoMime}`);
+  throw new BadInputError(
+    `Tipo de archivo no permitido para soporte anexo: ${archivo.getTipoMime}`
+  );
 }
 
 export async function validateDocumentoInput(
@@ -79,7 +86,7 @@ export async function validateDocumentoInput(
   tipoDocumentoCategoria: string,
   aplica: boolean,
   tipoDocumentoEsObligatorio?: boolean,
-  archivoId?: number,
+  archivoId?: number
 ): Promise<void> {
   if (
     tipoDocumentoEsObligatorio !== undefined &&
@@ -88,14 +95,12 @@ export async function validateDocumentoInput(
     !archivoId
   ) {
     throw new BadInputError(
-      'El documento es obligatorio y debe incluir un archivo cuando aplica=true',
+      'El documento es obligatorio y debe incluir un archivo cuando aplica=true'
     );
   }
 
   if (!aplica && archivoId) {
-    throw new BadInputError(
-      'No debe enviar archivo cuando aplica=false',
-    );
+    throw new BadInputError('No debe enviar archivo cuando aplica=false');
   }
 
   if (aplica && archivoId) {
@@ -103,10 +108,7 @@ export async function validateDocumentoInput(
       throwIfNotFound: true,
     });
 
-    validateArchivoForCategoriaDocumento(
-      archivo,
-      tipoDocumentoCategoria,
-    );
+    validateArchivoForCategoriaDocumento(archivo, tipoDocumentoCategoria);
   }
 }
 
@@ -121,12 +123,12 @@ export function assertTipoDocTransaccional(categoria: CategoriaDocumento): void 
 export function assertTipoDocAplica(tipoDoc: TipoDocCategoriaActivo, tipoActivoId: number): void {
   if (tipoDoc.getCategoria === CategoriaDocumento.TRANSACTIONAL_SUPPORT) {
     throw new BadInputError(
-      `El tipo de documento "${tipoDoc.getNombre}" es de soporte transaccional y solo aplica a compras`,
+      `El tipo de documento "${tipoDoc.getNombre}" es de soporte transaccional y solo aplica a compras`
     );
   }
   if (!tipoDoc.AppliesToTipoActivo(tipoActivoId)) {
     throw new BadInputError(
-      `El tipo de documento "${tipoDoc.getNombre}" no aplica para el tipo de activo del equipo`,
+      `El tipo de documento "${tipoDoc.getNombre}" no aplica para el tipo de activo del equipo`
     );
   }
 }
@@ -135,12 +137,13 @@ export async function commitDocumentoTipoEquipoArchivo(
   stagingFileService: StagingFileService,
   categoriaDoc: string,
   archivoId: number,
-  documentoId: number,
+  documentoId: number
 ): Promise<void> {
   const { module, contexto } = resolveDocumentoStorage(categoriaDoc);
-  const categoriasPermitidas = categoriaDoc === CategoriaDocumento.MANUAL
-    ? [CategoriaArchivo.DOCUMENTO]
-    : [CategoriaArchivo.DOCUMENTO, CategoriaArchivo.IMAGEN];
+  const categoriasPermitidas =
+    categoriaDoc === CategoriaDocumento.MANUAL
+      ? [CategoriaArchivo.DOCUMENTO]
+      : [CategoriaArchivo.DOCUMENTO, CategoriaArchivo.IMAGEN];
 
   await stagingFileService.commit(
     {
@@ -150,13 +153,13 @@ export async function commitDocumentoTipoEquipoArchivo(
       referenciaId: documentoId,
     },
     { categorias: categoriasPermitidas },
-    true,
+    true
   );
 }
 
 export async function enrichDocumentosTipoEquipoRead(
   stagingFileService: StagingFileService,
-  documentos: DocumentoTipoEquipoRead[],
+  documentos: DocumentoTipoEquipoRead[]
 ): Promise<DocumentoTipoEquipoRead[]> {
   const ids = documentos.map(d => d.archivoId).filter((id): id is number => !!id);
   if (!ids.length) return documentos;
@@ -166,8 +169,7 @@ export async function enrichDocumentosTipoEquipoRead(
 
   return documentos.map(d => ({
     ...d,
-    archivo: d.archivoId && byId.has(d.archivoId)
-      ? archivoToRead(byId.get(d.archivoId)!)
-      : undefined,
+    archivo:
+      d.archivoId && byId.has(d.archivoId) ? archivoToRead(byId.get(d.archivoId)!) : undefined,
   }));
 }

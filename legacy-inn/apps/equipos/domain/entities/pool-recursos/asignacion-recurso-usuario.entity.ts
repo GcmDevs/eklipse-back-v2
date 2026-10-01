@@ -1,6 +1,9 @@
 import { BadInputError } from '@common/domain/errors';
 import { Id } from '@common/domain/value-objects';
-import { MotivoAsignacionRecursoUsuario, MotivoFinalizacionAsignacionRecursoUsuario } from '@equipos/domain/enums';
+import {
+  MotivoAsignacionRecursoUsuario,
+  MotivoFinalizacionAsignacionRecursoUsuario,
+} from '@equipos/domain/enums';
 
 export class AsignacionRecursoUsuario {
   private constructor(
@@ -18,7 +21,7 @@ export class AsignacionRecursoUsuario {
     private finalizadoPorId: Id,
     private readonly createdAt: Date,
     private observaciones?: string
-  ) { }
+  ) {}
 
   static create(data: {
     recursoId: number;
@@ -27,7 +30,7 @@ export class AsignacionRecursoUsuario {
     asignadoPorId: number;
     motivoAsignacion?: MotivoAsignacionRecursoUsuario | null;
     motivoAsignacionDetalle?: string | null;
-    observaciones?: string
+    observaciones?: string;
   }): AsignacionRecursoUsuario {
     return new AsignacionRecursoUsuario(
       new Id(),
@@ -38,7 +41,8 @@ export class AsignacionRecursoUsuario {
       true,
       data.motivoAsignacion ?? null,
       data.motivoAsignacionDetalle ?? null,
-      null, null,
+      null,
+      null,
       new Id(data.asignadoPorId),
       null,
       new Date(),
@@ -85,34 +89,57 @@ export class AsignacionRecursoUsuario {
     motivoFinalizacion: MotivoFinalizacionAsignacionRecursoUsuario;
     motivoFinalizacionDetalle?: string;
   }): void {
-
     if (!this.activa) {
-      throw new BadInputError(
-        'La asignación ya fue finalizada'
-      );
+      throw new BadInputError('La asignación ya fue finalizada');
     }
 
     this.activa = false;
     this.fechaFin = new Date();
     this.finalizadoPorId = new Id(data.finalizadoPorId);
     this.motivoFinalizacion = data.motivoFinalizacion;
-    this.motivoFinalizacionDetalle =
-      data.motivoFinalizacionDetalle ?? null;
+    this.motivoFinalizacionDetalle = data.motivoFinalizacionDetalle ?? null;
   }
 
-  get getId(): Id { return this.id; }
-  get getRecursoId(): Id { return this.recursoId; }
-  get getUsuarioId(): Id { return this.usuarioId; }
-  get getFechaInicio(): Date { return this.fechaInicio; }
-  get getFechaFin(): Date | null { return this.fechaFin; }
-  get isActiva(): boolean { return this.activa; }
-  get getMotivoAsignacion(): MotivoAsignacionRecursoUsuario | null { return this.motivoAsignacion; }
-  get getMotivoAsignacionDetalle(): string | null { return this.motivoAsignacionDetalle; }
-  get getMotivoFinalizacion(): MotivoFinalizacionAsignacionRecursoUsuario | null { return this.motivoFinalizacion; }
-  get getMotivoFinalizacionDetalle(): string | null { return this.motivoFinalizacionDetalle; }
-  get getAsignadoPorId(): Id { return this.asignadoPorId; }
-  get getFinalizadoPorId(): Id | null { return this.finalizadoPorId; }
-  get getObservaciones(): string | undefined { return this.observaciones; }
-  get getCreatedAt(): Date { return this.createdAt; }
+  get getId(): Id {
+    return this.id;
+  }
+  get getRecursoId(): Id {
+    return this.recursoId;
+  }
+  get getUsuarioId(): Id {
+    return this.usuarioId;
+  }
+  get getFechaInicio(): Date {
+    return this.fechaInicio;
+  }
+  get getFechaFin(): Date | null {
+    return this.fechaFin;
+  }
+  get isActiva(): boolean {
+    return this.activa;
+  }
+  get getMotivoAsignacion(): MotivoAsignacionRecursoUsuario | null {
+    return this.motivoAsignacion;
+  }
+  get getMotivoAsignacionDetalle(): string | null {
+    return this.motivoAsignacionDetalle;
+  }
+  get getMotivoFinalizacion(): MotivoFinalizacionAsignacionRecursoUsuario | null {
+    return this.motivoFinalizacion;
+  }
+  get getMotivoFinalizacionDetalle(): string | null {
+    return this.motivoFinalizacionDetalle;
+  }
+  get getAsignadoPorId(): Id {
+    return this.asignadoPorId;
+  }
+  get getFinalizadoPorId(): Id | null {
+    return this.finalizadoPorId;
+  }
+  get getObservaciones(): string | undefined {
+    return this.observaciones;
+  }
+  get getCreatedAt(): Date {
+    return this.createdAt;
+  }
 }
-

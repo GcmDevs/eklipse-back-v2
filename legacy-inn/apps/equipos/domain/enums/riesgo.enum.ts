@@ -5,6 +5,3 @@ export enum Riesgo {
   MODERADO = 'MODERADO',
   BAJO = 'BAJO',
 }
-
-
-

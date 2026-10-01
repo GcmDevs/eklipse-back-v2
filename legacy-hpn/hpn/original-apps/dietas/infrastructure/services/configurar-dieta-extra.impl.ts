@@ -8,7 +8,10 @@ import { BaseSource } from '@common/infrastructure/services';
 import { DietaConfExtraOrm } from '../models/local';
 
 export class ConfigurarDietasExtraordinariasImpl extends BaseSource {
-  constructor(@Inject(REQUEST) request: Request, private _transaction: TransactionDietaService) {
+  constructor(
+    @Inject(REQUEST) request: Request,
+    private _transaction: TransactionDietaService
+  ) {
     super(request);
   }
 

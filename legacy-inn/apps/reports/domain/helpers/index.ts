@@ -1,1 +1,1 @@
-export * from "./format.helper";
+export * from './format.helper';

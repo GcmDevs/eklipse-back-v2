@@ -1,7 +1,7 @@
-import { BadInputError } from "@common/domain/errors";
-import { Id } from "@common/domain/value-objects";
-import { Anexo } from "@core/media/domain/entities";
-import { MotivoEjecucionExternaExcepcional, TipoEjecutorExterno } from "@equipos/domain/enums";
+import { BadInputError } from '@common/domain/errors';
+import { Id } from '@common/domain/value-objects';
+import { Anexo } from '@core/media/domain/entities';
+import { MotivoEjecucionExternaExcepcional, TipoEjecutorExterno } from '@equipos/domain/enums';
 
 export class EjecucionExterna {
   private constructor(
@@ -19,8 +19,8 @@ export class EjecucionExterna {
     private readonly motivoExcepcionalDetalle: string | null,
     private readonly anexos: Anexo[],
     private readonly createdAt: Date,
-    private readonly updatedAt: Date,
-  ) { }
+    private readonly updatedAt: Date
+  ) {}
 
   static create(data: {
     registroActividadId: number;
@@ -52,7 +52,7 @@ export class EjecucionExterna {
       data.motivoExcepcionalDetalle ?? null,
       data.anexos,
       new Date(),
-      new Date(),
+      new Date()
     );
   }
 
@@ -71,7 +71,7 @@ export class EjecucionExterna {
     motivoExcepcionalDetalle: string | null,
     anexos: Anexo[],
     createdAt: Date,
-    updatedAt: Date,
+    updatedAt: Date
   ): EjecucionExterna {
     return new EjecucionExterna(
       new Id(id),
@@ -88,23 +88,22 @@ export class EjecucionExterna {
       motivoExcepcionalDetalle,
       anexos,
       createdAt,
-      updatedAt,
+      updatedAt
     );
   }
 
   private static validate(data: {
-    tecnicoNombre: string,
-    tipoEjecutor: TipoEjecutorExterno,
-    fechaEjecucion: Date,
-    esExcepcional?: boolean,
-    empresaTerceroId?: number,
-    motivoExcepcional?: string | null,
+    tecnicoNombre: string;
+    tipoEjecutor: TipoEjecutorExterno;
+    fechaEjecucion: Date;
+    esExcepcional?: boolean;
+    empresaTerceroId?: number;
+    motivoExcepcional?: string | null;
   }): void {
     if (!data.tecnicoNombre?.trim())
       throw new BadInputError('El nombre del tecnico externo es requerido');
 
-    if (data.tipoEjecutor === TipoEjecutorExterno.EMPRESA_CON_TECNICO
-      && !data.empresaTerceroId)
+    if (data.tipoEjecutor === TipoEjecutorExterno.EMPRESA_CON_TECNICO && !data.empresaTerceroId)
       throw new BadInputError('Debe indicar la empresa cuando el tipo es EMPRESA_CON_TECNICO');
 
     if (data.esExcepcional && !data.motivoExcepcional)
@@ -116,19 +115,49 @@ export class EjecucionExterna {
       throw new BadInputError('La fecha de ejecución no puede ser futura');
   }
 
-  get getId(): Id { return this.id; }
-  get getRegistroActividadId(): Id { return this.registroActividadId; }
-  get getTipoEjecutor(): TipoEjecutorExterno { return this.tipoEjecutor; }
-  get getTecnicoNombre(): string { return this.tecnicoNombre; }
-  get getFechaEjecucion(): Date { return this.fechaEjecucion; }
-  get getTerceroTecnicoId(): number | null { return this.terceroTecnicoId; }
-  get getEmpresaTerceroId(): number | null { return this.empresaTerceroId; }
-  get getEmpresaNombreSnapshot(): string | null { return this.empresaNombreSnapshot; }
-  get getObservaciones(): string | null { return this.observaciones; }
-  get getEsExcepcional(): boolean { return this.esExcepcional; }
-  get getMotivoExcepcional(): MotivoEjecucionExternaExcepcional | null { return this.motivoExcepcional; }
-  get getMotivoExcepcionalDetalle(): string | null { return this.motivoExcepcionalDetalle; }
-  get getCreatedAt(): Date { return this.createdAt; }
-  get getUpdatedAt(): Date { return this.updatedAt; }
-  get getAnexos(): Anexo[] { return this.anexos; }
+  get getId(): Id {
+    return this.id;
+  }
+  get getRegistroActividadId(): Id {
+    return this.registroActividadId;
+  }
+  get getTipoEjecutor(): TipoEjecutorExterno {
+    return this.tipoEjecutor;
+  }
+  get getTecnicoNombre(): string {
+    return this.tecnicoNombre;
+  }
+  get getFechaEjecucion(): Date {
+    return this.fechaEjecucion;
+  }
+  get getTerceroTecnicoId(): number | null {
+    return this.terceroTecnicoId;
+  }
+  get getEmpresaTerceroId(): number | null {
+    return this.empresaTerceroId;
+  }
+  get getEmpresaNombreSnapshot(): string | null {
+    return this.empresaNombreSnapshot;
+  }
+  get getObservaciones(): string | null {
+    return this.observaciones;
+  }
+  get getEsExcepcional(): boolean {
+    return this.esExcepcional;
+  }
+  get getMotivoExcepcional(): MotivoEjecucionExternaExcepcional | null {
+    return this.motivoExcepcional;
+  }
+  get getMotivoExcepcionalDetalle(): string | null {
+    return this.motivoExcepcionalDetalle;
+  }
+  get getCreatedAt(): Date {
+    return this.createdAt;
+  }
+  get getUpdatedAt(): Date {
+    return this.updatedAt;
+  }
+  get getAnexos(): Anexo[] {
+    return this.anexos;
+  }
 }

@@ -13,11 +13,11 @@ export class CreateTurnoDto {
   subgrupoId: number;
 
   @IsNumber()
-  centroId: number
+  centroId: number;
 
   @IsOptional()
   @IsString()
-  observacion: string
+  observacion: string;
 
   @IsOptional()
   @IsArray()

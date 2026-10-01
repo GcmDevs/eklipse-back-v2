@@ -5,9 +5,16 @@ import { DocumentoTipoEquipoOrm } from '@orm/inn/equipos/catalogo/documento-tipo
 export class DocumentoTipoEquipoMapper {
   static toDomain(orm: DocumentoTipoEquipoOrm): DocumentoTipoEquipo {
     return DocumentoTipoEquipo.rebuild(
-      orm.id, orm.tipoEquipo?.id, orm.tipoDocumento?.id,
-      orm.aplica, orm.createdAt, orm.updatedAt, orm.archivo?.id, orm.observaciones, orm.activo ?? true,
-      orm.compra?.id,
+      orm.id,
+      orm.tipoEquipo?.id,
+      orm.tipoDocumento?.id,
+      orm.aplica,
+      orm.createdAt,
+      orm.updatedAt,
+      orm.archivo?.id,
+      orm.observaciones,
+      orm.activo ?? true,
+      orm.compra?.id
     );
   }
 

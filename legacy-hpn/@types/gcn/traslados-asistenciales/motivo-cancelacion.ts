@@ -1,7 +1,10 @@
 export type MotivoFallidoTypeCode = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
 
 export class MotivoFallidoType {
-  constructor(private code: MotivoFallidoTypeCode, private forHumans: string) {}
+  constructor(
+    private code: MotivoFallidoTypeCode,
+    private forHumans: string
+  ) {}
 
   public getCode(): MotivoFallidoTypeCode {
     return this.code;

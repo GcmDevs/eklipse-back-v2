@@ -9,7 +9,7 @@ export class SignoVitalType {
     private _placeholder: string,
     private _icon: string,
     private _isNumeric: boolean
-  ) { }
+  ) {}
 
   public getCode(): SignoVitalTypeCode {
     return this._code;
@@ -91,7 +91,7 @@ export const SIGNO_VITAL_PRIMARIO_VALUE = {
   GLASGOW,
   PESO,
   TALLA,
-  TEMPERATURA
+  TEMPERATURA,
 };
 
 export const SIGNO_VITAL_PRIMARIO_VALUES = [
@@ -103,22 +103,15 @@ export const SIGNO_VITAL_PRIMARIO_VALUES = [
   GLASGOW,
   PESO,
   TALLA,
-  TEMPERATURA
+  TEMPERATURA,
 ];
-
 
 export const SIGNO_VITAL_SECUNDARIO_VALUE = {
   TA,
   FC,
   FR,
   SATO2,
-  GLASGOW
+  GLASGOW,
 };
 
-export const SIGNO_VITAL_SECUNDARIO_VALUES = [
-  TA,
-  FC,
-  FR,
-  SATO2,
-  GLASGOW
-];
+export const SIGNO_VITAL_SECUNDARIO_VALUES = [TA, FC, FR, SATO2, GLASGOW];

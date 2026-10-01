@@ -1,16 +1,22 @@
-import { TABLE_NAMES } from "@common/application/constants";
-import { BaseTimestampedOrm } from "@common/infrastructure/orm";
-import { MotivoEjecucionExternaExcepcional, TipoEjecutorExterno } from "@equipos/domain/enums";
-import { AnexoOrm, TerceroOrm, } from "@orm/cor";
-import { Check, Column, Entity, Index, JoinColumn, ManyToOne, OneToOne } from "typeorm";
-import { RegistroActividadOrm } from "./registro-actividad.orm";
+import { TABLE_NAMES } from '@common/application/constants';
+import { BaseTimestampedOrm } from '@common/infrastructure/orm';
+import { MotivoEjecucionExternaExcepcional, TipoEjecutorExterno } from '@equipos/domain/enums';
+import { AnexoOrm, TerceroOrm } from '@orm/cor';
+import { Check, Column, Entity, Index, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import { RegistroActividadOrm } from './registro-actividad.orm';
 
 @Entity({ name: TABLE_NAMES.inn.eqp.actividades.ejecuciones_externas })
 @Index('UQ_EKINNEQPACTREGSEJECUCIONEXTERNA_REGACT', ['registroActividadId'])
-@Check('CHK_EKINNEQPACTREGSEJECUCIONEXTERNA_EMPRESA', `([TIPOEJECUTOR] <> 'EMPRESA_CON_TECNICO') OR ([EMPRESATERCEROOID] IS NOT NULL)`)
-@Check('CHK_EKINNEQPACTREGSEJECUCIONEXTERNA_EXCEPCIONAL', `([ESEXCEPCIONAL] = 0) OR ([MOTIVOEXCEPCIONAL] IS NOT NULL)`)
+@Check(
+  'CHK_EKINNEQPACTREGSEJECUCIONEXTERNA_EMPRESA',
+  `([TIPOEJECUTOR] <> 'EMPRESA_CON_TECNICO') OR ([EMPRESATERCEROOID] IS NOT NULL)`
+)
+@Check(
+  'CHK_EKINNEQPACTREGSEJECUCIONEXTERNA_EXCEPCIONAL',
+  `([ESEXCEPCIONAL] = 0) OR ([MOTIVOEXCEPCIONAL] IS NOT NULL)`
+)
 export class EjecucionExternaOrm extends BaseTimestampedOrm {
-  @OneToOne(() => RegistroActividadOrm, (reg) => reg.ejecucionExterna, {
+  @OneToOne(() => RegistroActividadOrm, reg => reg.ejecucionExterna, {
     nullable: false,
     onDelete: 'RESTRICT',
   })

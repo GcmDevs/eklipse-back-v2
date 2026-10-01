@@ -6,10 +6,9 @@ export class dataRes {
   entregaTurnoPorSubgrupoActual: EntergaTurnoSubgrupoRes;
 }
 
-
 interface UsuarioReponse {
-  cedula?: string,
-  nombreCompleto?: string
+  cedula?: string;
+  nombreCompleto?: string;
 }
 
 export class ATRegistroClinicoRes {
@@ -23,15 +22,15 @@ export class ATRegistroClinicoRes {
   reporteImg: string;
   reporteLab: string;
   tratamiento: string;
-  subgrupo: {codigo?: string, nombre?: string}
-  usuarioMedicoGuarda: UsuarioReponse
+  subgrupo: { codigo?: string; nombre?: string };
+  usuarioMedicoGuarda: UsuarioReponse;
   turno: {
-    fechaInicio: Date | null
-    fechaFin: Date | null
-    medicoEntrega: UsuarioReponse | null
-    medicoRecibe: UsuarioReponse | null
-    habilitador: UsuarioReponse | null 
-  }
+    fechaInicio: Date | null;
+    fechaFin: Date | null;
+    medicoEntrega: UsuarioReponse | null;
+    medicoRecibe: UsuarioReponse | null;
+    habilitador: UsuarioReponse | null;
+  };
 }
 
 export class EntergaTurnoSubgrupoRes {

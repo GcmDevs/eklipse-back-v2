@@ -16,12 +16,10 @@ import {
   RespuestaTextoLibre,
 } from 'apps/motor-formatos/domain/types/submission.types';
 
-
 export class SchemaValidator {
-
   static validate(
-    schema:    EstructuraFormatoSchema,
-    respuestas: Record<string, RespuestaComponente>,
+    schema: EstructuraFormatoSchema,
+    respuestas: Record<string, RespuestaComponente>
   ): void {
     const errores: string[] = [];
 
@@ -32,16 +30,14 @@ export class SchemaValidator {
     }
 
     if (errores.length > 0) {
-      throw new BadInputError(
-        `Errores de validación:\n${errores.map(e => `  - ${e}`).join('\n')}`
-      );
+      throw new BadInputError(`Errores de validación:\n${errores.map(e => `  - ${e}`).join('\n')}`);
     }
   }
 
   private static validarComponente(
-    comp:      ComponenteSchema,
+    comp: ComponenteSchema,
     respuestas: Record<string, RespuestaComponente>,
-    errores:   string[],
+    errores: string[]
   ): void {
     const resp = respuestas[comp.key];
 
@@ -72,9 +68,9 @@ export class SchemaValidator {
   }
 
   private static validarGrupo(
-    comp:   ComponenteGrupoEjecucionSchema,
-    resp:   RespuestaGrupoEjecucion,
-    errores: string[],
+    comp: ComponenteGrupoEjecucionSchema,
+    resp: RespuestaGrupoEjecucion,
+    errores: string[]
   ): void {
     for (const item of comp.items) {
       const itemResp = resp.items[item.key];
@@ -89,9 +85,9 @@ export class SchemaValidator {
   }
 
   private static validarTabla(
-    comp:   ComponenteTablaSchema,
-    resp:   RespuestaTabla,
-    errores: string[],
+    comp: ComponenteTablaSchema,
+    resp: RespuestaTabla,
+    errores: string[]
   ): void {
     if (!resp.filas?.length) {
       errores.push(`Tabla "${comp.key}" no tiene filas`);
@@ -118,25 +114,23 @@ export class SchemaValidator {
   }
 
   private static validarRango(
-    comp:   ComponenteRangoSchema,
-    resp:   RespuestaRango,
-    errores: string[],
+    comp: ComponenteRangoSchema,
+    resp: RespuestaRango,
+    errores: string[]
   ): void {
     if (typeof resp.valor !== 'number') {
       errores.push(`Rango "${comp.key}" debe ser número`);
       return;
     }
     if (resp.valor < comp.min || resp.valor > comp.max) {
-      errores.push(
-        `Rango "${comp.key}": valor ${resp.valor} fuera de [${comp.min}, ${comp.max}]`
-      );
+      errores.push(`Rango "${comp.key}": valor ${resp.valor} fuera de [${comp.min}, ${comp.max}]`);
     }
   }
 
   private static validarTextoLibre(
-    comp:   ComponenteTextoLibreSchema,
-    resp:   RespuestaTextoLibre,
-    errores: string[],
+    comp: ComponenteTextoLibreSchema,
+    resp: RespuestaTextoLibre,
+    errores: string[]
   ): void {
     if (comp.requerido && !resp.valor?.trim()) {
       errores.push(`Campo de texto "${comp.key}" es requerido`);

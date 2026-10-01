@@ -8,8 +8,14 @@ import {
   EquiposCustomReportInput,
   EquiposInventarioReportInput,
 } from '../domain/types/equipos';
-import { ExceljsEquiposCustomExportGenerator, ExceljsInventarioExportGenerator } from '../infrastructure/exporters';
-import { EquiposCustomReportMapper, EquiposInventarioReportMapper } from '../infrastructure/mappers';
+import {
+  ExceljsEquiposCustomExportGenerator,
+  ExceljsInventarioExportGenerator,
+} from '../infrastructure/exporters';
+import {
+  EquiposCustomReportMapper,
+  EquiposInventarioReportMapper,
+} from '../infrastructure/mappers';
 import { TypeOrmEquiposReportListRepository } from '../infrastructure/persistence/repositories';
 
 @Injectable()
@@ -17,17 +23,14 @@ export class EquiposReportListService {
   constructor(
     private readonly repository: TypeOrmEquiposReportListRepository,
     private readonly excelCustomReportGenerator: ExceljsEquiposCustomExportGenerator,
-    private readonly excelInventarioReportGenerator: ExceljsInventarioExportGenerator,
-  ) { }
+    private readonly excelInventarioReportGenerator: ExceljsInventarioExportGenerator
+  ) {}
 
   public async exportCustomReportExcel(input: EquiposCustomReportInput): Promise<Buffer> {
     const equipos = await this.repository.findForExportList(input.filtros);
     const rows = EquiposCustomReportMapper.toExportRows(equipos);
     const logo = this.resolveLogo();
-    const columnas =
-      input.columnas?.length > 0
-        ? input.columnas
-        : [...EQUIPOS_CUSTOM_COLUMNS];
+    const columnas = input.columnas?.length > 0 ? input.columnas : [...EQUIPOS_CUSTOM_COLUMNS];
 
     return this.excelCustomReportGenerator.generate({
       titulo: 'Reporte de equipos',
@@ -51,10 +54,7 @@ export class EquiposReportListService {
   private resolveLogo():
     | { buffer: Buffer; extension: FileExtensions.JPEG | FileExtensions.PNG }
     | undefined {
-    const logoPath = path.join(
-      process.cwd(),
-      '../private/clinicas/alta-centro.jpg',
-    );
+    const logoPath = path.join(process.cwd(), '../private/clinicas/alta-centro.jpg');
     if (!fs.existsSync(logoPath)) {
       return undefined;
     }

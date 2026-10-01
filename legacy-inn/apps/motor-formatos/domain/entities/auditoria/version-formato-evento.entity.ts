@@ -1,5 +1,5 @@
-import { Id } from "@common/domain/value-objects";
-import { TipoEventoVersionFormato } from "../../enums";
+import { Id } from '@common/domain/value-objects';
+import { TipoEventoVersionFormato } from '../../enums';
 
 export class VersionFormatoEvento {
   private constructor(
@@ -8,19 +8,19 @@ export class VersionFormatoEvento {
     private readonly tipoEvento: TipoEventoVersionFormato,
     private readonly usuarioId: Id,
     private readonly createdAt: Date
-  ) { }
+  ) {}
 
   static create(
     versionFormatoId: number,
     tipoEvento: TipoEventoVersionFormato,
-    usuarioId: number,
+    usuarioId: number
   ): VersionFormatoEvento {
     return new VersionFormatoEvento(
       new Id(),
       new Id(versionFormatoId),
       tipoEvento,
       new Id(usuarioId),
-      new Date(),
+      new Date()
     );
   }
 
@@ -36,7 +36,7 @@ export class VersionFormatoEvento {
       new Id(versionFormatoId),
       tipoEvento,
       new Id(usuarioId),
-      fecha,
+      fecha
     );
   }
 

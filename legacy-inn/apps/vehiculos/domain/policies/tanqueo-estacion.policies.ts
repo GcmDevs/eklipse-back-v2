@@ -13,14 +13,16 @@ export function validateKilometrajeTanqueo(kilometraje: number | null | undefine
   if (kilometraje === undefined || kilometraje === null) return;
 
   if (!Number.isInteger(kilometraje) || kilometraje < 1 || kilometraje > MAX_KILOMETRAJE) {
-    throw new BadInputError(
-      `El kilometraje debe ser un entero entre 1 y ${MAX_KILOMETRAJE}`
-    );
+    throw new BadInputError(`El kilometraje debe ser un entero entre 1 y ${MAX_KILOMETRAJE}`);
   }
 }
 
 export function validateValorTanqueoEstacion(valor: number): void {
-  if (!Number.isFinite(valor) || valor < MIN_VALOR_TANQUEO_ESTACION || valor > MAX_VALOR_TANQUEO_ESTACION) {
+  if (
+    !Number.isFinite(valor) ||
+    valor < MIN_VALOR_TANQUEO_ESTACION ||
+    valor > MAX_VALOR_TANQUEO_ESTACION
+  ) {
     throw new BadInputError(
       `El valor pagado debe estar entre ${MIN_VALOR_TANQUEO_ESTACION} y ${MAX_VALOR_TANQUEO_ESTACION}`
     );
@@ -28,7 +30,7 @@ export function validateValorTanqueoEstacion(valor: number): void {
 }
 
 export function validateCantidadCombustibleTanqueoEstacion(
-  cantidad: number | null | undefined,
+  cantidad: number | null | undefined
 ): void {
   if (cantidad === undefined || cantidad === null) {
     throw new BadInputError('La cantidad de combustible es obligatoria');

@@ -7,8 +7,10 @@ export interface EstacionServicioFilters {
   municipioId?: number;
 }
 
-export interface EstacionServicioRepository
-  extends BaseRepository<EstacionServicio, EstacionServicioRead> {
+export interface EstacionServicioRepository extends BaseRepository<
+  EstacionServicio,
+  EstacionServicioRead
+> {
   findViewById(id: number): Promise<EstacionServicioRead | null>;
   findAllAndCount(
     page: number,

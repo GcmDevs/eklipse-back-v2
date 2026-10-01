@@ -17,7 +17,7 @@ import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query } from '
 export class CompraController extends BaseShelteredController {
   constructor(
     private readonly service: CompraService,
-    private readonly documentoService: DocumentoCompraService,
+    private readonly documentoService: DocumentoCompraService
   ) {
     super();
   }
@@ -29,11 +29,9 @@ export class CompraController extends BaseShelteredController {
   }
 
   @Get('/:id')
-  async getById(
-    @Param('id', ParseIntPipe) id: number
-  ): Promise<BaseApiResponse<CompraRead>> {
+  async getById(@Param('id', ParseIntPipe) id: number): Promise<BaseApiResponse<CompraRead>> {
     const compra = await this.service.getById(id);
-    return { data: compra }
+    return { data: compra };
   }
 
   @Get()
@@ -47,7 +45,7 @@ export class CompraController extends BaseShelteredController {
   @Patch('/:id')
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() data: UpdateCompraDto,
+    @Body() data: UpdateCompraDto
   ): Promise<BaseApiResponse<CompraRead>> {
     const entity = await this.service.update(id, data);
     return { data: entity };
@@ -56,7 +54,7 @@ export class CompraController extends BaseShelteredController {
   @Post('/:id/equipos')
   async agregarEquipos(
     @Param('id', ParseIntPipe) id: number,
-    @Body() data: AgregarEquiposCompraDto,
+    @Body() data: AgregarEquiposCompraDto
   ): Promise<BaseApiResponse<CompraRead>> {
     const entity = await this.service.addEquiposACompra(id, data);
     return { data: entity };
@@ -65,9 +63,9 @@ export class CompraController extends BaseShelteredController {
   @Post('/:id/documentos')
   async createDocumento(
     @Param('id', ParseIntPipe) id: number,
-    @Body() data: CreateDocumentoTipoEquipoDto,
+    @Body() data: CreateDocumentoTipoEquipoDto
   ): Promise<BaseApiResponse<DocumentoTipoEquipoRead>> {
-      const entity = await this.documentoService.create(id, data);
+    const entity = await this.documentoService.create(id, data);
     return { data: entity };
   }
 
@@ -75,7 +73,7 @@ export class CompraController extends BaseShelteredController {
   async updateDocumento(
     @Param('id', ParseIntPipe) id: number,
     @Param('documentoId', ParseIntPipe) documentoId: number,
-    @Body() data: UpdateDocumentoTipoEquipoDto,
+    @Body() data: UpdateDocumentoTipoEquipoDto
   ): Promise<BaseApiResponse<DocumentoTipoEquipoRead>> {
     const entity = await this.documentoService.update(id, documentoId, data);
     return { data: entity };
@@ -84,7 +82,7 @@ export class CompraController extends BaseShelteredController {
   @Patch('/:id/documentos/:documentoId/deprecar')
   async depreciateDocumento(
     @Param('id', ParseIntPipe) id: number,
-    @Param('documentoId', ParseIntPipe) documentoId: number,
+    @Param('documentoId', ParseIntPipe) documentoId: number
   ): Promise<BaseApiResponse<void>> {
     await this.documentoService.depreciate(id, documentoId);
     return { message: 'Documento depreciado con exito' };

@@ -1,4 +1,4 @@
-import { BadInputError } from "@common/domain/errors";
+import { BadInputError } from '@common/domain/errors';
 
 export interface ReglaObligatoriedadTipoActivoItem {
   tipoActivoId: number;
@@ -6,7 +6,7 @@ export interface ReglaObligatoriedadTipoActivoItem {
 }
 
 export class ReglasObligatoriedadTipoActivo {
-  private constructor(private readonly reglas: ReglaObligatoriedadTipoActivoItem[]) { }
+  private constructor(private readonly reglas: ReglaObligatoriedadTipoActivoItem[]) {}
 
   static create(reglas: ReglaObligatoriedadTipoActivoItem[]): ReglasObligatoriedadTipoActivo {
     if (!reglas.length) reglas = [];
@@ -17,7 +17,9 @@ export class ReglasObligatoriedadTipoActivo {
     return new ReglasObligatoriedadTipoActivo([...reglas]);
   }
 
-  static fromPrimitives(data?: ReglaObligatoriedadTipoActivoItem[] | null): ReglasObligatoriedadTipoActivo {
+  static fromPrimitives(
+    data?: ReglaObligatoriedadTipoActivoItem[] | null
+  ): ReglasObligatoriedadTipoActivo {
     if (!data?.length) {
       return new ReglasObligatoriedadTipoActivo([]);
     }

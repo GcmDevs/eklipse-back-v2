@@ -3,17 +3,33 @@ import { BadInputError, ResourceNotFoundError } from '@common/domain/errors';
 import { EntityStatusQuery, FindThrowOptions } from '@common/domain/types';
 import { getUser } from '@common/infrastructure/services';
 import { StagingFileService } from '@core/media/application/services/staging.archivo.service';
-import { AccesorioTipoEquipo, DocumentoTipoEquipo, PlanDefaultTipoEquipo, TipoEquipo } from '@equipos/domain/entities/catalogo';
+import {
+  AccesorioTipoEquipo,
+  DocumentoTipoEquipo,
+  PlanDefaultTipoEquipo,
+  TipoEquipo,
+} from '@equipos/domain/entities/catalogo';
 import { TipoMedidaCodigo } from '@equipos/domain/enums';
 import { TipoEquipoRead } from '@equipos/domain/read';
 import { AccesorioTipoEquipoRepository } from '@equipos/domain/repositories/catalogo/accesorio-tipo-equipo.repository';
 import { DocumentoTipoEquipoRepository } from '@equipos/domain/repositories/catalogo/documento-tipo-equipo.repository';
 import { PlanDefaultTipoEquipoRepository } from '@equipos/domain/repositories/catalogo/plan-default-tipo-equipo.repository';
+import { TipoEquipoRepository } from '@equipos/domain/repositories/catalogo/tipo-equipo.repository';
 import {
-  TipoEquipoRepository,
-} from '@equipos/domain/repositories/catalogo/tipo-equipo.repository';
-import { ACCESORIO_TIPO_EQUIPO_REPOSITORY, DOCUMENTO_TIPO_EQUIPO_REPOSITORY, PLAN_DEFAULT_TIPO_EQUIPO_REPOSITORY, TIPO_EQUIPO_REPOSITORY } from '@equipos/domain/repositories/tokens';
-import { ClasificacionBiomedica, DatosCalibracion, DatosTecnicos, FichaTecnicaTipoEquipo, Medida, PeriodoDeTiempo, VariableCalibracion } from '@equipos/domain/value-objects';
+  ACCESORIO_TIPO_EQUIPO_REPOSITORY,
+  DOCUMENTO_TIPO_EQUIPO_REPOSITORY,
+  PLAN_DEFAULT_TIPO_EQUIPO_REPOSITORY,
+  TIPO_EQUIPO_REPOSITORY,
+} from '@equipos/domain/repositories/tokens';
+import {
+  ClasificacionBiomedica,
+  DatosCalibracion,
+  DatosTecnicos,
+  FichaTecnicaTipoEquipo,
+  Medida,
+  PeriodoDeTiempo,
+  VariableCalibracion,
+} from '@equipos/domain/value-objects';
 import { MedidasTecnicas } from '@equipos/domain/value-objects/medidas-tecnicas.vo';
 import {
   CreateTipoEquipoDto,
@@ -54,16 +70,29 @@ export class TipoEquipoService {
     private readonly stagingFileService: StagingFileService,
     private readonly tipoDocCategoriaService: TipoDocCategoriaActivoService,
     private readonly claseEquipoService: ClaseEquipoService,
-    private readonly modifyTipoEquipoService: ModifyTipoEquipoService,
-  ) { }
+    private readonly modifyTipoEquipoService: ModifyTipoEquipoService
+  ) {}
 
   async create({
-    nombre, modeloId, subclaseId, observaciones,
-    fichaTecnica, accesorios, planesDefault, documentos,
+    nombre,
+    modeloId,
+    subclaseId,
+    observaciones,
+    fichaTecnica,
+    accesorios,
+    planesDefault,
+    documentos,
   }: CreateTipoEquipoDto): Promise<TipoEquipoRead> {
     const tipoActivoId = await this.claseEquipoService.resolveTipoActivoIdBySubclaseId(subclaseId);
     const fichaTec = await this.buildFichaTecnica(fichaTecnica);
-    const tipoEquipo = TipoEquipo.create(nombre, modeloId, subclaseId, tipoActivoId, observaciones, fichaTec);
+    const tipoEquipo = TipoEquipo.create(
+      nombre,
+      modeloId,
+      subclaseId,
+      tipoActivoId,
+      observaciones,
+      fichaTec
+    );
 
     return this.txManager.transactional(async () => {
       const saved = await this.repository.save(tipoEquipo);
@@ -78,7 +107,8 @@ export class TipoEquipoService {
 
   async findById(
     id: number,
-    options: FindThrowOptions = new FindThrowOptions()): Promise<TipoEquipo | null> {
+    options: FindThrowOptions = new FindThrowOptions()
+  ): Promise<TipoEquipo | null> {
     const tipoEquipoFound = await this.repository.findById(id);
     if (!tipoEquipoFound && options.throwIfNotFound) {
       throw new ResourceNotFoundError(`TipoEquipo con id: ${id} no encontrado`);
@@ -95,13 +125,19 @@ export class TipoEquipoService {
   }
 
   async findAllAndCount({
-    page, limit, search, modeloId, subclaseId, estado, estadoHijos,
+    page,
+    limit,
+    search,
+    modeloId,
+    subclaseId,
+    estado,
+    estadoHijos,
   }: FilterTipoEquipoDto): Promise<[TipoEquipoRead[], number]> {
     return this.repository.findAllAndCount(
       page,
       limit,
       { modeloId, subclaseId, estado, estadoHijos },
-      search,
+      search
     );
   }
 
@@ -111,7 +147,11 @@ export class TipoEquipoService {
 
       const changes: ChangeCampoTipoEquipo[] = [];
       if (data.nombre !== undefined && data.nombre !== currentTipoEquipo.getNombre) {
-        changes.push({ campo: 'nombre', valorAnterior: currentTipoEquipo.getNombre, valorNuevo: data.nombre });
+        changes.push({
+          campo: 'nombre',
+          valorAnterior: currentTipoEquipo.getNombre,
+          valorNuevo: data.nombre,
+        });
       }
       if (
         data.observaciones !== undefined &&
@@ -146,7 +186,10 @@ export class TipoEquipoService {
     });
   }
 
-  async updateFichaTecnica(id: number, data: UpdateFichaTecnicaTipoEquipoDto): Promise<TipoEquipoRead> {
+  async updateFichaTecnica(
+    id: number,
+    data: UpdateFichaTecnicaTipoEquipoDto
+  ): Promise<TipoEquipoRead> {
     return this.txManager.transactional(async () => {
       const tipoEquipo = await this.findById(id, { throwIfNotFound: true });
       const fichaTecnica = await this.buildFichaTecnicaFromFullState(data);
@@ -174,7 +217,10 @@ export class TipoEquipoService {
     });
   }
 
-  private async syncAccesorios(tipoEquipoId: number, accesorios: ReplaceTipoEquipoDto['accesorios']): Promise<void> {
+  private async syncAccesorios(
+    tipoEquipoId: number,
+    accesorios: ReplaceTipoEquipoDto['accesorios']
+  ): Promise<void> {
     const existing = await this.accesorioRepository.findByTipoEquipoId(tipoEquipoId);
     for (const old of existing) {
       await this.accesorioRepository.delete(old.id);
@@ -189,14 +235,22 @@ export class TipoEquipoService {
         await this.marcaService.findById(acc.marcaId);
       }
       const entity = AccesorioTipoEquipo.create(
-        tipoEquipoId, parteId, parteSnap, acc.cantidad,
-        acc.marcaId, acc.referencia, acc.observaciones,
+        tipoEquipoId,
+        parteId,
+        parteSnap,
+        acc.cantidad,
+        acc.marcaId,
+        acc.referencia,
+        acc.observaciones
       );
       await this.accesorioRepository.save(entity);
     }
   }
 
-  private async syncPlanesDefault(tipoEquipoId: number, planesDefault: ReplaceTipoEquipoDto['planesDefault']): Promise<void> {
+  private async syncPlanesDefault(
+    tipoEquipoId: number,
+    planesDefault: ReplaceTipoEquipoDto['planesDefault']
+  ): Promise<void> {
     const existentes = await this.planRepository.findAll({ tipoEquipoId });
     for (const old of existentes) {
       await this.planRepository.delete(old.id);
@@ -204,8 +258,14 @@ export class TipoEquipoService {
 
     for (const plDf of planesDefault) {
       const entity = PlanDefaultTipoEquipo.create(
-        tipoEquipoId, plDf.tipo, plDf.periocidad?.valor, plDf.periocidad?.unidad,
-        plDf.diasAntNotif, plDf.realizaExterno, plDf.formatoId, plDf.observaciones,
+        tipoEquipoId,
+        plDf.tipo,
+        plDf.periocidad?.valor,
+        plDf.periocidad?.unidad,
+        plDf.diasAntNotif,
+        plDf.realizaExterno,
+        plDf.formatoId,
+        plDf.observaciones
       );
       await this.planRepository.save(entity);
     }
@@ -214,7 +274,7 @@ export class TipoEquipoService {
   private async syncDocumentos(
     tipoEquipoId: number,
     tipoActivoId: number,
-    documentos: ReplaceTipoEquipoDto['documentos'],
+    documentos: ReplaceTipoEquipoDto['documentos']
   ): Promise<void> {
     const existentes = await this.documentoRepository.findByTipoEquipoId(tipoEquipoId);
     for (const old of existentes) {
@@ -222,10 +282,12 @@ export class TipoEquipoService {
     }
 
     for (const d of documentos) {
-      const tipoDoc = await this.tipoDocCategoriaService.findById(d.tipoDocumentoId, { throwIfNotFound: true });
+      const tipoDoc = await this.tipoDocCategoriaService.findById(d.tipoDocumentoId, {
+        throwIfNotFound: true,
+      });
       if (!tipoDoc.AppliesToTipoActivo(tipoActivoId)) {
         throw new BadInputError(
-          `El tipo de documento "${tipoDoc.getNombre}" no aplica para el tipo de activo del equipo`,
+          `El tipo de documento "${tipoDoc.getNombre}" no aplica para el tipo de activo del equipo`
         );
       }
       await validateDocumentoInput(
@@ -233,10 +295,14 @@ export class TipoEquipoService {
         tipoDoc.getCategoria,
         d.aplica,
         tipoDoc.IsObligatorioPara(tipoActivoId),
-        d.archivoId,
+        d.archivoId
       );
       const entity = DocumentoTipoEquipo.createForTipoEquipo(
-        tipoEquipoId, d.tipoDocumentoId, d.aplica, d.archivoId, d.observaciones,
+        tipoEquipoId,
+        d.tipoDocumentoId,
+        d.aplica,
+        d.archivoId,
+        d.observaciones
       );
       const savedDoc = await this.documentoRepository.save(entity);
       if (d.aplica && d.archivoId) {
@@ -244,13 +310,15 @@ export class TipoEquipoService {
           this.stagingFileService,
           tipoDoc.getCategoria,
           d.archivoId,
-          savedDoc.getId.getValor,
+          savedDoc.getId.getValor
         );
       }
     }
   }
 
-  private async buildDatosTecnicos(datosTecnicos: FichaTecnicaTipoEquipoDto['datosTecnicos']): Promise<DatosTecnicos | undefined> {
+  private async buildDatosTecnicos(
+    datosTecnicos: FichaTecnicaTipoEquipoDto['datosTecnicos']
+  ): Promise<DatosTecnicos | undefined> {
     if (!datosTecnicos?.medidas?.length) return undefined;
     const medidas: Medida[] = [];
     const tiposUsados = new Set<TipoMedidaCodigo>();
@@ -258,14 +326,25 @@ export class TipoEquipoService {
     for (const me of datosTecnicos.medidas) {
       if (me.tipo !== TipoMedidaCodigo.OTROS) {
         if (tiposUsados.has(me.tipo)) {
-          throw new BadInputError(`Tipo de medida duplicado: ${me.tipo}. Solo OTROS puede repetirse`);
+          throw new BadInputError(
+            `Tipo de medida duplicado: ${me.tipo}. Solo OTROS puede repetirse`
+          );
         }
         tiposUsados.add(me.tipo);
       }
 
       const unidad = await this.unidadMedidaService.findOneById(me.unidadId);
       if (me.valorMin != null && me.valorMax != null) {
-        medidas.push(Medida.createRango(me.tipo, me.valorMin, me.valorMax, me.unidadId, unidad.getNombre, me.nombre));
+        medidas.push(
+          Medida.createRango(
+            me.tipo,
+            me.valorMin,
+            me.valorMax,
+            me.unidadId,
+            unidad.getNombre,
+            me.nombre
+          )
+        );
       } else {
         medidas.push(Medida.create(me.tipo, me.valor, me.unidadId, unidad.getNombre, me.nombre));
       }
@@ -274,21 +353,24 @@ export class TipoEquipoService {
     return DatosTecnicos.create(MedidasTecnicas.create(medidas));
   }
 
-  private async buildFichaTecnica(data?: FichaTecnicaTipoEquipoDto): Promise<FichaTecnicaTipoEquipo | undefined> {
+  private async buildFichaTecnica(
+    data?: FichaTecnicaTipoEquipoDto
+  ): Promise<FichaTecnicaTipoEquipo | undefined> {
     if (!data) return undefined;
-    const hasFichaInput = data.vidaUtil !== undefined
-      || data.reqCalibracion !== undefined
-      || data.datosCalibracion !== undefined
-      || data.datosTecnicos !== undefined
-      || data.dtCalibNormaAplicable !== undefined
-      || data.clasificacion !== undefined;
+    const hasFichaInput =
+      data.vidaUtil !== undefined ||
+      data.reqCalibracion !== undefined ||
+      data.datosCalibracion !== undefined ||
+      data.datosTecnicos !== undefined ||
+      data.dtCalibNormaAplicable !== undefined ||
+      data.clasificacion !== undefined;
 
     if (!hasFichaInput) return undefined;
     return this.buildFichaTecnicaFromFullState(data);
   }
 
   private async buildFichaTecnicaFromFullState(
-    data: FichaTecnicaTipoEquipoDto,
+    data: FichaTecnicaTipoEquipoDto
   ): Promise<FichaTecnicaTipoEquipo> {
     const vidaUtilFinal = data.vidaUtil
       ? PeriodoDeTiempo.create(data.vidaUtil.valor, data.vidaUtil.unidad)
@@ -296,9 +378,9 @@ export class TipoEquipoService {
 
     const dtCalib = data.datosCalibracion?.variables?.length
       ? DatosCalibracion.create(
-        VariableCalibracion.create(data.datosCalibracion.variables),
-        data.datosCalibracion.codigoUltimaCalibracion,
-      )
+          VariableCalibracion.create(data.datosCalibracion.variables),
+          data.datosCalibracion.codigoUltimaCalibracion
+        )
       : undefined;
 
     const dtTec = data.datosTecnicos?.medidas?.length
@@ -307,16 +389,16 @@ export class TipoEquipoService {
 
     const clasifBio = data.clasificacion
       ? ClasificacionBiomedica.create(
-        data.clasificacion.aplicaRegSanitario,
-        data.clasificacion.diagnostico,
-        data.clasificacion.prevencion,
-        data.clasificacion.rehabilitacion,
-        data.clasificacion.analisisLaboratorio,
-        data.clasificacion.tratamientoMantenimientoDeVida,
-        data.clasificacion.riesgo,
-        data.clasificacion.numeroRegSanitario,
-        data.clasificacion.expedienteRegSanitario,
-      )
+          data.clasificacion.aplicaRegSanitario,
+          data.clasificacion.diagnostico,
+          data.clasificacion.prevencion,
+          data.clasificacion.rehabilitacion,
+          data.clasificacion.analisisLaboratorio,
+          data.clasificacion.tratamientoMantenimientoDeVida,
+          data.clasificacion.riesgo,
+          data.clasificacion.numeroRegSanitario,
+          data.clasificacion.expedienteRegSanitario
+        )
       : ClasificacionBiomedica.create();
 
     return FichaTecnicaTipoEquipo.create(
@@ -325,7 +407,7 @@ export class TipoEquipoService {
       vidaUtilFinal,
       data.reqCalibracion ?? false,
       dtCalib,
-      data.dtCalibNormaAplicable,
+      data.dtCalibNormaAplicable
     );
   }
 }

@@ -107,7 +107,7 @@ export function TextAllowedOnlyWhen<T = any>(
       validate(value: unknown, args): boolean {
         const [condition, validationOptions] = args.constraints as [
           ValidationPredicate,
-          TextValidationOptions
+          TextValidationOptions,
         ];
         if (!condition(args.object, value)) {
           return value === undefined || value === null || value === '';
@@ -282,7 +282,7 @@ export function OptionalNestedWhen<T = any>(
     ValidateIf(predicate as ValidationPredicate),
     IsOptional(),
     ValidateNested(),
-    Type(type),
+    Type(type)
   );
 }
 

@@ -1,1 +1,1 @@
-export * from "./puppeteer-pdf.generator";
+export * from './puppeteer-pdf.generator';

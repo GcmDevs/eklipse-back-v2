@@ -1,7 +1,10 @@
 export type UbicacionPacienteTypeCode = 1 | 2 | 3 | 4;
 
 export class UbicacionPacienteType {
-  constructor(private code: UbicacionPacienteTypeCode, private forHumans: string) {}
+  constructor(
+    private code: UbicacionPacienteTypeCode,
+    private forHumans: string
+  ) {}
 
   public getCode(): UbicacionPacienteTypeCode {
     return this.code;

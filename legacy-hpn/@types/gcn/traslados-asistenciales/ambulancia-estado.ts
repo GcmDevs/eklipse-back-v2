@@ -4,7 +4,7 @@ export class AmbulanciaEstadoType {
   constructor(
     private _code: AmbulanciaEstadoCode,
     private _forHumans: string
-  ) { }
+  ) {}
 
   public getCode(): AmbulanciaEstadoCode {
     return this._code;
@@ -20,9 +20,12 @@ export const INACTIVA = new AmbulanciaEstadoType(2, 'INACTIVA');
 
 export function ambulanciaEstadoTypeFactory(code: AmbulanciaEstadoCode): AmbulanciaEstadoType {
   switch (code) {
-    case 1: return ACTIVA;
-    case 2: return INACTIVA;
-    default: return ACTIVA;
+    case 1:
+      return ACTIVA;
+    case 2:
+      return INACTIVA;
+    default:
+      return ACTIVA;
   }
 }
 

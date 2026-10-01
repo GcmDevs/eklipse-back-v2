@@ -42,11 +42,10 @@ export class TipoEquipoController extends BaseShelteredController {
     private readonly accesorioService: AccesorioTipoEquipoService,
     private readonly sincronizarService: SyncAccesorioTipoEquipoService,
     private readonly documentoService: DocumentoTipoEquipoService,
-    private readonly planDefaultService: PlanDefaultTipoEquipoService,
+    private readonly planDefaultService: PlanDefaultTipoEquipoService
   ) {
     super();
   }
-
 
   @Post()
   async create(@Body() data: CreateTipoEquipoDto): Promise<BaseApiResponse<TipoEquipoRead>> {
@@ -56,7 +55,7 @@ export class TipoEquipoController extends BaseShelteredController {
 
   @Get()
   async getAll(
-    @Query() { page, limit, ...filters }: FilterTipoEquipoDto,
+    @Query() { page, limit, ...filters }: FilterTipoEquipoDto
   ): Promise<BaseApiResponse<TipoEquipoRead[]>> {
     const [list, count] = await this.service.findAllAndCount({ page, limit, ...filters });
     return PaginationHelper.response(list, count, page, limit);
@@ -64,7 +63,7 @@ export class TipoEquipoController extends BaseShelteredController {
 
   @Get('/:id/auditoria')
   async getAuditoria(
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseIntPipe) id: number
   ): Promise<BaseApiResponse<AuditTipoEquipoRead[]>> {
     const auditoria = await this.auditService.findByTipoEquipo(id);
     return { data: auditoria };
@@ -73,7 +72,7 @@ export class TipoEquipoController extends BaseShelteredController {
   @Get('/:id')
   async getOne(
     @Param('id', ParseIntPipe) id: number,
-    @Query() filters: FilterEstadoMasHijosDto,
+    @Query() filters: FilterEstadoMasHijosDto
   ): Promise<BaseApiResponse<TipoEquipoRead>> {
     const entity = await this.service.getOneById(id, filters);
     return { data: entity };
@@ -82,27 +81,25 @@ export class TipoEquipoController extends BaseShelteredController {
   @Patch('/:id')
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() data: UpdateTipoEquipoDto,
+    @Body() data: UpdateTipoEquipoDto
   ): Promise<BaseApiResponse<TipoEquipoRead>> {
     const entity = await this.service.update(id, data);
     return { data: entity };
   }
 
-
   @Patch('/:id/ficha-tecnica')
   async modifyFichaTecnica(
     @Param('id', ParseIntPipe) id: number,
-    @Body() data: UpdateFichaTecnicaTipoEquipoDto,
+    @Body() data: UpdateFichaTecnicaTipoEquipoDto
   ): Promise<BaseApiResponse<TipoEquipoRead>> {
     const fichaTec = await this.service.updateFichaTecnica(id, data);
     return { data: fichaTec };
   }
 
-
   @Post('/:id/accesorios')
   async createAccesorio(
     @Param('id', ParseIntPipe) id: number,
-    @Body() data: CreateAccesorioTipoEquipoDto,
+    @Body() data: CreateAccesorioTipoEquipoDto
   ): Promise<BaseApiResponse<AccesorioTipoEquipoRead>> {
     const accesorios = await this.accesorioService.create(id, data);
     return { data: accesorios };
@@ -112,7 +109,7 @@ export class TipoEquipoController extends BaseShelteredController {
   async updateAccesorio(
     @Param('id', ParseIntPipe) id: number,
     @Param('accesorioId', ParseIntPipe) accesorioId: number,
-    @Body() data: UpdateAccesorioTipoEquipoDto,
+    @Body() data: UpdateAccesorioTipoEquipoDto
   ): Promise<BaseApiResponse<AccesorioTipoEquipoRead>> {
     const accesorio = await this.accesorioService.update(id, accesorioId, data);
     return { data: accesorio };
@@ -121,7 +118,7 @@ export class TipoEquipoController extends BaseShelteredController {
   @Patch('/:id/accesorios/:accesorioId/deprecar')
   async deprecarAccesorio(
     @Param('id', ParseIntPipe) id: number,
-    @Param('accesorioId', ParseIntPipe) accesorioId: number,
+    @Param('accesorioId', ParseIntPipe) accesorioId: number
   ): Promise<BaseApiResponse<AccesorioTipoEquipoRead>> {
     const entity = await this.accesorioService.deprecar(id, accesorioId);
     return { data: entity };
@@ -130,7 +127,7 @@ export class TipoEquipoController extends BaseShelteredController {
   @Get('/:id/accesorios/:accesorioId/sincronizacion/preview')
   async previewSincronizacionAccesorio(
     @Param('id', ParseIntPipe) id: number,
-    @Param('accesorioId', ParseIntPipe) accesorioId: number,
+    @Param('accesorioId', ParseIntPipe) accesorioId: number
   ): Promise<BaseApiResponse<PreviewSincronizacionAccesorioRead>> {
     const preview = await this.sincronizarService.preview(id, accesorioId);
     return { data: preview };
@@ -140,7 +137,7 @@ export class TipoEquipoController extends BaseShelteredController {
   async sincronizarAccesorio(
     @Param('id', ParseIntPipe) id: number,
     @Param('accesorioId', ParseIntPipe) accesorioId: number,
-    @Body() data: SyncAccesorioDto,
+    @Body() data: SyncAccesorioDto
   ): Promise<BaseApiResponse<{ ok: true }>> {
     const usuario = getUser();
     await this.sincronizarService.execute({
@@ -159,7 +156,7 @@ export class TipoEquipoController extends BaseShelteredController {
   @Post('/:id/documentos')
   async createDocumento(
     @Param('id', ParseIntPipe) id: number,
-    @Body() data: CreateDocumentoTipoEquipoDto,
+    @Body() data: CreateDocumentoTipoEquipoDto
   ): Promise<BaseApiResponse<DocumentoTipoEquipoRead>> {
     const entity = await this.documentoService.create(id, data);
     return { data: entity };
@@ -169,7 +166,7 @@ export class TipoEquipoController extends BaseShelteredController {
   async updateDocumento(
     @Param('id', ParseIntPipe) id: number,
     @Param('documentoId', ParseIntPipe) documentoId: number,
-    @Body() data: UpdateDocumentoTipoEquipoDto,
+    @Body() data: UpdateDocumentoTipoEquipoDto
   ): Promise<BaseApiResponse<DocumentoTipoEquipoRead>> {
     const entity = await this.documentoService.update(id, documentoId, data);
     return { data: entity };
@@ -178,7 +175,7 @@ export class TipoEquipoController extends BaseShelteredController {
   @Patch('/:id/documentos/:documentoId/deprecar')
   async deprecarDocumento(
     @Param('id', ParseIntPipe) id: number,
-    @Param('documentoId', ParseIntPipe) documentoId: number,
+    @Param('documentoId', ParseIntPipe) documentoId: number
   ): Promise<BaseApiResponse<DocumentoTipoEquipoRead>> {
     const entity = await this.documentoService.depreciate(id, documentoId);
     return { data: entity };
@@ -187,7 +184,7 @@ export class TipoEquipoController extends BaseShelteredController {
   @Post('/:id/planes-default')
   async createPlanDefault(
     @Param('id', ParseIntPipe) id: number,
-    @Body() data: CreatePlanDefaultTipoEquipoDto,
+    @Body() data: CreatePlanDefaultTipoEquipoDto
   ): Promise<BaseApiResponse<PlanDefaultTipoEquipoRead>> {
     const entity = await this.planDefaultService.create(id, data);
     return { data: entity };
@@ -197,7 +194,7 @@ export class TipoEquipoController extends BaseShelteredController {
   async updatePlanDefault(
     @Param('id', ParseIntPipe) id: number,
     @Param('planId', ParseIntPipe) planId: number,
-    @Body() data: UpdatePlanDefaultTipoEquipoDto,
+    @Body() data: UpdatePlanDefaultTipoEquipoDto
   ): Promise<BaseApiResponse<PlanDefaultTipoEquipoRead>> {
     const entity = await this.planDefaultService.update(id, planId, data);
     return { data: entity };
@@ -206,7 +203,7 @@ export class TipoEquipoController extends BaseShelteredController {
   @Patch('/:id/planes-default/:planId/inactivar')
   async inactivarPlanDefault(
     @Param('id', ParseIntPipe) id: number,
-    @Param('planId', ParseIntPipe) planId: number,
+    @Param('planId', ParseIntPipe) planId: number
   ): Promise<BaseApiResponse<PlanDefaultTipoEquipoRead>> {
     const entity = await this.planDefaultService.deactivate(id, planId);
     return { data: entity };

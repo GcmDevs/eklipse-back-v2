@@ -1,4 +1,4 @@
 export interface SaveArchivoOptions {
-    id: number;
-    nombreOriginal: string;
+  id: number;
+  nombreOriginal: string;
 }

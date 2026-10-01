@@ -132,7 +132,6 @@ export class RecursosImpl extends BaseSource {
     return subgrupos;
   }
 
-
   public async fetchMedicoByPattern(pattern: string) {
     const usuarioRp = this.conn.getRepository(UsuarioOrm);
     const ignoreCaseAccent = 'COLLATE Latin1_General_CI_AI';
@@ -150,30 +149,21 @@ export class RecursosImpl extends BaseSource {
         const palabras = value.split(/\s+/);
 
         qb.andWhere(
-          new Brackets((subQb) => {
+          new Brackets(subQb => {
             palabras.forEach((palabra, index) => {
-              subQb.andWhere(
-                `usuario.nombreCompleto ${ignoreCaseAccent} LIKE :nombre${index}`,
-                {
-                  [`nombre${index}`]: `%${palabra}%`,
-                },
-              );
+              subQb.andWhere(`usuario.nombreCompleto ${ignoreCaseAccent} LIKE :nombre${index}`, {
+                [`nombre${index}`]: `%${palabra}%`,
+              });
             });
-          }),
+          })
         );
       } else {
-        qb.andWhere(
-          `usuario.cedula ${ignoreCaseAccent} LIKE :cedula`,
-          {
-            cedula: `%${value}%`,
-          },
-        );
+        qb.andWhere(`usuario.cedula ${ignoreCaseAccent} LIKE :cedula`, {
+          cedula: `%${value}%`,
+        });
       }
     }
 
-    return qb
-      .orderBy('usuario.nombreCompleto', 'ASC')
-      .take(15)
-      .getMany();
+    return qb.orderBy('usuario.nombreCompleto', 'ASC').take(15).getMany();
   }
 }

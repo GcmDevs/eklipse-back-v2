@@ -1,7 +1,8 @@
 import { UserOptions } from 'jspdf-autotable';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { FILE_LOCATIONS, GcmContexts } from '@common/application/constants';
+import { GcmContexts } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import * as fs from 'fs';
 import { DetalleCotizacionOrm } from '@orm/inn/central-compras';
 import { TimerService } from '../../base';
@@ -72,14 +73,14 @@ const findImageFromContext = (contexto: GcmContexts) => {
     contexto === GcmContexts.ALTACENTRO
       ? 'alta-centro.jpg'
       : contexto === GcmContexts.AGUACHICA
-      ? 'aguachica.jpg'
-      : contexto === GcmContexts.AMMEDICAL
-      ? 'ammedical.png'
-      : contexto === GcmContexts.SANJUAN
-      ? 'sanjuan.jpg'
-      : contexto === GcmContexts.VALLEDUPAR
-      ? 'valledupar.jpg'
-      : 'ammedical.png'
+        ? 'aguachica.jpg'
+        : contexto === GcmContexts.AMMEDICAL
+          ? 'ammedical.png'
+          : contexto === GcmContexts.SANJUAN
+            ? 'sanjuan.jpg'
+            : contexto === GcmContexts.VALLEDUPAR
+              ? 'valledupar.jpg'
+              : 'ammedical.png'
   }`;
 };
 
@@ -88,14 +89,14 @@ const findNitFromContext = (contexto: GcmContexts) => {
     contexto === GcmContexts.ALTACENTRO
       ? '824001041-6'
       : contexto === GcmContexts.AGUACHICA
-      ? '900772387-1'
-      : contexto === GcmContexts.AMMEDICAL
-      ? '900106694-2'
-      : contexto === GcmContexts.SANJUAN
-      ? '900272582-6'
-      : contexto === GcmContexts.VALLEDUPAR
-      ? '892300708-1'
-      : '900106694-2'
+        ? '900772387-1'
+        : contexto === GcmContexts.AMMEDICAL
+          ? '900106694-2'
+          : contexto === GcmContexts.SANJUAN
+            ? '900272582-6'
+            : contexto === GcmContexts.VALLEDUPAR
+              ? '892300708-1'
+              : '900106694-2'
   }`;
 };
 
@@ -104,14 +105,14 @@ const findAddressFromContext = (contexto: GcmContexts) => {
     contexto === GcmContexts.ALTACENTRO
       ? 'CALLE 16B # 11-33'
       : contexto === GcmContexts.AGUACHICA
-      ? 'CALLE 5 # 26-42'
-      : contexto === GcmContexts.AMMEDICAL
-      ? 'CALLE 13B BIS No. 17 - 54'
-      : contexto === GcmContexts.SANJUAN
-      ? 'CALLE 7 No. 1 -74'
-      : contexto === GcmContexts.VALLEDUPAR
-      ? 'CALLE 16 No 15-15'
-      : 'CALLE 13B BIS No. 17 - 54'
+        ? 'CALLE 5 # 26-42'
+        : contexto === GcmContexts.AMMEDICAL
+          ? 'CALLE 13B BIS No. 17 - 54'
+          : contexto === GcmContexts.SANJUAN
+            ? 'CALLE 7 No. 1 -74'
+            : contexto === GcmContexts.VALLEDUPAR
+              ? 'CALLE 16 No 15-15'
+              : 'CALLE 13B BIS No. 17 - 54'
   }`;
 };
 
@@ -362,10 +363,10 @@ export async function generateOrdCo(payload: OCPayload) {
     dentOrFpaHeight <= 17
       ? 0
       : dentOrFpaHeight > 17 && dentOrFpaHeight <= 25
-      ? 10
-      : dentOrFpaHeight > 25 && dentOrFpaHeight <= 34
-      ? 20
-      : 30;
+        ? 10
+        : dentOrFpaHeight > 25 && dentOrFpaHeight <= 34
+          ? 20
+          : 30;
 
   doc.text(line, startX, startY + addPxToStartYFPH);
   startY += 15 + addPxToStartYFPH;
@@ -526,15 +527,15 @@ export async function generateOrdCo(payload: OCPayload) {
         isArrayImpar && index === payload.encargados.length - 1
           ? pageWidth / 2
           : index !== 0 && index % 2 !== 0
-          ? 300
-          : startX;
+            ? 300
+            : startX;
 
       let newStartY =
         isArrayImpar && index === payload.encargados.length - 1
           ? (startY += 70)
           : index !== 0 && index % 2 === 0
-          ? (startY += 70)
-          : startY;
+            ? (startY += 70)
+            : startY;
 
       if (index % 2 === 0) {
         if (startY >= 783) {

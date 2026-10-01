@@ -1,5 +1,5 @@
-import { TipoEventoAuditEquipo } from "../enums/tipos-audit-equipo.enum";
-import { DomainEquipoEvent } from "./domain-equipo.base.event";
+import { TipoEventoAuditEquipo } from '../enums/tipos-audit-equipo.enum';
+import { DomainEquipoEvent } from './domain-equipo.base.event';
 
 export class ActividadScheduledEvent extends DomainEquipoEvent {
   readonly tipo = TipoEventoAuditEquipo.ACTIVIDAD_PROGRAMADA;
@@ -38,4 +38,3 @@ export class ActividadInmediatedEvent extends DomainEquipoEvent {
     return { payload: this.data };
   }
 }
-

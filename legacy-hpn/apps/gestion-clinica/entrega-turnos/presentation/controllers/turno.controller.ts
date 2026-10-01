@@ -13,7 +13,7 @@ import { HPN_AUTHORITIES } from '@authorities/hospitalizacion';
 @CommonGuards()
 @Controller('v4/entrega-turnos')
 export class TurnoController {
-  constructor(private _turnoSource: TurnoSource) { }
+  constructor(private _turnoSource: TurnoSource) {}
 
   @Authorities([HPN_AUTHORITIES.GESTION_CLINICA.ENTREGA_TURNO])
   @Post('create-turno')

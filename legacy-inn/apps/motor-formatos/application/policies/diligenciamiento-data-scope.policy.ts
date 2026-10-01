@@ -9,19 +9,15 @@ import { RegistroDiligenciadoFmtOrm } from 'apps/motor-formatos/infrastructure';
 import { SelectQueryBuilder } from 'typeorm';
 
 @Injectable()
-export class DiligenciamientoDataScopePolicy
-  extends BaseDataScopePolicy<RegistroDiligenciadoFmtOrm>
-{
-  protected readonly authorityGlobal =
-    INN_AUTHORITIES.GESTION_ACTIVOS.FORMATOS.GESTIONAR;
+export class DiligenciamientoDataScopePolicy extends BaseDataScopePolicy<RegistroDiligenciadoFmtOrm> {
+  protected readonly authorityGlobal = INN_AUTHORITIES.GESTION_ACTIVOS.FORMATOS.GESTIONAR;
 
-  protected readonly authorityTeam =
-    INN_AUTHORITIES.GESTION_ACTIVOS.FORMATOS.REVISAR;
+  protected readonly authorityTeam = INN_AUTHORITIES.GESTION_ACTIVOS.FORMATOS.REVISAR;
 
   applyScope(
     qb: SelectQueryBuilder<RegistroDiligenciadoFmtOrm>,
     scope: DataScopeResult,
-    alias: string,
+    alias: string
   ): SelectQueryBuilder<RegistroDiligenciadoFmtOrm> {
     switch (scope.tipo) {
       case DataScopeType.GLOBAL:
@@ -34,9 +30,7 @@ export class DiligenciamientoDataScopePolicy
 
       case DataScopeType.OWNER:
       default:
-        return DataScopeSpecs.onlyFromUsuario(
-          qb, alias, 'diligenciadoPorId', scope.filtros,
-        );
+        return DataScopeSpecs.onlyFromUsuario(qb, alias, 'diligenciadoPorId', scope.filtros);
     }
   }
 }

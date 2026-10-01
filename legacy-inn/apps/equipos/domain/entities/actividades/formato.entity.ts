@@ -1,8 +1,8 @@
-import { BadInputError } from "@common/domain/errors";
-import { UsuariosCreativos } from "@common/domain/enums";
-import { Id } from "@common/domain/value-objects";
-import { ModoFormato, TipoMantenimiento } from "@equipos/domain/enums";
-import { VersionFormatoFmt } from "apps/motor-formatos/domain";
+import { BadInputError } from '@common/domain/errors';
+import { UsuariosCreativos } from '@common/domain/enums';
+import { Id } from '@common/domain/value-objects';
+import { ModoFormato, TipoMantenimiento } from '@equipos/domain/enums';
+import { VersionFormatoFmt } from 'apps/motor-formatos/domain';
 
 export class Formato {
   private constructor(
@@ -19,9 +19,8 @@ export class Formato {
     private readonly creadoPorId: Id,
     private readonly createdAt: Date,
     private updatedAt: Date,
-    private descripcion?: string,
-  ) { }
-
+    private descripcion?: string
+  ) {}
 
   private static create(
     nombre: string,
@@ -32,7 +31,6 @@ export class Formato {
     creadoPorId: number,
     descripcion?: string
   ): Formato {
-
     this.validate(nombre, codigo, slug);
 
     return new Formato(
@@ -49,10 +47,9 @@ export class Formato {
       new Id(creadoPorId),
       new Date(),
       new Date(),
-      descripcion,
+      descripcion
     );
   }
-
 
   static rebuild(
     id: number,
@@ -70,7 +67,6 @@ export class Formato {
     updatedAt: Date,
     descripcion?: string
   ): Formato {
-
     return new Formato(
       new Id(id),
       nombre,
@@ -88,7 +84,6 @@ export class Formato {
       descripcion
     );
   }
-
 
   get getId(): Id {
     return this.id;
@@ -133,7 +128,6 @@ export class Formato {
     return this.updatedAt;
   }
 
-
   addVersion(version: VersionFormatoFmt): void {
     this.versiones.push(version);
   }
@@ -146,12 +140,7 @@ export class Formato {
     this.activo = true;
   }
 
-  private static validate(
-    nombre: string,
-    codigo: string,
-    slug: string
-  ): void {
-
+  private static validate(nombre: string, codigo: string, slug: string): void {
     if (!nombre || nombre.trim().length === 0) {
       throw new BadInputError('El nombre es obligatorio');
     }
@@ -173,16 +162,15 @@ export class Formato {
     versionFormatoId: number,
     etiquetaVersion: string | null,
     descripcion?: string,
-    formatoDestino?: Formato,
+    formatoDestino?: Formato
   ): Formato {
-
     const versionFormatoClone = this.getVersiones.find(
-      (vers) => vers.getId.getValor === versionFormatoId,
+      vers => vers.getId.getValor === versionFormatoId
     );
 
     if (!versionFormatoClone) {
       throw new BadInputError(
-        `No se encontró la versión ${versionFormatoId} del formato ${this.getNombre}`,
+        `No se encontró la versión ${versionFormatoId} del formato ${this.getNombre}`
       );
     }
 
@@ -190,18 +178,14 @@ export class Formato {
       const nuevaVersion = versionFormatoClone.clone(
         formatoDestino.getId.getValor,
         usuarioId,
-        etiquetaVersion,
+        etiquetaVersion
       );
 
       formatoDestino.addVersion(nuevaVersion);
       return formatoDestino;
     }
 
-    Formato.validate(
-      nuevoNombre,
-      nuevoCodigo,
-      nuevoSlug,
-    );
+    Formato.validate(nuevoNombre, nuevoCodigo, nuevoSlug);
 
     const nuevoFormato = Formato.create(
       nuevoNombre,
@@ -210,13 +194,13 @@ export class Formato {
       nuevoSlug,
       this.id.getValor,
       usuarioId,
-      descripcion,
+      descripcion
     );
 
     const primeraVersion = versionFormatoClone.clone(
       nuevoFormato.getId.getValor,
       usuarioId,
-      etiquetaVersion,
+      etiquetaVersion
     );
 
     nuevoFormato.addVersion(primeraVersion);

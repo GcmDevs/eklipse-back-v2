@@ -15,8 +15,8 @@ export class AuditTipoEquipo {
     private readonly fechaCambio: Date,
     private readonly observaciones: string | null,
     private readonly correlationOid: string,
-    private readonly createdAt: Date,
-  ) { }
+    private readonly createdAt: Date
+  ) {}
 
   static create(props: {
     tipoEquipoId: number;
@@ -44,7 +44,7 @@ export class AuditTipoEquipo {
       props.fechaCambio,
       props.observaciones ?? null,
       props.correlationOid,
-      new Date(),
+      new Date()
     );
   }
 
@@ -76,7 +76,7 @@ export class AuditTipoEquipo {
       props.fechaCambio,
       props.observaciones,
       props.correlationOid,
-      props.createdAt,
+      props.createdAt
     );
   }
 
@@ -86,17 +86,43 @@ export class AuditTipoEquipo {
     }
   }
 
-  get getId(): Id { return this.id; }
-  get getTipoEquipoId(): Id { return this.tipoEquipoId; }
-  get getTipo(): TipoAuditTipoEquipo { return this.tipo; }
-  get getCampo(): string | null { return this.campo; }
-  get getValorAnterior(): string | null { return this.valorAnterior; }
-  get getValorNuevo(): string | null { return this.valorNuevo; }
-  get getSincronizo(): boolean { return this.sincronizo; }
-  get getUsuarioId(): Id { return this.usuarioId; }
-  get getUsuarioNombre(): string { return this.usuarioNombre; }
-  get getFechaCambio(): Date { return this.fechaCambio; }
-  get getObservaciones(): string | null { return this.observaciones; }
-  get getCorrelationOid(): string { return this.correlationOid; }
-  get getCreatedAt(): Date { return this.createdAt; }
+  get getId(): Id {
+    return this.id;
+  }
+  get getTipoEquipoId(): Id {
+    return this.tipoEquipoId;
+  }
+  get getTipo(): TipoAuditTipoEquipo {
+    return this.tipo;
+  }
+  get getCampo(): string | null {
+    return this.campo;
+  }
+  get getValorAnterior(): string | null {
+    return this.valorAnterior;
+  }
+  get getValorNuevo(): string | null {
+    return this.valorNuevo;
+  }
+  get getSincronizo(): boolean {
+    return this.sincronizo;
+  }
+  get getUsuarioId(): Id {
+    return this.usuarioId;
+  }
+  get getUsuarioNombre(): string {
+    return this.usuarioNombre;
+  }
+  get getFechaCambio(): Date {
+    return this.fechaCambio;
+  }
+  get getObservaciones(): string | null {
+    return this.observaciones;
+  }
+  get getCorrelationOid(): string {
+    return this.correlationOid;
+  }
+  get getCreatedAt(): Date {
+    return this.createdAt;
+  }
 }

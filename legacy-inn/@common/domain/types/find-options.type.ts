@@ -1,4 +1,4 @@
-import { EntityStatusFilter } from "../enums";
+import { EntityStatusFilter } from '../enums';
 
 export class FindThrowOptions {
   throwIfNotFound: boolean = true;

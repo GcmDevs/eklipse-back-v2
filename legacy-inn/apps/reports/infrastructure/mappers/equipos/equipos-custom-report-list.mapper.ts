@@ -3,7 +3,7 @@ import { EquipoExportRow, EQUIPOS_CUSTOM_COLUMNS } from 'apps/reports/domain/typ
 
 export class EquiposCustomReportMapper {
   public static toExportRows(equipos: EquipoOrm[]): EquipoExportRow[] {
-    return equipos.map((equipo) => this.toExportRow(equipo));
+    return equipos.map(equipo => this.toExportRow(equipo));
   }
 
   public static toExportRow(equipo: EquipoOrm): EquipoExportRow {

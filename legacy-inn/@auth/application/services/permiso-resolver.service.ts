@@ -11,7 +11,7 @@ import { PermisoCacheService } from './permiso-cache.service';
 export class PermisoResolverService {
   constructor(
     @Inject(REQUEST) private readonly request: Request,
-    private readonly permisoCache: PermisoCacheService,
+    private readonly permisoCache: PermisoCacheService
   ) {}
 
   async resolveAuthorities(usuarioId: number): Promise<Set<string>> {

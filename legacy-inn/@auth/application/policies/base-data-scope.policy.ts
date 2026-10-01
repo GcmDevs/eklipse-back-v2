@@ -46,6 +46,6 @@ export abstract class BaseDataScopePolicy<T> implements IDataScopePolicy<T> {
   abstract applyScope(
     qb: SelectQueryBuilder<T>,
     scope: DataScopeResult,
-    alias: string,
+    alias: string
   ): SelectQueryBuilder<T>;
 }

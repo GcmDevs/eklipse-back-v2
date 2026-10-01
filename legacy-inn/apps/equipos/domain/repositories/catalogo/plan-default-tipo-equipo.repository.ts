@@ -8,6 +8,9 @@ export interface PlanDefaultTipoEquipoFindAllFilters {
   limit?: number;
 }
 
-export interface PlanDefaultTipoEquipoRepository extends BaseRepository<PlanDefaultTipoEquipo, PlanDefaultTipoEquipoRead> {
+export interface PlanDefaultTipoEquipoRepository extends BaseRepository<
+  PlanDefaultTipoEquipo,
+  PlanDefaultTipoEquipoRead
+> {
   findAll(filters: PlanDefaultTipoEquipoFindAllFilters): Promise<PlanDefaultTipoEquipoRead[]>;
 }

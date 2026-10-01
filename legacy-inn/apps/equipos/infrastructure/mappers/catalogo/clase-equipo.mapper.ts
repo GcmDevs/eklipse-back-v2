@@ -12,7 +12,7 @@ export class ClaseEquipoMapper {
       orm.createdAt,
       orm.updatedAt,
       orm.descripcion,
-      orm.activo,
+      orm.activo
     );
   }
 

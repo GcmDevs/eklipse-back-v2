@@ -20,7 +20,7 @@ export interface RecordAuditTipoEquipoInput {
 export class AuditTipoEquipoService {
   constructor(
     @Inject(AUDIT_TIPO_EQUIPO_REPOSITORY)
-    private readonly repository: AuditTipoEquipoRepository,
+    private readonly repository: AuditTipoEquipoRepository
   ) {}
 
   async record(input: RecordAuditTipoEquipoInput): Promise<void> {

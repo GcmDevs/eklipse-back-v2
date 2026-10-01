@@ -47,7 +47,10 @@ interface CamaEnJornadaI {
 
 @Injectable()
 export class CreateDietasBySubgrupoImpl extends DietasBaseSource {
-  constructor(@Inject(REQUEST) request: Request, private _transaction: TransactionDietaService) {
+  constructor(
+    @Inject(REQUEST) request: Request,
+    private _transaction: TransactionDietaService
+  ) {
     super(request);
   }
 

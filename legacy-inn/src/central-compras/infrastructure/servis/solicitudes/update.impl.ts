@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { TIPOS, ESTADOS } from '@ctypes/inn/central-compras/solicitudes';
 import { consecutivosServices } from '@common/application/services';
 import { OldManageSolicitudDto } from '@inn/central-compras/presentation/dtos';

@@ -1,7 +1,7 @@
 import { UserOptions } from 'jspdf-autotable';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import * as fs from 'fs';
 import { ENVIRONMENTS } from 'src/app.environments';
 import { additionalDataByCentro, GcmContextType } from '@common/domain/types';

@@ -9,4 +9,3 @@ export * from './documento-tipo-equipo.entity';
 export * from './parte-catg.entity';
 export * from './unidad-medida.entity';
 export * from './audit-tipo-equipo.entity';
-

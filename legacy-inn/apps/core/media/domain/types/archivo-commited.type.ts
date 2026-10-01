@@ -1,7 +1,7 @@
-import { ArchivoAlmacenado } from "../entities/archivo-almacenado.entity";
+import { ArchivoAlmacenado } from '../entities/archivo-almacenado.entity';
 
 export interface ArchivoCommitted {
-    archivo: ArchivoAlmacenado;
-    destino: string;
-    rutaOrigen: string;
+  archivo: ArchivoAlmacenado;
+  destino: string;
+  rutaOrigen: string;
 }

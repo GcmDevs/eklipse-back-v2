@@ -1,21 +1,25 @@
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { TRANSACTION_MANAGER, TransactionManager } from '@common/application/services';
 import { ResourceNotFoundError } from '@common/domain/errors';
 import { FindThrowOptions } from '@common/domain/types';
 import { StagingFileService } from '@core/media/application/services/staging.archivo.service';
-import { PayloadArchivo, RESTRICCIONES_MIME_STAGING, TipoContextoArchivo } from '@core/media/domain/types';
+import {
+  PayloadArchivo,
+  RESTRICCIONES_MIME_STAGING,
+  TipoContextoArchivo,
+} from '@core/media/domain/types';
 import { ProveedorService, ResponsableService } from '@core/terceros/application/services';
 import { Equipo, Marca, Modelo, PlanActividad } from '@equipos/domain/entities';
 import { EstadoBusquedaEquipo, TipoActividad } from '@equipos/domain/enums';
 import { DomainEquipoEvent } from '@equipos/domain/events';
 import { EquipoRead } from '@equipos/domain/read';
-import {
-  EQUIPOS_REPOSITORY,
-  EquiposRepository,
-} from '@equipos/domain/repositories';
+import { EQUIPOS_REPOSITORY, EquiposRepository } from '@equipos/domain/repositories';
 import { IAccesorioUnidadRepository } from '@equipos/domain/repositories/accesorio-unidad.repository';
 import { PlanDefaultTipoEquipoRepository } from '@equipos/domain/repositories/catalogo/plan-default-tipo-equipo.repository';
-import { ACCESORIO_UNIDAD_REPOSITORY, PLAN_DEFAULT_TIPO_EQUIPO_REPOSITORY } from '@equipos/domain/repositories/tokens';
+import {
+  ACCESORIO_UNIDAD_REPOSITORY,
+  PLAN_DEFAULT_TIPO_EQUIPO_REPOSITORY,
+} from '@equipos/domain/repositories/tokens';
 import { RegistroFotografico } from '@equipos/domain/value-objects';
 import { GeneralActivoLegacyMapper } from '@equipos/infrastructure';
 import { GeneralActivoLegacyView } from '@equipos/infrastructure/persistence/views/external';
@@ -38,7 +42,6 @@ import { CompraService } from './adquisicion';
 import { AccesorioTipoEquipoService, TipoActivoService, TipoEquipoService } from './catalogo';
 import { MarcaService, ModeloService } from './marca';
 
-
 @Injectable()
 export class EquiposLegacyService {
   constructor(
@@ -60,8 +63,8 @@ export class EquiposLegacyService {
     @Inject(ACCESORIO_UNIDAD_REPOSITORY)
     private readonly accesorioUnidadRepository: IAccesorioUnidadRepository,
     @Inject(TRANSACTION_MANAGER)
-    private readonly txManager: TransactionManager,
-  ) { }
+    private readonly txManager: TransactionManager
+  ) {}
 
   public async importEquipoLegacy({
     complemento,
@@ -69,21 +72,17 @@ export class EquiposLegacyService {
   }: ImportEquipoLegacyDto): Promise<EquipoRead> {
     const legacy = await this.equipoRepository.findGeneralActivoByNumeroPlaca(numeroPlaca);
     if (!legacy) {
-      throw new ResourceNotFoundError(
-        `Equipo legacy con placa ${numeroPlaca} no encontrado`,
-      );
+      throw new ResourceNotFoundError(`Equipo legacy con placa ${numeroPlaca} no encontrado`);
     }
 
     const alreadyImported = await this.equipoRepository.alreadyExist(numeroPlaca);
     if (alreadyImported) {
-      throw new BadRequestException(
-        `El equipo legacy con placa ${numeroPlaca} ya fue importado`,
-      );
+      throw new BadRequestException(`El equipo legacy con placa ${numeroPlaca} ya fue importado`);
     }
 
     const modeloEquivalent = await this.resolveModeloEquivalent(
       legacy.modeloLegacyNombre,
-      legacy.marcaLegacyNombre,
+      legacy.marcaLegacyNombre
     );
     const sugerencias = buildLegacyImportSuggestions(legacy, modeloEquivalent);
     const merged = mergeLegacyImportPayload(numeroPlaca, sugerencias, complemento);
@@ -94,7 +93,9 @@ export class EquiposLegacyService {
     ]);
 
     if (!tipoEquipo) {
-      throw new ResourceNotFoundError(`Tipo de equipo con id: ${merged.tipoEquipoId} no encontrado`);
+      throw new ResourceNotFoundError(
+        `Tipo de equipo con id: ${merged.tipoEquipoId} no encontrado`
+      );
     }
     if (!responsable) {
       throw new ResourceNotFoundError(`Responsable con id: ${merged.responsableId} no encontrado`);
@@ -102,42 +103,52 @@ export class EquiposLegacyService {
 
     const tipoActivo = await this.tipoActivoService.findById(tipoEquipo.getTipoActivoId.getValor);
     if (!tipoActivo) {
-      throw new ResourceNotFoundError(`Tipo de activo con id: ${tipoEquipo.getTipoActivoId.getValor} no encontrado`);
+      throw new ResourceNotFoundError(
+        `Tipo de activo con id: ${tipoEquipo.getTipoActivoId.getValor} no encontrado`
+      );
     }
 
     const compra = await this.compraService.findById(merged.compraId);
     if (!compra) {
-      throw new ResourceNotFoundError(`Registro de entrada con id: ${merged.compraId} no encontrado`);
+      throw new ResourceNotFoundError(
+        `Registro de entrada con id: ${merged.compraId} no encontrado`
+      );
     }
 
     const tipoEquipoCatId = tipoEquipo.getId.getValor;
-    const planesDefaultList = await this.planDefaultRepository.findAll({ tipoEquipoId: tipoEquipoCatId });
+    const planesDefaultList = await this.planDefaultRepository.findAll({
+      tipoEquipoId: tipoEquipoCatId,
+    });
 
     const planMantenimientoResuelto = resolvePlanCreacionEquipo(
       merged.planMantenimiento,
       TipoActividad.MANTENIMIENTO,
-      planesDefaultList,
+      planesDefaultList
     );
     const planCalibracionResuelto = resolvePlanCreacionEquipo(
       merged.planCalibracion,
       TipoActividad.CALIBRACION,
-      planesDefaultList,
+      planesDefaultList
     );
 
     const planes: PlanActividad[] = [];
     if (planMantenimientoResuelto.planPersonalizado) {
-      planes.push(await buildPlanActividad(
-        this.formatoService,
-        TipoActividad.MANTENIMIENTO,
-        planMantenimientoResuelto.planPersonalizado,
-      ));
+      planes.push(
+        await buildPlanActividad(
+          this.formatoService,
+          TipoActividad.MANTENIMIENTO,
+          planMantenimientoResuelto.planPersonalizado
+        )
+      );
     }
     if (planCalibracionResuelto.planPersonalizado) {
-      planes.push(await buildPlanActividad(
-        this.formatoService,
-        TipoActividad.CALIBRACION,
-        planCalibracionResuelto.planPersonalizado,
-      ));
+      planes.push(
+        await buildPlanActividad(
+          this.formatoService,
+          TipoActividad.CALIBRACION,
+          planCalibracionResuelto.planPersonalizado
+        )
+      );
     }
 
     const registroFotografico = merged.registroFotografico?.length
@@ -161,90 +172,99 @@ export class EquiposLegacyService {
       merged.compraId,
       registroFotografico,
       planMantenimientoResuelto.planDefaultId,
-      planCalibracionResuelto.planDefaultId,
+      planCalibracionResuelto.planDefaultId
     );
 
     const aggregates: Array<{ pullEvents(): DomainEquipoEvent[] }> = [];
     const correlationId = generateCorrelationId();
 
-    return this.txManager.transactional(async () => {
-      const equipoImportedSaved = await this.equipoRepository.save(equipo);
-      equipoImportedSaved.registerImportedEvent({
-        generalActivoId: legacy.id,
-        activoId: legacy.activoId,
-      });
-
-      const accesoriosEstandar = await this.accesorioTipoEquipoService.findByTipoEquipoId(tipoEquipoCatId);
-      if (accesoriosEstandar.length > 0) {
-        await Promise.all(
-          accesoriosEstandar.map(a =>
-            this.accesorioUnidadRepository.createFromEstandar(
-              equipoImportedSaved.getId.getValor,
-              a.id,
-              a.parteSnap,
-            ),
-          ),
-        );
-      }
-
-      const planesConFecha = equipoImportedSaved.getPlanesActividad
-        .filter(plan => !!plan.getFechaProximaEjecucion);
-
-      const actividades = await Promise.all(
-        planesConFecha.map(plan =>
-          this.actividadService.createRegistroProgramadoDefault({
-            equipoId: equipoImportedSaved.getId.getValor,
-            esRealizaPorExterno: plan.getSeRealizaPorExterno ?? false,
-            tipo: plan.getTipo,
-            formatoId: plan.getFormatoId?.getValor ?? null,
-            planActividadId: plan.getId.getValor,
-            fechaPrograma: plan.getFechaProximaEjecucion,
-          }),
-        ),
-      );
-
-      const payloads: PayloadArchivo[] = [];
-      for (const foto of merged.registroFotografico ?? []) {
-        if (!foto.archivoId) continue;
-        payloads.push({
-          archivoId: foto.archivoId,
-          contexto: TipoContextoArchivo.REGISTRO_FOTOGRAFICO_EQUIPO,
-          module: FILE_LOCATIONS.inn.eqp.hdv.regFotg,
-          referenciaId: equipoImportedSaved.getId.getValor,
+    return this.txManager.transactional(
+      async () => {
+        const equipoImportedSaved = await this.equipoRepository.save(equipo);
+        equipoImportedSaved.registerImportedEvent({
+          generalActivoId: legacy.id,
+          activoId: legacy.activoId,
         });
-      }
-      if (payloads.length > 0) {
-        await this.stagingFileService.commitMany(
-          payloads,
-          RESTRICCIONES_MIME_STAGING.IMAGENES,
-        );
-      }
 
-      aggregates.push(equipoImportedSaved, ...actividades);
-      return this.equipoRepository.findViewById(equipoImportedSaved.getId.getValor);
-    }, aggregates, correlationId);
+        const accesoriosEstandar =
+          await this.accesorioTipoEquipoService.findByTipoEquipoId(tipoEquipoCatId);
+        if (accesoriosEstandar.length > 0) {
+          await Promise.all(
+            accesoriosEstandar.map(a =>
+              this.accesorioUnidadRepository.createFromEstandar(
+                equipoImportedSaved.getId.getValor,
+                a.id,
+                a.parteSnap
+              )
+            )
+          );
+        }
+
+        const planesConFecha = equipoImportedSaved.getPlanesActividad.filter(
+          plan => !!plan.getFechaProximaEjecucion
+        );
+
+        const actividades = await Promise.all(
+          planesConFecha.map(plan =>
+            this.actividadService.createRegistroProgramadoDefault({
+              equipoId: equipoImportedSaved.getId.getValor,
+              esRealizaPorExterno: plan.getSeRealizaPorExterno ?? false,
+              tipo: plan.getTipo,
+              formatoId: plan.getFormatoId?.getValor ?? null,
+              planActividadId: plan.getId.getValor,
+              fechaPrograma: plan.getFechaProximaEjecucion,
+            })
+          )
+        );
+
+        const payloads: PayloadArchivo[] = [];
+        for (const foto of merged.registroFotografico ?? []) {
+          if (!foto.archivoId) continue;
+          payloads.push({
+            archivoId: foto.archivoId,
+            contexto: TipoContextoArchivo.REGISTRO_FOTOGRAFICO_EQUIPO,
+            module: FILE_LOCATIONS.inn.eqp.hdv.regFotg,
+            referenciaId: equipoImportedSaved.getId.getValor,
+          });
+        }
+        if (payloads.length > 0) {
+          await this.stagingFileService.commitMany(payloads, RESTRICCIONES_MIME_STAGING.IMAGENES);
+        }
+
+        aggregates.push(equipoImportedSaved, ...actividades);
+        return this.equipoRepository.findViewById(equipoImportedSaved.getId.getValor);
+      },
+      aggregates,
+      correlationId
+    );
   }
 
   public async getGeneralActivoByNumeroPlaca(
-    numeroPlaca: string,
+    numeroPlaca: string
   ): Promise<ResponseGeneralActivoLegacyEnrichedDto> {
     const { equipo, estado } = await this.equipoRepository.findInGlobalSystemByPlaca(numeroPlaca);
     if (equipo && estado === EstadoBusquedaEquipo.IMPORTABLE) {
       const { marca, modelo } = await this.resolveCatalogoEquivalents(equipo);
       const [proveedorExiste, responsableExiste] = await Promise.all([
         equipo.proveedorId
-          ? this.proveedorService.findById(equipo.proveedorId, { throwIfNotFound: false })
-            .then(p => !!p)
+          ? this.proveedorService
+              .findById(equipo.proveedorId, { throwIfNotFound: false })
+              .then(p => !!p)
           : Promise.resolve(false),
         equipo.responsableId
-          ? this.responsableService.findById(equipo.responsableId, { throwIfNotFound: false })
-            .then(r => !!r)
+          ? this.responsableService
+              .findById(equipo.responsableId, { throwIfNotFound: false })
+              .then(r => !!r)
           : Promise.resolve(false),
       ]);
 
       const marcaResponse = mapMarcaToResponse(marca);
       const modeloResponse = mapModeloToResponse(modelo, marca);
-      const legacyResponse = GeneralActivoLegacyMapper.toResponse(equipo, marcaResponse, modeloResponse);
+      const legacyResponse = GeneralActivoLegacyMapper.toResponse(
+        equipo,
+        marcaResponse,
+        modeloResponse
+      );
       if (!legacyResponse) {
         throw new ResourceNotFoundError(`Activo legacy con placa ${numeroPlaca} no encontrado`);
       }
@@ -261,18 +281,24 @@ export class EquiposLegacyService {
         estado,
       };
     }
-    return { estado, legacy: null, catalogo: null, valoresSugeridos: null, camposRequeridosUsuario: null }
+    return {
+      estado,
+      legacy: null,
+      catalogo: null,
+      valoresSugeridos: null,
+      camposRequeridosUsuario: null,
+    };
   }
 
   public async findGeneralActivoByNumeroPlaca(
     numPlaca: string,
-    options: FindThrowOptions = new FindThrowOptions(),
+    options: FindThrowOptions = new FindThrowOptions()
   ): Promise<GeneralActivoLegacyView | null> {
     const gralActivoFound = await this.equipoRepository.findGeneralActivoByNumeroPlaca(numPlaca);
     if (!gralActivoFound) {
       if (options.throwIfNotFound) {
         throw new ResourceNotFoundError(
-          `No se encontro el activo general con el numero de placa: ${numPlaca}`,
+          `No se encontro el activo general con el numero de placa: ${numPlaca}`
         );
       }
       return null;
@@ -281,19 +307,18 @@ export class EquiposLegacyService {
   }
 
   private async resolveCatalogoEquivalents(
-    legacy: GeneralActivoLegacyView,
+    legacy: GeneralActivoLegacyView
   ): Promise<{ marca: Marca | null; modelo: Modelo | null }> {
     const modelo = await this.resolveModeloEquivalent(
       legacy.modeloLegacyNombre,
-      legacy.marcaLegacyNombre,
+      legacy.marcaLegacyNombre
     );
 
     let marca: Marca | null = null;
     if (legacy.marcaLegacyNombre) {
-      marca = await this.marcaService.findMarcaByLegacyNombre(
-        legacy.marcaLegacyNombre,
-        { throwIfNotFound: false },
-      );
+      marca = await this.marcaService.findMarcaByLegacyNombre(legacy.marcaLegacyNombre, {
+        throwIfNotFound: false,
+      });
     } else if (modelo) {
       marca = await this.marcaService.findById(modelo.getMarcaId.getValor, {
         throwIfNotFound: false,
@@ -305,25 +330,23 @@ export class EquiposLegacyService {
 
   private async resolveModeloEquivalent(
     modeloLegacyNombre?: string | null,
-    marcaLegacyNombre?: string | null,
+    marcaLegacyNombre?: string | null
   ): Promise<Modelo | null> {
     if (!modeloLegacyNombre) {
       return null;
     }
 
-    const modeloEquivalent = await this.modeloService.findModeloByLegacyNombre(
-      modeloLegacyNombre,
-      { throwIfNotFound: false },
-    );
+    const modeloEquivalent = await this.modeloService.findModeloByLegacyNombre(modeloLegacyNombre, {
+      throwIfNotFound: false,
+    });
 
     if (!modeloEquivalent || !marcaLegacyNombre) {
       return modeloEquivalent;
     }
 
-    const marcaEquivalent = await this.marcaService.findMarcaByLegacyNombre(
-      marcaLegacyNombre,
-      { throwIfNotFound: false },
-    );
+    const marcaEquivalent = await this.marcaService.findMarcaByLegacyNombre(marcaLegacyNombre, {
+      throwIfNotFound: false,
+    });
 
     if (
       marcaEquivalent &&

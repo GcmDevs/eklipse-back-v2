@@ -1,5 +1,11 @@
 import { Logger } from '@nestjs/common';
-import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import {
+  ConnectedSocket,
+  MessageBody,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import * as jwt from 'jsonwebtoken';
 import { processEnv } from '@env';
@@ -56,28 +62,33 @@ export class TrasladosRealtimeGateway {
   @SubscribeMessage('traslado:suscribir-contexto')
   public subscribeContext(
     @ConnectedSocket() client: Socket,
-    @MessageBody() body: { contextoCode: GcmContextCode },
+    @MessageBody() body: { contextoCode: GcmContextCode }
   ): void {
     if (!client.data.documento || !body?.contextoCode) return;
 
     [...client.rooms]
-      .filter((room) => room.startsWith('traslado:contexto:'))
-      .forEach((room) => client.leave(room));
+      .filter(room => room.startsWith('traslado:contexto:'))
+      .forEach(room => client.leave(room));
 
     client.join(this.contextRoom(body.contextoCode));
   }
 
-  public publish(event: Omit<TrasladoRealtimeEvent, 'ocurridoEn'>, documentos: string[] = []): void {
+  public publish(
+    event: Omit<TrasladoRealtimeEvent, 'ocurridoEn'>,
+    documentos: string[] = []
+  ): void {
     const payload: TrasladoRealtimeEvent = { ...event, ocurridoEn: new Date().toISOString() };
     const rooms = [
       this.contextRoom(payload.contextoCode),
-      ...[...new Set(documentos.filter(Boolean))].map((documento) => this.userRoom(documento)),
+      ...[...new Set(documentos.filter(Boolean))].map(documento => this.userRoom(documento)),
     ];
     this.server.to(rooms).emit('traslado.actualizado', payload);
   }
 
   private getToken(value: unknown): string {
-    const token = String(value || '').replace(/^Bearer\s+/i, '').trim();
+    const token = String(value || '')
+      .replace(/^Bearer\s+/i, '')
+      .trim();
     if (!token) throw new Error('Token requerido');
     return token;
   }

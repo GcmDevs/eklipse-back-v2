@@ -45,8 +45,8 @@ export class AprobacionGerenteImpl extends CentralComprasSource {
       const estado = payload.isAprobado
         ? ESTADOS.SOL_APROBADA
         : rechazos.length >= 2
-        ? ESTADOS.SOL_RECHAZO_DEFINITIVO
-        : ESTADOS.SOL_RECHAZO_TEMPORAL;
+          ? ESTADOS.SOL_RECHAZO_DEFINITIVO
+          : ESTADOS.SOL_RECHAZO_TEMPORAL;
 
       const estadoEspecifico = payload.isAprobado
         ? ESTADOS_ESPECIFICOS.SOL_APROBADA

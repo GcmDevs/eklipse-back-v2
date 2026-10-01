@@ -8,16 +8,13 @@ import { RegistroActividadOrm } from '@orm/inn/equipos';
 import { SelectQueryBuilder } from 'typeorm';
 
 @Injectable()
-export class ActividadesDataScopePolicy
-  extends BaseDataScopePolicy<RegistroActividadOrm>
-{
-  protected readonly authorityGlobal =
-    INN_AUTHORITIES.GESTION_ACTIVOS.ACTIVIDADES.VER;
+export class ActividadesDataScopePolicy extends BaseDataScopePolicy<RegistroActividadOrm> {
+  protected readonly authorityGlobal = INN_AUTHORITIES.GESTION_ACTIVOS.ACTIVIDADES.VER;
 
   applyScope(
     qb: SelectQueryBuilder<RegistroActividadOrm>,
     scope: DataScopeResult,
-    alias: string,
+    alias: string
   ): SelectQueryBuilder<RegistroActividadOrm> {
     switch (scope.tipo) {
       case DataScopeType.GLOBAL:
@@ -25,9 +22,7 @@ export class ActividadesDataScopePolicy
 
       case DataScopeType.OWNER:
       default:
-        return DataScopeSpecs.onlyFromUsuario(
-          qb, alias, 'tecnicoResponsableId', scope.filtros,
-        );
+        return DataScopeSpecs.onlyFromUsuario(qb, alias, 'tecnicoResponsableId', scope.filtros);
     }
   }
 }

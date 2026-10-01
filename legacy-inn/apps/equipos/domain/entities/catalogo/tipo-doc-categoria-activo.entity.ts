@@ -1,7 +1,7 @@
-import { BadInputError } from "@common/domain/errors";
-import { Id, normalizeUppercaseText } from "@common/domain/value-objects";
-import { CategoriaDocumento } from "@equipos/domain/enums";
-import { ReglasObligatoriedadTipoActivo } from "@equipos/domain/value-objects";
+import { BadInputError } from '@common/domain/errors';
+import { Id, normalizeUppercaseText } from '@common/domain/value-objects';
+import { CategoriaDocumento } from '@equipos/domain/enums';
+import { ReglasObligatoriedadTipoActivo } from '@equipos/domain/value-objects';
 
 export class TipoDocCategoriaActivo {
   private constructor(
@@ -11,14 +11,14 @@ export class TipoDocCategoriaActivo {
     private reglasTipoActivo: ReglasObligatoriedadTipoActivo,
     private descripcion: string | undefined,
     private readonly createdAt: Date,
-    private updatedAt: Date,
+    private updatedAt: Date
   ) {}
 
   static create(
     nombre: string,
     categoria: CategoriaDocumento,
     reglasTipoActivo: ReglasObligatoriedadTipoActivo,
-    descripcion?: string,
+    descripcion?: string
   ): TipoDocCategoriaActivo {
     const now = new Date();
     return new TipoDocCategoriaActivo(
@@ -28,7 +28,7 @@ export class TipoDocCategoriaActivo {
       reglasTipoActivo,
       descripcion,
       now,
-      now,
+      now
     );
   }
 
@@ -39,7 +39,7 @@ export class TipoDocCategoriaActivo {
     reglasTipoActivo: ReglasObligatoriedadTipoActivo,
     createdAt: Date,
     updatedAt: Date,
-    descripcion?: string,
+    descripcion?: string
   ): TipoDocCategoriaActivo {
     return new TipoDocCategoriaActivo(
       new Id(id),
@@ -48,7 +48,7 @@ export class TipoDocCategoriaActivo {
       reglasTipoActivo,
       descripcion,
       createdAt,
-      updatedAt,
+      updatedAt
     );
   }
 
@@ -56,7 +56,7 @@ export class TipoDocCategoriaActivo {
     nombre: string,
     categoria: CategoriaDocumento,
     reglasTipoActivo: ReglasObligatoriedadTipoActivo,
-    descripcion?: string,
+    descripcion?: string
   ): void {
     this.nombre = normalizeUppercaseText(nombre);
     this.categoria = categoria;
@@ -69,7 +69,7 @@ export class TipoDocCategoriaActivo {
     const valor = this.reglasTipoActivo.getEsObligatorioPara(tipoActivoId);
     if (valor === undefined) {
       throw new BadInputError(
-        `El tipo de documento no aplica para el tipo de activo con id ${tipoActivoId}.`,
+        `El tipo de documento no aplica para el tipo de activo con id ${tipoActivoId}.`
       );
     }
     return valor;
@@ -79,11 +79,25 @@ export class TipoDocCategoriaActivo {
     return this.reglasTipoActivo.aplicaParaTipoActivo(tipoActivoId);
   }
 
-  get getId(): Id { return this.id; }
-  get getNombre(): string { return this.nombre; }
-  get getCategoria(): CategoriaDocumento { return this.categoria; }
-  get getReglasTipoActivo(): ReglasObligatoriedadTipoActivo { return this.reglasTipoActivo; }
-  get getDescripcion(): string | undefined { return this.descripcion; }
-  get getCreatedAt(): Date { return this.createdAt; }
-  get getUpdatedAt(): Date { return this.updatedAt; }
+  get getId(): Id {
+    return this.id;
+  }
+  get getNombre(): string {
+    return this.nombre;
+  }
+  get getCategoria(): CategoriaDocumento {
+    return this.categoria;
+  }
+  get getReglasTipoActivo(): ReglasObligatoriedadTipoActivo {
+    return this.reglasTipoActivo;
+  }
+  get getDescripcion(): string | undefined {
+    return this.descripcion;
+  }
+  get getCreatedAt(): Date {
+    return this.createdAt;
+  }
+  get getUpdatedAt(): Date {
+    return this.updatedAt;
+  }
 }

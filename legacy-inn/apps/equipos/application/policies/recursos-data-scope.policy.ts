@@ -8,16 +8,13 @@ import { RecursoOrm } from '@orm/inn/equipos/pool-recursos/recurso.orm';
 import { SelectQueryBuilder } from 'typeorm';
 
 @Injectable()
-export class RecursosDataScopePolicy
-  extends BaseDataScopePolicy<RecursoOrm>
-{
-  protected readonly authorityGlobal =
-    INN_AUTHORITIES.GESTION_ACTIVOS.RECURSOS.VER;
+export class RecursosDataScopePolicy extends BaseDataScopePolicy<RecursoOrm> {
+  protected readonly authorityGlobal = INN_AUTHORITIES.GESTION_ACTIVOS.RECURSOS.VER;
 
   applyScope(
     qb: SelectQueryBuilder<RecursoOrm>,
     scope: DataScopeResult,
-    alias: string,
+    alias: string
   ): SelectQueryBuilder<RecursoOrm> {
     switch (scope.tipo) {
       case DataScopeType.GLOBAL:

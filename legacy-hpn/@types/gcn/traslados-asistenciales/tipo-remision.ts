@@ -1,7 +1,10 @@
 export type TipoRemisionTypeCode = 1 | 2 | 3 | 4 | 5 | 6 | 99;
 
 export class TipoRemisionType {
-  constructor(private _code: TipoRemisionTypeCode, private _forHumans: string) {}
+  constructor(
+    private _code: TipoRemisionTypeCode,
+    private _forHumans: string
+  ) {}
 
   public getCode(): TipoRemisionTypeCode {
     return this._code;

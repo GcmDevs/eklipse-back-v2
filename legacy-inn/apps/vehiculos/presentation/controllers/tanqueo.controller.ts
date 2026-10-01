@@ -43,18 +43,18 @@ export class TanqueoController extends BaseShelteredController {
     @Body() syncData: SincronizarLoteTanqueosDto,
     @Headers('idempotency-key') idempotencyKeyHeader?: string
   ): Promise<BaseApiResponse<ResultadoItemSync[]>> {
-      const idempotencyKey = idempotencyKeyHeader ?? syncData.idempotencyKey;
-      if (!idempotencyKey) {
-        throw new BadRequestException('Se requiere idempotencyKey');
-      }
-      const usuario = getUser();
-      const comando = TanqueoPresentationMapper.toSincronizarLote(
-        syncData,
-        usuario.id,
-        idempotencyKey
-      );
-      const resultados = await this.syncLoteTanqueos.execute(comando);
-      return { data: resultados };
+    const idempotencyKey = idempotencyKeyHeader ?? syncData.idempotencyKey;
+    if (!idempotencyKey) {
+      throw new BadRequestException('Se requiere idempotencyKey');
+    }
+    const usuario = getUser();
+    const comando = TanqueoPresentationMapper.toSincronizarLote(
+      syncData,
+      usuario.id,
+      idempotencyKey
+    );
+    const resultados = await this.syncLoteTanqueos.execute(comando);
+    return { data: resultados };
   }
 
   @Authorities([INN_AUTHORITIES.GESTION_TANQUEOS.TANQUEOS.REGISTRAR])

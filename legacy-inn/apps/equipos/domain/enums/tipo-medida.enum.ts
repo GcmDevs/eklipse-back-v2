@@ -1,4 +1,4 @@
-import { EnumOptions } from "@common/domain/types";
+import { EnumOptions } from '@common/domain/types';
 
 export enum TipoMedidaCodigo {
   VOLTAJE = 'VOL',
@@ -22,8 +22,9 @@ export const TipoMedidaCodigoForHumans: Record<TipoMedidaCodigo, string> = {
   [TipoMedidaCodigo.OTROS]: 'OTROS',
 };
 
-export const TIPO_MEDIDA_OPTIONS: EnumOptions<TipoMedidaCodigo>[] =
-  Object.values(TipoMedidaCodigo).map((value) => ({
-    value,
-    option: TipoMedidaCodigoForHumans[value],
-  }));
+export const TIPO_MEDIDA_OPTIONS: EnumOptions<TipoMedidaCodigo>[] = Object.values(
+  TipoMedidaCodigo
+).map(value => ({
+  value,
+  option: TipoMedidaCodigoForHumans[value],
+}));

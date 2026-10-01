@@ -101,7 +101,6 @@ export class RegistroClinicoImpl extends BaseSource {
     return turno;
   }
 
-
   public async getRegistrosClinicosByPacienteId(pacienteId: number) {
     const pacienteTurnoRp = this.conn.getRepository(ETPacienteTurnoOrm);
     const ingresoRp = this.conn.getRepository(IngresoOrm);
@@ -157,7 +156,8 @@ export class RegistroClinicoImpl extends BaseSource {
         'entregaTurno.subgrupo',
         'entregaTurno.habilitador',
         'entregaTurno.medicoEntrega',
-        'entregaTurno.medicoRecibe'],
+        'entregaTurno.medicoRecibe',
+      ],
       order: {
         registroClinicoId: 'DESC',
       },
@@ -167,7 +167,7 @@ export class RegistroClinicoImpl extends BaseSource {
       .filter(turno => turno.registroClinico)
       .map(clinico => {
         const { registroClinico, entregaTurnoId, entregaTurno } = clinico;
-        entregaTurno.habilitadoId
+        entregaTurno.habilitadoId;
 
         const registrosClinico = new ATRegistroClinicoRes();
         registrosClinico.id = registroClinico.id;
@@ -177,21 +177,21 @@ export class RegistroClinicoImpl extends BaseSource {
           fechaFin: entregaTurno?.fechaRecibido ?? null,
           medicoEntrega: entregaTurno?.medicoEntrega
             ? {
-              cedula: entregaTurno.medicoEntrega.cedula,
-              nombreCompleto: entregaTurno.medicoEntrega.nombreCompleto,
-            }
+                cedula: entregaTurno.medicoEntrega.cedula,
+                nombreCompleto: entregaTurno.medicoEntrega.nombreCompleto,
+              }
             : null,
           medicoRecibe: entregaTurno?.medicoRecibe
             ? {
-              cedula: entregaTurno.medicoRecibe.cedula,
-              nombreCompleto: entregaTurno.medicoRecibe.nombreCompleto,
-            }
+                cedula: entregaTurno.medicoRecibe.cedula,
+                nombreCompleto: entregaTurno.medicoRecibe.nombreCompleto,
+              }
             : null,
           habilitador: entregaTurno?.habilitador
             ? {
-              cedula: entregaTurno.habilitador.cedula,
-              nombreCompleto: entregaTurno.habilitador.nombreCompleto,
-            }
+                cedula: entregaTurno.habilitador.cedula,
+                nombreCompleto: entregaTurno.habilitador.nombreCompleto,
+              }
             : null,
         };
         registrosClinico.usuarioMedicoGuarda = {
@@ -200,9 +200,9 @@ export class RegistroClinicoImpl extends BaseSource {
         };
         registrosClinico.subgrupo = entregaTurno?.subgrupo
           ? {
-            codigo: entregaTurno.subgrupo.codigo,
-            nombre: entregaTurno.subgrupo.nombre,
-          }
+              codigo: entregaTurno.subgrupo.codigo,
+              nombre: entregaTurno.subgrupo.nombre,
+            }
           : null;
         registrosClinico.diagnostico = registroClinico.diagnostico;
         registrosClinico.especialidadTratante = registroClinico.especialidadTratante;
@@ -292,7 +292,8 @@ export class RegistroClinicoImpl extends BaseSource {
 
       if (!medicoAutorizadoIds.includes(this.auth.id) && !entregaTurnoActual.fechaEntrega) {
         throw new Error(
-          `No puedes registrar/modificar la evolución: el turno actual pertenece a ${entregaTurnoActual.medicoEntrega?.nombreCompleto ?? 'otro médico'
+          `No puedes registrar/modificar la evolución: el turno actual pertenece a ${
+            entregaTurnoActual.medicoEntrega?.nombreCompleto ?? 'otro médico'
           }.`
         );
       }
@@ -400,7 +401,8 @@ export class RegistroClinicoImpl extends BaseSource {
       // Si existe entrega y ya fue entregada pero no recibida
       if (entregaTurno && entregaTurno.fechaEntrega && !entregaTurno.fechaRecibido) {
         throw new Error(
-          `No puedes registrar datos clínicos: el subgrupo fue entregado por ${entregaTurno.medicoEntrega?.nombreCompleto ?? 'otro médico'
+          `No puedes registrar datos clínicos: el subgrupo fue entregado por ${
+            entregaTurno.medicoEntrega?.nombreCompleto ?? 'otro médico'
           } y aún no ha sido recibido.`
         );
       }
@@ -417,7 +419,8 @@ export class RegistroClinicoImpl extends BaseSource {
         !medicoAutorizadoIds.includes(this.auth.id)
       ) {
         throw new Error(
-          `No puedes registrar datos clínicos: el turno actual pertenece a ${entregaTurno.medicoRecibe?.nombreCompleto ?? 'otro médico'
+          `No puedes registrar datos clínicos: el turno actual pertenece a ${
+            entregaTurno.medicoRecibe?.nombreCompleto ?? 'otro médico'
           }.`
         );
       }

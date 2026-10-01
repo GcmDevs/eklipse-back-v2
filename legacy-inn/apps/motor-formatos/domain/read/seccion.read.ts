@@ -1,7 +1,7 @@
-import { ComponenteSchema } from "../types";
+import { ComponenteSchema } from '../types';
 
 export class SeccionPlantillaFmtRead {
-    id: number;
-    nombre: string;
-    componentes: ComponenteSchema[];
+  id: number;
+  nombre: string;
+  componentes: ComponenteSchema[];
 }

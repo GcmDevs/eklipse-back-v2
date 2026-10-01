@@ -31,8 +31,8 @@ ${
   centro
     ? 'AND ADNCENATE IN(' + centro + ')'
     : ctx === GcmContexts.ALTACENTRO
-    ? 'AND ADNCENATE IS NULL'
-    : ''
+      ? 'AND ADNCENATE IS NULL'
+      : ''
 } 
 `;
 };

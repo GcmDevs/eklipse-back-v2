@@ -4,7 +4,7 @@ import { Between, In, IsNull, Repository } from 'typeorm';
 import { GCM_CONTEXTS, GCM_CONTEXTS_VALUES, GcmContextType } from '@common/domain/types';
 import { ENVIRONMENTS } from 'src/app.environments';
 import { uniq } from 'lodash';
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { FacturaOrm } from '@orm/sln';
 import { TIPOS_FACTURA } from '@ctypes/sln';
 import { ESTADOS_RADICACION } from '@ctypes/crn/rdc';

@@ -22,7 +22,7 @@ export class SeccionesService {
     private readonly seccionRepository: SeccionPlantillaRepository,
     @Inject(SECCION_ANEXOS_REPOSITORY)
     private readonly configAnexosRepository: SeccionesAnexosRepository
-  ) { }
+  ) {}
 
   public async create(dto: CreateSeccionPlantillaDto): Promise<SeccionPlantillaFmtRead> {
     const componentes: ComponenteSchema[] = dto.componentes.map(comp => ({
