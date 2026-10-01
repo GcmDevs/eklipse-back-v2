@@ -21,4 +21,5 @@ skills-lock.json
 /cartera/dist
 /inventario/dist
 /pacientes
+/chatbot
 .public
