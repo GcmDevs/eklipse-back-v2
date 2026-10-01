@@ -13,6 +13,11 @@ skills-lock.json
 /public
 /dist
 /.cursor
+/legacy-gen/dist
+/legacy-hpn/dist
+/legacy-inn/dist
+/fileserver/dist
+/general/public
 /general/dist
 /legacy-inn/dist
 /hospitalizacion/dist

@@ -1,0 +1,76 @@
+export const getAll = `SELECT 
+GGC.FECHA FechaGestion,
+GGC.OID IdGestion,
+GU.OID IdUsuario,
+GU.USUNOMBRE Identificacion,
+GU.USUDESCRI UsuarioEncargado,
+GT.OID IdTercero,
+GT.TERNUMDOC Nit,
+GT.TERNOMCOM Tercero,
+GCC.OID IdConciliacion,
+GCC.NACTACONCI NActaConciliacion,
+GCC.FECHACONC FechaConciliacion,
+GDF.CalendarYear Anio,
+GDF.CalendarQuarterOfYear Trimestre,
+GDF.MonthNumberOfYear Mes,
+DATEDIFF(DAY, GDF.DATE, GETDATE()) Dias,
+GCC.VALCONCI ValorConciliado,
+GCC.VALRECPAG ValorReconocidoParaPago,
+GCC.VALGLOSAD ValorGlosado,
+GCC.VALDEVUEL ValorDevuelto,
+GCC.VALNORADI ValorNoRadicado,
+GCC.AUDITORIA ValorEnAuditoria,
+GCC.RETENCION ValorEnRetencion,
+GCC.GLOSACEPTIPS ValorDeGlosasAceptadaPorIPS,
+GCC.NOTNODESCEPS ValorNoDescontadoPorEps,
+GCC.PAGNOAPLI ValorPagoNoAplicado,
+GCC.COPCUOMODE ValorCuotaModeradora,
+GCC.VALCANCEL ValorCancelado,
+GCC.TOTAL ValorTotal,
+GCC.DIFEREN ValorDiferencia,
+GCC.RUTARCHI RutaArchivo,
+GCC.ESTADO Estado
+FROM GCMCONCCART GCC
+INNER JOIN GCMGESCART GGC ON GCC.GCMGESCART = GGC.OID
+INNER JOIN GCMDIMFECHA GDF ON CONVERT(DATE, GGC.FECHCONCI, 103) = GDF.Date
+INNER JOIN GENUSUARIO GU ON GGC.GENUSUARIO = GU.OID
+INNER JOIN GENTERCER GT ON GGC.GENTERCER = GT.OID`;
+
+export const getAllByUser = `SELECT 
+GGC.FECHA FechaGestion,
+GGC.OID IdGestion,
+GU.OID IdUsuario,
+GU.USUNOMBRE Identificacion,
+GU.USUDESCRI UsuarioEncargado,
+GT.OID IdTercero,
+GT.TERNUMDOC Nit,
+GT.TERNOMCOM Tercero,
+GCC.OID IdConciliacion,
+GCC.NACTACONCI NActaConciliacion,
+GCC.FECHACONC FechaConciliacion,
+GDF.CalendarYear Anio,
+GDF.CalendarQuarterOfYear Trimestre,
+GDF.MonthNumberOfYear Mes,
+DATEDIFF(DAY, GDF.DATE, GETDATE()) Dias,
+GCC.VALCONCI ValorConciliado,
+GCC.VALRECPAG ValorReconocidoParaPago,
+GCC.VALGLOSAD ValorGlosado,
+GCC.VALDEVUEL ValorDevuelto,
+GCC.VALNORADI ValorNoRadicado,
+GCC.AUDITORIA ValorEnAuditoria,
+GCC.RETENCION ValorEnRetencion,
+GCC.GLOSACEPTIPS ValorDeGlosasAceptadaPorIPS,
+GCC.NOTNODESCEPS ValorNoDescontadoPorEps,
+GCC.PAGNOAPLI ValorPagoNoAplicado,
+GCC.COPCUOMODE ValorCuotaModeradora,
+GCC.VALCANCEL ValorCancelado,
+GCC.TOTAL ValorTotal,
+GCC.DIFEREN ValorDiferencia,
+GCC.RUTARCHI RutaArchivo,
+GCC.ESTADO Estado
+FROM GCMCONCCART GCC
+INNER JOIN GCMGESCART GGC ON GCC.GCMGESCART = GGC.OID
+INNER JOIN GCMDIMFECHA GDF ON CONVERT(DATE, GGC.FECHCONCI, 103) = GDF.Date
+INNER JOIN GENUSUARIO GU ON GGC.GENUSUARIO = GU.OID
+INNER JOIN GENTERCER GT ON GGC.GENTERCER = GT.OID
+WHERE GU.OID = @0`;
