@@ -13,7 +13,9 @@ export const newDataToPacientesHopitalizados = (
   turno: EntregaTurnoOrm,
   evoluciones: PacienteEvolucionOrm[],
   auth: any,
-  evolucionesAnteriores: PacienteEvolucionOrm[] = []
+  evolucionesAnteriores: PacienteEvolucionOrm[] = [],
+  asignacionesTemporales: Map<number, number> = new Map(),
+  especialidadesTratantesPorIngreso: Map<number, string[]> = new Map()
 ): dataRes => {
   const ATpaciente: ATPacienteHpnRes[] = [];
 
@@ -42,6 +44,7 @@ export const newDataToPacientesHopitalizados = (
     paciente.numeroDocumento = est.ingreso.paciente.numeroDoc;
     paciente.fechaIngreso = est.fechaIngreso;
     paciente.fechaNacimiento = est.ingreso.paciente.fechaNacimiento;
+    paciente.especialidadesTratantes = especialidadesTratantesPorIngreso.get(est.ingreso.id) ?? [];
 
     paciente.cama = new EntidadRes();
     paciente.cama.id = est.cama.id.toString();
@@ -86,6 +89,17 @@ export const newDataToPacientesHopitalizados = (
     }
 
     paciente.entregaTurno = [];
+
+    const asignacionTemporalId = asignacionesTemporales.get(est.id);
+    if (asignacionTemporalId) {
+      paciente.esTemporal = true;
+      paciente.asignacionTemporalId = asignacionTemporalId;
+      paciente.subgrupoTemporal = {
+        id: String(est.cama.subgrupo.id),
+        codigo: est.cama.subgrupo.codigo,
+        nombre: est.cama.subgrupo.nombre,
+      };
+    }
 
     ATpaciente.push(paciente);
   }

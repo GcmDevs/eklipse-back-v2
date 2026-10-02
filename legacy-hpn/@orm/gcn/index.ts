@@ -23,6 +23,7 @@ import {
   ETPreAltaOrm,
   ETRegistroClinicoOrm,
   PacienteEvolucionOrm,
+  PacienteTemporalOrm,
 } from './entrega-turno';
 import {
   MedicamentoOrm,
@@ -65,6 +66,7 @@ export * from './entrega-turno/paciente-turno.orm';
 export * from './entrega-turno/registro-clinico.orm';
 export * from './entrega-turno/paciente-evolucion.orm';
 export * from './entrega-turno/cambio-turno.orm';
+export * from './entrega-turno/paciente-temporal.orm';
 export * from './traslados-asistenciales/traslado-asistencial.orm';
 export * from './traslados-asistenciales/traslado-evolucion.orm';
 export * from './traslados-asistenciales/traslado-tramo.orm';
@@ -103,6 +105,7 @@ export const ORM_GEN_GESTION_CLINICA_ENTITIES = [
   ETPacienteTurnoOrm,
   ETRegistroClinicoOrm,
   PacienteEvolucionOrm,
+  PacienteTemporalOrm,
   CambioTurnoOrm,
   ETPreAltaOrm,
   TrasladoAsistencialOrm,

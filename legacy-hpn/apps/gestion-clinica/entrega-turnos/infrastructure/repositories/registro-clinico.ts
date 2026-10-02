@@ -5,6 +5,7 @@ import {
   ETPacienteTurnoOrm,
   ETRegistroClinicoOrm,
   PacienteEvolucionOrm,
+  PacienteTemporalOrm,
 } from '@orm/gcn';
 import { TABLE_NAMES } from '@common/application/constants';
 import {
@@ -26,7 +27,7 @@ export class RegistroClinicoImpl extends BaseSource {
     const estanciaRp = this.conn.getRepository(EstanciaOrm);
     const estancia = await estanciaRp.findOne({
       where: { ingreso: { id: ingresoId } },
-      relations: ['ingreso', 'cama', 'cama.subgrupo'],
+      relations: ['ingreso', 'cama', 'cama.grupo', 'cama.subgrupo'],
       order: { id: 'DESC' },
     });
 
@@ -40,7 +41,16 @@ export class RegistroClinicoImpl extends BaseSource {
       throw new Error(`El paciente ya fue dado de alta${mgs}`);
     }
 
-    if (estancia.cama.subgrupo?.id !== subgrupoId) {
+    const esCamaTemporal =
+      estancia.cama.grupo?.nombre?.toUpperCase().includes('TEMPORAL') ||
+      estancia.cama.subgrupo?.nombre?.toUpperCase().includes('TEMPORAL');
+    const asignacionTemporal = esCamaTemporal
+      ? await this.conn.getRepository(PacienteTemporalOrm).findOne({
+          where: { estanciaId: estancia.id, ingresoId, subgrupoDestinoId: subgrupoId },
+        })
+      : null;
+    const esTemporalAsignado = !!asignacionTemporal;
+    if (estancia.cama.subgrupo?.id !== subgrupoId && !esTemporalAsignado) {
       throw new Error(`El paciente ya no pertenece a este subgrupo${mgs}`);
     }
 

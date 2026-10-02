@@ -4,6 +4,7 @@ import { EstadoTypeCode } from '../types';
 export class dataRes {
   pacientes: ATPacienteHpnRes[];
   entregaTurnoPorSubgrupoActual: EntergaTurnoSubgrupoRes;
+  temporalesConfigurados?: boolean;
 }
 
 interface UsuarioReponse {
@@ -56,6 +57,11 @@ export class ATPacienteHpnRes {
   eps: EntidadRes;
   entregaTurno: EntregaTurnoRes[] | null;
   evolucion: string;
+  esTemporal?: boolean;
+  asignacionTemporalId?: number;
+  subgrupoTemporal?: EntidadRes;
+  subgrupoAsignado?: EntidadRes;
+  especialidadesTratantes: string[];
 }
 export class EntregaTurnoRes {
   id: number;

@@ -18,6 +18,7 @@ export const TBNMS__HPN__ = {
     combioTurno: 'EKHPNENTREGATURNOCAMBIOTURNO',
     pacienteEvolucion: 'EKHPNENTREGATURNOPACIENEVOLUCION',
     prealta: 'EKHPNENTREGATURNOPREALTA',
+    pacienteTemporal: 'EKHPNENTREGATURNOTEMP',
   },
   trasladosAsistenciales: {
     index: 'EKHPNTRASLADO',

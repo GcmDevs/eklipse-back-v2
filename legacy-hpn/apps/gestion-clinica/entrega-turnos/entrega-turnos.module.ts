@@ -11,6 +11,7 @@ import {
   RegistroClinicoImpl,
   MedicoImpl,
   CreatePrealtaImpl,
+  TemporalesImpl,
 } from './infrastructure/repositories';
 import { RegistroClinicoController } from './presentation/controllers/registro-clinico.controller';
 
@@ -22,6 +23,13 @@ import { RegistroClinicoController } from './presentation/controllers/registro-c
     MedicoController,
     PreAltaController,
   ],
-  providers: [RecursosImpl, TurnoSource, RegistroClinicoImpl, MedicoImpl, CreatePrealtaImpl],
+  providers: [
+    RecursosImpl,
+    TurnoSource,
+    RegistroClinicoImpl,
+    MedicoImpl,
+    CreatePrealtaImpl,
+    TemporalesImpl,
+  ],
 })
 export class EntregaTurnosModule {}
