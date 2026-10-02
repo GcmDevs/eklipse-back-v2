@@ -12,6 +12,7 @@ import {
 import { diskStorage } from 'multer';
 import {
   CreateSolicitudServicioTecnicoSource,
+  FetchCasoByPlacaServicioTecnicoSource,
   FetchHistoricoSolicitudServicioTecnicoSource,
   FetchSolicitudServicioTecnicoSource,
   SolicitudServicioTecnicoSource,
@@ -33,6 +34,7 @@ export class ServicioTecnicoController {
     private _createSolicitudes: CreateSolicitudServicioTecnicoSource,
     private _updateSolicitudes: UpdateSolicitudServicioTecnicoSource,
     private _fetchSolicitudes: FetchSolicitudServicioTecnicoSource,
+    private _fetchCasoByPlaca: FetchCasoByPlacaServicioTecnicoSource,
     private _fetchHistorico: FetchHistoricoSolicitudServicioTecnicoSource
   ) {}
 
@@ -55,6 +57,16 @@ export class ServicioTecnicoController {
         final = new Date(`${final}:23:59:59`);
       }
       return await this._fetchSolicitudes.execute(onlyMisSolicitudes, inicio, final);
+    } catch (error: any) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Authorities()
+  @Get('fetch-caso-by-placa/:placa')
+  async fetchCasoByPlaca(@Param('placa') placa: string) {
+    try {
+      return await this._fetchCasoByPlaca.execute(placa);
     } catch (error: any) {
       throw new BadRequestException(error.message);
     }
