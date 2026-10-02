@@ -7,6 +7,7 @@ import {
 } from './presentation/controllers';
 import {
   CreateSolicitudServicioTecnicoSource,
+  FetchCasoByPlacaServicioTecnicoSource,
   FetchHistoricoSolicitudServicioTecnicoSource,
   FetchSolicitudServicioTecnicoSource,
   NotaServicioTecnicoSource,
@@ -29,6 +30,7 @@ import { ServicioTecnicoBaseSource } from './infrastructure/bases';
     CreateSolicitudServicioTecnicoSource,
     UpdateSolicitudServicioTecnicoSource,
     FetchSolicitudServicioTecnicoSource,
+    FetchCasoByPlacaServicioTecnicoSource,
     SolicitudServicioTecnicoSource,
     NotaServicioTecnicoSource,
     AfnRecursosImpl,
