@@ -8,6 +8,7 @@ import { additionalDataByCentro, GcmContextType } from '@common/domain/types';
 import { Query1Res } from '../queries';
 import { findImageFromContext, GcmGrouped } from '@common/application/services';
 import { TimerService } from '@common/infrastructure/services';
+import autoTable from 'jspdf-autotable';
 
 const line = `_________________________________________________________________________________________________________________________________________`;
 const timer = new TimerService();
@@ -154,7 +155,7 @@ export async function generatePdf1(payload: OCPayload) {
     });
 
     if (!payload.isResumen) {
-      doc.autoTable({
+      autoTable(doc, {
         head: [tablas],
         body: tablaProductos,
         didDrawPage: d => {

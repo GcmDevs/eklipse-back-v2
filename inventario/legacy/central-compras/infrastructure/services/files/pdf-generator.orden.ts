@@ -7,6 +7,7 @@ import { TimerService } from '../../base';
 import { GcmContexts } from '@common/domain/types';
 import { CTC_FILE_LOCATIONS } from '@inn/lgc/ctc/application/constants';
 import { ENVIRONMENTS } from '@inn/app.environments';
+import autoTable from 'jspdf-autotable';
 
 export interface OCFirma {
   subtitle?: string;
@@ -429,7 +430,7 @@ export async function generateOrdCo(payload: OCPayload) {
 
   //let tablaProductosHeight = 0;
 
-  doc.autoTable({
+  autoTable(doc, {
     head: [tablas],
     body: tablaProductos,
     didDrawPage: d => {

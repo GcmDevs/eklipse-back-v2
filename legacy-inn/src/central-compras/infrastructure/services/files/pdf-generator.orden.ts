@@ -7,6 +7,7 @@ import * as fs from 'fs';
 import { DetalleCotizacionOrm } from '@orm/inn/central-compras';
 import { TimerService } from '../../base';
 import { ENVIRONMENTS } from 'src/app.environments';
+import autoTable from 'jspdf-autotable';
 
 export interface OCFirma {
   subtitle?: string;
@@ -429,7 +430,7 @@ export async function generateOrdCo(payload: OCPayload) {
 
   //let tablaProductosHeight = 0;
 
-  doc.autoTable({
+  autoTable(doc, {
     head: [tablas],
     body: tablaProductos,
     didDrawPage: d => {

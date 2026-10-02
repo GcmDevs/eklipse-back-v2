@@ -24,7 +24,7 @@ export const fetchCamasRegistradasEnJornadaQuery = (
         INNER JOIN PDYDIEJOR J ON J.OID = G.PDYDIEJOR
         INNER JOIN HPNDEFCAM C ON C.OID = D.HPNDEFCAM 
         INNER JOIN GENPACIEN P ON P.OID = D.GENPACIEN
-      WHERE J.DIEFECJOR = '${fecha}' AND J.DIEHORARIO = ${horarioId}
+      WHERE J.DIEFECJOR = '${fecha.toISOString().split('T')[0]}' AND J.DIEHORARIO = ${horarioId}
       AND D.ELIMINADO = 0
       AND (C.OID IN(${camas})
       OR P.OID IN(${pacientes}))`;
