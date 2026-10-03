@@ -121,7 +121,11 @@ export class BuscarProductoImpl extends BaseSource {
       return {
         id: producto.id,
         codigo: producto.codigo,
-        descripcion: producto.descripcionLarga,
+        descripcion:
+          producto.descripcionLarga?.trim() ||
+          producto.descripcionCorta?.trim() ||
+          producto.codigo?.trim() ||
+          '',
         existenciaActual,
         existeEnOtraSolicitud: solicitudes.length > 0,
         solicitudes,
