@@ -15,6 +15,9 @@ export class ProductoOrm {
   @Column({ name: 'IPRTIPPRO' })
   tipoCode: TipoProductoCode;
 
+  @Column({ name: 'ISGCODIGO', type: 'int', nullable: true })
+  codigoSub: number | null;
+
   @Column({ name: 'IPRDESCOR' })
   descripcionCorta: string;
 
