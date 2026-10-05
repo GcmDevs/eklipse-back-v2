@@ -1,7 +1,10 @@
 export type UnidadMedidaTemperaturaTypeCode = 1 | 2 | 3;
 
 export class UnidadMedidaTemperaturaType {
-  constructor(private code: UnidadMedidaTemperaturaTypeCode, private forHumans: string) {}
+  constructor(
+    private code: UnidadMedidaTemperaturaTypeCode,
+    private forHumans: string
+  ) {}
 
   public getCode(): UnidadMedidaTemperaturaTypeCode {
     return this.code;

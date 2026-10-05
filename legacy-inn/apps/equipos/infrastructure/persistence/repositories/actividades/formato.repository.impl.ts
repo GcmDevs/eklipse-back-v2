@@ -5,18 +5,27 @@ import { FormatoRead } from '@equipos/domain/read';
 import { FormatoRepository } from '@equipos/domain/repositories';
 import { FormatoMapper } from '@equipos/infrastructure/mappers';
 import { FormatoOrm } from '@orm/inn/equipos';
-import { EstadoVersionFormato, VersionFormatoEvento, VersionFormatoFmt } from 'apps/motor-formatos/domain';
-import { EventoAuditVersionFormatoOrm, VersionFormatoFmtOrm } from 'apps/motor-formatos/infrastructure';
-import { VersionFormatoEventoMapper, VersionFormatoMapper } from 'apps/motor-formatos/infrastructure/mappers';
+import {
+  EstadoVersionFormato,
+  VersionFormatoEvento,
+  VersionFormatoFmt,
+} from 'apps/motor-formatos/domain';
+import {
+  EventoAuditVersionFormatoOrm,
+  VersionFormatoFmtOrm,
+} from 'apps/motor-formatos/infrastructure';
+import {
+  VersionFormatoEventoMapper,
+  VersionFormatoMapper,
+} from 'apps/motor-formatos/infrastructure/mappers';
 import { Repository } from 'typeorm';
-
 
 export class TypeOrmFormatoRepository extends BaseSource implements FormatoRepository {
   private readonly repository: Repository<FormatoOrm> = this.conn.getRepository(FormatoOrm);
-  private readonly versionRepository: Repository<VersionFormatoFmtOrm> = this.conn.getRepository(VersionFormatoFmtOrm);
+  private readonly versionRepository: Repository<VersionFormatoFmtOrm> =
+    this.conn.getRepository(VersionFormatoFmtOrm);
   private readonly versionFmtEventorepository: Repository<EventoAuditVersionFormatoOrm> =
     this.conn.getRepository(EventoAuditVersionFormatoOrm);
-
 
   private getAttributesVersion(prefix: string) {
     return [
@@ -28,15 +37,14 @@ export class TypeOrmFormatoRepository extends BaseSource implements FormatoRepos
       `${prefix}.createdAt`,
       `${prefix}.updatedAt`,
       `${prefix}.creadoPorId`,
-    ]
+    ];
   }
 
   async findViewById(id: number): Promise<FormatoRead> {
-    const formatoFound = await this.repository.createQueryBuilder('fmt')
+    const formatoFound = await this.repository
+      .createQueryBuilder('fmt')
       .leftJoin('fmt.versiones', 'versiones')
-      .addSelect(
-        this.getAttributesVersion('versiones')
-      )
+      .addSelect(this.getAttributesVersion('versiones'))
       .where('fmt.id = :id', { id: id })
       .getOne();
     return formatoFound ? FormatoMapper.toView(formatoFound) : null;
@@ -78,12 +86,12 @@ export class TypeOrmFormatoRepository extends BaseSource implements FormatoRepos
     if (search?.trim()) {
       qb.andWhere(
         '(fmt.nombre LIKE :search OR fmt.codigo LIKE :search OR fmt.descripcion LIKE :search)',
-        { search: `%${search.trim()}%` },
+        { search: `%${search.trim()}%` }
       );
     }
 
     if (modo) {
-      qb.andWhere('fmt.modoFormato = :modo', { modo: modo })
+      qb.andWhere('fmt.modoFormato = :modo', { modo: modo });
     }
 
     const [formatosFound, count] = await qb
@@ -96,7 +104,8 @@ export class TypeOrmFormatoRepository extends BaseSource implements FormatoRepos
   }
 
   async findById(id: number): Promise<Formato | null> {
-    const formatoFound = await this.repository.createQueryBuilder('fmt')
+    const formatoFound = await this.repository
+      .createQueryBuilder('fmt')
       .leftJoin('fmt.versiones', 'versiones')
       .addSelect(this.getAttributesVersion('versiones'))
       .where('fmt.id = :id', { id: id })
@@ -105,7 +114,8 @@ export class TypeOrmFormatoRepository extends BaseSource implements FormatoRepos
   }
 
   async findByIdAndTipo(id: number, tipo: TipoMantenimiento): Promise<Formato | null> {
-    const formatoFound = await this.repository.createQueryBuilder('fmt')
+    const formatoFound = await this.repository
+      .createQueryBuilder('fmt')
       .leftJoin('fmt.versiones', 'versiones')
       .addSelect(this.getAttributesVersion('versiones'))
       .where('fmt.id = :id', { id: id })
@@ -115,22 +125,14 @@ export class TypeOrmFormatoRepository extends BaseSource implements FormatoRepos
   }
 
   async findByIdWithoutVersions(id: number): Promise<FormatoRead | null> {
-    const formatoFound = await this.repository.findOne({ where: { id: id } })
+    const formatoFound = await this.repository.findOne({ where: { id: id } });
     return formatoFound ? FormatoMapper.toView(formatoFound) : null;
   }
 
-  async findByIdWithSpecificVersion(
-    formatoId: number,
-    versionId: number
-  ): Promise<Formato | null> {
+  async findByIdWithSpecificVersion(formatoId: number, versionId: number): Promise<Formato | null> {
     const formatoFound = await this.repository
       .createQueryBuilder('fmt')
-      .leftJoinAndSelect(
-        'fmt.versiones',
-        'versiones',
-        'versiones.id = :versionId',
-        { versionId }
-      )
+      .leftJoinAndSelect('fmt.versiones', 'versiones', 'versiones.id = :versionId', { versionId })
       .leftJoinAndSelect('versiones.secciones', 'secciones')
       .leftJoinAndSelect('secciones.seccion', 'seccion')
       .where('fmt.id = :formatoId', { formatoId })
@@ -139,26 +141,24 @@ export class TypeOrmFormatoRepository extends BaseSource implements FormatoRepos
     return formatoFound ? FormatoMapper.toDomain(formatoFound) : null;
   }
 
-
   public async exist(id: number): Promise<boolean | null> {
     return await this.repository.exists({ where: { id: id } });
   }
 
   public async findVersionFormato(versionFormatoId: number): Promise<VersionFormatoFmt | null> {
-    const orm = await this.versionRepository.createQueryBuilder('verFmt')
+    const orm = await this.versionRepository
+      .createQueryBuilder('verFmt')
       .leftJoinAndSelect('verFmt.secciones', 'secciones')
       .leftJoinAndSelect('secciones.seccion', 'seccion')
       .leftJoinAndSelect('verFmt.configuracionSecImagenes', 'configuracionSecImagenes')
       .where('verFmt.id = :id', { id: versionFormatoId })
       .getOne();
 
-    if (!orm) return null
+    if (!orm) return null;
     return VersionFormatoMapper.toDomain(orm);
   }
 
-  public async findLastPublishedVersion(
-    formatoId: number,
-  ): Promise<VersionFormatoFmt | null> {
+  public async findLastPublishedVersion(formatoId: number): Promise<VersionFormatoFmt | null> {
     const lastVersionFmtPublished = await this.versionRepository.findOne({
       where: {
         formatoId,
@@ -179,8 +179,8 @@ export class TypeOrmFormatoRepository extends BaseSource implements FormatoRepos
       .select('1')
       .where('verFmt.formatoId = :formatoId', { formatoId })
       .andWhere('verFmt.estado = :estado', { estado: EstadoVersionFormato.PUBLICADO })
-      .limit(1).
-      getRawOne();
+      .limit(1)
+      .getRawOne();
 
     return Boolean(result);
   }
@@ -195,8 +195,3 @@ export class TypeOrmFormatoRepository extends BaseSource implements FormatoRepos
     throw new Error('Method not implemented.');
   }
 }
-
-
-
-
-

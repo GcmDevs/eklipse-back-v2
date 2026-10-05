@@ -1,6 +1,6 @@
 export function formatTiempoResolucion(
   createdAt: Date,
-  fechaResolucion?: Date | null,
+  fechaResolucion?: Date | null
 ): string | null {
   if (!fechaResolucion) return null;
 

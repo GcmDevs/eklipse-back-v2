@@ -84,7 +84,7 @@ export function validateCamposRequeridosPorTipo(
   }
 
   const clasificacionUso = valores.clasificacionUso as ClasificacionUso | null | undefined;
-  if (clasificacionUso == null || clasificacionUso === ''as ClasificacionUso) return;
+  if (clasificacionUso == null || clasificacionUso === ('' as ClasificacionUso)) return;
 
   const tipoEsperado = TIPO_ACTIVO_POR_CLASIFICACION_USO[clasificacionUso];
   if (!tipoEsperado) {

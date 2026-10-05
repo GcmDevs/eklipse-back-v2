@@ -1,4 +1,4 @@
-import { MimeTypes } from "@common/domain/enums";
+import { MimeTypes } from '@common/domain/enums';
 
 export class BaseDto {
   id: number;
@@ -19,5 +19,5 @@ export class UsuarioEjecucionDto {
   usuario: {
     id: number;
     nombre: string;
-  }
+  };
 }

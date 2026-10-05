@@ -15,7 +15,7 @@ export class TypeOrmClaseEquipoRepository extends BaseSource implements ClaseEqu
   }
 
   private relations(): string[] {
-    return ['tipoActivo']
+    return ['tipoActivo'];
   }
 
   async save(domain: ClaseEquipo): Promise<ClaseEquipo> {
@@ -32,8 +32,8 @@ export class TypeOrmClaseEquipoRepository extends BaseSource implements ClaseEqu
   async findAll(tipoActivoId: number): Promise<ClaseEquipoRead[]> {
     const orms = await this.repository.find({
       where: { tipoActivo: { id: tipoActivoId } },
-      relations: this.relations()
-    })
+      relations: this.relations(),
+    });
     return ClaseEquipoMapper.toViewList(orms);
   }
 
@@ -53,7 +53,8 @@ export class TypeOrmClaseEquipoRepository extends BaseSource implements ClaseEqu
   async findAllView(page: number, limit: number): Promise<[ClaseEquipoRead[], number]> {
     const [orms, count] = await this.repository.findAndCount({
       relations: ['tipoActivo'],
-      skip: (page - 1) * limit, take: limit,
+      skip: (page - 1) * limit,
+      take: limit,
       order: { nombre: 'ASC' },
     });
     return [ClaseEquipoMapper.toViewList(orms), count];
@@ -66,8 +67,8 @@ export class TypeOrmClaseEquipoRepository extends BaseSource implements ClaseEqu
   async findViewById(id: number): Promise<ClaseEquipoRead | null> {
     const orm = await this.repository.findOne({
       where: { id: id },
-      relations: this.relations()
-    })
+      relations: this.relations(),
+    });
     return orm ? ClaseEquipoMapper.toView(orm) : null;
   }
 }

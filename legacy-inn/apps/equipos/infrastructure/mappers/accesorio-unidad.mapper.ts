@@ -14,7 +14,7 @@ export class AccesorioUnidadMapper {
       orm.estado,
       orm.observaciones,
       orm.descontinuado,
-      orm.fechaDescontinuado,
+      orm.fechaDescontinuado
     );
   }
 

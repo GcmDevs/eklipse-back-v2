@@ -26,11 +26,6 @@ export class FormatoController extends BaseShelteredController {
     @Query() { page, limit, search, ...filters }: FilterFormatoDto
   ): Promise<BaseApiResponse<FormatoRead[]>> {
     const [formatos, count] = await this.formatoService.getAll({ page, limit, search, ...filters });
-    return PaginationHelper.response(
-      formatos,
-      count,
-      page,
-      limit,
-    );
+    return PaginationHelper.response(formatos, count, page, limit);
   }
 }

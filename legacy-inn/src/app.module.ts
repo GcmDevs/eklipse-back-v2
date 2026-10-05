@@ -36,7 +36,7 @@ import { VehiculosModule } from '@vehiculos/vehiculos.module';
     ReportsModule,
     OfertasModule,
     VehiculosModule,
-    ...COR_MODULES
+    ...COR_MODULES,
   ],
 })
 export class AppModule implements OnModuleInit, NestModule {

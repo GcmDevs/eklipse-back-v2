@@ -6,7 +6,8 @@ import {
   createSoliServTecnPayloadToAfnSoliSerTecOrmFactory,
   itemSoliServTecnPayloadToAfnItemSoliSerTecOrmFactory,
 } from '../../factories';
-import { FILE_LOCATIONS, TABLE_NAMES } from '@common/application/constants';
+import { TABLE_NAMES } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { CreateSoliSerTecPayload } from '@activos-fijos/application/payloads';
 import { ESTADO_AFNITEM_SOL_SER_TEC } from '@ctypes/inn/activos-fijos';
 import { deleteFile } from '@common/presentation/helpers';

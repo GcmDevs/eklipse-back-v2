@@ -17,7 +17,8 @@ export class RespuestaItemGrupoDto {
   @IsBoolean()
   valor: boolean;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   observacion?: string | null;
 }
 
@@ -49,7 +50,6 @@ export class ImagenDto {
   @IsOptional() @IsInt() archivoId: number | null;
 }
 
-
 export class DiligenciarFormatoDto {
   @IsInt() @IsPositive() equipoId: number;
   @IsInt() @IsPositive() registroActividadId: number;
@@ -64,7 +64,9 @@ export class DiligenciarFormatoDto {
     RespuestaGrupoEjecucionDto | RespuestaTablaDto | RespuestaRangoDto | RespuestaTextoLibreDto
   >;
 
-  @IsOptional() @IsArray()
-  @ValidateNested({ each: true }) @Type(() => ImagenDto)
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ImagenDto)
   imagenes?: ImagenDto[];
 }

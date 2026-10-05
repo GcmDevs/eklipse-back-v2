@@ -1,4 +1,4 @@
-import { Id, normalizeUppercaseText } from "@common/domain/value-objects";
+import { Id, normalizeUppercaseText } from '@common/domain/value-objects';
 
 export class ClaseEquipo {
   private constructor(
@@ -9,7 +9,7 @@ export class ClaseEquipo {
     private descripcion: string | undefined,
     private activo: boolean,
     private readonly createdAt: Date,
-    private updatedAt: Date,
+    private updatedAt: Date
   ) {}
 
   static create(
@@ -17,7 +17,7 @@ export class ClaseEquipo {
     nombre: string,
     codigo: string,
     descripcion?: string,
-    activo: boolean = true,
+    activo: boolean = true
   ): ClaseEquipo {
     const now = new Date();
     return new ClaseEquipo(
@@ -28,7 +28,7 @@ export class ClaseEquipo {
       descripcion,
       activo,
       now,
-      now,
+      now
     );
   }
 
@@ -40,7 +40,7 @@ export class ClaseEquipo {
     createdAt: Date,
     updatedAt: Date,
     descripcion?: string,
-    activo?: boolean,
+    activo?: boolean
   ): ClaseEquipo {
     return new ClaseEquipo(
       new Id(id),
@@ -50,7 +50,7 @@ export class ClaseEquipo {
       descripcion,
       activo ?? true,
       createdAt,
-      updatedAt,
+      updatedAt
     );
   }
 
@@ -72,12 +72,28 @@ export class ClaseEquipo {
     this.updatedAt = new Date();
   }
 
-  get getId(): Id { return this.id; }
-  get getTipoActivoId(): Id { return this.tipoActivoId; }
-  get getNombre(): string { return this.nombre; }
-  get getCodigo(): string { return this.codigo; }
-  get getDescripcion(): string | undefined { return this.descripcion; }
-  get getActivo(): boolean { return this.activo; }
-  get getCreatedAt(): Date { return this.createdAt; }
-  get getUpdatedAt(): Date { return this.updatedAt; }
+  get getId(): Id {
+    return this.id;
+  }
+  get getTipoActivoId(): Id {
+    return this.tipoActivoId;
+  }
+  get getNombre(): string {
+    return this.nombre;
+  }
+  get getCodigo(): string {
+    return this.codigo;
+  }
+  get getDescripcion(): string | undefined {
+    return this.descripcion;
+  }
+  get getActivo(): boolean {
+    return this.activo;
+  }
+  get getCreatedAt(): Date {
+    return this.createdAt;
+  }
+  get getUpdatedAt(): Date {
+    return this.updatedAt;
+  }
 }

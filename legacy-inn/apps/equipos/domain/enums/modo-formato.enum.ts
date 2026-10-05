@@ -1,4 +1,4 @@
 export enum ModoFormato {
-    PLANTILLA = 'PLANTILLA',
-    OPERATIVO = 'OPERATIVO',
+  PLANTILLA = 'PLANTILLA',
+  OPERATIVO = 'OPERATIVO',
 }

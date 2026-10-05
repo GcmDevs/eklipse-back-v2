@@ -5,44 +5,29 @@ import { ModeloRepository } from '@equipos/domain/repositories';
 import { ModeloMapper } from '@equipos/infrastructure/mappers';
 import { ModeloOrm } from '@orm/inn/equipos';
 
-export class TypeOrmModeloRepository
-  extends BaseSource
-  implements ModeloRepository {
+export class TypeOrmModeloRepository extends BaseSource implements ModeloRepository {
   private readonly repository = this.conn.getRepository(ModeloOrm);
 
   private qbBase(alias = 'modelo') {
     return this.repository
       .createQueryBuilder(alias)
       .leftJoinAndSelect(`${alias}.marca`, 'marca')
-      .select([
-        `${alias}.id`,
-        `${alias}.nombre`,
-        'marca.id',
-        'marca.nombre',
-      ]);
+      .select([`${alias}.id`, `${alias}.nombre`, 'marca.id', 'marca.nombre']);
   }
 
-
   async findViewById(id: number): Promise<ModeloRead> {
-    const modeloFound = await this.qbBase()
-      .where('modelo.id = :id', { id })
-      .getOne();
+    const modeloFound = await this.qbBase().where('modelo.id = :id', { id }).getOne();
 
     return modeloFound ? ModeloMapper.toView(modeloFound) : null;
   }
 
   async findById(id: number): Promise<Modelo | null> {
-    const modeloFound = await this.qbBase()
-      .where('modelo.id = :id', { id })
-      .getOne();
+    const modeloFound = await this.qbBase().where('modelo.id = :id', { id }).getOne();
 
     return modeloFound ? ModeloMapper.toDomain(modeloFound) : null;
   }
 
-  async findAllByMarca(
-    marcaId: number,
-    search?: string,
-  ): Promise<ModeloRead[]> {
+  async findAllByMarca(marcaId: number, search?: string): Promise<ModeloRead[]> {
     const qb = this.qbBase().where('marca.id = :marcaId', { marcaId });
 
     if (search?.trim()) {
@@ -86,18 +71,13 @@ export class TypeOrmModeloRepository
     throw new Error('Method not implemented.');
   }
 
-  async findModeloByLegacyNombre(
-    nombreLegacy: string,
-  ): Promise<Modelo | null> {
-    const raw = await this.repository.query(
-      'EXEC SP_FIND_NEW_MODELO_BY_LEGACY_NAME @0',
-      [nombreLegacy],
-    );
+  async findModeloByLegacyNombre(nombreLegacy: string): Promise<Modelo | null> {
+    const raw = await this.repository.query('EXEC SP_FIND_NEW_MODELO_BY_LEGACY_NAME @0', [
+      nombreLegacy,
+    ]);
 
     const modeloFound = raw[0];
 
-    return modeloFound
-      ? ModeloMapper.fromLegacySp(modeloFound)
-      : null;
+    return modeloFound ? ModeloMapper.fromLegacySp(modeloFound) : null;
   }
 }

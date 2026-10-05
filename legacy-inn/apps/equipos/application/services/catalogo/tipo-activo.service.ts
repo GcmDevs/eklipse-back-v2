@@ -5,7 +5,11 @@ import { Inject, Injectable } from '@nestjs/common';
 import { TipoActivoRepository } from '@equipos/domain/repositories';
 import { TipoActivo } from '@equipos/domain/entities';
 import { TipoActivoRead } from '@equipos/domain/read';
-import { CreateTipoActivoDto, FilterTipoActivoDto, UpdateTipoActivoDto } from '@equipos/presentation/dto';
+import {
+  CreateTipoActivoDto,
+  FilterTipoActivoDto,
+  UpdateTipoActivoDto,
+} from '@equipos/presentation/dto';
 import { TIPO_ACTIVO_REPOSITORY } from '@equipos/domain/repositories';
 
 @Injectable()
@@ -14,7 +18,7 @@ export class TipoActivoService {
     @Inject(TIPO_ACTIVO_REPOSITORY)
     private readonly repository: TipoActivoRepository,
     @Inject(TRANSACTION_MANAGER)
-    private readonly txManager: TransactionManager,
+    private readonly txManager: TransactionManager
   ) {}
 
   async create({ nombre, codigo, descripcion }: CreateTipoActivoDto): Promise<TipoActivoRead> {
@@ -27,7 +31,7 @@ export class TipoActivoService {
 
   async findById(
     id: number,
-    options: FindThrowOptions = new FindThrowOptions(),
+    options: FindThrowOptions = new FindThrowOptions()
   ): Promise<TipoActivo | null> {
     const tipoActivoFound = await this.repository.findById(id);
     if (!tipoActivoFound && options.throwIfNotFound) {

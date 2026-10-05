@@ -11,7 +11,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Authorities, CommonGuards } from '@common/presentation/decorators';
 import { INN_AUTHORITIES } from '@authorities/inventario';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { editFileName } from '@common/presentation/helpers';
 import { CreateCotizacionDto } from '../dtos';
 import { CotizacionCrudSource } from '@inn/central-compras/infrastructure/repositories';

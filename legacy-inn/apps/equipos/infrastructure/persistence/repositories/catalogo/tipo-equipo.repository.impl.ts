@@ -1,5 +1,9 @@
 import { EntityStatusQuery } from '@common/domain/types';
-import { applyActivoStatusToQb, leftJoinAndSelectWithActivoStatus, TypeOrmTransactionContext } from '@common/infrastructure/persistence/transactional';
+import {
+  applyActivoStatusToQb,
+  leftJoinAndSelectWithActivoStatus,
+  TypeOrmTransactionContext,
+} from '@common/infrastructure/persistence/transactional';
 import { BaseSource } from '@common/infrastructure/services';
 import { TipoEquipo } from '@equipos/domain/entities/catalogo/tipo-equipo.entity';
 import { TipoEquipoRead } from '@equipos/domain/read';
@@ -18,7 +22,7 @@ export class TypeOrmTipoEquipoRepository extends BaseSource implements TipoEquip
 
   private qbBase(
     alias = 'te',
-    estadoHijos?: EntityStatusQuery['estadoHijos'],
+    estadoHijos?: EntityStatusQuery['estadoHijos']
   ): SelectQueryBuilder<TipoEquipoOrm> {
     let qb = this.repository
       .createQueryBuilder(alias)
@@ -27,8 +31,18 @@ export class TypeOrmTipoEquipoRepository extends BaseSource implements TipoEquip
       .leftJoinAndSelect(`${alias}.tipoActivo`, 'tipoActivo')
       .leftJoinAndSelect(`modelo.marca`, 'marca');
     qb = leftJoinAndSelectWithActivoStatus(qb, `${alias}.documentos`, 'documentos', estadoHijos);
-    qb = leftJoinAndSelectWithActivoStatus(qb, `${alias}.accesoriosEstandar`, 'accesoriosEstandar', estadoHijos);
-    qb = leftJoinAndSelectWithActivoStatus(qb, `${alias}.planesDefault`, 'planesDefault', estadoHijos);
+    qb = leftJoinAndSelectWithActivoStatus(
+      qb,
+      `${alias}.accesoriosEstandar`,
+      'accesoriosEstandar',
+      estadoHijos
+    );
+    qb = leftJoinAndSelectWithActivoStatus(
+      qb,
+      `${alias}.planesDefault`,
+      'planesDefault',
+      estadoHijos
+    );
 
     return qb
       .leftJoinAndSelect('documentos.tipoDocumento', 'docTipDoc')
@@ -61,17 +75,14 @@ export class TypeOrmTipoEquipoRepository extends BaseSource implements TipoEquip
   }
 
   async findAllView(page: number, limit: number): Promise<[TipoEquipoRead[], number]> {
-    throw new Error('mETHOD NO IMPLEMENTED')
+    throw new Error('mETHOD NO IMPLEMENTED');
   }
 
   async delete(id: number): Promise<void> {
-    throw Error('Method not implemented')
+    throw Error('Method not implemented');
   }
 
-  async findViewById(
-    id: number,
-    filters?: EntityStatusQuery,
-  ): Promise<TipoEquipoRead | null> {
+  async findViewById(id: number, filters?: EntityStatusQuery): Promise<TipoEquipoRead | null> {
     const qb = this.qbBase('te', filters?.estadoHijos).where('te.id = :id', { id });
     applyActivoStatusToQb(qb, 'te.activo', filters?.estado, 'tipoEquipoEstado');
     const orm = await qb.getOne();
@@ -82,16 +93,16 @@ export class TypeOrmTipoEquipoRepository extends BaseSource implements TipoEquip
     page: number,
     limit: number,
     filters: EntityStatusQuery & { modeloId?: number; subclaseId?: number },
-    search?: string,
+    search?: string
   ): Promise<[TipoEquipoRead[], number]> {
     const qb = this.qbBase('te', filters?.estadoHijos);
     applyActivoStatusToQb(qb, 'te.activo', filters?.estado, 'tipoEquipoEstado');
 
     if (filters?.modeloId) {
-      qb.andWhere('te.modelo = :modeloId', { modeloId: filters.modeloId })
+      qb.andWhere('te.modelo = :modeloId', { modeloId: filters.modeloId });
     }
     if (filters?.subclaseId) {
-      qb.andWhere('te.subclase = :subclaseId', { subclaseId: filters.subclaseId })
+      qb.andWhere('te.subclase = :subclaseId', { subclaseId: filters.subclaseId });
     }
     if (search?.trim()) {
       qb.andWhere('te.nombre LIKE :search', { search: `%${search.trim()}%` });

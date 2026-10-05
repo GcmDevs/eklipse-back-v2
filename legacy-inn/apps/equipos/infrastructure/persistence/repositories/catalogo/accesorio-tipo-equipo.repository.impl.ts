@@ -1,4 +1,7 @@
-import { applyActivoStatusToQb, TypeOrmTransactionContext } from '@common/infrastructure/persistence/transactional';
+import {
+  applyActivoStatusToQb,
+  TypeOrmTransactionContext,
+} from '@common/infrastructure/persistence/transactional';
 import { BaseSource } from '@common/infrastructure/services';
 import { AccesorioTipoEquipo } from '@equipos/domain/entities/catalogo/accesorio-tipo-equipo.entity';
 import { AccesorioTipoEquipoRead } from '@equipos/domain/read';
@@ -8,10 +11,15 @@ import { Injectable } from '@nestjs/common';
 import { AccesorioTipoEquipoOrm } from '@orm/inn/equipos/catalogo/accesorio-tipo-equipo.orm';
 
 @Injectable()
-export class TypeOrmAccesorioTipoEquipoRepository extends BaseSource implements AccesorioTipoEquipoRepository {
+export class TypeOrmAccesorioTipoEquipoRepository
+  extends BaseSource
+  implements AccesorioTipoEquipoRepository
+{
   private get repository() {
     const qr = TypeOrmTransactionContext.getQueryRunner();
-    return qr ? qr.manager.getRepository(AccesorioTipoEquipoOrm) : this.conn.getRepository(AccesorioTipoEquipoOrm);
+    return qr
+      ? qr.manager.getRepository(AccesorioTipoEquipoOrm)
+      : this.conn.getRepository(AccesorioTipoEquipoOrm);
   }
 
   private qbBase(alias = 'ate') {
@@ -68,9 +76,7 @@ export class TypeOrmAccesorioTipoEquipoRepository extends BaseSource implements 
   }
 
   async findViewById(id: number): Promise<AccesorioTipoEquipoRead | null> {
-    const orm = await this.qbBase()
-      .where('ate.id = :id', { id })
-      .getOne();
+    const orm = await this.qbBase().where('ate.id = :id', { id }).getOne();
     return orm ? AccesorioTipoEquipoMapper.toView(orm) : null;
   }
 

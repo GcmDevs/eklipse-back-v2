@@ -116,5 +116,5 @@ export interface ResponseGeneralActivoLegacyEnrichedDto {
   catalogo: LegacyCatalogoEquivalenciasDto;
   valoresSugeridos: LegacyImportSuggestionsDto;
   camposRequeridosUsuario: string[];
-  estado: EstadoBusquedaEquipo 
+  estado: EstadoBusquedaEquipo;
 }

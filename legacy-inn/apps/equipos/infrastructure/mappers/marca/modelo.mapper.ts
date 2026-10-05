@@ -24,9 +24,7 @@ export class ModeloMapper {
       nombre: orm.nombre,
       createdAt: orm.createdAt,
       updatedAt: orm.updatedAt,
-      marca: orm.marca
-        ? MarcaMapper.toView(orm.marca)
-        : null,
+      marca: orm.marca ? MarcaMapper.toView(orm.marca) : null,
     };
   }
 

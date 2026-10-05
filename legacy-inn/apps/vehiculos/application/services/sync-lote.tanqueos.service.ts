@@ -24,7 +24,7 @@ import {
   MIN_MUESTRA_VALOR_ALTO,
   validateKilometrajeTanqueo,
   validateTanqueoItemEstacion,
-  VENTANA_DUPLICADO_MINUTOS
+  VENTANA_DUPLICADO_MINUTOS,
 } from '@vehiculos/domain/policies';
 import {
   ABASTECIMIENTO_REPOSITORY,
@@ -263,9 +263,10 @@ export class SincronizarLoteTanqueosUseCase {
     for (const [vehiculoId, tanqueosDelVehiculo] of porVehiculo) {
       const vehiculo = vehiculosPorId.get(vehiculoId);
       const requiresKm = vehiculo ? appliesKilometrajeValidation(vehiculo.getTipoActivo) : false;
-      const kmActual = requiresKm ? vehiculo?.getKilometrajeActual ?? null : null;
+      const kmActual = requiresKm ? (vehiculo?.getKilometrajeActual ?? null) : null;
       const capacidadTanque = vehiculo?.getCapacidadAlmacenamientoCombustible ?? null;
-      const kilometrajeInicial = requiresKm && kmActual != null ? Kilometraje.create(kmActual) : null;
+      const kilometrajeInicial =
+        requiresKm && kmActual != null ? Kilometraje.create(kmActual) : null;
 
       const ordenados = sortAndValidateSecuenciaKilometraje(
         tanqueosDelVehiculo,

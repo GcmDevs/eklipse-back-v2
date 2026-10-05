@@ -19,7 +19,6 @@ export interface ComponenteGrupoEjecucionSchema {
   items: ItemGrupoSchema[];
 }
 
-
 export interface ColumnaTablaSchema {
   key: string;
   etiqueta: string;

@@ -1,4 +1,4 @@
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 
 export const FOLDERS = {
   inn: {

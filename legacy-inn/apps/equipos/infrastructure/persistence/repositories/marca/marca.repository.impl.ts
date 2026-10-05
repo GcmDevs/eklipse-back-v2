@@ -6,32 +6,22 @@ import { MarcaMapper } from '@equipos/infrastructure/mappers';
 import { MarcaOrm } from '@orm/inn/equipos';
 import { Repository } from 'typeorm';
 
-export class TypeOrmMarcaRepository
-  extends BaseSource
-  implements MarcaRepository {
-  private readonly repository: Repository<MarcaOrm> =
-    this.conn.getRepository(MarcaOrm);
+export class TypeOrmMarcaRepository extends BaseSource implements MarcaRepository {
+  private readonly repository: Repository<MarcaOrm> = this.conn.getRepository(MarcaOrm);
 
   private qbBase(alias = 'marca') {
-    return this.repository
-      .createQueryBuilder(alias)
-      .select([
-        `${alias}.id`,
-        `${alias}.nombre`
-      ]);
+    return this.repository.createQueryBuilder(alias).select([`${alias}.id`, `${alias}.nombre`]);
   }
 
-
   async findViewById(id: number): Promise<MarcaRead> {
-    const marcaFound = await this.qbBase()
-      .where('marca.id = :id', { id })
-      .getOne();
+    const marcaFound = await this.qbBase().where('marca.id = :id', { id }).getOne();
 
     return marcaFound ? MarcaMapper.toView(marcaFound) : null;
   }
 
   async findById(id: number): Promise<Marca | null> {
-    const marcaFound = await this.repository.createQueryBuilder('marca')
+    const marcaFound = await this.repository
+      .createQueryBuilder('marca')
       .where('marca.id = :id', { id })
       .getOne();
 
@@ -41,7 +31,7 @@ export class TypeOrmMarcaRepository
   async findAllAndCount(
     page: number,
     take: number,
-    search?: string,
+    search?: string
   ): Promise<[MarcaRead[], number]> {
     const qb = this.qbBase();
 
@@ -90,17 +80,12 @@ export class TypeOrmMarcaRepository
     throw new Error('Method not implemented.');
   }
 
-  async findMarcaByLegacyNombre(
-    nombreLegacy: string,
-  ): Promise<Marca | null> {
-    const raw = await this.repository.query(
-      'EXEC SP_FIND_NEW_MARCA_BY_LEGACY_NAME @0',
-      [nombreLegacy],
-    );
+  async findMarcaByLegacyNombre(nombreLegacy: string): Promise<Marca | null> {
+    const raw = await this.repository.query('EXEC SP_FIND_NEW_MARCA_BY_LEGACY_NAME @0', [
+      nombreLegacy,
+    ]);
 
     const marcaFound = raw[0];
-    return marcaFound
-      ? MarcaMapper.fromLegacySp(marcaFound)
-      : null;
+    return marcaFound ? MarcaMapper.fromLegacySp(marcaFound) : null;
   }
 }

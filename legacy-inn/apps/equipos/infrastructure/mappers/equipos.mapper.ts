@@ -1,23 +1,26 @@
-import { ensureArray } from "@common/application/services";
-import { ResponsableMapper } from "@core/terceros/infrastructure/mappers";
-import { Equipo } from "@equipos/domain/entities";
-import { EstadoEquipo, OrigenPlanEquipo, TipoActividad } from "@equipos/domain/enums";
-import { EquipoMinimalRead, EquipoRead, PlanEquipoRead, ResumenEquiposRead } from "@equipos/domain/read";
-import { ResponsableView } from "@orm/cor";
-import { CompraOrm, EquipoOrm, PlanActividadOrm } from "@orm/inn/equipos";
-import { PlanDefaultTipoEquipoOrm } from "@orm/inn/equipos/catalogo/plan-default-tipo-equipo.orm";
-import { TipoEquipoOrm } from "@orm/inn/equipos/catalogo/tipo-equipo.orm";
-import { PlanActividadMapper } from "./actividades";
-import { AccesorioUnidadMapper } from "./accesorio-unidad.mapper";
-import { EquipoBajaMapper } from "./baja-equipo.mapper";
-import { CompraMapper } from "./catalogo/compra.mapper";
-import { PlanDefaultTipoEquipoMapper } from "./catalogo/plan-default-tipo-equipo.mapper";
-import { TipoEquipoMapper } from "./catalogo/tipo-equipo.mapper";
-
+import { ensureArray } from '@common/application/services';
+import { ResponsableMapper } from '@core/terceros/infrastructure/mappers';
+import { Equipo } from '@equipos/domain/entities';
+import { EstadoEquipo, OrigenPlanEquipo, TipoActividad } from '@equipos/domain/enums';
+import {
+  EquipoMinimalRead,
+  EquipoRead,
+  PlanEquipoRead,
+  ResumenEquiposRead,
+} from '@equipos/domain/read';
+import { ResponsableView } from '@orm/cor';
+import { CompraOrm, EquipoOrm, PlanActividadOrm } from '@orm/inn/equipos';
+import { PlanDefaultTipoEquipoOrm } from '@orm/inn/equipos/catalogo/plan-default-tipo-equipo.orm';
+import { TipoEquipoOrm } from '@orm/inn/equipos/catalogo/tipo-equipo.orm';
+import { PlanActividadMapper } from './actividades';
+import { AccesorioUnidadMapper } from './accesorio-unidad.mapper';
+import { EquipoBajaMapper } from './baja-equipo.mapper';
+import { CompraMapper } from './catalogo/compra.mapper';
+import { PlanDefaultTipoEquipoMapper } from './catalogo/plan-default-tipo-equipo.mapper';
+import { TipoEquipoMapper } from './catalogo/tipo-equipo.mapper';
 
 export class EquipoMapper {
   static toOrm(domain: Equipo): EquipoOrm {
-
     const orm = new EquipoOrm();
 
     if (domain.getId.getValor) {
@@ -47,9 +50,7 @@ export class EquipoMapper {
     orm.planDefaultCalibracion = domain.getPlanDefaultCalibracionId
       ? ({ id: domain.getPlanDefaultCalibracionId.getValor } as PlanDefaultTipoEquipoOrm)
       : null;
-    orm.compra = domain.getCompraId
-      ? ({ id: domain.getCompraId.getValor } as CompraOrm)
-      : null;
+    orm.compra = domain.getCompraId ? ({ id: domain.getCompraId.getValor } as CompraOrm) : null;
 
     return orm;
   }
@@ -75,7 +76,7 @@ export class EquipoMapper {
       orm?.compra?.id,
       orm?.registroFotografico,
       orm.planDefaultMantenimiento?.id,
-      orm.planDefaultCalibracion?.id,
+      orm.planDefaultCalibracion?.id
     );
   }
 
@@ -91,19 +92,25 @@ export class EquipoMapper {
       fechaPuestaFuncionamiento: equipo?.getFechaPuestaFuncionamiento,
       observaciones: equipo?.getObservaciones,
       responsable: { responsableId: equipo.getResponsableId.getValor } as ResponsableView,
-      ...(equipo.getCompraId
-        ? { compra: { id: equipo.getCompraId.getValor } as CompraOrm }
-        : {}),
+      ...(equipo.getCompraId ? { compra: { id: equipo.getCompraId.getValor } as CompraOrm } : {}),
       ...(equipo.getTipoEquipoCatId
         ? { tipoEquipoRel: { id: equipo.getTipoEquipoCatId.getValor } as TipoEquipoOrm }
         : {}),
       ...(equipo.getPlanDefaultMantenimientoId
-        ? { planDefaultMantenimiento: { id: equipo.getPlanDefaultMantenimientoId.getValor } as PlanDefaultTipoEquipoOrm }
+        ? {
+            planDefaultMantenimiento: {
+              id: equipo.getPlanDefaultMantenimientoId.getValor,
+            } as PlanDefaultTipoEquipoOrm,
+          }
         : {}),
       ...(equipo.getPlanDefaultCalibracionId
-        ? { planDefaultCalibracion: { id: equipo.getPlanDefaultCalibracionId.getValor } as PlanDefaultTipoEquipoOrm }
+        ? {
+            planDefaultCalibracion: {
+              id: equipo.getPlanDefaultCalibracionId.getValor,
+            } as PlanDefaultTipoEquipoOrm,
+          }
         : {}),
-    }
+    };
 
     return updateEquipoOrm;
   }
@@ -111,7 +118,7 @@ export class EquipoMapper {
   static toUpdateEstadoOrm(equipo: Equipo): Pick<EquipoOrm, 'id' | 'estado'> {
     return {
       id: equipo.getId.getValor,
-      estado: equipo.getEstado
+      estado: equipo.getEstado,
     };
   }
 
@@ -133,13 +140,11 @@ export class EquipoMapper {
     view.tipoActivoId = orm.tipoEquipoRel?.tipoActivo?.id;
     view.tipoActivoNombre = orm.tipoEquipoRel?.tipoActivo?.nombre;
     view.registroFotografico = orm?.registroFotografico?.getFotos() ?? [];
-    view.tipoEquipo = orm.tipoEquipoRel
-      ? TipoEquipoMapper.toEmbeddedView(orm.tipoEquipoRel)
-      : null;
+    view.tipoEquipo = orm.tipoEquipoRel ? TipoEquipoMapper.toEmbeddedView(orm.tipoEquipoRel) : null;
     view.accesoriosUnidad = (orm.accesoriosUnidad ?? [])
-      .filter((a) => !a.descontinuado)
-      .map((a) => ({
-        ...AccesorioUnidadMapper.toView(a)
+      .filter(a => !a.descontinuado)
+      .map(a => ({
+        ...AccesorioUnidadMapper.toView(a),
       }));
 
     const planes = ensureArray(orm.planesActividad);
@@ -151,13 +156,13 @@ export class EquipoMapper {
         mantenimiento,
         orm?.planDefaultMantenimiento,
         orm?.id,
-        orm.tipoEquipoRel?.id,
+        orm.tipoEquipoRel?.id
       ),
       calibracion: EquipoMapper.buildPlanView(
         calibracion,
         orm?.planDefaultCalibracion,
         orm?.id,
-        orm.tipoEquipoRel?.id,
+        orm.tipoEquipoRel?.id
       ),
     };
 
@@ -167,9 +172,7 @@ export class EquipoMapper {
 
     view.baja = orm?.baja ? EquipoBajaMapper.toView(orm?.baja) : null;
 
-    view.compra = orm.compra
-      ? CompraMapper.toView(orm.compra)
-      : null;
+    view.compra = orm.compra ? CompraMapper.toView(orm.compra) : null;
 
     return view;
   }
@@ -178,9 +181,8 @@ export class EquipoMapper {
     planActividad: PlanActividadOrm | undefined,
     planDefault: PlanDefaultTipoEquipoOrm | undefined,
     equipoId: number,
-    tipoEquipoId?: number,
+    tipoEquipoId?: number
   ): PlanEquipoRead | null {
-
     if (planActividad) {
       return {
         origen: OrigenPlanEquipo.PROPIO,
@@ -200,14 +202,16 @@ export class EquipoMapper {
     return null;
   }
 
-  static toResumenView(rows: {
-    estado: EstadoEquipo;
-    tipoActivoNombre: string | null;
-    total: string;
-  }[]): ResumenEquiposRead {
+  static toResumenView(
+    rows: {
+      estado: EstadoEquipo;
+      tipoActivoNombre: string | null;
+      total: string;
+    }[]
+  ): ResumenEquiposRead {
     const porEstado = Object.values(EstadoEquipo).reduce(
       (acc, estado) => ({ ...acc, [estado]: 0 }),
-      {} as Record<EstadoEquipo, number>,
+      {} as Record<EstadoEquipo, number>
     );
     const porTipo: Record<string, number> = {};
     let totalFiltrado = 0;

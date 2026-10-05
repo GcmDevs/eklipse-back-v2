@@ -1,7 +1,6 @@
 import { BadInputError } from '@common/domain/errors';
 import { Riesgo } from '../enums';
 
-
 export class ClasificacionBiomedica {
   private constructor(
     private readonly aplicaRegSanitario: boolean = false,
@@ -13,7 +12,7 @@ export class ClasificacionBiomedica {
     private readonly riesgo: Riesgo = Riesgo.NO_APLICA,
     private readonly numeroRegSanitario?: string,
     private readonly expedienteRegSanitario?: string
-  ) { }
+  ) {}
 
   static create(
     aplicaRegSanitario?: boolean,
@@ -26,9 +25,10 @@ export class ClasificacionBiomedica {
     numeroRegSanitario?: string,
     expedienteRegSanitario?: string
   ): ClasificacionBiomedica {
-
     if (!aplicaRegSanitario && (numeroRegSanitario || expedienteRegSanitario)) {
-      throw new BadInputError("No se puede asignar un numero de registro o expediente si el registro sanitario no aplica");
+      throw new BadInputError(
+        'No se puede asignar un numero de registro o expediente si el registro sanitario no aplica'
+      );
     }
 
     return new ClasificacionBiomedica(
@@ -75,7 +75,6 @@ export class ClasificacionBiomedica {
   get getExpedienteRegistroSanitario(): string {
     return this.expedienteRegSanitario;
   }
-
 
   get getTratamientoMantenimientoDeVida(): boolean {
     return this.tratamientoMantenimientoDeVida;

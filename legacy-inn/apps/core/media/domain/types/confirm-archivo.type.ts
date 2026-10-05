@@ -1,5 +1,5 @@
-import { DestinoArchivoConfig } from "./destino-archivo-config.type";
+import { DestinoArchivoConfig } from './destino-archivo-config.type';
 
 export interface ConfirmFileOptions extends DestinoArchivoConfig {
-    fileId: number;
+  fileId: number;
 }

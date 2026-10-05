@@ -16,7 +16,7 @@ interface PlanCreacionEquipoResuelto {
 export function resolvePlanCreacionEquipo(
   config: ConfiguracionPlanEquipoInput | undefined,
   tipoPlan: TipoActividad,
-  planesDefault: PlanDefaultTipoEquipoRead[],
+  planesDefault: PlanDefaultTipoEquipoRead[]
 ): PlanCreacionEquipoResuelto {
   if (!config) return {};
 
@@ -25,7 +25,7 @@ export function resolvePlanCreacionEquipo(
 
   if (usaTipoEquipo && planPersonalizado) {
     throw new BadInputError(
-      `Configuración inválida del plan de ${TipoActividad[tipoPlan].toLowerCase()}: no puede enviar usarPlanTipoEquipo en true y un plan personalizado al mismo tiempo`,
+      `Configuración inválida del plan de ${TipoActividad[tipoPlan].toLowerCase()}: no puede enviar usarPlanTipoEquipo en true y un plan personalizado al mismo tiempo`
     );
   }
 
@@ -33,7 +33,7 @@ export function resolvePlanCreacionEquipo(
     const planDefault = planesDefault.find(p => p.tipo === tipoPlan);
     if (!planDefault) {
       throw new BadInputError(
-        `El tipo de equipo no tiene plan default de ${TipoActividad[tipoPlan].toLowerCase()}`,
+        `El tipo de equipo no tiene plan default de ${TipoActividad[tipoPlan].toLowerCase()}`
       );
     }
     return { planDefaultId: planDefault.id };

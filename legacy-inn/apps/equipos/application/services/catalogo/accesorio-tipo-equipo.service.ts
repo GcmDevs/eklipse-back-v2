@@ -7,7 +7,10 @@ import { AccesorioTipoEquipoRepository } from '@equipos/domain/repositories/cata
 import { ACCESORIO_TIPO_EQUIPO_REPOSITORY } from '@equipos/domain/repositories/tokens';
 import { AccesorioTipoEquipo } from '@equipos/domain/entities/catalogo/accesorio-tipo-equipo.entity';
 import { AccesorioTipoEquipoRead } from '@equipos/domain/read';
-import { CreateAccesorioTipoEquipoDto, UpdateAccesorioTipoEquipoDto } from '@equipos/presentation/dto';
+import {
+  CreateAccesorioTipoEquipoDto,
+  UpdateAccesorioTipoEquipoDto,
+} from '@equipos/presentation/dto';
 import { AuditTipoEquipoService } from '../../audit/audit-tipo-equipo.service';
 import { PartesCatgService } from './partes-catg.service';
 
@@ -19,12 +22,12 @@ export class AccesorioTipoEquipoService {
     @Inject(TRANSACTION_MANAGER)
     private readonly txManager: TransactionManager,
     private readonly partesCatgService: PartesCatgService,
-    private readonly auditService: AuditTipoEquipoService,
+    private readonly auditService: AuditTipoEquipoService
   ) {}
 
   async create(
     tipoEquipoId: number,
-    { parteId, parte, cantidad, marcaId, referencia, observaciones }: CreateAccesorioTipoEquipoDto,
+    { parteId, parte, cantidad, marcaId, referencia, observaciones }: CreateAccesorioTipoEquipoDto
   ): Promise<AccesorioTipoEquipoRead> {
     const resolved = await this.partesCatgService.resolveForAccesorio({ parteId, parte });
     const accesorio = AccesorioTipoEquipo.create(
@@ -34,7 +37,7 @@ export class AccesorioTipoEquipoService {
       cantidad,
       marcaId,
       referencia,
-      observaciones,
+      observaciones
     );
 
     return this.txManager.transactional(async () => {
@@ -51,7 +54,7 @@ export class AccesorioTipoEquipoService {
 
   async findById(
     id: number,
-    options: FindThrowOptions = new FindThrowOptions(),
+    options: FindThrowOptions = new FindThrowOptions()
   ): Promise<AccesorioTipoEquipo | null> {
     const accesorioFound = await this.repository.findById(id);
     if (!accesorioFound && options.throwIfNotFound) {
@@ -67,7 +70,7 @@ export class AccesorioTipoEquipoService {
   async update(
     tipoEquipoId: number,
     id: number,
-    data: UpdateAccesorioTipoEquipoDto,
+    data: UpdateAccesorioTipoEquipoDto
   ): Promise<AccesorioTipoEquipoRead> {
     return this.txManager.transactional(async () => {
       const current = await this.assertBelongsToTipoEquipo(tipoEquipoId, id);
@@ -121,12 +124,12 @@ export class AccesorioTipoEquipoService {
 
   private async assertBelongsToTipoEquipo(
     tipoEquipoId: number,
-    id: number,
+    id: number
   ): Promise<AccesorioTipoEquipo> {
     const current = await this.findById(id);
     if (!current || current.getTipoEquipoId.getValor !== tipoEquipoId) {
       throw new ResourceNotFoundError(
-        `AccesorioTipoEquipo con id: ${id} no encontrado para el tipoEquipo ${tipoEquipoId}`,
+        `AccesorioTipoEquipo con id: ${id} no encontrado para el tipoEquipo ${tipoEquipoId}`
       );
     }
     return current;

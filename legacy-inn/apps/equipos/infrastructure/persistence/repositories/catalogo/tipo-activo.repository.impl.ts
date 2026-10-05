@@ -1,4 +1,7 @@
-import { applyActivoStatusToQb, TypeOrmTransactionContext } from '@common/infrastructure/persistence/transactional';
+import {
+  applyActivoStatusToQb,
+  TypeOrmTransactionContext,
+} from '@common/infrastructure/persistence/transactional';
 import { BaseSource } from '@common/infrastructure/services';
 import { TipoActivo } from '@equipos/domain/entities/catalogo/tipo-activo.entity';
 import { TipoActivoRead } from '@equipos/domain/read';
@@ -26,16 +29,14 @@ export class TypeOrmTipoActivoRepository extends BaseSource implements TipoActiv
   }
 
   async findActivos(): Promise<TipoActivoRead[]> {
-    const qb = this.repository.createQueryBuilder('tipoActivo')
-      .orderBy('tipoActivo.nombre', 'ASC');
+    const qb = this.repository.createQueryBuilder('tipoActivo').orderBy('tipoActivo.nombre', 'ASC');
     applyActivoStatusToQb(qb, 'tipoActivo.activo');
     const orms = await qb.getMany();
     return TipoActivoMapper.toViewList(orms);
   }
 
   async findAll({ search, limit }: { search?: string; limit?: number }): Promise<TipoActivoRead[]> {
-    const qb = this.repository.createQueryBuilder('tipoActivo')
-      .orderBy('tipoActivo.nombre', 'ASC');
+    const qb = this.repository.createQueryBuilder('tipoActivo').orderBy('tipoActivo.nombre', 'ASC');
     applyActivoStatusToQb(qb, 'tipoActivo.activo');
 
     if (search?.trim()) {
@@ -63,12 +64,15 @@ export class TypeOrmTipoActivoRepository extends BaseSource implements TipoActiv
   }
 
   async findAllView(page: number, limit: number): Promise<[TipoActivoRead[], number]> {
-    const [orms, count] = await this.repository.findAndCount({ skip: (page - 1) * limit, take: limit, order: { nombre: 'ASC' } });
+    const [orms, count] = await this.repository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { nombre: 'ASC' },
+    });
     return [TipoActivoMapper.toViewList(orms), count];
   }
 
-  async delete(id: number): Promise<void> {
-  }
+  async delete(id: number): Promise<void> {}
 
   async findViewById(id: number): Promise<TipoActivoRead | null> {
     const orm = await this.repository.findOne({ where: { id } });
@@ -76,7 +80,10 @@ export class TypeOrmTipoActivoRepository extends BaseSource implements TipoActiv
   }
 
   async findAllAndCount(page: number, limit: number): Promise<[TipoActivoRead[], number]> {
-    const [orms, count] = await this.repository.findAndCount({ skip: (page - 1) * limit, take: limit });
+    const [orms, count] = await this.repository.findAndCount({
+      skip: (page - 1) * limit,
+      take: limit,
+    });
     return [TipoActivoMapper.toViewList(orms), count];
   }
 }

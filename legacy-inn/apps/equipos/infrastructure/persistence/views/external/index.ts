@@ -1,1 +1,1 @@
-export * from "./activo-general-legacy.view";
+export * from './activo-general-legacy.view';

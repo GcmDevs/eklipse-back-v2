@@ -172,18 +172,18 @@ where D.OID =  ${cotizacion.cotDocumento.documentoId}
           ))
             ? 'COORDINADOR(A) DE COMPRAS'
             : (await this.hasAnyAuthorityFromRemote(
-                [INN_AUTHORITIES.CENTRAL_COMPRAS.CARGO_2_APROBAR_RECHAZAR_COTI_RECOMEN],
-                aprobado1FromCE.usuario.id,
-                gcmContextFactory(payload.context)
-              ))
-            ? 'GERENTE DE COMPRAS'
-            : (await this.hasAnyAuthorityFromRemote(
-                [INN_AUTHORITIES.CENTRAL_COMPRAS.CARGO_4_APROBAR_RECHAZAR_COT_RECOMEN],
-                aprobado1FromCE.usuario.id,
-                gcmContextFactory(payload.context)
-              ))
-            ? 'SUBDIRECTOR(A) DE COMPRAS'
-            : 'VERIFICA COORDINACION DE COMPRAS',
+                  [INN_AUTHORITIES.CENTRAL_COMPRAS.CARGO_2_APROBAR_RECHAZAR_COTI_RECOMEN],
+                  aprobado1FromCE.usuario.id,
+                  gcmContextFactory(payload.context)
+                ))
+              ? 'GERENTE DE COMPRAS'
+              : (await this.hasAnyAuthorityFromRemote(
+                    [INN_AUTHORITIES.CENTRAL_COMPRAS.CARGO_4_APROBAR_RECHAZAR_COT_RECOMEN],
+                    aprobado1FromCE.usuario.id,
+                    gcmContextFactory(payload.context)
+                  ))
+                ? 'SUBDIRECTOR(A) DE COMPRAS'
+                : 'VERIFICA COORDINACION DE COMPRAS',
         }
       : undefined;
 
@@ -198,18 +198,18 @@ where D.OID =  ${cotizacion.cotDocumento.documentoId}
           ))
             ? 'COORDINADOR(A) DE COMPRAS'
             : (await this.hasAnyAuthorityFromRemote(
-                [INN_AUTHORITIES.CENTRAL_COMPRAS.CARGO_2_APROBAR_RECHAZAR_COTI_RECOMEN],
-                aprobado2FromCE.usuario.id,
-                gcmContextFactory(payload.context)
-              ))
-            ? 'GERENTE DE COMPRAS'
-            : (await this.hasAnyAuthorityFromRemote(
-                [INN_AUTHORITIES.CENTRAL_COMPRAS.CARGO_4_APROBAR_RECHAZAR_COT_RECOMEN],
-                aprobado1FromCE.usuario.id,
-                gcmContextFactory(payload.context)
-              ))
-            ? 'SUBDIRECTOR(A) DE COMPRAS'
-            : 'VERIFICA COORDINACION DE COMPRAS',
+                  [INN_AUTHORITIES.CENTRAL_COMPRAS.CARGO_2_APROBAR_RECHAZAR_COTI_RECOMEN],
+                  aprobado2FromCE.usuario.id,
+                  gcmContextFactory(payload.context)
+                ))
+              ? 'GERENTE DE COMPRAS'
+              : (await this.hasAnyAuthorityFromRemote(
+                    [INN_AUTHORITIES.CENTRAL_COMPRAS.CARGO_4_APROBAR_RECHAZAR_COT_RECOMEN],
+                    aprobado1FromCE.usuario.id,
+                    gcmContextFactory(payload.context)
+                  ))
+                ? 'SUBDIRECTOR(A) DE COMPRAS'
+                : 'VERIFICA COORDINACION DE COMPRAS',
         }
       : undefined;
 

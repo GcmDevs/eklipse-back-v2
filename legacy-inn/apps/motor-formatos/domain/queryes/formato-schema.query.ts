@@ -1,3 +1,3 @@
 export interface FormatoSchemaQuery {
-    getSchema(versionFormatoId: number): Promise<any>;
+  getSchema(versionFormatoId: number): Promise<any>;
 }

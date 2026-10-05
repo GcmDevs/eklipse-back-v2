@@ -9,8 +9,8 @@ export * from './responsable.controller';
 export * from './tercero.controller';
 
 export const COR_TERCEROS_CONTROLLERS = [
-    PaisController,
-    ProveedorController,
-    ResponsableController,
-    TerceroController
+  PaisController,
+  ProveedorController,
+  ResponsableController,
+  TerceroController,
 ];

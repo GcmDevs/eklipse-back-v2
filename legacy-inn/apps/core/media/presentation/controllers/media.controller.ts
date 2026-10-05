@@ -9,7 +9,7 @@ import { StagingFileService } from '@core/media/application/services/staging.arc
 @Controller('/v4/media')
 export class MediaController extends BaseShelteredController {
   constructor(private readonly mediaService: StagingFileService) {
-    super()
+    super();
   }
 
   @Post('/upload/imagenes')
@@ -18,13 +18,14 @@ export class MediaController extends BaseShelteredController {
     allowedMimeType: [MimeTypes.PNG, MimeTypes.JPEG],
     multiple: true,
     maxSizeMB: 5,
-    maxCount: 30
+    maxCount: 30,
   })
-  public async uploadImages(@UploadFileExtractor() images: Express.Multer.File[]): Promise<BaseApiResponse<any>> {
+  public async uploadImages(
+    @UploadFileExtractor() images: Express.Multer.File[]
+  ): Promise<BaseApiResponse<any>> {
     const result = await this.mediaService.uploadMany(images);
     return { data: result, message: 'Archivos creados con exito' };
   }
-
 
   @Post('/upload/docs')
   @UploadFile({
@@ -32,27 +33,27 @@ export class MediaController extends BaseShelteredController {
     allowedMimeType: [MimeTypes.PDF, MimeTypes.DOCX, MimeTypes.XLSX],
     multiple: true,
     maxSizeMB: 15,
-    maxCount: 10
+    maxCount: 10,
   })
-  public async uploadDocs(@UploadFileExtractor() docs: Express.Multer.File[]): Promise<BaseApiResponse<any>> {
+  public async uploadDocs(
+    @UploadFileExtractor() docs: Express.Multer.File[]
+  ): Promise<BaseApiResponse<any>> {
     const result = await this.mediaService.uploadMany(docs);
     return { data: result, message: 'Archivos guardados con exito' };
   }
-
 
   @FileResponse()
   @Get('/preview/:id')
   async getFile(
     @Param('id', ParseIntPipe) id: number,
-    @Query('download') download: string,
+    @Query('download') download: string
   ): Promise<StreamableFile> {
-    const { stream, archivo } =
-      await this.mediaService.getArchivoStream(id);
+    const { stream, archivo } = await this.mediaService.getArchivoStream(id);
 
     const disposition = download === 'true' ? 'attachment' : 'inline';
     return new StreamableFile(stream, {
       type: archivo.getTipoMime,
-      disposition: `${disposition}; filename="${archivo.getNombreOriginal}"`
+      disposition: `${disposition}; filename="${archivo.getNombreOriginal}"`,
     });
   }
 }

@@ -6,8 +6,7 @@ import { ProveedorOrm } from '@orm/gen';
 
 @Injectable()
 export class ProveedorService {
-  constructor(private readonly proveedorRepository: TypeOrmProveedorRepository) {
-   }
+  constructor(private readonly proveedorRepository: TypeOrmProveedorRepository) {}
 
   public async findById(
     id: number,
@@ -20,10 +19,7 @@ export class ProveedorService {
     return proveedorFound;
   }
 
-  public async findAll(
-    search?: string,
-    limit?: number
-  ): Promise<ProveedorOrm[]> {
+  public async findAll(search?: string, limit?: number): Promise<ProveedorOrm[]> {
     const finalLimit = limit ?? 20;
     return await this.proveedorRepository.findAll(finalLimit, search);
   }

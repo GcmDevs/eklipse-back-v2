@@ -5,8 +5,7 @@ import { DocumentoTipoEquipoOrm } from '@orm/inn/equipos/catalogo/documento-tipo
 import { Repository, SelectQueryBuilder } from 'typeorm';
 
 export class TypeOrmEquipoReportRepository extends BaseSource {
-  private readonly repository: Repository<EquipoOrm> =
-    this.conn.getRepository(EquipoOrm);
+  private readonly repository: Repository<EquipoOrm> = this.conn.getRepository(EquipoOrm);
   private readonly responsableRepository: Repository<ResponsableView> =
     this.conn.getRepository(ResponsableView);
   private readonly documentoTipoEquipoRepository: Repository<DocumentoTipoEquipoOrm> =
@@ -30,7 +29,7 @@ export class TypeOrmEquipoReportRepository extends BaseSource {
       'equipo.accesoriosUnidad',
       'accesoriosUnidad',
       'accesoriosUnidad.descontinuado = :descontinuado',
-      { descontinuado: false },
+      { descontinuado: false }
     );
     qb = qb
       .leftJoinAndSelect('accesoriosUnidad.accesorioEstandar', 'accesorioEstandar')
@@ -41,31 +40,16 @@ export class TypeOrmEquipoReportRepository extends BaseSource {
   }
 
   public async findDepartamentoEquipoByResponsableId(
-    responsableId: number,
+    responsableId: number
   ): Promise<ResponsableView | null> {
     return this.responsableRepository.findOne({
       where: { responsableId },
     });
   }
 
-  private joinDocumentos(
-    qb: SelectQueryBuilder<EquipoOrm>,
-    relation: string,
-    alias: string,
-  ): void {
-    qb.leftJoinAndSelect(
-      relation,
-      alias,
-      `${alias}.activo = :activo`,
-      { activo: true },
-    )
-      .leftJoinAndSelect(
-        `${alias}.tipoDocumento`,
-        `${alias}TipoDocumento`,
-      )
-      .leftJoinAndSelect(
-        `${alias}.archivo`,
-        `${alias}Archivo`,
-      );
+  private joinDocumentos(qb: SelectQueryBuilder<EquipoOrm>, relation: string, alias: string): void {
+    qb.leftJoinAndSelect(relation, alias, `${alias}.activo = :activo`, { activo: true })
+      .leftJoinAndSelect(`${alias}.tipoDocumento`, `${alias}TipoDocumento`)
+      .leftJoinAndSelect(`${alias}.archivo`, `${alias}Archivo`);
   }
 }

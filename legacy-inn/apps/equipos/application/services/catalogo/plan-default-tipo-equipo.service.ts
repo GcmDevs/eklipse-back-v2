@@ -7,7 +7,10 @@ import { PlanDefaultTipoEquipo } from '@equipos/domain/entities/catalogo/plan-de
 import { PlanDefaultTipoEquipoRead } from '@equipos/domain/read';
 import { PlanDefaultTipoEquipoRepository } from '@equipos/domain/repositories/catalogo/plan-default-tipo-equipo.repository';
 import { TipoEquipoRepository } from '@equipos/domain/repositories/catalogo/tipo-equipo.repository';
-import { PLAN_DEFAULT_TIPO_EQUIPO_REPOSITORY, TIPO_EQUIPO_REPOSITORY } from '@equipos/domain/repositories/tokens';
+import {
+  PLAN_DEFAULT_TIPO_EQUIPO_REPOSITORY,
+  TIPO_EQUIPO_REPOSITORY,
+} from '@equipos/domain/repositories/tokens';
 import {
   CreatePlanDefaultTipoEquipoDto,
   FilterPlanDefaultTipoEquipoDto,
@@ -24,16 +27,30 @@ export class PlanDefaultTipoEquipoService {
     private readonly tipoEquipoRepository: TipoEquipoRepository,
     @Inject(TRANSACTION_MANAGER)
     private readonly txManager: TransactionManager,
-    private readonly auditService: AuditTipoEquipoService,
+    private readonly auditService: AuditTipoEquipoService
   ) {}
 
   async create(
     tipoEquipoId: number,
-    { tipo, periocidad, diasAntNotif, realizaExterno, formatoId, observaciones }: CreatePlanDefaultTipoEquipoDto,
+    {
+      tipo,
+      periocidad,
+      diasAntNotif,
+      realizaExterno,
+      formatoId,
+      observaciones,
+    }: CreatePlanDefaultTipoEquipoDto
   ): Promise<PlanDefaultTipoEquipoRead> {
     await this.ensureTipoEquipoExists(tipoEquipoId);
     const planDefault = PlanDefaultTipoEquipo.create(
-      tipoEquipoId, tipo, periocidad?.valor, periocidad?.unidad, diasAntNotif, realizaExterno, formatoId, observaciones,
+      tipoEquipoId,
+      tipo,
+      periocidad?.valor,
+      periocidad?.unidad,
+      diasAntNotif,
+      realizaExterno,
+      formatoId,
+      observaciones
     );
     return this.txManager.transactional(async () => {
       const saved = await this.repository.save(planDefault);
@@ -50,13 +67,13 @@ export class PlanDefaultTipoEquipoService {
   async findById(
     tipoEquipoId: number,
     planId: number,
-    options: FindThrowOptions = new FindThrowOptions(),
+    options: FindThrowOptions = new FindThrowOptions()
   ): Promise<PlanDefaultTipoEquipo | null> {
     const planFound = await this.repository.findById(planId);
     if (!planFound || planFound.getTipoEquipoId.getValor !== tipoEquipoId) {
       if (options.throwIfNotFound) {
         throw new ResourceNotFoundError(
-          `PlanDefaultTipoEquipo con id: ${planId} no encontrado en tipoEquipo: ${tipoEquipoId}`,
+          `PlanDefaultTipoEquipo con id: ${planId} no encontrado en tipoEquipo: ${tipoEquipoId}`
         );
       }
       return null;
@@ -66,7 +83,7 @@ export class PlanDefaultTipoEquipoService {
 
   async findAll(
     tipoEquipoId: number,
-    { search, limit }: FilterPlanDefaultTipoEquipoDto,
+    { search, limit }: FilterPlanDefaultTipoEquipoDto
   ): Promise<PlanDefaultTipoEquipoRead[]> {
     await this.ensureTipoEquipoExists(tipoEquipoId);
     return this.repository.findAll({ tipoEquipoId, search, limit });
@@ -75,7 +92,7 @@ export class PlanDefaultTipoEquipoService {
   async update(
     tipoEquipoId: number,
     planId: number,
-    data: UpdatePlanDefaultTipoEquipoDto,
+    data: UpdatePlanDefaultTipoEquipoDto
   ): Promise<PlanDefaultTipoEquipoRead> {
     return this.txManager.transactional(async () => {
       const planDefault = await this.findById(tipoEquipoId, planId, { throwIfNotFound: true });

@@ -1,4 +1,4 @@
-import { TipoEventoAuditEquipo } from "../enums/tipos-audit-equipo.enum";
+import { TipoEventoAuditEquipo } from '../enums/tipos-audit-equipo.enum';
 
 export interface EventoAuditEquipoRead {
   id: number;
@@ -24,7 +24,7 @@ export interface EventoAuditEquipoWorkflowRead {
   latestEventoId: number;
   lastActivityAt: Date;
   totalEventos: number;
-  rootActivityAt: Date,
+  rootActivityAt: Date;
 }
 
 export interface IncidenciaExternaEquipoRead {

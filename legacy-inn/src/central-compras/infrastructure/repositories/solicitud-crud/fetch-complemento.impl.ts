@@ -1,7 +1,8 @@
 import { In } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { ProductoOrm as AfnProductoOrm } from '@orm/inn/activos-fijos';
-import { FILE_LOCATIONS, GcmContexts } from '@common/application/constants';
+import { GcmContexts } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import {
   CambioEstadoOrm,
   DetalleCotizacionOrm,

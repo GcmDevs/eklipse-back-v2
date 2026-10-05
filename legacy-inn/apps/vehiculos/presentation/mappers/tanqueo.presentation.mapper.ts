@@ -61,5 +61,4 @@ export class TanqueoPresentationMapper {
   ): TanqueoInconsistenciaFilters {
     return { ...filters };
   }
-
 }

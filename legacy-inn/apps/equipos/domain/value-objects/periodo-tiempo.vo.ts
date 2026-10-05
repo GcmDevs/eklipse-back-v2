@@ -5,7 +5,7 @@ export class PeriodoDeTiempo {
   private constructor(
     private readonly valor: number,
     private readonly unidad: UnidadTiempo
-  ) { }
+  ) {}
 
   static create(valor: number, unidad: UnidadTiempo): PeriodoDeTiempo {
     if (valor !== undefined && unidad !== undefined) {
@@ -32,8 +32,7 @@ export class PeriodoDeTiempo {
   toPrimitives(): any {
     return {
       valor: this.valor,
-      unidad: this.getUnidad
-    }
+      unidad: this.getUnidad,
+    };
   }
-
 }

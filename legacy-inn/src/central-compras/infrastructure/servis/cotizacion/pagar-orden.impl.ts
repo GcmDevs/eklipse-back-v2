@@ -2,7 +2,8 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CentralComprasSource, TimerService } from '../../base';
 import { orderBy } from 'lodash';
 import { In, Not } from 'typeorm';
-import { FILE_LOCATIONS, IVA } from '@common/application/constants';
+import { IVA } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { OldPagarOrdenDto } from '@inn/central-compras/presentation/dtos';
 import {
   CotizacionOrm,

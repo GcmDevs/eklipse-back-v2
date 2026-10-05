@@ -169,9 +169,7 @@ export class RepositorioCombustible {
     }
     const nuevoStock = this.stockActual + cantidad;
     if (nuevoStock > this.capacidad) {
-      throw new BadInputError(
-        `La entrada supera la capacidad del repositorio (${this.capacidad})`
-      );
+      throw new BadInputError(`La entrada supera la capacidad del repositorio (${this.capacidad})`);
     }
     this.stockActual = nuevoStock;
     this.updatedAt = new Date();

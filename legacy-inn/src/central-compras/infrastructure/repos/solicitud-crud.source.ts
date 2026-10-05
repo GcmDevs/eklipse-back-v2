@@ -1,4 +1,5 @@
-import { FILE_LOCATIONS, GcmContexts } from '@common/application/constants';
+import { GcmContexts } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CentralComprasSource } from '../base';
 import { Like } from 'typeorm';

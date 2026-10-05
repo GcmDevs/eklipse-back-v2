@@ -90,8 +90,9 @@ const formatTimeAgo = (
   const tv = GCM_TIME_LANG[lg];
 
   if (Math.floor(exedent) > 0) {
-    const v = `${concatenated ? ', ' : ''}${Math.floor(exedent)} ${Math.floor(exedent) === 1 ? tv[calendar] : tv[`${calendar}s`]
-      }`;
+    const v = `${concatenated ? ', ' : ''}${Math.floor(exedent)} ${
+      Math.floor(exedent) === 1 ? tv[calendar] : tv[`${calendar}s`]
+    }`;
 
     return extensionAgo(v, lg, upd, ago, add);
   } else {
@@ -220,7 +221,6 @@ const getDiffInDays = (start: Date, end?: Date) => {
   const diff = fechaFin - fechaInicio;
   return diff / (1000 * 60 * 60 * 24);
 };
-
 
 /** Zona horaria de negocio GCM (Colombia). */
 export const GCM_TIMEZONE = 'America/Bogota';

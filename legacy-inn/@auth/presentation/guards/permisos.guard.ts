@@ -9,14 +9,14 @@ import { PERMISOS_KEY } from '../decorators/permisos.decorator';
 export class PermisosGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
-    private readonly permisoResolver: PermisoResolverService,
+    private readonly permisoResolver: PermisoResolverService
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const requiredAuthorities = this.reflector.getAllAndOverride<string[]>(
-      PERMISOS_KEY,
-      [context.getHandler(), context.getClass()],
-    );
+    const requiredAuthorities = this.reflector.getAllAndOverride<string[]>(PERMISOS_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
 
     if (!requiredAuthorities?.length) return true;
 
@@ -25,8 +25,8 @@ export class PermisosGuard implements CanActivate {
     if (!userId) throw new ForbiddenAccessError('Usuario no autenticado');
 
     const userAuthorities = await this.permisoResolver.resolveAuthorities(userId);
-    const hasAuthority = requiredAuthorities.some(a => userAuthorities.has(a))
-      || userAuthorities.has(ADMIN_AUTHORITY);
+    const hasAuthority =
+      requiredAuthorities.some(a => userAuthorities.has(a)) || userAuthorities.has(ADMIN_AUTHORITY);
 
     if (!hasAuthority) {
       throw new ForbiddenAccessError('No tiene permisos para esta operacion');

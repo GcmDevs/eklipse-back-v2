@@ -1,12 +1,23 @@
-import { BadInputError, ResourceNotFoundError } from "@common/domain/errors";
+import { BadInputError, ResourceNotFoundError } from '@common/domain/errors';
 import {
   Id,
   normalizeOptionalUppercaseText,
   normalizeUppercaseText,
-} from "@common/domain/value-objects";
-import { EstadoEquipo, MotivoCambioEstadoEquipo, OrigenInicializacionPlan, TipoActividad } from '../enums';
-import { DomainEquipoEvent, EquipoChangeEstadoEvent, EquipoCreatedEvent, EquipoImportedEvent, EquipoUpdatedEvent } from "../events";
-import { EquipoBajaEvent } from "../events/equipo-baja.event";
+} from '@common/domain/value-objects';
+import {
+  EstadoEquipo,
+  MotivoCambioEstadoEquipo,
+  OrigenInicializacionPlan,
+  TipoActividad,
+} from '../enums';
+import {
+  DomainEquipoEvent,
+  EquipoChangeEstadoEvent,
+  EquipoCreatedEvent,
+  EquipoImportedEvent,
+  EquipoUpdatedEvent,
+} from '../events';
+import { EquipoBajaEvent } from '../events/equipo-baja.event';
 import { normalizeLocalizacion } from '../policies/equipo-create.policies';
 import { FotoItem, PeriodoDeTiempo, RegistroFotografico } from '../value-objects';
 import { PlanActividad } from './actividades';
@@ -34,8 +45,8 @@ export class Equipo {
     private compraId?: Id,
     private registroFotografico?: RegistroFotografico,
     private planDefaultMantenimientoId?: Id,
-    private planDefaultCalibracionId?: Id,
-  ) { }
+    private planDefaultCalibracionId?: Id
+  ) {}
 
   static create(
     nombre: string,
@@ -54,7 +65,7 @@ export class Equipo {
     compraId?: number,
     registroFotografico?: RegistroFotografico,
     planDefaultMantenimientoId?: number,
-    planDefaultCalibracionId?: number,
+    planDefaultCalibracionId?: number
   ): Equipo {
     if (estado === EstadoEquipo.DE_BAJA) {
       throw new BadInputError('No se puede crear un equipo en estado DE BAJA');
@@ -85,7 +96,7 @@ export class Equipo {
       compraId ? new Id(compraId) : undefined,
       registroFotografico,
       planDefaultMantenimientoId ? new Id(planDefaultMantenimientoId) : undefined,
-      planDefaultCalibracionId ? new Id(planDefaultCalibracionId) : undefined,
+      planDefaultCalibracionId ? new Id(planDefaultCalibracionId) : undefined
     );
     return equipo;
   }
@@ -110,7 +121,7 @@ export class Equipo {
     compraId?: number,
     registroFotografico?: RegistroFotografico,
     planDefaultMantenimientoId?: number,
-    planDefaultCalibracionId?: number,
+    planDefaultCalibracionId?: number
   ): Equipo {
     return new Equipo(
       new Id(id),
@@ -132,7 +143,7 @@ export class Equipo {
       compraId ? new Id(compraId) : undefined,
       registroFotografico,
       planDefaultMantenimientoId ? new Id(planDefaultMantenimientoId) : undefined,
-      planDefaultCalibracionId ? new Id(planDefaultCalibracionId) : undefined,
+      planDefaultCalibracionId ? new Id(planDefaultCalibracionId) : undefined
     );
   }
 
@@ -155,28 +166,31 @@ export class Equipo {
   changeEstado(
     nuevoEstado: EstadoEquipo,
     motivo: MotivoCambioEstadoEquipo,
-    observaciones?: string) {
-    this.assertCanChangeEstado(nuevoEstado)
+    observaciones?: string
+  ) {
+    this.assertCanChangeEstado(nuevoEstado);
     const estadoAnterior = this.estado;
-      
+
     this.estado = nuevoEstado;
     if (nuevoEstado === EstadoEquipo.EN_BODEGA) {
       this.deactivatePlanes();
     }
     this.updatedAt = new Date();
-    this.events.push(new EquipoChangeEstadoEvent(
-      this.id.getValor,
-      estadoAnterior,
-      nuevoEstado,
-      motivo,
-      observaciones
-    ));
+    this.events.push(
+      new EquipoChangeEstadoEvent(
+        this.id.getValor,
+        estadoAnterior,
+        nuevoEstado,
+        motivo,
+        observaciones
+      )
+    );
   }
 
   assertCanChangeEstado(nuevoEstado: EstadoEquipo) {
-    this.ensureNotDeBaja()
+    this.ensureNotDeBaja();
     if (this.estado === nuevoEstado) {
-        throw new BadInputError(`El equipo actualmente ya esta en estado ${this.estado}`);
+      throw new BadInputError(`El equipo actualmente ya esta en estado ${this.estado}`);
     }
   }
 
@@ -184,29 +198,25 @@ export class Equipo {
     this.assertCanChangeEstado(EstadoEquipo.DE_BAJA);
     const estadoAnterior = this.estado;
     this.estado = EstadoEquipo.DE_BAJA;
-    this.deactivatePlanes()
+    this.deactivatePlanes();
 
     this.updatedAt = new Date();
-    this.events.push(
-      new EquipoBajaEvent(
-        this.id.getValor,
-        estadoAnterior
-      )
-    );
+    this.events.push(new EquipoBajaEvent(this.id.getValor, estadoAnterior));
   }
 
   update(data: {
     numeroInventario?: string | null;
     tipoEquipoCatId?: number | null;
     localizacion?: string | null;
-    fechaPuestaFuncionamiento?: Date | null,
+    fechaPuestaFuncionamiento?: Date | null;
     observaciones?: string | null;
     compraId?: number;
   }) {
-    this.ensureNotDeBaja()
+    this.ensureNotDeBaja();
     if (data.tipoEquipoCatId !== undefined) this.tipoEquipoRelId = new Id(data.tipoEquipoCatId);
     if (data.observaciones !== undefined) this.observaciones = data.observaciones;
-    if (data.fechaPuestaFuncionamiento !== undefined) this.fechaPuestaFuncionamiento = data.fechaPuestaFuncionamiento;
+    if (data.fechaPuestaFuncionamiento !== undefined)
+      this.fechaPuestaFuncionamiento = data.fechaPuestaFuncionamiento;
 
     if (data.localizacion !== undefined) {
       this.localizacion = normalizeLocalizacion(data.localizacion);
@@ -220,24 +230,23 @@ export class Equipo {
       this.compraId = new Id(data.compraId);
     }
 
-    this.events.push(
-      new EquipoUpdatedEvent(
-        this.id.getValor,
-        { ...data })
-    );
+    this.events.push(new EquipoUpdatedEvent(this.id.getValor, { ...data }));
     this.updatedAt = new Date();
   }
 
-  updatePlan(tipo: TipoActividad, data: {
-    formatoId?: number,
-    periocidad?: PeriodoDeTiempo | null,
-    seRealizaPorExterno?: boolean,
-    fechaUltimaEjecucion?: Date | null,
-    diasAnticipacionNotificacion?: number | null,
-    origenInicializacion?: OrigenInicializacionPlan,
-    observaciones?: string
-  }): void {
-    this.ensureNotDeBaja()
+  updatePlan(
+    tipo: TipoActividad,
+    data: {
+      formatoId?: number;
+      periocidad?: PeriodoDeTiempo | null;
+      seRealizaPorExterno?: boolean;
+      fechaUltimaEjecucion?: Date | null;
+      diasAnticipacionNotificacion?: number | null;
+      origenInicializacion?: OrigenInicializacionPlan;
+      observaciones?: string;
+    }
+  ): void {
+    this.ensureNotDeBaja();
     let plan = this.getPlan(tipo);
     if (!plan) {
       plan = PlanActividad.create(
@@ -256,11 +265,7 @@ export class Equipo {
       plan.update(secureData);
     }
 
-    this.events.push(
-      new EquipoUpdatedEvent(
-        this.id.getValor,
-        { tipoActividad: tipo, ...data })
-    );
+    this.events.push(new EquipoUpdatedEvent(this.id.getValor, { tipoActividad: tipo, ...data }));
     this.updatedAt = new Date();
   }
 
@@ -311,17 +316,16 @@ export class Equipo {
           generalActivoId: legacy.generalActivoId,
           activoId: legacy.activoId,
           numeroPlaca: this.numeroPlaca,
-        },
+        }
       )
     );
   }
-
 
   public addFoto(foto: FotoItem): void {
     const exist = this.registroFotografico.getArchivoIds().includes(foto.archivoId);
     if (exist) {
       throw new BadInputError(
-        `El archivo con id: ${foto.archivoId} ya está asociado a este equipo`,
+        `El archivo con id: ${foto.archivoId} ya está asociado a este equipo`
       );
     }
     const actuales = this.registroFotografico.toPrimitives();
@@ -333,7 +337,7 @@ export class Equipo {
     const idx = actuales.findIndex(f => f.archivoId === archivoId && !f.deleted);
     if (idx === -1) {
       throw new ResourceNotFoundError(
-        `La fotografía con archivoId: ${archivoId} no está asociada a este equipo`,
+        `La fotografía con archivoId: ${archivoId} no está asociada a este equipo`
       );
     }
 
@@ -351,7 +355,7 @@ export class Equipo {
     const idx = actuales.findIndex(f => f.archivoId === archivoId && !f.deleted);
     if (idx === -1) {
       throw new ResourceNotFoundError(
-        `La fotografía con archivoId: ${archivoId} no está asociada a este equipo o fue eliminada`,
+        `La fotografía con archivoId: ${archivoId} no está asociada a este equipo o fue eliminada`
       );
     }
     actuales[idx] = { ...actuales[idx], ...cambios };
@@ -363,7 +367,7 @@ export class Equipo {
     const target = actuales.find(f => f.archivoId === archivoId && !f.deleted);
     if (!target) {
       throw new ResourceNotFoundError(
-        `La fotografía con archivoId: ${archivoId} no está asociada a este equipo o fue eliminada`,
+        `La fotografía con archivoId: ${archivoId} no está asociada a este equipo o fue eliminada`
       );
     }
     const actualizadas = actuales.map(f => ({
@@ -372,7 +376,6 @@ export class Equipo {
     }));
     this.registroFotografico = RegistroFotografico.create(actualizadas);
   }
-
 
   get getId(): Id {
     return this.id;

@@ -6,14 +6,14 @@ import { TypeOrmConsecutivoRepository } from './infrastructure/persistence';
 
 @Global()
 @Module({
-    providers: [
-        ConsecutivoService,
-        {
-            provide: CONSECUTIVO_REPOSITORY,
-            useClass: TypeOrmConsecutivoRepository,
-        },
-        { provide: TRANSACTION_MANAGER, useClass: TypeOrmTransactionManagerImpl },
-    ],
-    exports: [ConsecutivoService],
+  providers: [
+    ConsecutivoService,
+    {
+      provide: CONSECUTIVO_REPOSITORY,
+      useClass: TypeOrmConsecutivoRepository,
+    },
+    { provide: TRANSACTION_MANAGER, useClass: TypeOrmTransactionManagerImpl },
+  ],
+  exports: [ConsecutivoService],
 })
-export class ConsecutivosModule { }
+export class ConsecutivosModule {}

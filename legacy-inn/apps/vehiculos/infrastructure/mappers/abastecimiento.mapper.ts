@@ -83,8 +83,7 @@ export class AbastecimientoMapper {
       estacionServicioId: orm.estacionServicioId,
       usuarioId: orm.usuario?.id,
       valorTotalPagado: Number(orm.valorTotalPagado),
-      cantidadCombustible:
-        orm.cantidadCombustible != null ? Number(orm.cantidadCombustible) : null,
+      cantidadCombustible: orm.cantidadCombustible != null ? Number(orm.cantidadCombustible) : null,
       unidadMedidaCombustible: orm.unidadMedidaCombustible,
       tipoCombustible: orm.tipoCombustible,
       fechaAbastecimiento: orm.fechaAbastecimiento,
@@ -97,7 +96,9 @@ export class AbastecimientoMapper {
     };
   }
 
-  private static toCoordenadas(ubicacion: CoordenadasGPS | null): CoordenadasEmbeddable | undefined {
+  private static toCoordenadas(
+    ubicacion: CoordenadasGPS | null
+  ): CoordenadasEmbeddable | undefined {
     if (!ubicacion) return undefined;
     const embeddable = new CoordenadasEmbeddable();
     embeddable.latitud = ubicacion.getLatitud;

@@ -26,10 +26,10 @@ export class EstantesMapper {
     );
     const cicloId = contextoAsignacion
       ? contextoAsignacion.cicloId
-      : asignaciones
+      : (asignaciones
           .map(asignacion => asignacion.cicloId)
           .filter((id): id is number => id != null)
-          .sort((a, b) => b - a)[0] ?? null;
+          .sort((a, b) => b - a)[0] ?? null);
     const productosActivos = (estante.productos ?? []).filter(
       p => p.isActivo && p.isActivoEstante && p.isDeleted !== true
     );
@@ -43,8 +43,8 @@ export class EstantesMapper {
     const numeroConteoActual = contextoAsignacion
       ? contextoAsignacion.numeroConteo
       : asignaciones.length
-      ? Math.max(...asignaciones.map(a => a.numeroConteo))
-      : 0;
+        ? Math.max(...asignaciones.map(a => a.numeroConteo))
+        : 0;
     const numeroConteoUnoRealizado = conteoCompletadoParaTodos(detallesPorProducto, 1);
     const numeroConteoDosRealizado = conteoCompletadoParaTodos(detallesPorProducto, 2);
     return {

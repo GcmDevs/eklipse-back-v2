@@ -1,4 +1,4 @@
-import { Id, normalizeUppercaseText } from "@common/domain/value-objects";
+import { Id, normalizeUppercaseText } from '@common/domain/value-objects';
 
 export class Marca {
   private constructor(
@@ -10,13 +10,7 @@ export class Marca {
   ) {}
 
   static create(nombre: string, descripcion?: string): Marca {
-    return new Marca(
-      new Id(),
-      normalizeUppercaseText(nombre),
-      new Date(),
-      new Date(),
-      descripcion,
-    );
+    return new Marca(new Id(), normalizeUppercaseText(nombre), new Date(), new Date(), descripcion);
   }
 
   static rebuild(
@@ -26,7 +20,7 @@ export class Marca {
     updatedAt: Date,
     descripcion?: string
   ): Marca {
-    return new Marca(new Id(id), nombre,createdAt, updatedAt, descripcion);
+    return new Marca(new Id(id), nombre, createdAt, updatedAt, descripcion);
   }
 
   get getId(): Id {

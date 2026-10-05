@@ -5,7 +5,11 @@ import { Equipo, EquipoBaja } from '@equipos/domain/entities';
 import { EstadoBusquedaEquipo, EstadoEquipo, TipoActividad } from '@equipos/domain/enums';
 import { EquipoRead, ResumenEquiposRead } from '@equipos/domain/read';
 import { EquiposRepository } from '@equipos/domain/repositories';
-import { EquipoBajaMapper, EquipoMapper, PlanActividadMapper } from '@equipos/infrastructure/mappers';
+import {
+  EquipoBajaMapper,
+  EquipoMapper,
+  PlanActividadMapper,
+} from '@equipos/infrastructure/mappers';
 import { EquipoBajaOrm, EquipoOrm, PlanActividadOrm } from '@orm/inn/equipos';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { GeneralActivoLegacyView } from '../views/external';
@@ -23,11 +27,13 @@ export class TypeOrmEquiposRepository extends BaseSource implements EquiposRepos
 
   private get planActividadRepository() {
     const qr = TypeOrmTransactionContext.getQueryRunner();
-    return qr ? qr.manager.getRepository(PlanActividadOrm) : this.conn.getRepository(PlanActividadOrm);
+    return qr
+      ? qr.manager.getRepository(PlanActividadOrm)
+      : this.conn.getRepository(PlanActividadOrm);
   }
 
-  private readonly generalActivoViewrepository: Repository<GeneralActivoLegacyView>
-    = this.conn.getRepository(GeneralActivoLegacyView);
+  private readonly generalActivoViewrepository: Repository<GeneralActivoLegacyView> =
+    this.conn.getRepository(GeneralActivoLegacyView);
 
   async save(equipo: Equipo): Promise<Equipo> {
     const equipoOrm = EquipoMapper.toOrm(equipo);
@@ -84,10 +90,7 @@ export class TypeOrmEquiposRepository extends BaseSource implements EquiposRepos
     qb.skip((page - 1) * limit);
     const [equipos, count] = await qb.getManyAndCount();
 
-    return [
-      equipos.map(EquipoMapper.toView),
-      count,
-    ];
+    return [equipos.map(EquipoMapper.toView), count];
   }
 
   async alreadyExist(numeroPlaca: string): Promise<boolean> {
@@ -104,10 +107,7 @@ export class TypeOrmEquiposRepository extends BaseSource implements EquiposRepos
   async updatePlan(equipo: Equipo, tipo: TipoActividad): Promise<Equipo> {
     const plan = equipo.getPlan(tipo);
     if (!plan) return null;
-    const planOrm = PlanActividadMapper.toUpdateOrm(
-      plan,
-      equipo.getId.getValor
-    );
+    const planOrm = PlanActividadMapper.toUpdateOrm(plan, equipo.getId.getValor);
     await this.conn.getRepository(PlanActividadOrm).save(planOrm);
     return this.findById(equipo.getId.getValor);
   }
@@ -136,21 +136,24 @@ export class TypeOrmEquiposRepository extends BaseSource implements EquiposRepos
     return founds.map(row => row.id);
   }
 
-  async findGeneralActivoByNumeroPlaca(numeroPlaca: string): Promise<GeneralActivoLegacyView | null> {
-    const foundGralActivoView: GeneralActivoLegacyView = await this.generalActivoViewrepository.findOne({
-      where: { numeroPlaca: numeroPlaca }
-    })
+  async findGeneralActivoByNumeroPlaca(
+    numeroPlaca: string
+  ): Promise<GeneralActivoLegacyView | null> {
+    const foundGralActivoView: GeneralActivoLegacyView =
+      await this.generalActivoViewrepository.findOne({
+        where: { numeroPlaca: numeroPlaca },
+      });
 
     if (!foundGralActivoView) return null;
     return foundGralActivoView;
   }
 
   async findInGlobalSystemByPlaca(numeroPlaca: string): Promise<ResultFindEquipoGlobalSystem> {
-    const equipo = await this.repository.exists({ where: { numeroPlaca } })
+    const equipo = await this.repository.exists({ where: { numeroPlaca } });
     if (equipo) {
       return {
         estado: EstadoBusquedaEquipo.EXISTE,
-        equipo: null
+        equipo: null,
       };
     }
     const equipoLegacy = await this.generalActivoViewrepository.findOne({ where: { numeroPlaca } });
@@ -162,7 +165,7 @@ export class TypeOrmEquiposRepository extends BaseSource implements EquiposRepos
     }
     return {
       estado: EstadoBusquedaEquipo.NO_EXISTE,
-      equipo: null
+      equipo: null,
     };
   }
 
@@ -171,13 +174,9 @@ export class TypeOrmEquiposRepository extends BaseSource implements EquiposRepos
   }
 
   async findViewById(id: number): Promise<EquipoRead | null> {
-    const equipoFound = await this.baseQbRelations()
-      .where('equipo.id = :id', { id })
-      .getOne();
+    const equipoFound = await this.baseQbRelations().where('equipo.id = :id', { id }).getOne();
 
-    return equipoFound
-      ? EquipoMapper.toView(equipoFound)
-      : null;
+    return equipoFound ? EquipoMapper.toView(equipoFound) : null;
   }
 
   async findViewByPlaca(numeroPlaca: string): Promise<EquipoRead | null> {
@@ -185,47 +184,41 @@ export class TypeOrmEquiposRepository extends BaseSource implements EquiposRepos
       .where('equipo.numeroPlaca = :numeroPlaca', { numeroPlaca })
       .getOne();
 
-    return equipoFound
-      ? EquipoMapper.toView(equipoFound)
-      : null;
+    return equipoFound ? EquipoMapper.toView(equipoFound) : null;
   }
 
-  async saveBaja(
-    equipo: Equipo,
-    baja: EquipoBaja
-  ): Promise<void> {
-    await this.repository.save(
-      EquipoMapper.toUpdateEstadoOrm(equipo)
-    );
+  async saveBaja(equipo: Equipo, baja: EquipoBaja): Promise<void> {
+    await this.repository.save(EquipoMapper.toUpdateEstadoOrm(equipo));
     const planesOrm = equipo.getPlanesActividad.map(plan =>
-      PlanActividadMapper.toUpdateOrm(
-        plan,
-        equipo.getId.getValor
-      )
+      PlanActividadMapper.toUpdateOrm(plan, equipo.getId.getValor)
     );
 
     await this.planActividadRepository.save(planesOrm);
-    await this.equipoBajaRepository.save(
-      EquipoBajaMapper.toOrm(baja)
-    );
+    await this.equipoBajaRepository.save(EquipoBajaMapper.toOrm(baja));
   }
 
   async updateRegistroFotografico(equipo: Equipo): Promise<Equipo | null> {
     const primitives = equipo.getRegistroFotografico;
-    
+
     const result = await this.repository.update(
       { id: equipo.getId.getValor },
-      { registroFotografico: primitives },
+      { registroFotografico: primitives }
     );
 
     return result.affected ? equipo : null;
   }
 
   private baseQbRelations(): SelectQueryBuilder<EquipoOrm> {
-    return this.repository.createQueryBuilder('equipo')
-      .leftJoinAndSelect('equipo.accesoriosUnidad', 'accesoriosUnidad', 'accesoriosUnidad.descontinuado = :accDescontinuado', {
-        accDescontinuado: false,
-      })
+    return this.repository
+      .createQueryBuilder('equipo')
+      .leftJoinAndSelect(
+        'equipo.accesoriosUnidad',
+        'accesoriosUnidad',
+        'accesoriosUnidad.descontinuado = :accDescontinuado',
+        {
+          accDescontinuado: false,
+        }
+      )
       .leftJoinAndSelect('accesoriosUnidad.accesorioEstandar', 'accesorioEstandar')
       .leftJoinAndSelect('accesorioEstandar.marca', 'accesorioMarca')
       .leftJoinAndSelect('equipo.planesActividad', 'planes')
@@ -293,9 +286,9 @@ export class TypeOrmEquiposRepository extends BaseSource implements EquiposRepos
     throw new Error('Method not implemented.');
   }
 
-
   async getResumen(filters?: FiltersEquipos): Promise<ResumenEquiposRead> {
-    const qb = this.repository.createQueryBuilder('equipo')
+    const qb = this.repository
+      .createQueryBuilder('equipo')
       .leftJoin('equipo.tipoEquipoRel', 'tipoEquipoRel')
       .leftJoin('tipoEquipoRel.tipoActivo', 'tipoActivo')
       .leftJoin('equipo.responsable', 'responsable');
@@ -311,10 +304,9 @@ export class TypeOrmEquiposRepository extends BaseSource implements EquiposRepos
     return EquipoMapper.toResumenView(rows);
   }
 
-
   private applyFilters(
     qb: SelectQueryBuilder<EquipoOrm>,
-    filters?: FiltersEquipos,
+    filters?: FiltersEquipos
   ): SelectQueryBuilder<EquipoOrm> {
     if (filters?.estado) {
       qb.andWhere('equipo.estado = :estado', { estado: filters.estado });

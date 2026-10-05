@@ -1,6 +1,6 @@
-import { Id } from "@common/domain/value-objects";
-import { EstadoRegistroDilg } from "../../enums";
-import { RegistroImagen } from "../../value-objects";
+import { Id } from '@common/domain/value-objects';
+import { EstadoRegistroDilg } from '../../enums';
+import { RegistroImagen } from '../../value-objects';
 
 export class RegistroDiligenciadoFmt {
   private constructor(
@@ -16,9 +16,8 @@ export class RegistroDiligenciadoFmt {
     private readonly fechaEnvio: Date | null,
     private fechaCompletado: Date | null,
     private readonly createdAt: Date,
-    private updatedAt: Date,
-  ) { }
-
+    private updatedAt: Date
+  ) {}
 
   static create(data: {
     versionFormatoId: number;
@@ -49,7 +48,7 @@ export class RegistroDiligenciadoFmt {
       now,
       data.completarInmediato ? now : null,
       now,
-      now,
+      now
     );
   }
 
@@ -66,7 +65,7 @@ export class RegistroDiligenciadoFmt {
     fechaEnvio: Date | null,
     fechaCompletado: Date | null,
     createdAt: Date,
-    updatedAt: Date,
+    updatedAt: Date
   ): RegistroDiligenciadoFmt {
     return new RegistroDiligenciadoFmt(
       new Id(id),
@@ -81,18 +80,13 @@ export class RegistroDiligenciadoFmt {
       fechaEnvio,
       fechaCompletado,
       createdAt,
-      updatedAt,
+      updatedAt
     );
   }
 
-  updateBorrador(
-    datoSnapshot: Record<string, unknown>,
-    imagenes: RegistroImagen[],
-  ): void {
+  updateBorrador(datoSnapshot: Record<string, unknown>, imagenes: RegistroImagen[]): void {
     if (this.estado !== EstadoRegistroDilg.BORRADOR)
-      throw new Error(
-        `No se puede editar un registro en estado ${this.estado}`,
-      );
+      throw new Error(`No se puede editar un registro en estado ${this.estado}`);
 
     this.datoSnapshot = datoSnapshot;
     this.imagenes = imagenes;
@@ -101,9 +95,7 @@ export class RegistroDiligenciadoFmt {
 
   complete(): void {
     if (this.estado !== EstadoRegistroDilg.BORRADOR)
-      throw new Error(
-        `Solo un borrador puede completarse. Estado actual: ${this.estado}`,
-      );
+      throw new Error(`Solo un borrador puede completarse. Estado actual: ${this.estado}`);
 
     this.estado = EstadoRegistroDilg.COMPLETADO;
     this.fechaCompletado = new Date();
@@ -112,9 +104,7 @@ export class RegistroDiligenciadoFmt {
 
   approve(): void {
     if (this.estado !== EstadoRegistroDilg.COMPLETADO)
-      throw new Error(
-        `Solo un registro completado puede aprobarse. Estado actual: ${this.estado}`,
-      );
+      throw new Error(`Solo un registro completado puede aprobarse. Estado actual: ${this.estado}`);
 
     this.estado = EstadoRegistroDilg.APROBADO;
     this.updatedAt = new Date();
@@ -124,12 +114,11 @@ export class RegistroDiligenciadoFmt {
     if (this.estado === EstadoRegistroDilg.APROBADO)
       throw new Error(
         'No se puede anular un registro diligenciado ya aprobado. ' +
-        'Contacte al supervisor para gestionar este caso.',
+          'Contacte al supervisor para gestionar este caso.'
       );
     this.estado = EstadoRegistroDilg.ANULADO;
     this.updatedAt = new Date();
   }
-
 
   isAnulado(): boolean {
     return this.estado === EstadoRegistroDilg.ANULADO;
@@ -146,17 +135,43 @@ export class RegistroDiligenciadoFmt {
     return this.estado === EstadoRegistroDilg.APROBADO;
   }
 
-  get getId(): Id { return this.id; }
-  get getVersionFormatoId(): Id { return this.versionFormatoId; }
-  get getFormatoId(): Id { return this.formatoId; }
-  get getEquipoId(): Id { return this.equipoId; }
-  get getRegistroActividadId(): Id | null { return this.registroActividadId; }
-  get getDiligenciadoPorId(): number { return this.diligenciadoPorId; }
-  get getDatoSnapshot(): Record<string, unknown> { return this.datoSnapshot; }
-  get getImagenes(): RegistroImagen[] { return this.imagenes; }
-  get getEstado(): EstadoRegistroDilg { return this.estado; }
-  get getFechaEnvio(): Date | null { return this.fechaEnvio; }
-  get getFechaCompletado(): Date | null { return this.fechaCompletado; }
-  get getCreatedAt(): Date { return this.createdAt; }
-  get getUpdatedAt(): Date { return this.updatedAt; }
+  get getId(): Id {
+    return this.id;
+  }
+  get getVersionFormatoId(): Id {
+    return this.versionFormatoId;
+  }
+  get getFormatoId(): Id {
+    return this.formatoId;
+  }
+  get getEquipoId(): Id {
+    return this.equipoId;
+  }
+  get getRegistroActividadId(): Id | null {
+    return this.registroActividadId;
+  }
+  get getDiligenciadoPorId(): number {
+    return this.diligenciadoPorId;
+  }
+  get getDatoSnapshot(): Record<string, unknown> {
+    return this.datoSnapshot;
+  }
+  get getImagenes(): RegistroImagen[] {
+    return this.imagenes;
+  }
+  get getEstado(): EstadoRegistroDilg {
+    return this.estado;
+  }
+  get getFechaEnvio(): Date | null {
+    return this.fechaEnvio;
+  }
+  get getFechaCompletado(): Date | null {
+    return this.fechaCompletado;
+  }
+  get getCreatedAt(): Date {
+    return this.createdAt;
+  }
+  get getUpdatedAt(): Date {
+    return this.updatedAt;
+  }
 }

@@ -6,9 +6,7 @@ export class Kilometraje {
 
   static create(valor: number): Kilometraje {
     if (!Number.isInteger(valor) || valor <= 0 || valor > MAX_KILOMETRAJE) {
-      throw new BadInputError(
-        `El kilometraje debe ser un entero entre 1 y ${MAX_KILOMETRAJE}`
-      );
+      throw new BadInputError(`El kilometraje debe ser un entero entre 1 y ${MAX_KILOMETRAJE}`);
     }
     return new Kilometraje(valor);
   }

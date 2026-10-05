@@ -1,7 +1,8 @@
 import { UserOptions } from 'jspdf-autotable';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { FILE_LOCATIONS, GcmContexts } from '@common/application/constants';
+import { GcmContexts } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { numeroALetras } from './numero-a-letras';
 import * as fs from 'fs';
 import { TimerService, formatMoney } from '../../base';
@@ -20,14 +21,14 @@ const findImageFromContext = (contexto: GcmContexts) => {
     contexto === GcmContexts.ALTACENTRO
       ? 'alta-centro.jpg'
       : contexto === GcmContexts.AGUACHICA
-      ? 'aguachica.jpg'
-      : contexto === GcmContexts.AMMEDICAL
-      ? 'ammedical.png'
-      : contexto === GcmContexts.SANJUAN
-      ? 'sanjuan.jpg'
-      : contexto === GcmContexts.VALLEDUPAR
-      ? 'valledupar.jpg'
-      : 'undefined.jpg'
+        ? 'aguachica.jpg'
+        : contexto === GcmContexts.AMMEDICAL
+          ? 'ammedical.png'
+          : contexto === GcmContexts.SANJUAN
+            ? 'sanjuan.jpg'
+            : contexto === GcmContexts.VALLEDUPAR
+              ? 'valledupar.jpg'
+              : 'undefined.jpg'
   }`;
 };
 
@@ -36,14 +37,14 @@ const findNitFromContext = (contexto: GcmContexts) => {
     contexto === GcmContexts.ALTACENTRO
       ? '824001041-6'
       : contexto === GcmContexts.AGUACHICA
-      ? '900772387-1'
-      : contexto === GcmContexts.AMMEDICAL
-      ? '900106694-2'
-      : contexto === GcmContexts.SANJUAN
-      ? 'NITSANJUANFALTA'
-      : contexto === GcmContexts.VALLEDUPAR
-      ? '892300708-1'
-      : 'CENTRONOVALIDO'
+        ? '900772387-1'
+        : contexto === GcmContexts.AMMEDICAL
+          ? '900106694-2'
+          : contexto === GcmContexts.SANJUAN
+            ? 'NITSANJUANFALTA'
+            : contexto === GcmContexts.VALLEDUPAR
+              ? '892300708-1'
+              : 'CENTRONOVALIDO'
   }`;
 };
 

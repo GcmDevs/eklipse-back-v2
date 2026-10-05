@@ -36,7 +36,7 @@ async function bootstrap() {
   if (ENVIRONMENTS.showDocs) initSwagger(app);
 
   app.enableCors({
-    origin: "*",
+    origin: '*',
     //  origin: function (origin, callback) {
     //       if (!origin || VALID_HOSTS.indexOf(origin) !== -1) {
     //         callback(null, true);
@@ -55,5 +55,3 @@ async function bootstrap() {
 }
 
 bootstrap();
-
-

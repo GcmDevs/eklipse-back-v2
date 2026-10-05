@@ -1,8 +1,8 @@
-import { safeParseJson } from "@common/application/services";
-import { SolicitudAprobacion } from "@equipos/domain/entities";
-import { EquipoMinimalRead,SolicitudRead } from "@equipos/domain/read";
-import { SolicitudAprobacionOrm } from "@orm/inn/equipos/solicitud-aprobacion.orm";
-import { EquipoMapper } from "./equipos.mapper";
+import { safeParseJson } from '@common/application/services';
+import { SolicitudAprobacion } from '@equipos/domain/entities';
+import { EquipoMinimalRead, SolicitudRead } from '@equipos/domain/read';
+import { SolicitudAprobacionOrm } from '@orm/inn/equipos/solicitud-aprobacion.orm';
+import { EquipoMapper } from './equipos.mapper';
 
 export class SolicitudAprobacionMapper {
   static toDomain(orm: SolicitudAprobacionOrm): SolicitudAprobacion {
@@ -22,7 +22,7 @@ export class SolicitudAprobacionMapper {
       orm.esAutoAprobada,
       orm.correlationId,
       orm.createdAt,
-      orm.updatedAt,
+      orm.updatedAt
     );
   }
 
@@ -48,8 +48,6 @@ export class SolicitudAprobacionMapper {
     return orm;
   }
 
-
-
   static toUpdateOrm(domain: SolicitudAprobacion): Partial<SolicitudAprobacionOrm> {
     return {
       id: domain.getId.getValor,
@@ -62,20 +60,18 @@ export class SolicitudAprobacionMapper {
     };
   }
 
-
-
   static toView(orm: SolicitudAprobacionOrm): SolicitudRead {
     return {
       id: orm.id,
       codigo: orm.codigo,
       equipo: orm?.equipo
         ? EquipoMapper.toMinimalView(orm.equipo)
-        : { id: orm.equipoId } as EquipoMinimalRead,
+        : ({ id: orm.equipoId } as EquipoMinimalRead),
       tipoAccion: orm.tipoAccion,
       estado: orm.estado,
       solicitante: {
         id: orm.solicitanteId,
-        nombreCompleto: orm.solicitanteNombre
+        nombreCompleto: orm.solicitanteNombre,
       },
       aprobador: {
         id: orm?.aprobadorId ?? null,
@@ -91,4 +87,3 @@ export class SolicitudAprobacionMapper {
     };
   }
 }
-

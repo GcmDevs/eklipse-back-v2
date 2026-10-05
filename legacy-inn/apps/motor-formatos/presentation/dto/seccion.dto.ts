@@ -11,10 +11,12 @@ import {
 } from 'class-validator';
 
 export class ComponenteTextoLibreCatalogoDto {
-  @IsInt() @Min(1)
+  @IsInt()
+  @Min(1)
   orden: number;
 
-  @IsString() @MaxLength(150)
+  @IsString()
+  @MaxLength(150)
   etiqueta: string;
 
   @IsBoolean()
@@ -27,7 +29,8 @@ export class ComponenteTextoLibreCatalogoDto {
 }
 
 export class CreateSeccionPlantillaDto {
-  @IsString() @MaxLength(110)
+  @IsString()
+  @MaxLength(110)
   nombre: string;
 
   @IsArray()

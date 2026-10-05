@@ -1,14 +1,23 @@
 import { FichaTecnicaTipoEquipo } from '@equipos/domain/value-objects';
-import { DatosCalibracion, DatosTecnicos, PeriodoDeTiempo, VariableCalibracion } from '@equipos/domain/value-objects';
+import {
+  DatosCalibracion,
+  DatosTecnicos,
+  PeriodoDeTiempo,
+  VariableCalibracion,
+} from '@equipos/domain/value-objects';
 import { Riesgo } from '@equipos/domain/enums';
 import { FichaTecnicaTipoEquipoRead } from '@equipos/domain/read';
-import { FichaTecnicaTipoEquipoEmbeddable, PeriodoTiempoEmbeddable, variableMedidaTransformer } from '@orm/inn/equipos';
+import {
+  FichaTecnicaTipoEquipoEmbeddable,
+  PeriodoTiempoEmbeddable,
+  variableMedidaTransformer,
+} from '@orm/inn/equipos';
 import { ClasificacionBiomedicaMapper } from './clasif-biomedica.mapper';
 import { DatosTecnicosMapper } from './datos-tec.mapper';
 
 export class FichaTecnicaTipoEquipoMapper {
   private static resolveVariables(
-    raw?: VariableCalibracion | string | null,
+    raw?: VariableCalibracion | string | null
   ): VariableCalibracion | undefined {
     if (!raw) return undefined;
     if (raw instanceof VariableCalibracion) return raw;
@@ -16,7 +25,9 @@ export class FichaTecnicaTipoEquipoMapper {
     return undefined;
   }
 
-  static toDomain(orm?: FichaTecnicaTipoEquipoEmbeddable | null): FichaTecnicaTipoEquipo | undefined {
+  static toDomain(
+    orm?: FichaTecnicaTipoEquipoEmbeddable | null
+  ): FichaTecnicaTipoEquipo | undefined {
     if (!orm) return undefined;
 
     const variables = this.resolveVariables(orm.dtCalibVariables);
@@ -31,17 +42,19 @@ export class FichaTecnicaTipoEquipoMapper {
         : undefined,
       orm.reqCalibracion,
       variables ? DatosCalibracion.create(variables) : undefined,
-      orm.dtCalibNormaAplicable,
+      orm.dtCalibNormaAplicable
     );
   }
 
-  static toEmbeddable(domain?: FichaTecnicaTipoEquipo): FichaTecnicaTipoEquipoEmbeddable | undefined {
+  static toEmbeddable(
+    domain?: FichaTecnicaTipoEquipo
+  ): FichaTecnicaTipoEquipoEmbeddable | undefined {
     if (!domain) return undefined;
 
     const embeddable = new FichaTecnicaTipoEquipoEmbeddable();
     embeddable.datosTecnicos = DatosTecnicosMapper.toOrm(domain.getDatosTecnicos);
     embeddable.clasificacionBiomedica = ClasificacionBiomedicaMapper.toOrm(
-      domain.getClasificacionBiomedica,
+      domain.getClasificacionBiomedica
     ) as any;
 
     if (domain.getVidaUtil) {
@@ -63,7 +76,7 @@ export class FichaTecnicaTipoEquipoMapper {
   }
 
   static calibVariablesToView(
-    raw?: VariableCalibracion | string | null,
+    raw?: VariableCalibracion | string | null
   ): { tipo: string; nombre?: string }[] | null {
     const variables = this.resolveVariables(raw);
     return variables ? variables.getAll() : null;
@@ -75,35 +88,33 @@ export class FichaTecnicaTipoEquipoMapper {
     const variables = this.calibVariablesToView(orm.dtCalibVariables);
     const medidasRaw = orm.datosTecnicos?.medidas;
     const medidas = medidasRaw
-      ? (typeof (medidasRaw as any).getAll === 'function'
+      ? typeof (medidasRaw as any).getAll === 'function'
         ? (medidasRaw as any).getAll()
-        : medidasRaw)
+        : medidasRaw
       : null;
 
     return {
-      vidaUtil: orm.vidaUtil?.valor != null && orm.vidaUtil?.unidad
-        ? { valor: orm.vidaUtil.valor, unidad: orm.vidaUtil.unidad }
-        : null,
+      vidaUtil:
+        orm.vidaUtil?.valor != null && orm.vidaUtil?.unidad
+          ? { valor: orm.vidaUtil.valor, unidad: orm.vidaUtil.unidad }
+          : null,
       reqCalibracion: orm.reqCalibracion ?? false,
-      datosTecnicos: medidas
-        ? { medidas: Array.isArray(medidas) ? medidas : [] }
-        : null,
-      datosCalibracion: variables?.length
-        ? { variables }
-        : null,
+      datosTecnicos: medidas ? { medidas: Array.isArray(medidas) ? medidas : [] } : null,
+      datosCalibracion: variables?.length ? { variables } : null,
       dtCalibNormaAplicable: orm.dtCalibNormaAplicable ?? null,
       clasificacion: orm.clasificacionBiomedica
         ? {
-          aplicaRegSanitario: orm.clasificacionBiomedica.aplicaRegSanitario ?? false,
-          numeroRegSanitario: orm.clasificacionBiomedica.numeroRegSanitario ?? null,
-          expedienteRegSanitario: orm.clasificacionBiomedica.expedienteRegSanitario ?? null,
-          prevencion: orm.clasificacionBiomedica.prevencion ?? false,
-          diagnostico: orm.clasificacionBiomedica.diagnostico ?? false,
-          rehabilitacion: orm.clasificacionBiomedica.rehabilitacion ?? false,
-          tratamientoMantenimientoDeVida: orm.clasificacionBiomedica.tratamientoMantenimientoDeVida ?? false,
-          analisisLaboratorio: orm.clasificacionBiomedica.analisisLaboratorio ?? false,
-          riesgo: (orm.clasificacionBiomedica.riesgo ?? Riesgo.NO_APLICA) as Riesgo,
-        }
+            aplicaRegSanitario: orm.clasificacionBiomedica.aplicaRegSanitario ?? false,
+            numeroRegSanitario: orm.clasificacionBiomedica.numeroRegSanitario ?? null,
+            expedienteRegSanitario: orm.clasificacionBiomedica.expedienteRegSanitario ?? null,
+            prevencion: orm.clasificacionBiomedica.prevencion ?? false,
+            diagnostico: orm.clasificacionBiomedica.diagnostico ?? false,
+            rehabilitacion: orm.clasificacionBiomedica.rehabilitacion ?? false,
+            tratamientoMantenimientoDeVida:
+              orm.clasificacionBiomedica.tratamientoMantenimientoDeVida ?? false,
+            analisisLaboratorio: orm.clasificacionBiomedica.analisisLaboratorio ?? false,
+            riesgo: (orm.clasificacionBiomedica.riesgo ?? Riesgo.NO_APLICA) as Riesgo,
+          }
         : null,
     };
   }

@@ -1,21 +1,25 @@
-import { TRANSACTION_MANAGER, TransactionManager } from "@common/application/services";
-import { BadInputError, ResourceNotFoundError } from "@common/domain/errors";
-import { getUser } from "@common/infrastructure/services";
-import { CONSECUTIVOS_CODES, ConsecutivoService } from "@core/consecutivos/application";
-import { UsuarioEqpService } from "@core/firmas";
-import { SolicitudAprobacion } from "@equipos/domain/entities";
-import { TipoAccionAprobacion } from "@equipos/domain/enums";
-import { TipoEventoAuditEquipo } from "@equipos/domain/enums/tipos-audit-equipo.enum";
-import { SolicitudRead } from "@equipos/domain/read";
-import { SOLICITUD_APROBACION_REPOSITORY, SolicitudRepository } from "@equipos/domain/repositories";
-import { FilterSolicitudDto, RejectSolicitudDto, ResponseCreatedSolicitudDto } from "@equipos/presentation/dto";
-import { Inject, Injectable } from "@nestjs/common";
-import { REFERENCIA_ENTIDAD } from "../constants";
-import { AccionAprobacionHandler } from "../handlers";
-import { AccionHandlerRegistry } from "../handlers/accion-handler.registry";
-import { generateCorrelationId } from "../helpers";
-import { ProcessSolicitudBase, ProcessSolicitudInput } from "../types";
-import { AuditEquipoService } from "../audit/audit-equipo.service";
+import { TRANSACTION_MANAGER, TransactionManager } from '@common/application/services';
+import { BadInputError, ResourceNotFoundError } from '@common/domain/errors';
+import { getUser } from '@common/infrastructure/services';
+import { CONSECUTIVOS_CODES, ConsecutivoService } from '@core/consecutivos/application';
+import { UsuarioEqpService } from '@core/firmas';
+import { SolicitudAprobacion } from '@equipos/domain/entities';
+import { TipoAccionAprobacion } from '@equipos/domain/enums';
+import { TipoEventoAuditEquipo } from '@equipos/domain/enums/tipos-audit-equipo.enum';
+import { SolicitudRead } from '@equipos/domain/read';
+import { SOLICITUD_APROBACION_REPOSITORY, SolicitudRepository } from '@equipos/domain/repositories';
+import {
+  FilterSolicitudDto,
+  RejectSolicitudDto,
+  ResponseCreatedSolicitudDto,
+} from '@equipos/presentation/dto';
+import { Inject, Injectable } from '@nestjs/common';
+import { REFERENCIA_ENTIDAD } from '../constants';
+import { AccionAprobacionHandler } from '../handlers';
+import { AccionHandlerRegistry } from '../handlers/accion-handler.registry';
+import { generateCorrelationId } from '../helpers';
+import { ProcessSolicitudBase, ProcessSolicitudInput } from '../types';
+import { AuditEquipoService } from '../audit/audit-equipo.service';
 
 @Injectable()
 export class SolicitudService {
@@ -27,8 +31,8 @@ export class SolicitudService {
     private readonly usuarioService: UsuarioEqpService,
     private readonly eventoService: AuditEquipoService,
     @Inject(TRANSACTION_MANAGER)
-    private readonly txManager: TransactionManager,
-  ) { }
+    private readonly txManager: TransactionManager
+  ) {}
 
   async process(data: ProcessSolicitudInput): Promise<ResponseCreatedSolicitudDto> {
     const handler = this.handlerRegistry.get(data.tipoAccion);
@@ -44,7 +48,7 @@ export class SolicitudService {
     return {
       autoaprobada: false,
       solicitudId: solicitud.getId.getValor,
-      solicitudCodigo: solicitud.getCodigo
+      solicitudCodigo: solicitud.getCodigo,
     };
   }
 
@@ -67,13 +71,13 @@ export class SolicitudService {
         descripcion: `${aprobador.nombreCompleto} aprobo: ${solicitud.getTipoAccion}`,
         autor: {
           id: aprobador.id,
-          nombre: aprobador.nombreCompleto
+          nombre: aprobador.nombreCompleto,
         },
         referenciaEntidad: REFERENCIA_ENTIDAD.SOLICITUD_APROBACION,
         referenciaId: id,
         metadata: { tipoAccion: solicitud.getTipoAccion, solicitudId: solicitud.getId.getValor },
         correlationId: solicitud.getCorrelationId,
-        secuencia: 2
+        secuencia: 2,
       });
 
       await handler.execute(
@@ -83,7 +87,7 @@ export class SolicitudService {
       );
 
       return await this.solicitudesRepository.findViewById(id);
-    })
+    });
   }
 
   async reject(id: number, { motivoRechazo }: RejectSolicitudDto): Promise<SolicitudRead> {
@@ -103,26 +107,32 @@ export class SolicitudService {
         descripcion: `${aprobador.nombreCompleto} rechazo: ${solicitud.getTipoAccion}. Motivo: ${motivoRechazo}`,
         autor: {
           id: aprobador.id,
-          nombre: aprobador.nombreCompleto
+          nombre: aprobador.nombreCompleto,
         },
         referenciaEntidad: REFERENCIA_ENTIDAD.SOLICITUD_APROBACION,
         referenciaId: id,
-        metadata: { solicitudId: solicitud.getId.getValor, tipoAccion: solicitud.getTipoAccion, motivoRechazo: motivoRechazo },
+        metadata: {
+          solicitudId: solicitud.getId.getValor,
+          tipoAccion: solicitud.getTipoAccion,
+          motivoRechazo: motivoRechazo,
+        },
         correlationId: solicitud.getCorrelationId,
-        secuencia: 2
+        secuencia: 2,
       });
 
       return await this.solicitudesRepository.findViewById(id);
-    })
+    });
   }
 
   private async executeAsAdmin(
     data: ProcessSolicitudBase,
-    handler: AccionAprobacionHandler,
+    handler: AccionAprobacionHandler
   ): Promise<void> {
     const authorizeUsuarioId = getUser().id;
     const admin = await this.usuarioService.findById(authorizeUsuarioId);
-    const codigoSolicitud = await this.consecutivoService.generate(CONSECUTIVOS_CODES.SOLICITUD_APROB);
+    const codigoSolicitud = await this.consecutivoService.generate(
+      CONSECUTIVOS_CODES.SOLICITUD_APROB
+    );
     const correlationId = generateCorrelationId();
     const solicitud = SolicitudAprobacion.createAutoAprobada({
       codigo: codigoSolicitud,
@@ -137,7 +147,8 @@ export class SolicitudService {
       await this.solicitudesRepository.save(solicitud);
       await handler.execute(data.equipoId, data.payload, correlationId);
 
-      const secuencia = await this.eventoService.findMaxSecuenciaByCorrelationId(correlationId) + 1;
+      const secuencia =
+        (await this.eventoService.findMaxSecuenciaByCorrelationId(correlationId)) + 1;
 
       await this.eventoService.register({
         equipoId: data.equipoId,
@@ -145,11 +156,15 @@ export class SolicitudService {
         descripcion: `${admin.nombreCompleto} ejecutó directamente: ${data.tipoAccion}`,
         autor: {
           id: admin.id,
-          nombre: admin.nombreCompleto
+          nombre: admin.nombreCompleto,
         },
         referenciaEntidad: REFERENCIA_ENTIDAD.SOLICITUD_APROBACION,
         referenciaId: solicitud.getId.getValor,
-        metadata: { solicitudId: solicitud.getId.getValor, tipoAccion: data.tipoAccion, payload: data.payload },
+        metadata: {
+          solicitudId: solicitud.getId.getValor,
+          tipoAccion: data.tipoAccion,
+          payload: data.payload,
+        },
         correlationId,
         secuencia,
       });
@@ -159,7 +174,7 @@ export class SolicitudService {
   private async assertNotSolicitudPendiente(
     equipoId: number,
     tipoAccion: TipoAccionAprobacion,
-    directAccess: boolean,
+    directAccess: boolean
   ): Promise<void> {
     const hasPendiente = await this.solicitudesRepository.existPendiente(equipoId, tipoAccion);
     if (!hasPendiente) return;
@@ -175,7 +190,9 @@ export class SolicitudService {
     const usuarioSolicitante = getUser();
     const solicitante = await this.usuarioService.findById(usuarioSolicitante.id);
     const correlationId = generateCorrelationId();
-    const numeroSolicitud = await this.consecutivoService.generate(CONSECUTIVOS_CODES.SOLICITUD_APROB);
+    const numeroSolicitud = await this.consecutivoService.generate(
+      CONSECUTIVOS_CODES.SOLICITUD_APROB
+    );
 
     const solicitud = SolicitudAprobacion.create({
       codigo: numeroSolicitud,
@@ -195,13 +212,17 @@ export class SolicitudService {
       descripcion: `${solicitante.nombreCompleto} solicitó aprobación para: ${data.tipoAccion}`,
       autor: {
         id: solicitante.id,
-        nombre: solicitante.nombreCompleto
+        nombre: solicitante.nombreCompleto,
       },
       referenciaEntidad: REFERENCIA_ENTIDAD.SOLICITUD_APROBACION,
       referenciaId: saved.getId.getValor,
-      metadata: { solicitudId: solicitud.getId.getValor, tipoAccion: data.tipoAccion, payload: data.payload },
+      metadata: {
+        solicitudId: solicitud.getId.getValor,
+        tipoAccion: data.tipoAccion,
+        payload: data.payload,
+      },
       correlationId,
-      secuencia: 1
+      secuencia: 1,
     });
 
     return saved;

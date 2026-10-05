@@ -35,7 +35,6 @@ const dataSourceConfig: DataSourceOptions = {
     ResponsableOrm,
     ...ORM_EQPS_ENTITIES,
     ...ORM_MOTOR_FMTS_ENTITIES,
-
   ],
   migrations: [join(__dirname, '../database/migrations/*.{ts,js}')],
 };

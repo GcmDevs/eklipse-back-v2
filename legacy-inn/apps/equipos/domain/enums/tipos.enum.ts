@@ -36,13 +36,13 @@ export enum TipoManual {
 export enum CategoriaDocumento {
   ANNEX_CHECK_SUPPORT = 'SOPORTE_ANEXO',
   TRANSACTIONAL_SUPPORT = 'SOPORTE_TRANSACCIONAL',
-  MANUAL = 'MANUAL'
+  MANUAL = 'MANUAL',
 }
 
 export enum TipoMantenimiento {
   PREVENTIVO = 'PREVENTIVO',
   CORRECTIVO = 'CORRECTIVO',
-  PREDICTIVO = 'PREDICTIVO'
+  PREDICTIVO = 'PREDICTIVO',
 }
 
 export enum TipoEjecutorExterno {

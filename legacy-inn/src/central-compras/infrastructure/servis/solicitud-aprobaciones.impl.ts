@@ -190,8 +190,8 @@ export class AprobacionesSolicitudesImpl extends AprobacionesCotizacionesImpl {
       const newEstadoSolicitud = isAprobado
         ? ESTADOS.SOL_APROBADA
         : rechazos.length >= 2
-        ? ESTADOS.SOL_RECHAZO_DEFINITIVO
-        : ESTADOS.SOL_RECHAZO_TEMPORAL;
+          ? ESTADOS.SOL_RECHAZO_DEFINITIVO
+          : ESTADOS.SOL_RECHAZO_TEMPORAL;
 
       if (rechazos.length >= 3) {
         throw new Error('La solicitud ya ha sido rechazada 3 veces, debe crear una nueva');

@@ -6,7 +6,7 @@ import { map, Observable } from 'rxjs';
 
 @Injectable()
 export class CustomResponseInterceptor<T> implements NestInterceptor {
-  constructor(private readonly reflector: Reflector) { }
+  constructor(private readonly reflector: Reflector) {}
 
   intercept(context: ExecutionContext, next: CallHandler<T>): Observable<FormatResponse<T>> {
     const fileResponse = this.reflector.getAllAndOverride(KEYS.FILE_RESPONSE, [
@@ -15,7 +15,7 @@ export class CustomResponseInterceptor<T> implements NestInterceptor {
     ]);
 
     if (fileResponse) return next.handle() as Observable<any>;
-    
+
     return next.handle().pipe(map((res: unknown) => this.responseHandler(res, context)));
   }
 

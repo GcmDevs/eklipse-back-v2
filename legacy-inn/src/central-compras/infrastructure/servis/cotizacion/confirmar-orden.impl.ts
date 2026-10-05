@@ -71,16 +71,16 @@ export class ConfirmarOrdenImpl extends CentralComprasSource {
           payload.isAprobado === 1
             ? ESTADOS.SOL_ULTIMOS_PASOS.getCode()
             : payload.isAprobado === 2
-            ? ESTADOS.SOL_RECHAZO_TEMPORAL.getCode()
-            : ESTADOS.SOL_RECHAZO_DEFINITIVO.getCode(),
+              ? ESTADOS.SOL_RECHAZO_TEMPORAL.getCode()
+              : ESTADOS.SOL_RECHAZO_DEFINITIVO.getCode(),
         solicitud,
         entidadRelacionadaId: cotizacion.id,
         informacionAdicional: `${kwTO.tipoOrdenAbr} de cot. #${cotizacion.id} ${
           payload.isAprobado === 1
             ? 'APROBADA'
             : payload.isAprobado === 2
-            ? 'RECHAZADA TEMPORALMENTE'
-            : 'RECHAZADA DEFINITIVAMENTE'
+              ? 'RECHAZADA TEMPORALMENTE'
+              : 'RECHAZADA DEFINITIVAMENTE'
         }${
           payload.isAprobado !== 1 && !solicitud.isPagoPorCajaMenor
             ? `, ${cotizacion.cotDocumento.documento.consecutivo}`

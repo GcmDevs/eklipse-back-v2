@@ -65,10 +65,10 @@ export class FetchSolicitudServicioTecnicoSource extends ServicioTecnicoBaseSour
       const atendidoPorId = onlyMisSolicitudes
         ? undefined
         : puedeVerTodosLosCasos
-        ? undefined
-        : puedeAtenderCasosNoAsignados
-        ? undefined
-        : this.auth.id;
+          ? undefined
+          : puedeAtenderCasosNoAsignados
+            ? undefined
+            : this.auth.id;
 
       let soliSerTec = await soliSerTecRp.find({
         where:

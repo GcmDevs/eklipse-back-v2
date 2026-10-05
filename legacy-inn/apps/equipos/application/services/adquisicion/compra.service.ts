@@ -4,14 +4,26 @@ import { FindThrowOptions } from '@common/domain/types';
 import { CONSECUTIVOS_CODES, ConsecutivoService } from '@core/consecutivos/application';
 import { StagingFileService } from '@core/media/application/services/staging.archivo.service';
 import { ProveedorService, TerceroService } from '@core/terceros/application/services';
-import { commitDocumentoTipoEquipoArchivo, validateDocumentoInput } from '@equipos/application/helpers/documento-tipo-equipo.helper';
+import {
+  commitDocumentoTipoEquipoArchivo,
+  validateDocumentoInput,
+} from '@equipos/application/helpers/documento-tipo-equipo.helper';
 import { DocumentoTipoEquipo } from '@equipos/domain/entities';
 import { Compra } from '@equipos/domain/entities/compra.entity';
 import { CompraRead } from '@equipos/domain/read';
 import { DocumentoTipoEquipoRepository, EquiposRepository } from '@equipos/domain/repositories';
 import { ICompraRepository } from '@equipos/domain/repositories/compra.repository';
-import { COMPRA_REPOSITORY, DOCUMENTO_TIPO_EQUIPO_REPOSITORY, EQUIPOS_REPOSITORY } from '@equipos/domain/repositories/tokens';
-import { AgregarEquiposCompraDto, CreateCompraDto, ReplaceTipoEquipoDto, UpdateCompraDto } from '@equipos/presentation/dto';
+import {
+  COMPRA_REPOSITORY,
+  DOCUMENTO_TIPO_EQUIPO_REPOSITORY,
+  EQUIPOS_REPOSITORY,
+} from '@equipos/domain/repositories/tokens';
+import {
+  AgregarEquiposCompraDto,
+  CreateCompraDto,
+  ReplaceTipoEquipoDto,
+  UpdateCompraDto,
+} from '@equipos/presentation/dto';
 import { Inject, Injectable } from '@nestjs/common';
 import { TipoDocCategoriaActivoService } from '../catalogo';
 
@@ -30,26 +42,43 @@ export class CompraService {
     private readonly proveedorService: ProveedorService,
     private readonly tipoDocCategoriaService: TipoDocCategoriaActivoService,
     private readonly terceroService: TerceroService,
-    private readonly stagingFileService: StagingFileService,
-  ) { }
+    private readonly stagingFileService: StagingFileService
+  ) {}
 
   async create({
-    codigo, fechaCompra, tipoAdquisicion, proveedorId,
-    numFactura, fechaFactura, fechaFabricacion,
-    aplicaGarantia, fechVencGarantia, fabricanteId,
-    distribuidorId, observaciones, documentos
+    codigo,
+    fechaCompra,
+    tipoAdquisicion,
+    proveedorId,
+    numFactura,
+    fechaFactura,
+    fechaFabricacion,
+    aplicaGarantia,
+    fechVencGarantia,
+    fabricanteId,
+    distribuidorId,
+    observaciones,
+    documentos,
   }: CreateCompraDto): Promise<CompraRead> {
-    const resolvedCodigo = codigo ?? await this.consecutivoService.generate(CONSECUTIVOS_CODES.ADQUISICION);
+    const resolvedCodigo =
+      codigo ?? (await this.consecutivoService.generate(CONSECUTIVOS_CODES.ADQUISICION));
     const snaps = await this.resolveSnapshots(proveedorId, fabricanteId, distribuidorId);
     const compra = Compra.create(
-      resolvedCodigo, new Date(fechaCompra), tipoAdquisicion, proveedorId,
+      resolvedCodigo,
+      new Date(fechaCompra),
+      tipoAdquisicion,
+      proveedorId,
       snaps.proveedorSnap,
-      numFactura, fechaFactura ? new Date(fechaFactura) : undefined,
+      numFactura,
+      fechaFactura ? new Date(fechaFactura) : undefined,
       fechaFabricacion ? new Date(fechaFabricacion) : undefined,
-      aplicaGarantia, fechVencGarantia ? new Date(fechVencGarantia) : undefined,
-      fabricanteId, distribuidorId,
-      snaps.fabricanteSnap, snaps.distribuidorSnap,
-      observaciones,
+      aplicaGarantia,
+      fechVencGarantia ? new Date(fechVencGarantia) : undefined,
+      fabricanteId,
+      distribuidorId,
+      snaps.fabricanteSnap,
+      snaps.distribuidorSnap,
+      observaciones
     );
     return this.txManager.transactional(async () => {
       const saved = await this.repository.save(compra);
@@ -66,7 +95,7 @@ export class CompraService {
 
   async findById(
     id: number,
-    options: FindThrowOptions = new FindThrowOptions(),
+    options: FindThrowOptions = new FindThrowOptions()
   ): Promise<Compra | null> {
     const compraFound = await this.repository.findById(id);
     if (!compraFound && options.throwIfNotFound) {
@@ -79,38 +108,57 @@ export class CompraService {
     const compra = await this.findById(id);
 
     const proveedorId = data.proveedorId ?? compra!.getProveedorId.getValor;
-    const fabricanteId = data.fabricanteId !== undefined ? data.fabricanteId : compra!.getFabricanteId?.getValor;
-    const distribuidorId = data.distribuidorId !== undefined ? data.distribuidorId : compra!.getDistribuidorId?.getValor;
+    const fabricanteId =
+      data.fabricanteId !== undefined ? data.fabricanteId : compra!.getFabricanteId?.getValor;
+    const distribuidorId =
+      data.distribuidorId !== undefined ? data.distribuidorId : compra!.getDistribuidorId?.getValor;
 
-    const needsSnapRefresh = data.proveedorId !== undefined
-      || data.fabricanteId !== undefined
-      || data.distribuidorId !== undefined;
+    const needsSnapRefresh =
+      data.proveedorId !== undefined ||
+      data.fabricanteId !== undefined ||
+      data.distribuidorId !== undefined;
 
-    let snaps: { proveedorSnap: string; fabricanteSnap: string; distribuidorSnap?: string } | undefined;
+    let snaps:
+      | { proveedorSnap: string; fabricanteSnap: string; distribuidorSnap?: string }
+      | undefined;
     if (needsSnapRefresh) {
-      snaps = await this.resolveSnapshots(proveedorId, fabricanteId ?? undefined, distribuidorId ?? undefined);
+      snaps = await this.resolveSnapshots(
+        proveedorId,
+        fabricanteId ?? undefined,
+        distribuidorId ?? undefined
+      );
     }
 
     compra!.update({
       fechaCompra: data.fechaCompra ? new Date(data.fechaCompra) : undefined,
       tipoAdquisicion: data.tipoAdquisicion,
       numFactura: data.numFactura,
-      fechaFactura: data.fechaFactura !== undefined
-        ? (data.fechaFactura ? new Date(data.fechaFactura) : undefined)
-        : undefined,
-      fechaFabricacion: data.fechaFabricacion !== undefined
-        ? (data.fechaFabricacion ? new Date(data.fechaFabricacion) : undefined)
-        : undefined,
+      fechaFactura:
+        data.fechaFactura !== undefined
+          ? data.fechaFactura
+            ? new Date(data.fechaFactura)
+            : undefined
+          : undefined,
+      fechaFabricacion:
+        data.fechaFabricacion !== undefined
+          ? data.fechaFabricacion
+            ? new Date(data.fechaFabricacion)
+            : undefined
+          : undefined,
       aplicaGarantia: data.aplicaGarantia,
-      fechVencGarantia: data.fechVencGarantia !== undefined
-        ? (data.fechVencGarantia ? new Date(data.fechVencGarantia) : undefined)
-        : undefined,
+      fechVencGarantia:
+        data.fechVencGarantia !== undefined
+          ? data.fechVencGarantia
+            ? new Date(data.fechVencGarantia)
+            : undefined
+          : undefined,
       proveedorId: data.proveedorId,
       fabricanteId: data.fabricanteId,
       distribuidorId: data.distribuidorId,
       proveedorSnap: snaps?.proveedorSnap,
       fabricanteSnap: snaps?.fabricanteSnap,
-      distribuidorSnap: snaps?.distribuidorSnap ?? (data.distribuidorId === null ? null : undefined),
+      distribuidorSnap:
+        snaps?.distribuidorSnap ?? (data.distribuidorId === null ? null : undefined),
       observaciones: data.observaciones,
     });
 
@@ -120,7 +168,10 @@ export class CompraService {
     });
   }
 
-  async addEquiposACompra(compraId: number, { equipoIds }: AgregarEquiposCompraDto): Promise<CompraRead> {
+  async addEquiposACompra(
+    compraId: number,
+    { equipoIds }: AgregarEquiposCompraDto
+  ): Promise<CompraRead> {
     if (!equipoIds?.length) {
       throw new BadInputError('Debe proporcionar al menos un equipo');
     }
@@ -140,27 +191,35 @@ export class CompraService {
     });
   }
 
-  async findAllAndCount(page: number, limit: number, search?: string): Promise<[CompraRead[], number]> {
+  async findAllAndCount(
+    page: number,
+    limit: number,
+    search?: string
+  ): Promise<[CompraRead[], number]> {
     return this.repository.findAllAndCount(page, limit, search);
   }
 
   private async resolveSnapshots(
     proveedorId: number,
     fabricanteId?: number,
-    distribuidorId?: number,
+    distribuidorId?: number
   ): Promise<{ proveedorSnap: string; fabricanteSnap: string; distribuidorSnap?: string }> {
     const proveedor = await this.proveedorService.findById(proveedorId, { throwIfNotFound: true });
     const proveedorSnap = proveedor.nombre ?? proveedor.codigo;
 
     let fabricanteSnap = proveedorSnap;
     if (fabricanteId) {
-      const fabricante = await this.terceroService.findById(fabricanteId, { throwIfNotFound: true });
+      const fabricante = await this.terceroService.findById(fabricanteId, {
+        throwIfNotFound: true,
+      });
       fabricanteSnap = fabricante.nombre;
     }
 
     let distribuidorSnap: string | undefined;
     if (distribuidorId) {
-      const distribuidor = await this.terceroService.findById(distribuidorId, { throwIfNotFound: true });
+      const distribuidor = await this.terceroService.findById(distribuidorId, {
+        throwIfNotFound: true,
+      });
       distribuidorSnap = distribuidor.nombre;
     }
 
@@ -169,7 +228,7 @@ export class CompraService {
 
   private async syncDocumentos(
     compraId: number,
-    documentos: ReplaceTipoEquipoDto['documentos'],
+    documentos: ReplaceTipoEquipoDto['documentos']
   ): Promise<void> {
     const existentes = await this.documentoRepository.findByCompraId(compraId);
     for (const old of existentes) {
@@ -177,16 +236,22 @@ export class CompraService {
     }
 
     for (const d of documentos) {
-      const tipoDoc = await this.tipoDocCategoriaService.findById(d.tipoDocumentoId, { throwIfNotFound: true });
+      const tipoDoc = await this.tipoDocCategoriaService.findById(d.tipoDocumentoId, {
+        throwIfNotFound: true,
+      });
       await validateDocumentoInput(
         this.stagingFileService,
         tipoDoc.getCategoria,
         d.aplica,
         undefined,
-        d.archivoId,
+        d.archivoId
       );
       const entity = DocumentoTipoEquipo.createForCompra(
-        compraId, d.tipoDocumentoId, d.aplica, d.archivoId, d.observaciones,
+        compraId,
+        d.tipoDocumentoId,
+        d.aplica,
+        d.archivoId,
+        d.observaciones
       );
       const savedDoc = await this.documentoRepository.save(entity);
       if (d.aplica && d.archivoId) {
@@ -194,7 +259,7 @@ export class CompraService {
           this.stagingFileService,
           tipoDoc.getCategoria,
           d.archivoId,
-          savedDoc.getId.getValor,
+          savedDoc.getId.getValor
         );
       }
     }

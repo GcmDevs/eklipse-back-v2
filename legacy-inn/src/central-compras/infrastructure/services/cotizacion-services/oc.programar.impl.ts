@@ -72,15 +72,15 @@ export class ProgramarOrdenCompraImpl extends CentralComprasSource {
           payload.aprobadoCode === 1
             ? ESTADOS.SOL_ULTIMOS_PASOS
             : payload.aprobadoCode === 2
-            ? ESTADOS.SOL_RECHAZO_TEMPORAL
-            : ESTADOS.SOL_RECHAZO_DEFINITIVO,
+              ? ESTADOS.SOL_RECHAZO_TEMPORAL
+              : ESTADOS.SOL_RECHAZO_DEFINITIVO,
         solicitud,
         entidadRelacionadaId: cotizacion.id,
         informacionAdicional: !isAprobrado
           ? `${abb1} RECHAZADA ${isDenTemp ? 'TEMPORALMENTE' : 'DEFINITIVAMENTE'}`
           : isACredito
-          ? `${abb1} APROBADA PARA PAGOS A CREDITO (DEPENDEN DE TESORERÍA)`
-          : `Pago a ${abb1} PROGRAMADO para el ${this.timer.formatDate(payload.fecha, 3)}` + obs,
+            ? `${abb1} APROBADA PARA PAGOS A CREDITO (DEPENDEN DE TESORERÍA)`
+            : `Pago a ${abb1} PROGRAMADO para el ${this.timer.formatDate(payload.fecha, 3)}` + obs,
       });
 
       const pagoPendiente = orderBy(pagosPendientes, 'id', 'asc')[0];

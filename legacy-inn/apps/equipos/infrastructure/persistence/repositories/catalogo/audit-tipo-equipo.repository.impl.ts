@@ -8,7 +8,10 @@ import { Injectable } from '@nestjs/common';
 import { AuditTipoEquipoOrm } from '@orm/inn/equipos/catalogo/audit-tipo-equipo.orm';
 
 @Injectable()
-export class TypeOrmAuditTipoEquipoRepository extends BaseSource implements AuditTipoEquipoRepository {
+export class TypeOrmAuditTipoEquipoRepository
+  extends BaseSource
+  implements AuditTipoEquipoRepository
+{
   private get repository() {
     const qr = TypeOrmTransactionContext.getQueryRunner();
     return qr

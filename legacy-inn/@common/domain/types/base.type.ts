@@ -1,5 +1,9 @@
 export class CtmType<T> {
-  constructor(private code: T, private forHumans: string, private abbreviation?: string) {}
+  constructor(
+    private code: T,
+    private forHumans: string,
+    private abbreviation?: string
+  ) {}
 
   public getCode(): T {
     return this.code;

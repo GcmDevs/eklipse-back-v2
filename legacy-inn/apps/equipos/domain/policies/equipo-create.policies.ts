@@ -3,19 +3,17 @@ import { normalizeUppercaseText } from '@common/domain/value-objects';
 
 export function resolveAplicaGarantia(
   aplicaGarantia?: boolean,
-  fechaVencimientoGarantia?: Date | null,
+  fechaVencimientoGarantia?: Date | null
 ): { aplicaGarantia: boolean; fechaVencimientoGarantia?: Date } {
   const aplica = aplicaGarantia ?? !!fechaVencimientoGarantia;
 
   if (aplica && !fechaVencimientoGarantia) {
-    throw new BadInputError(
-      'Si aplica garantía debe indicar fecha de vencimiento',
-    );
+    throw new BadInputError('Si aplica garantía debe indicar fecha de vencimiento');
   }
 
   if (!aplica && fechaVencimientoGarantia) {
     throw new BadInputError(
-      'Si no aplica garantía no debe tener fecha de vencimiento de esta misma',
+      'Si no aplica garantía no debe tener fecha de vencimiento de esta misma'
     );
   }
 

@@ -11,7 +11,7 @@ export class TipoActivoMapper {
       orm.createdAt,
       orm.updatedAt,
       orm.descripcion,
-      orm.activo,
+      orm.activo
     );
   }
 

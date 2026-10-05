@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Between, In, IsNull, Not } from 'typeorm';
-import { FILE_LOCATIONS, GcmContexts } from '@common/application/constants';
+import { GcmContexts } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { CambioEstadoOrm, DetalleCotizacionOrm, SolicitudOrm } from '@orm/inn/central-compras';
 import { ProductoOrm as AfnProductoOrm } from '@orm/inn/activos-fijos';
 import {
@@ -75,14 +76,14 @@ export class FetchSolicitudesImpl extends CentralComprasSource {
     const ctxs = onlyMySolicitudes
       ? [this.auth.context.getCode()]
       : isCentralCompras
-      ? [
-          GcmContexts.ALTACENTRO,
-          GcmContexts.AGUACHICA,
-          GcmContexts.VALLEDUPAR,
-          GcmContexts.SANJUAN,
-          GcmContexts.AMMEDICAL,
-        ]
-      : [this.auth.context.getCode()];
+        ? [
+            GcmContexts.ALTACENTRO,
+            GcmContexts.AGUACHICA,
+            GcmContexts.VALLEDUPAR,
+            GcmContexts.SANJUAN,
+            GcmContexts.AMMEDICAL,
+          ]
+        : [this.auth.context.getCode()];
 
     const solicitudes: SolicitudOrm[] = [];
 
@@ -230,8 +231,8 @@ export class FetchSolicitudesImpl extends CentralComprasSource {
               estadoCode: isResumido ? undefined : Not(In(SOLICITUDES_INVALIDAS_CODES)),
             }
           : !ids
-          ? conditions
-          : { id: In(ids) },
+            ? conditions
+            : { id: In(ids) },
       relations: [
         'usuario',
         'dependencia',

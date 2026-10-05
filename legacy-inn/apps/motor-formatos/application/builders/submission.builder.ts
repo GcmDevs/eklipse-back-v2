@@ -3,15 +3,13 @@ import {
   ComponenteSchema,
   EstructuraFormatoSchema,
   RespuestaComponente,
-  SeccionSchema
+  SeccionSchema,
 } from 'apps/motor-formatos/domain';
 
-
 export class SubmissionBuilder {
-
   static build(
     schema: EstructuraFormatoSchema,
-    respuestas: Record<string, RespuestaComponente>,
+    respuestas: Record<string, RespuestaComponente>
   ): Record<string, unknown> {
     return {
       secciones: ensureArray(schema.secciones).map(sec =>
@@ -22,7 +20,7 @@ export class SubmissionBuilder {
 
   private static fuseSeccion(
     seccion: SeccionSchema,
-    respuestas: Record<string, RespuestaComponente>,
+    respuestas: Record<string, RespuestaComponente>
   ): Record<string, unknown> {
     return {
       key: seccion.key,
@@ -38,10 +36,10 @@ export class SubmissionBuilder {
 
   private static fuseComponente(
     comp: ComponenteSchema,
-    respuestas: Record<string, RespuestaComponente>,
+    respuestas: Record<string, RespuestaComponente>
   ): Record<string, unknown> {
     return {
-      ...(comp),
+      ...comp,
       respuesta: respuestas[comp.key] ?? null,
     };
   }

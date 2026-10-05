@@ -10,7 +10,8 @@ import {
   tipoRequerimientoContratoSolSerTecTypeFactory,
 } from '@ctypes/inn/activos-fijos';
 import { deleteFile } from '@common/presentation/helpers';
-import { FILE_LOCATIONS, TABLE_NAMES } from '@common/application/constants';
+import { TABLE_NAMES } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { prioridadTypeFactory } from '@ctypes/gen';
 import { In, Not } from 'typeorm';
 import { afnSoliSerTecOrmToCreateAfnSoliSerTecResFactory } from '@activos-fijos/infrastructure/factories';

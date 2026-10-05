@@ -9,4 +9,3 @@ export * from './plan-default-tipo-equipo.service';
 export * from './documento-tipo-equipo.service';
 export * from './unidad-medida.service';
 export * from './partes-catg.service';
-

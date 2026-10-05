@@ -6,9 +6,19 @@ import {
   CreateClaseEquipoDto,
   CreateSubclaseEquipoDto,
   UpdateClaseEquipoDto,
-  UpdateSubclaseEquipoDto
+  UpdateSubclaseEquipoDto,
 } from '@equipos/presentation/dto';
-import { BadRequestException, Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+} from '@nestjs/common';
 
 @Controller('/v4/inn/clases-equipo')
 export class ClaseEquipoController extends BaseShelteredController {
@@ -23,14 +33,16 @@ export class ClaseEquipoController extends BaseShelteredController {
   }
 
   @Get()
-  async getAllClases(@Query(
-    'tipoActivoId',
-    new ParseIntPipe({
-      exceptionFactory: () =>
-        new BadRequestException('El parámetro tipoActivoId es obligatorio y debe ser un número.'),
-    }),
-  )
-  tipoActivoId: number,): Promise<BaseApiResponse<ClaseEquipoRead[]>> {
+  async getAllClases(
+    @Query(
+      'tipoActivoId',
+      new ParseIntPipe({
+        exceptionFactory: () =>
+          new BadRequestException('El parámetro tipoActivoId es obligatorio y debe ser un número.'),
+      })
+    )
+    tipoActivoId: number
+  ): Promise<BaseApiResponse<ClaseEquipoRead[]>> {
     const list = await this.service.findAllClases(tipoActivoId);
     return { data: list };
   }
@@ -38,14 +50,16 @@ export class ClaseEquipoController extends BaseShelteredController {
   @Patch('/:claseId')
   async updateClase(
     @Param('claseId', ParseIntPipe) claseId: number,
-    @Body() data: UpdateClaseEquipoDto,
+    @Body() data: UpdateClaseEquipoDto
   ): Promise<BaseApiResponse<ClaseEquipoRead>> {
     const entity = await this.service.updateClase(claseId, data);
     return { data: entity };
   }
 
   @Patch('/:claseId/desactivar')
-  async desactivarClase(@Param('claseId', ParseIntPipe) claseId: number): Promise<BaseApiResponse<void>> {
+  async desactivarClase(
+    @Param('claseId', ParseIntPipe) claseId: number
+  ): Promise<BaseApiResponse<void>> {
     await this.service.desactivarClase(claseId);
     return { data: undefined };
   }
@@ -53,7 +67,7 @@ export class ClaseEquipoController extends BaseShelteredController {
   @Post('/:claseId/subclases')
   async createSubclase(
     @Param('claseId', ParseIntPipe) claseId: number,
-    @Body() data: CreateSubclaseEquipoDto,
+    @Body() data: CreateSubclaseEquipoDto
   ): Promise<BaseApiResponse<SubclaseEquipoRead>> {
     const entity = await this.service.createSubclase(claseId, data);
     return { data: entity };
@@ -61,7 +75,7 @@ export class ClaseEquipoController extends BaseShelteredController {
 
   @Get('/:claseId/subclases')
   async getAllSubclases(
-    @Param('claseId', ParseIntPipe) claseId: number,
+    @Param('claseId', ParseIntPipe) claseId: number
   ): Promise<BaseApiResponse<SubclaseEquipoRead[]>> {
     const list = await this.service.findAllSubclases(claseId);
     return { data: list };
@@ -71,7 +85,7 @@ export class ClaseEquipoController extends BaseShelteredController {
   async updateSubclase(
     @Param('claseId', ParseIntPipe) claseId: number,
     @Param('subclaseId', ParseIntPipe) subclaseId: number,
-    @Body() data: UpdateSubclaseEquipoDto,
+    @Body() data: UpdateSubclaseEquipoDto
   ): Promise<BaseApiResponse<SubclaseEquipoRead>> {
     const entity = await this.service.updateSubclase(claseId, subclaseId, data);
     return { data: entity };
@@ -80,7 +94,7 @@ export class ClaseEquipoController extends BaseShelteredController {
   @Patch('/:claseId/subclases/:subclaseId/desactivar')
   async desactivarSubclase(
     @Param('claseId', ParseIntPipe) claseId: number,
-    @Param('subclaseId', ParseIntPipe) subclaseId: number,
+    @Param('subclaseId', ParseIntPipe) subclaseId: number
   ): Promise<BaseApiResponse<void>> {
     await this.service.desactivarSubclase(claseId, subclaseId);
     return { data: undefined };

@@ -7,8 +7,14 @@ import { TipoAuditTipoEquipo } from '@equipos/domain/enums';
 import { DocumentoTipoEquipoRead } from '@equipos/domain/read';
 import { DocumentoTipoEquipoRepository } from '@equipos/domain/repositories/catalogo/documento-tipo-equipo.repository';
 import { TipoEquipoRepository } from '@equipos/domain/repositories/catalogo/tipo-equipo.repository';
-import { DOCUMENTO_TIPO_EQUIPO_REPOSITORY, TIPO_EQUIPO_REPOSITORY } from '@equipos/domain/repositories/tokens';
-import { CreateDocumentoTipoEquipoDto, UpdateDocumentoTipoEquipoDto } from '@equipos/presentation/dto';
+import {
+  DOCUMENTO_TIPO_EQUIPO_REPOSITORY,
+  TIPO_EQUIPO_REPOSITORY,
+} from '@equipos/domain/repositories/tokens';
+import {
+  CreateDocumentoTipoEquipoDto,
+  UpdateDocumentoTipoEquipoDto,
+} from '@equipos/presentation/dto';
 import { Inject, Injectable } from '@nestjs/common';
 import { AuditTipoEquipoService } from '../../audit/audit-tipo-equipo.service';
 import {
@@ -30,25 +36,33 @@ export class DocumentoTipoEquipoService {
     private readonly txManager: TransactionManager,
     private readonly stagingFileService: StagingFileService,
     private readonly tipoDocCategoriaService: TipoDocCategoriaActivoService,
-    private readonly auditService: AuditTipoEquipoService,
-  ) { }
+    private readonly auditService: AuditTipoEquipoService
+  ) {}
 
   async create(
     tipoEquipoId: number,
-    { tipoDocumentoId, aplica, archivoId, observaciones }: CreateDocumentoTipoEquipoDto,
+    { tipoDocumentoId, aplica, archivoId, observaciones }: CreateDocumentoTipoEquipoDto
   ): Promise<DocumentoTipoEquipoRead> {
     const tipoActivoId = await this.resolveTipoActivoIdByTipoEquipo(tipoEquipoId);
-    const tipoDoc = await this.tipoDocCategoriaService.findById(tipoDocumentoId, { throwIfNotFound: true });
+    const tipoDoc = await this.tipoDocCategoriaService.findById(tipoDocumentoId, {
+      throwIfNotFound: true,
+    });
     assertTipoDocAplica(tipoDoc, tipoActivoId);
     await validateDocumentoInput(
       this.stagingFileService,
       tipoDoc.getCategoria,
       aplica,
       tipoDoc.IsObligatorioPara(tipoActivoId),
-      archivoId,
+      archivoId
     );
 
-    const docTipoEquipo = DocumentoTipoEquipo.createForTipoEquipo(tipoEquipoId, tipoDocumentoId, aplica, archivoId, observaciones);
+    const docTipoEquipo = DocumentoTipoEquipo.createForTipoEquipo(
+      tipoEquipoId,
+      tipoDocumentoId,
+      aplica,
+      archivoId,
+      observaciones
+    );
     return this.txManager.transactional(async () => {
       const saved = await this.repository.save(docTipoEquipo);
       if (aplica && archivoId) {
@@ -56,7 +70,7 @@ export class DocumentoTipoEquipoService {
           this.stagingFileService,
           tipoDoc.getCategoria,
           archivoId,
-          saved.getId.getValor,
+          saved.getId.getValor
         );
       }
       await this.auditService.record({
@@ -73,7 +87,7 @@ export class DocumentoTipoEquipoService {
 
   async findById(
     id: number,
-    options: FindThrowOptions = new FindThrowOptions(),
+    options: FindThrowOptions = new FindThrowOptions()
   ): Promise<DocumentoTipoEquipo | null> {
     const entity = await this.repository.findById(id);
     if (!entity && options.throwIfNotFound) {
@@ -85,7 +99,7 @@ export class DocumentoTipoEquipoService {
   async update(
     tipoEquipoId: number,
     id: number,
-    data: UpdateDocumentoTipoEquipoDto,
+    data: UpdateDocumentoTipoEquipoDto
   ): Promise<DocumentoTipoEquipoRead> {
     return this.txManager.transactional(async () => {
       await this.assertBelongsToTipoEquipo(tipoEquipoId, id);
@@ -95,17 +109,25 @@ export class DocumentoTipoEquipoService {
       const aplica = data.aplica ?? docTipoEquipo.getAplica;
       const archivoId = data.archivoId ?? docTipoEquipo.getArchivoId;
 
-      const tipoActivoId = await this.resolveTipoActivoIdByTipoEquipo(docTipoEquipo.getTipoEquipoId.getValor);
-      const tipoDoc = await this.tipoDocCategoriaService.findById(tipoDocumentoId, { throwIfNotFound: true });
+      const tipoActivoId = await this.resolveTipoActivoIdByTipoEquipo(
+        docTipoEquipo.getTipoEquipoId.getValor
+      );
+      const tipoDoc = await this.tipoDocCategoriaService.findById(tipoDocumentoId, {
+        throwIfNotFound: true,
+      });
       assertTipoDocAplica(tipoDoc, tipoActivoId);
 
-      if (data.archivoId !== undefined || data.aplica !== undefined || data.tipoDocumentoId !== undefined) {
+      if (
+        data.archivoId !== undefined ||
+        data.aplica !== undefined ||
+        data.tipoDocumentoId !== undefined
+      ) {
         await validateDocumentoInput(
           this.stagingFileService,
           tipoDoc.getCategoria,
           aplica,
           tipoDoc.IsObligatorioPara(tipoActivoId),
-          archivoId,
+          archivoId
         );
       }
 
@@ -117,7 +139,7 @@ export class DocumentoTipoEquipoService {
           this.stagingFileService,
           tipoDoc.getCategoria,
           data.archivoId,
-          id,
+          id
         );
       }
 
@@ -148,11 +170,14 @@ export class DocumentoTipoEquipoService {
     });
   }
 
-  private async assertBelongsToTipoEquipo(tipoEquipoId: number, id: number): Promise<DocumentoTipoEquipoRead> {
+  private async assertBelongsToTipoEquipo(
+    tipoEquipoId: number,
+    id: number
+  ): Promise<DocumentoTipoEquipoRead> {
     const currentDoc = await this.repository.findViewById(id);
     if (!currentDoc || currentDoc.tipoEquipoId !== tipoEquipoId) {
       throw new ResourceNotFoundError(
-        `DocumentoTipoEquipo con id: ${id} no encontrado para el tipoEquipo ${tipoEquipoId}`,
+        `DocumentoTipoEquipo con id: ${id} no encontrado para el tipoEquipo ${tipoEquipoId}`
       );
     }
     return currentDoc;

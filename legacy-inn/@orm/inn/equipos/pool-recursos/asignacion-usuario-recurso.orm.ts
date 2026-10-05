@@ -1,15 +1,18 @@
-import { TABLE_NAMES } from "@common/application/constants";
-import { BaseTimestampedOrm } from "@common/infrastructure/orm";
-import { UsuarioOrm } from "@orm/gen";
-import { Column, Entity, Index, JoinColumn, ManyToOne } from "typeorm";
-import { MotivoAsignacionAsignacionTecnicoEmbedded, MotivoFinalizacionAsignacionTecnicoEmbedded } from "../supports";
-import { RecursoOrm } from "./recurso.orm";
+import { TABLE_NAMES } from '@common/application/constants';
+import { BaseTimestampedOrm } from '@common/infrastructure/orm';
+import { UsuarioOrm } from '@orm/gen';
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
+import {
+  MotivoAsignacionAsignacionTecnicoEmbedded,
+  MotivoFinalizacionAsignacionTecnicoEmbedded,
+} from '../supports';
+import { RecursoOrm } from './recurso.orm';
 
 @Entity({ name: TABLE_NAMES.inn.eqp.pool_recursos.asignaciones_usuario_recurso })
 @Index('IDX_EKINNEQPPLASINACIONRECURSOUSUARIO_RECURSO', ['recursoId'])
 @Index('IDX_EKINNEQPPLASINACIONRECURSOUSUARIO_ACTIVA', ['recursoId', 'activa'])
 export class AsignacionRecursoUsuarioOrm extends BaseTimestampedOrm {
-  @ManyToOne(() => RecursoOrm, (recur) => recur.asignaciones, {
+  @ManyToOne(() => RecursoOrm, recur => recur.asignaciones, {
     nullable: false,
     onDelete: 'CASCADE',
   })

@@ -33,7 +33,7 @@ export class ExceljsEquiposCustomExportGenerator {
       sheet,
       this.dataHeaderRow,
       this.dataHeaderRow + config.rows.length,
-      config.columnas.length,
+      config.columnas.length
     );
     this.autosizeColumns(sheet, config.columnas.length);
 
@@ -41,10 +41,7 @@ export class ExceljsEquiposCustomExportGenerator {
     return Buffer.from(arrayBuffer);
   }
 
-  private buildEncabezado(
-    sheet: ExcelJS.Worksheet,
-    config: ExcelExportConfig,
-  ): void {
+  private buildEncabezado(sheet: ExcelJS.Worksheet, config: ExcelExportConfig): void {
     const colSpan = Math.max(config.columnas.length, 1);
 
     for (let row = 1; row <= this.logoAreaRows; row++) {
@@ -77,10 +74,7 @@ export class ExceljsEquiposCustomExportGenerator {
     };
   }
 
-  private buildColumnHeaders(
-    sheet: ExcelJS.Worksheet,
-    columnas: CustomExportColumn[],
-  ): void {
+  private buildColumnHeaders(sheet: ExcelJS.Worksheet, columnas: CustomExportColumn[]): void {
     const headerRow = sheet.getRow(this.dataHeaderRow);
     headerRow.height = 22;
 
@@ -111,7 +105,7 @@ export class ExceljsEquiposCustomExportGenerator {
   private buildDataRows(
     sheet: ExcelJS.Worksheet,
     columnas: CustomExportColumn[],
-    rows: EquipoExportRow[],
+    rows: EquipoExportRow[]
   ): void {
     rows.forEach((row, rowIndex) => {
       const excelRow = sheet.getRow(this.dataHeaderRow + 1 + rowIndex);
@@ -133,7 +127,7 @@ export class ExceljsEquiposCustomExportGenerator {
     sheet: ExcelJS.Worksheet,
     startRow: number,
     endRow: number,
-    columnCount: number,
+    columnCount: number
   ): void {
     if (columnCount < 1 || endRow < startRow) {
       return;
@@ -167,7 +161,7 @@ export class ExceljsEquiposCustomExportGenerator {
     for (let i = 1; i <= columnCount; i++) {
       const column = sheet.getColumn(i);
       let max = 12;
-      column.eachCell({ includeEmpty: true }, (cell) => {
+      column.eachCell({ includeEmpty: true }, cell => {
         const length = cell.value == null ? 0 : String(cell.value).length;
         if (length > max) {
           max = length;

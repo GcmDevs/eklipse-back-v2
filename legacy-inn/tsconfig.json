@@ -25,6 +25,7 @@
       "@authorities/*": ["./@authorities/*"],
       "@auth/*": ["./@auth/*"],
       "@common/*": ["./@common/*"],
+      "@common/application/file-locations": ["../@common/application/file-locations"],
       "@gtypes/*": ["./@gtypes/*"],
       "@gtypes": ["./@gtypes"],
       "@ctypes/*": ["@types/*"],

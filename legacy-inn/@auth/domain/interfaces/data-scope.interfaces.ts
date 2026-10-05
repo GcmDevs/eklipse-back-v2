@@ -30,6 +30,6 @@ export interface IDataScopePolicy<T> {
   applyScope(
     qb: SelectQueryBuilder<T>,
     scope: DataScopeResult,
-    alias: string,
+    alias: string
   ): SelectQueryBuilder<T>;
 }

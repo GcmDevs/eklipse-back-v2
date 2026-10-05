@@ -1,9 +1,4 @@
-import {
-  EstadoTanqueo,
-  OrigenTanqueo,
-  TipoCombustible,
-  UnidadMedidaCombustible,
-} from '../enums';
+import { EstadoTanqueo, OrigenTanqueo, TipoCombustible, UnidadMedidaCombustible } from '../enums';
 import { ResumenTanqueosRead } from '../reads';
 import { TanqueoFilters } from '../repositories/tanqueo.repository';
 import { TanqueoResumenRow } from '../types/tanqueo-resumen-row.type';
@@ -96,9 +91,7 @@ export function buildResumenTanqueos(
   }
 
   const promedioRendimiento =
-    rendimientos.length > 0
-      ? rendimientos.reduce((a, b) => a + b, 0) / rendimientos.length
-      : 0;
+    rendimientos.length > 0 ? rendimientos.reduce((a, b) => a + b, 0) / rendimientos.length : 0;
 
   const precioPromedioPorGalon = precioPromedioPorGalonDesdeFilas(analitica);
   const costoPromedioPorKm =

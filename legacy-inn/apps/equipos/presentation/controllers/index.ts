@@ -1,5 +1,11 @@
 import { AccesorioUnidadController } from './accesorio-unidad.controller';
-import { ActividadesController, CronogramaController, DashboardController, FormatoController, RecursoController } from './actividades';
+import {
+  ActividadesController,
+  CronogramaController,
+  DashboardController,
+  FormatoController,
+  RecursoController,
+} from './actividades';
 import {
   ClaseEquipoController,
   CompraController,

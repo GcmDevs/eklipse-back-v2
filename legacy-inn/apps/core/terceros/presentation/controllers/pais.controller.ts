@@ -5,15 +5,17 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { FilterPaisDto, ResponsePaisDto } from '../dto';
 import { PaisMapper } from '@core/terceros/infrastructure/mappers';
 
-
 @Controller('/v4/inn/paises')
 export class PaisController extends BaseShelteredController {
-    constructor(
-        private readonly paisService: PaisService) { super();}
+  constructor(private readonly paisService: PaisService) {
+    super();
+  }
 
-    @Get()
-    async getAll(@Query() { search, limit }: FilterPaisDto): Promise<BaseApiResponse<ResponsePaisDto>> {
-        const data = await this.paisService.getAll(search, limit);
-        return { data: PaisMapper.toResponseList(data) };
-    }
+  @Get()
+  async getAll(
+    @Query() { search, limit }: FilterPaisDto
+  ): Promise<BaseApiResponse<ResponsePaisDto>> {
+    const data = await this.paisService.getAll(search, limit);
+    return { data: PaisMapper.toResponseList(data) };
+  }
 }

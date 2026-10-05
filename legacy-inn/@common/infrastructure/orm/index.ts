@@ -16,6 +16,5 @@ export const _PRIV_ORM_AUTH_SEC_ENTITIES = [
   _PrivSecUserDependenceOrm,
 ];
 
-
 export * from './base-timestamped.orm';
 export * from './base.orm';

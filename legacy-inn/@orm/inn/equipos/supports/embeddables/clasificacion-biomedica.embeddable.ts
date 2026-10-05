@@ -1,5 +1,5 @@
-import { Riesgo } from "@equipos/domain/enums";
-import { Column } from "typeorm";
+import { Riesgo } from '@equipos/domain/enums';
+import { Column } from 'typeorm';
 
 export class ClasificacionBiomedicaEmbeddable {
   @Column({ name: 'REGSANITARIO', type: 'bit', nullable: false, default: false })

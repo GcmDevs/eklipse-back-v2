@@ -16,7 +16,7 @@ export class RegistroImagenJsonOrm {
 @Index('IDX_EKFMTREGSDATOSDILIGENCIADOSMANT_EQUIPO', ['equipoId'])
 @Index('IDX_EKFMTREGSDATOSDILIGENCIADOSMANT_ESTADO', ['estado'])
 export class RegistroDiligenciadoFmtOrm extends BaseTimestampedOrm {
-  @ManyToOne(() => VersionFormatoFmtOrm, (v) => v.registros, {
+  @ManyToOne(() => VersionFormatoFmtOrm, v => v.registros, {
     nullable: false,
     onDelete: 'RESTRICT',
   })

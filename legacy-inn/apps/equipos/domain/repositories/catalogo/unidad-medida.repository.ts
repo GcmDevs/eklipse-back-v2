@@ -1,4 +1,4 @@
-import { UnidadMedida } from "@equipos/domain/entities";
+import { UnidadMedida } from '@equipos/domain/entities';
 
 export interface UnidadMedidaRepository {
   save(unidadMedida: UnidadMedida): Promise<UnidadMedida>;

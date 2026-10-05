@@ -1,4 +1,7 @@
-import { applyActivoStatusToQb, TypeOrmTransactionContext } from '@common/infrastructure/persistence/transactional';
+import {
+  applyActivoStatusToQb,
+  TypeOrmTransactionContext,
+} from '@common/infrastructure/persistence/transactional';
 import { BaseSource } from '@common/infrastructure/services';
 import { DocumentoTipoEquipo } from '@equipos/domain/entities/catalogo/documento-tipo-equipo.entity';
 import { DocumentoTipoEquipoRead } from '@equipos/domain/read';
@@ -8,10 +11,15 @@ import { DocumentoTipoEquipoOrm } from '@orm/inn/equipos/catalogo/documento-tipo
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class TypeOrmDocumentoTipoEquipoRepository extends BaseSource implements DocumentoTipoEquipoRepository {
+export class TypeOrmDocumentoTipoEquipoRepository
+  extends BaseSource
+  implements DocumentoTipoEquipoRepository
+{
   private get repository() {
     const qr = TypeOrmTransactionContext.getQueryRunner();
-    return qr ? qr.manager.getRepository(DocumentoTipoEquipoOrm) : this.conn.getRepository(DocumentoTipoEquipoOrm);
+    return qr
+      ? qr.manager.getRepository(DocumentoTipoEquipoOrm)
+      : this.conn.getRepository(DocumentoTipoEquipoOrm);
   }
 
   private alias: string = 'docTipEqp';
@@ -73,7 +81,7 @@ export class TypeOrmDocumentoTipoEquipoRepository extends BaseSource implements 
   }
 
   async delete(id: number): Promise<void> {
-    throw Error('method not implemented')
+    throw Error('method not implemented');
   }
 
   async findViewById(id: number): Promise<DocumentoTipoEquipoRead | null> {

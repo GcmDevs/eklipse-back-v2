@@ -4,10 +4,7 @@ import { getUser } from '@common/infrastructure/services';
 import { CONSECUTIVOS_CODES, ConsecutivoService } from '@core/consecutivos/application';
 import { StagingFileService } from '@core/media/application/services/staging.archivo.service';
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  commitEvidenciasTanqueo,
-  validateEvidenciasStaging,
-} from '@vehiculos/application/helpers';
+import { commitEvidenciasTanqueo, validateEvidenciasStaging } from '@vehiculos/application/helpers';
 import { Abastecimiento, RepositorioCombustible } from '@vehiculos/domain/entities';
 import {
   ABASTECIMIENTO_REPOSITORY,
@@ -107,9 +104,7 @@ export class RepositorioCombustibleService {
       EvidenciasTanqueo.empty()
     );
 
-    const codigo = await this.consecutivosService.generate(
-      CONSECUTIVOS_CODES.ABASTECIMIENTO_TAN
-    );
+    const codigo = await this.consecutivosService.generate(CONSECUTIVOS_CODES.ABASTECIMIENTO_TAN);
     const abastecimiento = Abastecimiento.register({
       codigo,
       estacionServicioId: data.estacionServicioId,
@@ -139,11 +134,7 @@ export class RepositorioCombustibleService {
     });
 
     await this.txManager.nonTransactional(async () => {
-      await commitEvidenciasTanqueo(
-        this.stagingFileService,
-        evidenciasItems,
-        saved.getId.getValor
-      );
+      await commitEvidenciasTanqueo(this.stagingFileService, evidenciasItems, saved.getId.getValor);
     });
 
     const view = await this.abastecimientoRepository.findViewById(saved.getId.getValor);

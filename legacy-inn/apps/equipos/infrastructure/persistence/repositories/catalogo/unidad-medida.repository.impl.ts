@@ -23,8 +23,7 @@ export class TypeOrmUnidadMedidaRepository extends BaseSource implements UnidadM
   }
 
   async findAll(): Promise<UnidadMedida[]> {
-    const unidadesMedidaFound = await this.repository.find({
-    });
+    const unidadesMedidaFound = await this.repository.find({});
     return unidadesMedidaFound.map(UnidadMedidaMapper.toDomain);
   }
 }

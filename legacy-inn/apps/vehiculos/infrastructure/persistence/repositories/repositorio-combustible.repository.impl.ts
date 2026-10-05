@@ -64,8 +64,14 @@ export class TypeOrmRepositorioCombustibleRepository
     });
 
     const [vehiculos, estaciones] = await Promise.all([
-      fetchVehiculosById(this.ekConn, orms.map(orm => orm.tanqueo?.activoId)),
-      fetchEstacionesById(this.ekConn, orms.map(orm => orm.abastecimiento?.estacionServicioId)),
+      fetchVehiculosById(
+        this.ekConn,
+        orms.map(orm => orm.tanqueo?.activoId)
+      ),
+      fetchEstacionesById(
+        this.ekConn,
+        orms.map(orm => orm.abastecimiento?.estacionServicioId)
+      ),
     ]);
 
     return RepositorioCombustibleMapper.toMovimientoViews(orms, vehiculos, estaciones);

@@ -1,3 +1,3 @@
-export const ensureArray = <T> (value: T[] | null | undefined): T[] => {
+export const ensureArray = <T>(value: T[] | null | undefined): T[] => {
   return Array.isArray(value) ? value : [];
-}
+};

@@ -9,15 +9,13 @@ import { PermisoResolverService } from './permiso-resolver.service';
 
 @Injectable()
 export class DataScopeService {
-  constructor(
-    private readonly permisoResolver: PermisoResolverService,
-  ) {}
+  constructor(private readonly permisoResolver: PermisoResolverService) {}
 
   async apply<T>(
     usuarioCtx: UserScopeContext,
     qb: SelectQueryBuilder<T>,
     alias: string,
-    policy: IDataScopePolicy<T>,
+    policy: IDataScopePolicy<T>
   ): Promise<SelectQueryBuilder<T>> {
     const authorities = await this.permisoResolver.resolveAuthorities(usuarioCtx.id);
 

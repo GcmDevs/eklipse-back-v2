@@ -4,5 +4,4 @@ import { UsuarioEqpController } from './usuario-eqp.controller';
 export * from './firma.controller';
 export * from './usuario-eqp.controller';
 
-export const FIRMAS_CONTROLLERS = [FirmaController, UsuarioEqpController]
-
+export const FIRMAS_CONTROLLERS = [FirmaController, UsuarioEqpController];

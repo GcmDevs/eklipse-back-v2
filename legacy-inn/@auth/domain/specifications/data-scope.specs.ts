@@ -1,14 +1,12 @@
 import { SelectQueryBuilder } from 'typeorm';
 import { DataScopeFilters } from '../interfaces/data-scope.interfaces';
 
-
 export class DataScopeSpecs {
-
   static onlyFromUsuario<T>(
     qb: SelectQueryBuilder<T>,
     alias: string,
     campo: string,
-    filtros: DataScopeFilters,
+    filtros: DataScopeFilters
   ): SelectQueryBuilder<T> {
     return qb.andWhere(`${alias}.${campo} = :scopeUsuarioId`, {
       scopeUsuarioId: filtros.usuarioId,
@@ -19,7 +17,7 @@ export class DataScopeSpecs {
     qb: SelectQueryBuilder<T>,
     alias: string,
     campo: string,
-    filtros: DataScopeFilters,
+    filtros: DataScopeFilters
   ): SelectQueryBuilder<T> {
     return qb.andWhere(`${alias}.${campo} = :scopeAreaId`, {
       scopeAreaId: filtros.areaId,
@@ -34,7 +32,7 @@ export class DataScopeSpecs {
     qb: SelectQueryBuilder<T>,
     alias: string,
     campo: string,
-    ids: number[],
+    ids: number[]
   ): SelectQueryBuilder<T> {
     if (!ids.length) {
       return qb.andWhere('1 = 0');

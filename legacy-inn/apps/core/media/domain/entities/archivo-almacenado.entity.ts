@@ -1,9 +1,8 @@
 import { MimeTypes } from '@common/domain/enums';
 import { BadInputError } from '@common/domain/errors';
-import { Id } from "@common/domain/value-objects";
+import { Id } from '@common/domain/value-objects';
 
 export class ArchivoAlmacenado {
-
   private constructor(
     private readonly id: Id,
     private nombreOriginal: string,
@@ -19,8 +18,8 @@ export class ArchivoAlmacenado {
     private isTemporal: boolean,
     private isUsado: boolean,
     private fechaCarga: Date,
-    private usuarioCargaId?: Id,
-  ) { }
+    private usuarioCargaId?: Id
+  ) {}
 
   static create(
     nombreOriginal: string,
@@ -28,7 +27,7 @@ export class ArchivoAlmacenado {
     extension: string,
     tipoMime: MimeTypes,
     tamanoBytes: number,
-    rutaArchivo: string,
+    rutaArchivo: string
   ): ArchivoAlmacenado {
     return new ArchivoAlmacenado(
       new Id(),
@@ -45,7 +44,7 @@ export class ArchivoAlmacenado {
       true,
       false,
       new Date(),
-      null,
+      null
     );
   }
 
@@ -84,7 +83,6 @@ export class ArchivoAlmacenado {
       usuarioCargaId ? new Id(usuarioCargaId) : undefined
     );
   }
-
 
   get getId(): Id {
     return this.id;
@@ -146,14 +144,19 @@ export class ArchivoAlmacenado {
     return this.usuarioCargaId;
   }
 
-  MarkAsUsado(destino: string, contexto: string, referenciaId: number, usuarioCargaId?: number): void {
+  MarkAsUsado(
+    destino: string,
+    contexto: string,
+    referenciaId: number,
+    usuarioCargaId?: number
+  ): void {
     this.isUsado = true;
     this.isTemporal = false;
     this.rutaArchivo = destino;
-    this.contexto = contexto,
-      this.referenciaId = new Id(referenciaId),
-      this.usuarioCargaId = usuarioCargaId ? new Id(usuarioCargaId) : undefined,
-      this.fechaCarga = new Date()
+    ((this.contexto = contexto),
+      (this.referenciaId = new Id(referenciaId)),
+      (this.usuarioCargaId = usuarioCargaId ? new Id(usuarioCargaId) : undefined),
+      (this.fechaCarga = new Date()));
   }
 
   MarkAsTemporal(): void {
@@ -162,7 +165,8 @@ export class ArchivoAlmacenado {
 
   validateIsUsado() {
     if (this.getIsUsado || !this.getIsTemporal)
-      throw new BadInputError(`Archivo con id: ${this.getId.getValor} ya esta en uso, por favor cargue otro`);
-
+      throw new BadInputError(
+        `Archivo con id: ${this.getId.getValor} ya esta en uso, por favor cargue otro`
+      );
   }
 }

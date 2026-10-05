@@ -10,8 +10,8 @@ export * from './seccion.service';
 export * from './registro-dilg.adapter';
 
 export const MOTOR_FORMATOS_SERVICES = [
-    FormatoEngineService,
-    DiligenciamientoService,
-    EjecucionMantService,
-    SeccionesService
-]
+  FormatoEngineService,
+  DiligenciamientoService,
+  EjecucionMantService,
+  SeccionesService,
+];

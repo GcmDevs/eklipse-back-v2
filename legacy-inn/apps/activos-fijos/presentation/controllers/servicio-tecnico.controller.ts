@@ -19,7 +19,7 @@ import {
 } from '@activos-fijos/infrastructure/repositories';
 import { INN_AUTHORITIES } from '@authorities/inventario';
 import { nonEditFileName } from '@common/presentation/helpers';
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { CreateSoliSerTecPayload } from '@activos-fijos/application/payloads';
 import { Authorities, CommonGuards } from '@common/presentation/decorators';

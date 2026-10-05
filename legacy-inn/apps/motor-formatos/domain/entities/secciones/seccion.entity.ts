@@ -5,28 +5,27 @@ export class SeccionPlantillaFmt {
   private constructor(
     private readonly id: Id,
     private nombre: string,
-    private componentes: ComponenteSchema[],
+    private componentes: ComponenteSchema[]
   ) {}
 
-  static create(data: {
-    nombre:      string;
-    componentes: ComponenteSchema[];
-  }): SeccionPlantillaFmt {
+  static create(data: { nombre: string; componentes: ComponenteSchema[] }): SeccionPlantillaFmt {
     SeccionPlantillaFmt.validate(data.nombre, data.componentes);
     return new SeccionPlantillaFmt(new Id(), data.nombre, data.componentes);
   }
 
-  static rebuild(
-    id:           number,
-    nombre:       string,
-    componentes:  ComponenteSchema[],
-  ): SeccionPlantillaFmt {
+  static rebuild(id: number, nombre: string, componentes: ComponenteSchema[]): SeccionPlantillaFmt {
     return new SeccionPlantillaFmt(new Id(id), nombre, componentes);
   }
 
-  get getId():         Id              { return this.id; }
-  get getNombre():     string          { return this.nombre; }
-  get getComponentes(): ComponenteSchema[] { return [...this.componentes]; }
+  get getId(): Id {
+    return this.id;
+  }
+  get getNombre(): string {
+    return this.nombre;
+  }
+  get getComponentes(): ComponenteSchema[] {
+    return [...this.componentes];
+  }
 
   updateNombre(nombre: string): void {
     SeccionPlantillaFmt.validateNombre(nombre);

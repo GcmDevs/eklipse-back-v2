@@ -1,13 +1,12 @@
-import { EntidadTipoAnexo } from "@common/domain/enums";
-import { TypeOrmTransactionContext } from "@common/infrastructure/persistence/transactional";
-import { BaseSource } from "@common/infrastructure/services";
-import { Anexo } from "@core/media/domain/entities";
-import { AnexoRead } from "@core/media/domain/read/media.read";
-import { AnexoRepository } from "@core/media/domain/repositories";
-import { AnexoGroupKey, AnexoLookupItem, makeAnexoGroupKey } from "@core/media/domain/types";
-import { AnexoOrm } from "@orm/cor";
-import { AnexoMapper } from "../../mappers";
-
+import { EntidadTipoAnexo } from '@common/domain/enums';
+import { TypeOrmTransactionContext } from '@common/infrastructure/persistence/transactional';
+import { BaseSource } from '@common/infrastructure/services';
+import { Anexo } from '@core/media/domain/entities';
+import { AnexoRead } from '@core/media/domain/read/media.read';
+import { AnexoRepository } from '@core/media/domain/repositories';
+import { AnexoGroupKey, AnexoLookupItem, makeAnexoGroupKey } from '@core/media/domain/types';
+import { AnexoOrm } from '@orm/cor';
+import { AnexoMapper } from '../../mappers';
 
 export class TypeOrmAnexoRepository extends BaseSource implements AnexoRepository {
   private get repository() {
@@ -24,18 +23,13 @@ export class TypeOrmAnexoRepository extends BaseSource implements AnexoRepositor
     await this.repository.save(orms);
   }
 
-  async countByEntidad(
-    tipo: EntidadTipoAnexo,
-    entidadId: number,
-  ): Promise<number> {
+  async countByEntidad(tipo: EntidadTipoAnexo, entidadId: number): Promise<number> {
     return this.repository.count({
       where: { entidadTipo: tipo, entidadId },
     });
   }
 
-  async findGroupedByEntidad(
-    items: AnexoLookupItem[],
-  ): Promise<Map<AnexoGroupKey, AnexoRead[]>> {
+  async findGroupedByEntidad(items: AnexoLookupItem[]): Promise<Map<AnexoGroupKey, AnexoRead[]>> {
     const result = new Map<AnexoGroupKey, AnexoRead[]>();
     if (!items.length) return result;
 
@@ -46,7 +40,8 @@ export class TypeOrmAnexoRepository extends BaseSource implements AnexoRepositor
       byTipo.set(item.entidadTipo, existing);
     }
 
-    const qb = this.repository.createQueryBuilder('a')
+    const qb = this.repository
+      .createQueryBuilder('a')
       .orderBy('a.orden', 'ASC')
       .leftJoinAndSelect('a.archivo', 'archivo');
 

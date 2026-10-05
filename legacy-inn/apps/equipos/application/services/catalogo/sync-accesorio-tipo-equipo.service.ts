@@ -1,7 +1,13 @@
 import { TRANSACTION_MANAGER, TransactionManager } from '@common/application/services';
 import { BadInputError, ResourceNotFoundError } from '@common/domain/errors';
 import { AuditTipoEquipo } from '@equipos/domain/entities/catalogo/audit-tipo-equipo.entity';
-import { AccionSincronizacionAccesorio, AlcanceSincronizacion, EstadoAccesorioUnidad, OrigenCambio, TipoAuditTipoEquipo } from '@equipos/domain/enums';
+import {
+  AccionSincronizacionAccesorio,
+  AlcanceSincronizacion,
+  EstadoAccesorioUnidad,
+  OrigenCambio,
+  TipoAuditTipoEquipo,
+} from '@equipos/domain/enums';
 import { TipoEventoAuditEquipo } from '@equipos/domain/enums/tipos-audit-equipo.enum';
 import { AccesorioTipoEquipoRead } from '@equipos/domain/read';
 import { IAccesorioUnidadRepository } from '@equipos/domain/repositories/accesorio-unidad.repository';
@@ -49,12 +55,12 @@ export class SyncAccesorioTipoEquipoService {
     private readonly equiposRepository: EquiposRepository,
     private readonly eventoService: AuditEquipoService,
     @Inject(TRANSACTION_MANAGER)
-    private readonly txManager: TransactionManager,
-  ) { }
+    private readonly txManager: TransactionManager
+  ) {}
 
   async preview(
     tipoEquipoId: number,
-    accesorioEstandarId: number,
+    accesorioEstandarId: number
   ): Promise<PreviewSincronizacionAccesorioRead> {
     await this.resolveAccesorioEstandar(tipoEquipoId, accesorioEstandarId);
 
@@ -63,7 +69,8 @@ export class SyncAccesorioTipoEquipoService {
       this.equiposRepository.findIdsByTipoEquipoIdSinActividad(tipoEquipoId),
     ]);
     const conAccesorio = await this.accesorioUnidadRepository.findEquipoIdsConAccesorio(
-      accesorioEstandarId, todos,
+      accesorioEstandarId,
+      todos
     );
 
     return {
@@ -74,13 +81,17 @@ export class SyncAccesorioTipoEquipoService {
   }
 
   async execute(input: SincronizarAccesorioInput): Promise<void> {
-    const estandar = await this.resolveAccesorioEstandar(input.tipoEquipoId, input.accesorioEstandarId);
+    const estandar = await this.resolveAccesorioEstandar(
+      input.tipoEquipoId,
+      input.accesorioEstandarId
+    );
     const parteSnap = estandar.parteSnap;
 
     const equipoIds = await this.resolveEquipoIds(input);
-    const auditTipo = input.accion === AccionSincronizacionAccesorio.AGREGAR
-      ? TipoAuditTipoEquipo.ACCESORIO_AGREGADO
-      : TipoAuditTipoEquipo.ACCESORIO_DESCONTINUADO;
+    const auditTipo =
+      input.accion === AccionSincronizacionAccesorio.AGREGAR
+        ? TipoAuditTipoEquipo.ACCESORIO_AGREGADO
+        : TipoAuditTipoEquipo.ACCESORIO_DESCONTINUADO;
 
     const correlationOid = generateCorrelationId();
     await this.txManager.transactional(async () => {
@@ -88,7 +99,8 @@ export class SyncAccesorioTipoEquipoService {
         tipoEquipoId: input.tipoEquipoId,
         tipo: auditTipo,
         campo: null,
-        valorAnterior: input.accion === AccionSincronizacionAccesorio.DESCONTINUAR ? parteSnap : null,
+        valorAnterior:
+          input.accion === AccionSincronizacionAccesorio.DESCONTINUAR ? parteSnap : null,
         valorNuevo: input.accion === AccionSincronizacionAccesorio.AGREGAR ? parteSnap : null,
         sincronizo: equipoIds.length > 0,
         usuarioId: input.usuarioId,
@@ -102,9 +114,10 @@ export class SyncAccesorioTipoEquipoService {
 
       if (!equipoIds.length) return;
 
-      const equiposAfectados = input.accion === AccionSincronizacionAccesorio.AGREGAR
-        ? await this.applyAgregar(input.accesorioEstandarId, parteSnap, equipoIds)
-        : await this.applyDescontinuar(input.accesorioEstandarId, equipoIds);
+      const equiposAfectados =
+        input.accion === AccionSincronizacionAccesorio.AGREGAR
+          ? await this.applyAgregar(input.accesorioEstandarId, parteSnap, equipoIds)
+          : await this.applyDescontinuar(input.accesorioEstandarId, equipoIds);
 
       let secuencia = 1;
       for (const equipoId of equiposAfectados) {
@@ -132,15 +145,18 @@ export class SyncAccesorioTipoEquipoService {
   private async applyAgregar(
     accesorioEstandarId: number,
     parteSnap: string,
-    equipoIds: number[],
+    equipoIds: number[]
   ): Promise<number[]> {
     const alreadyHas = new Set(
-      await this.accesorioUnidadRepository.findEquipoIdsConAccesorio(accesorioEstandarId, equipoIds),
+      await this.accesorioUnidadRepository.findEquipoIdsConAccesorio(accesorioEstandarId, equipoIds)
     );
     const target = equipoIds.filter(id => !alreadyHas.has(id));
     for (const equipoId of target) {
       await this.accesorioUnidadRepository.createFromEstandar(
-        equipoId, accesorioEstandarId, parteSnap, EstadoAccesorioUnidad.PENDIENTE,
+        equipoId,
+        accesorioEstandarId,
+        parteSnap,
+        EstadoAccesorioUnidad.PENDIENTE
       );
     }
     return target;
@@ -148,10 +164,11 @@ export class SyncAccesorioTipoEquipoService {
 
   private async applyDescontinuar(
     accesorioEstandarId: number,
-    equipoIds: number[],
+    equipoIds: number[]
   ): Promise<number[]> {
     const unidades = await this.accesorioUnidadRepository.findByAccesorioEstandarId(
-      accesorioEstandarId, equipoIds,
+      accesorioEstandarId,
+      equipoIds
     );
     const afectados: number[] = [];
     for (const unidad of unidades) {
@@ -172,11 +189,14 @@ export class SyncAccesorioTipoEquipoService {
         if (!input.equipoIds?.length) {
           throw new BadInputError('Debe seleccionar al menos un equipo para el alcance MANUAL');
         }
-        const delTipo = new Set(await this.equiposRepository.findIdsByTipoEquipoId(input.tipoEquipoId));
+        const delTipo = new Set(
+          await this.equiposRepository.findIdsByTipoEquipoId(input.tipoEquipoId)
+        );
         const invalids = input.equipoIds.filter(id => !delTipo.has(id));
         if (invalids.length) {
           throw new BadInputError(
-            `Los equipos [${invalids.join(', ')}] no pertenecen al tipo de equipo ${input.tipoEquipoId}`);
+            `Los equipos [${invalids.join(', ')}] no pertenecen al tipo de equipo ${input.tipoEquipoId}`
+          );
         }
         return input.equipoIds;
       }
@@ -187,13 +207,13 @@ export class SyncAccesorioTipoEquipoService {
 
   private async resolveAccesorioEstandar(
     tipoEquipoId: number,
-    accesorioEstandarId: number,
+    accesorioEstandarId: number
   ): Promise<AccesorioTipoEquipoRead> {
     const accesorios = await this.accesorioEstandarRepository.findByTipoEquipoId(tipoEquipoId);
     const estandar = accesorios.find(acc => acc.id === accesorioEstandarId);
     if (!estandar) {
       throw new ResourceNotFoundError(
-        `Accesorio estandar con id: ${accesorioEstandarId} no encontrado para el tipo de equipo ${tipoEquipoId}`,
+        `Accesorio estandar con id: ${accesorioEstandarId} no encontrado para el tipo de equipo ${tipoEquipoId}`
       );
     }
     return estandar;

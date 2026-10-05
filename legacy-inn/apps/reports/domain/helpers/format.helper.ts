@@ -118,24 +118,21 @@ export function formatMedidaValor(medida?: any): string {
 }
 
 export function formatPeriodoTiempo(
-  periodo?: { valor?: number | null; unidad?: UnidadTiempo | null } | null,
+  periodo?: { valor?: number | null; unidad?: UnidadTiempo | null } | null
 ): string {
   if (!periodo || periodo.valor == null) return 'N/A';
 
   const unidadMap: Record<UnidadTiempo, string> = {
     [UnidadTiempo.ANIOS]: 'año(s)',
     [UnidadTiempo.MESES]: 'mes(es)',
-    [UnidadTiempo.SEMANAS]: 'semana(s)'
+    [UnidadTiempo.SEMANAS]: 'semana(s)',
   };
 
   const unidadTexto = periodo.unidad ? (unidadMap[periodo.unidad] ?? '') : '';
   return `${periodo.valor} ${unidadTexto}`.trim();
 }
 
-export function resolveContentDisposition(
-  download: string | undefined,
-  filename: string,
-): string {
+export function resolveContentDisposition(download: string | undefined, filename: string): string {
   const mode = download !== undefined ? 'attachment' : 'inline';
   return `${mode}; filename="${filename}"`;
 }

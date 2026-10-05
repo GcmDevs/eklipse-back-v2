@@ -6,17 +6,23 @@ import { AreaServicioOrm } from '@orm/gen';
 
 @Injectable()
 export class AreaService {
-  constructor(private readonly areaRepository: TypeOrmAreaRepository) { }
+  constructor(private readonly areaRepository: TypeOrmAreaRepository) {}
 
   public async getOneById(id: number): Promise<AreaServicioOrm> {
     return await this.findOneById(id);
   }
 
-  public async getSuggestionsByNombre(nombreParcial: string, limit?: number): Promise<AreaServicioOrm[]> {
+  public async getSuggestionsByNombre(
+    nombreParcial: string,
+    limit?: number
+  ): Promise<AreaServicioOrm[]> {
     return await this.areaRepository.findSuggestionsByNombre(nombreParcial, limit);
   }
 
-  public async findOneById(id: number, options: FindThrowOptions = new FindThrowOptions()): Promise<AreaServicioOrm | null> {
+  public async findOneById(
+    id: number,
+    options: FindThrowOptions = new FindThrowOptions()
+  ): Promise<AreaServicioOrm | null> {
     const areaFound = await this.areaRepository.findById(id);
     if (!areaFound && options.throwIfNotFound) {
       throw new ResourceNotFoundError(`Area o dependecia con id: ${id} no encontrada.`);

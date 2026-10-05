@@ -55,7 +55,7 @@ export class SolicitudCompraCrudController {
     try {
       const response = await this._crud.fetchComplemento(solicitudId, contextCode);
       return response;
-    } catch (error:any) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     }
   }

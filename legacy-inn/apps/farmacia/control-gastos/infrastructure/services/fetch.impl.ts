@@ -4,7 +4,7 @@ import { GCM_CONTEXTS } from '@common/domain/types';
 import { BaseSource } from '@common/infrastructure/services';
 import { ControlGastoHistorialOrm, ControlGastoOrm } from '@orm/inn/farmacia/control-gastos';
 import { ENVIRONMENTS } from 'src/app.environments';
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { orderBy } from 'lodash';
 import { IngresoOrm } from '@orm/gen';
 import { INN_AUTHORITIES } from '@authorities/inventario';

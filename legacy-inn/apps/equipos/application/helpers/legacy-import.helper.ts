@@ -4,10 +4,7 @@ import { GeneralActivoLegacyView } from '@equipos/infrastructure/persistence/vie
 import { ResponseMarcaDto, ResponseModeloDto } from '@equipos/presentation/dto/marca.dto';
 import { LegacyImportSuggestionsDto } from '@equipos/presentation/dto/equipo-legacy.dto';
 
-export const CAMPOS_REQUERIDOS_USUARIO_BASE = [
-  'tipoEquipoId',
-  'compraId',
-] as const;
+export const CAMPOS_REQUERIDOS_USUARIO_BASE = ['tipoEquipoId', 'compraId'] as const;
 
 export function buildLocalizacionLegacy(view: GeneralActivoLegacyView): string {
   const parts = [view.departamentoNombre, view.areaNombre].filter(Boolean);
@@ -15,7 +12,7 @@ export function buildLocalizacionLegacy(view: GeneralActivoLegacyView): string {
 }
 
 export function buildPeriocidadMantenimientoLegacy(
-  tiempoMantenimiento?: number | null,
+  tiempoMantenimiento?: number | null
 ): { valor: number; unidad: UnidadTiempo } | null {
   if (tiempoMantenimiento == null || tiempoMantenimiento <= 0) {
     return null;
@@ -25,7 +22,7 @@ export function buildPeriocidadMantenimientoLegacy(
 
 export function resolveAplicaGarantiaLegacy(
   legacy: GeneralActivoLegacyView,
-  fechaVencimientoUsuario?: Date | null,
+  fechaVencimientoUsuario?: Date | null
 ): boolean {
   if (fechaVencimientoUsuario != null) {
     return !!fechaVencimientoUsuario;
@@ -46,7 +43,7 @@ export function mapMarcaToResponse(marca: Marca | null): ResponseMarcaDto | null
 
 export function mapModeloToResponse(
   modelo: Modelo | null,
-  marca: Marca | null,
+  marca: Marca | null
 ): ResponseModeloDto | null {
   if (!modelo) return null;
   return {
@@ -64,7 +61,7 @@ export function buildCamposRequeridosUsuario(): string[] {
 
 export function buildLegacyImportSuggestions(
   legacy: GeneralActivoLegacyView,
-  _modelo: Modelo | null,
+  _modelo: Modelo | null
 ): LegacyImportSuggestionsDto {
   const periocidad = buildPeriocidadMantenimientoLegacy(legacy.tiempoMantenimiento);
 
@@ -92,9 +89,7 @@ export function buildLegacyImportSuggestions(
       distribuidorLegacy: legacy.distribuidor ?? null,
       observaciones: legacy.observaciones ?? null,
     },
-    planMantenimiento: periocidad
-      ? { plan: { periocidad } }
-      : null,
+    planMantenimiento: periocidad ? { plan: { periocidad } } : null,
     planCalibracion: null,
     legacyReferencia: {
       generalActivoId: legacy.id,

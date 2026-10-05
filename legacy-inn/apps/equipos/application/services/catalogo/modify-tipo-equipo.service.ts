@@ -6,7 +6,11 @@ import { TipoEventoAuditEquipo } from '@equipos/domain/enums/tipos-audit-equipo.
 import { AuditTipoEquipoRepository } from '@equipos/domain/repositories/catalogo/audit-tipo-equipo.repository';
 import { TipoEquipoRepository } from '@equipos/domain/repositories/catalogo/tipo-equipo.repository';
 import { EquiposRepository } from '@equipos/domain/repositories/equipo.repository';
-import { AUDIT_TIPO_EQUIPO_REPOSITORY, EQUIPOS_REPOSITORY, TIPO_EQUIPO_REPOSITORY } from '@equipos/domain/repositories/tokens';
+import {
+  AUDIT_TIPO_EQUIPO_REPOSITORY,
+  EQUIPOS_REPOSITORY,
+  TIPO_EQUIPO_REPOSITORY,
+} from '@equipos/domain/repositories/tokens';
 import { Inject, Injectable } from '@nestjs/common';
 import { REFERENCIA_ENTIDAD } from '../../constants';
 import { generateCorrelationId } from '../../helpers';
@@ -38,15 +42,16 @@ export class ModifyTipoEquipoService {
     private readonly equiposRepository: EquiposRepository,
     private readonly eventoService: AuditEquipoService,
     @Inject(TRANSACTION_MANAGER)
-    private readonly txManager: TransactionManager,
-  ) { }
+    private readonly txManager: TransactionManager
+  ) {}
 
   async execute(input: ModifyTipoEquipoInput): Promise<void> {
     const tipoEquipo = await this.tipoEquipoRepository.findById(input.tipoEquipoId);
-    if (!tipoEquipo) throw new ResourceNotFoundError(`TipoEquipo con id: ${input.tipoEquipoId} no encontrado`);
+    if (!tipoEquipo)
+      throw new ResourceNotFoundError(`TipoEquipo con id: ${input.tipoEquipoId} no encontrado`);
 
     const changes = input.cambios.filter(
-      cambio => (cambio.valorAnterior ?? null) !== (cambio.valorNuevo ?? null),
+      cambio => (cambio.valorAnterior ?? null) !== (cambio.valorNuevo ?? null)
     );
     if (!changes.length) return;
 

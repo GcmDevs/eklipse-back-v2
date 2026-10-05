@@ -22,7 +22,7 @@ export class CompraMapper {
       orm.distribuidor?.id,
       orm.fabricanteSnap ?? orm.fabricante?.nombre,
       orm.distribuidorSnap ?? orm.distribuidor?.nombre,
-      orm.observaciones,
+      orm.observaciones
     );
   }
 
@@ -66,7 +66,7 @@ export class CompraMapper {
       fechaFabricacion: orm.fechaFabricacion,
       aplicaGarantia: orm.aplicaGarantia,
       fechVencGarantia: orm.fechVencGarantia,
-      documentos: (orm.documentos ?? []).map((d) => ({
+      documentos: (orm.documentos ?? []).map(d => ({
         id: d.id,
         tipoEquipoId: d.tipoEquipo?.id ?? orm.id,
         tipoDocumentoId: d.tipoDocumento?.id,

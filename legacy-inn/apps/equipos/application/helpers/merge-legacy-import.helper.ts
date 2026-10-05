@@ -29,48 +29,52 @@ export interface LegacyImportMergedPayload {
 export function mergeLegacyImportPayload(
   numeroPlaca: string,
   suggestions: LegacyImportSuggestionsDto,
-  complemento: ComplementoImportLegacyDto,
+  complemento: ComplementoImportLegacyDto
 ): LegacyImportMergedPayload {
   const merger = new LegacyDataMerger();
 
   const merged: LegacyImportMergedPayload = {
     nombre: merger.getValue(complemento.nombre, suggestions.nombre, 'nombre', true)!,
     codigo: merger.getValue(complemento.codigo, suggestions.codigo, 'codigo', true)!,
-    numeroSerie: merger.getValue(complemento.numeroSerie, suggestions.numeroSerie, 'numeroSerie', true)!,
+    numeroSerie: merger.getValue(
+      complemento.numeroSerie,
+      suggestions.numeroSerie,
+      'numeroSerie',
+      true
+    )!,
     numeroPlaca,
     numeroInventario: merger.getValue(
       complemento.numeroInventario,
       suggestions.numeroInventario,
       'numeroInventario',
-      false,
+      false
     ),
     tipoEquipoId: complemento.tipoEquipoId,
     compraId: complemento.compraId,
-    fechaPuestaFuncionamiento: merger.getValue(
-      complemento.fechaPuestaFuncionamiento,
-      suggestions.fechaPuestaFuncionamiento,
-      'fechaPuestaFuncionamiento',
-      false,
-    ) ?? undefined,
-    observaciones: merger.getValue(
-      complemento.observaciones,
-      suggestions.observaciones,
-      'observaciones',
-      false,
-    ) ?? undefined,
+    fechaPuestaFuncionamiento:
+      merger.getValue(
+        complemento.fechaPuestaFuncionamiento,
+        suggestions.fechaPuestaFuncionamiento,
+        'fechaPuestaFuncionamiento',
+        false
+      ) ?? undefined,
+    observaciones:
+      merger.getValue(
+        complemento.observaciones,
+        suggestions.observaciones,
+        'observaciones',
+        false
+      ) ?? undefined,
     responsableId: merger.getValue(
       complemento.responsableId,
       suggestions.responsableId,
       'responsableId',
-      true,
+      true
     )!,
     estado: merger.getValue(complemento.estado, suggestions.estado, 'estado', true)!,
-    localizacion: merger.getValue(
-      complemento.localizacion,
-      suggestions.localizacion,
-      'localizacion',
-      false,
-    ) ?? undefined,
+    localizacion:
+      merger.getValue(complemento.localizacion, suggestions.localizacion, 'localizacion', false) ??
+      undefined,
     planMantenimiento: complemento.planMantenimiento ?? suggestions.planMantenimiento ?? undefined,
     planCalibracion: complemento.planCalibracion ?? suggestions.planCalibracion ?? undefined,
     registroFotografico: complemento.registroFotografico,

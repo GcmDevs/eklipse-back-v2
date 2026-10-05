@@ -1,10 +1,10 @@
-import { BaseApiResponse } from "@common/domain/types";
-import { BaseShelteredController } from "@common/presentation/controllers/base-sheltered.controller";
-import { ProveedorService } from "@core/terceros/application/services";
-import { ProveedorMapper } from "@core/terceros/infrastructure/mappers";
-import { Controller, Get, Param, ParseIntPipe, Query } from "@nestjs/common";
-import { ResponseProveedorDto } from "../dto";
-import { FilterSearchLimitedDto } from "@common/presentation/dto";
+import { BaseApiResponse } from '@common/domain/types';
+import { BaseShelteredController } from '@common/presentation/controllers/base-sheltered.controller';
+import { ProveedorService } from '@core/terceros/application/services';
+import { ProveedorMapper } from '@core/terceros/infrastructure/mappers';
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
+import { ResponseProveedorDto } from '../dto';
+import { FilterSearchLimitedDto } from '@common/presentation/dto';
 
 @Controller('v4/inn/proveedores')
 export class ProveedorController extends BaseShelteredController {

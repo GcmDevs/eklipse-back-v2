@@ -28,10 +28,7 @@ export class TypeOrmEquiposReportListRepository extends BaseSource {
       .leftJoinAndSelect('equipo.compra', 'compra');
   }
 
-  private applyFiltros(
-    qb: SelectQueryBuilder<EquipoOrm>,
-    filtros: EquiposExportFilters,
-  ): void {
+  private applyFiltros(qb: SelectQueryBuilder<EquipoOrm>, filtros: EquiposExportFilters): void {
     if (this.hasIds(filtros.tipoActivoIds)) {
       qb.andWhere('tipoActivo.id IN (:...tipoActivoIds)', {
         tipoActivoIds: filtros.tipoActivoIds,

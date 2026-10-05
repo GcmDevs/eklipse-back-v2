@@ -1,4 +1,4 @@
-import { BadRequestException } from "@nestjs/common";
+import { BadRequestException } from '@nestjs/common';
 
 export class LegacyDataMerger {
   private missingFields: string[] = [];
@@ -24,12 +24,11 @@ export class LegacyDataMerger {
     return null;
   }
 
-
   validateAndThrow(): void {
     if (this.missingFields.length > 0) {
       throw new BadRequestException(
         `Faltan los siguientes campos obligatorios: ${this.missingFields.join(', ')}. ` +
-        `Estos campos no están en el legacy ni fueron proporcionados por el usuario.`
+          `Estos campos no están en el legacy ni fueron proporcionados por el usuario.`
       );
     }
   }

@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { FILE_LOCATIONS, IVA } from '@common/application/constants';
+import { IVA } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { CotizacionOrm, DetalleCotizacionOrm, SolicitudOrm } from '@orm/inn/central-compras';
 import { ESTADOS, ESTADOS_ESPECIFICOS } from '@ctypes/inn/central-compras/solicitudes';
 import { CreateCotizacionDto } from '@inn/central-compras/presentation/dtos';

@@ -16,7 +16,7 @@ export class AccesorioUnidadController extends BaseShelteredController {
 
   @Get()
   async getByEquipo(
-    @Param('equipoId', ParseIntPipe) equipoId: number,
+    @Param('equipoId', ParseIntPipe) equipoId: number
   ): Promise<BaseApiResponse<AccesorioUnidadRead[]>> {
     const list = await this.service.findByEquipoId(equipoId);
     return { data: list };
@@ -26,7 +26,7 @@ export class AccesorioUnidadController extends BaseShelteredController {
   async changeEstado(
     @Param('equipoId', ParseIntPipe) equipoId: number,
     @Param('id', ParseIntPipe) id: number,
-    @Body() data: ChangeEstadoAccesorioUnidadDto,
+    @Body() data: ChangeEstadoAccesorioUnidadDto
   ): Promise<BaseApiResponse<AccesorioUnidadRead>> {
     const entity = await this.service.changeEstado(equipoId, id, data.estado);
     return { data: entity };
@@ -36,7 +36,7 @@ export class AccesorioUnidadController extends BaseShelteredController {
   async update(
     @Param('equipoId', ParseIntPipe) equipoId: number,
     @Param('id', ParseIntPipe) id: number,
-    @Body() data: UpdateObservacionesAccesorioUnidadDto,
+    @Body() data: UpdateObservacionesAccesorioUnidadDto
   ): Promise<BaseApiResponse<AccesorioUnidadRead>> {
     const entity = await this.service.update(equipoId, id, data.observaciones);
     return { data: entity };
@@ -45,7 +45,7 @@ export class AccesorioUnidadController extends BaseShelteredController {
   @Patch('/:id/descontinuar')
   async descontinuar(
     @Param('equipoId', ParseIntPipe) equipoId: number,
-    @Param('id', ParseIntPipe) id: number,
+    @Param('id', ParseIntPipe) id: number
   ): Promise<BaseApiResponse<AccesorioUnidadRead>> {
     const entity = await this.service.discontinue(equipoId, id);
     return { data: entity };

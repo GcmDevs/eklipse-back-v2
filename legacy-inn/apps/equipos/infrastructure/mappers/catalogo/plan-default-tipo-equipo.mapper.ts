@@ -5,10 +5,18 @@ import { PlanDefaultTipoEquipoOrm } from '@orm/inn/equipos/catalogo/plan-default
 export class PlanDefaultTipoEquipoMapper {
   static toDomain(orm: PlanDefaultTipoEquipoOrm): PlanDefaultTipoEquipo {
     return PlanDefaultTipoEquipo.rebuild(
-      orm.id, orm.tipoEquipo?.id, orm.tipo,
-      orm.createdAt, orm.updatedAt,
-      orm.periocidad?.valor, orm.periocidad?.unidad, orm.diasAntNotif,
-      orm.realizaExterno, orm.formato?.id, orm.observaciones, orm.activo ?? true,
+      orm.id,
+      orm.tipoEquipo?.id,
+      orm.tipo,
+      orm.createdAt,
+      orm.updatedAt,
+      orm.periocidad?.valor,
+      orm.periocidad?.unidad,
+      orm.diasAntNotif,
+      orm.realizaExterno,
+      orm.formato?.id,
+      orm.observaciones,
+      orm.activo ?? true
     );
   }
 
@@ -18,7 +26,10 @@ export class PlanDefaultTipoEquipoMapper {
     orm.tipoEquipo = { id: domain.getTipoEquipoId.getValor } as any;
     orm.tipo = domain.getTipo;
     if (domain.getPeriocidadValor !== undefined || domain.getPeriocidadUnidad !== undefined) {
-      orm.periocidad = { valor: domain.getPeriocidadValor, unidad: domain.getPeriocidadUnidad as any };
+      orm.periocidad = {
+        valor: domain.getPeriocidadValor,
+        unidad: domain.getPeriocidadUnidad as any,
+      };
     }
     orm.diasAntNotif = domain.getDiasAntNotif;
     orm.realizaExterno = domain.getRealizaExterno ?? false;
@@ -35,9 +46,10 @@ export class PlanDefaultTipoEquipoMapper {
       id: orm.id,
       tipoEquipoId: orm.tipoEquipo?.id,
       tipo: orm.tipo,
-      periocidad: orm.periocidad?.valor != null && orm.periocidad?.unidad
-        ? { valor: orm.periocidad.valor, unidad: orm.periocidad.unidad }
-        : null,
+      periocidad:
+        orm.periocidad?.valor != null && orm.periocidad?.unidad
+          ? { valor: orm.periocidad.valor, unidad: orm.periocidad.unidad }
+          : null,
       diasAntNotif: orm.diasAntNotif,
       realizaExterno: orm.realizaExterno,
       formatoId: orm.formato?.id,

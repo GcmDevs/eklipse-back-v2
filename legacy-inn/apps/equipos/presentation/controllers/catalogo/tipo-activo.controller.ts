@@ -2,7 +2,11 @@ import { BaseApiResponse } from '@common/domain/types';
 import { BaseShelteredController } from '@common/presentation/controllers';
 import { TipoActivoService } from '@equipos/application';
 import { TipoActivoRead } from '@equipos/domain/read';
-import { CreateTipoActivoDto, FilterTipoActivoDto, UpdateTipoActivoDto } from '@equipos/presentation/dto';
+import {
+  CreateTipoActivoDto,
+  FilterTipoActivoDto,
+  UpdateTipoActivoDto,
+} from '@equipos/presentation/dto';
 import { Body, Controller, Get, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
 
 @Controller('/v4/inn/tipos-activo')
@@ -26,7 +30,7 @@ export class TipoActivoController extends BaseShelteredController {
   @Patch('/:id')
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() data: UpdateTipoActivoDto,
+    @Body() data: UpdateTipoActivoDto
   ): Promise<BaseApiResponse<TipoActivoRead>> {
     const entity = await this.service.update(id, data);
     return { data: entity };

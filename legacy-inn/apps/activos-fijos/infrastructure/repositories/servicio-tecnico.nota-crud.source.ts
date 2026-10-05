@@ -6,7 +6,8 @@ import {
   UsuarioTipoServicioTecnicoOrm,
 } from '@orm/inn/activos-fijos/servicio-tecnico';
 import { sstNotaOrmToAfnNotaSoliSerTecRes } from '../factories';
-import { FILE_LOCATIONS, TABLE_NAMES } from '@common/application/constants';
+import { TABLE_NAMES } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { dataToNuevaEntidadRes } from '@common/presentation/factories';
 import { CreateNotaSerTecPayload } from '@activos-fijos/application/payloads';
 import { AfnNotaSoliSerTecRes } from '@activos-fijos/application/responses';

@@ -1,5 +1,5 @@
-import { Id, normalizeUppercaseText } from "@common/domain/value-objects";
-import { TipoAdquisicion } from "../enums";
+import { Id, normalizeUppercaseText } from '@common/domain/value-objects';
+import { TipoAdquisicion } from '../enums';
 
 export class Compra {
   private constructor(
@@ -20,7 +20,7 @@ export class Compra {
     private distribuidorSnap: string | undefined,
     private observaciones: string | undefined,
     private readonly createdAt: Date,
-    private updatedAt: Date,
+    private updatedAt: Date
   ) {}
 
   static create(
@@ -38,7 +38,7 @@ export class Compra {
     distribuidorId?: number,
     fabricanteSnap?: string,
     distribuidorSnap?: string,
-    observaciones?: string,
+    observaciones?: string
   ): Compra {
     const now = new Date();
     return new Compra(
@@ -47,14 +47,19 @@ export class Compra {
       numFactura ? normalizeUppercaseText(numFactura) : undefined,
       fechaFactura,
       fechaCompra,
-      fechaFabricacion, tipoAdquisicion, aplicaGarantia ?? false,
-      fechVencGarantia, new Id(proveedorId),
+      fechaFabricacion,
+      tipoAdquisicion,
+      aplicaGarantia ?? false,
+      fechVencGarantia,
+      new Id(proveedorId),
       fabricanteId ? new Id(fabricanteId) : undefined,
       distribuidorId ? new Id(distribuidorId) : undefined,
       normalizeUppercaseText(proveedorSnap),
       normalizeUppercaseText(fabricanteSnap ?? proveedorSnap),
       distribuidorSnap ? normalizeUppercaseText(distribuidorSnap) : undefined,
-      observaciones, now, now,
+      observaciones,
+      now,
+      now
     );
   }
 
@@ -76,18 +81,27 @@ export class Compra {
     distribuidorId?: number,
     fabricanteSnap?: string,
     distribuidorSnap?: string,
-    observaciones?: string,
+    observaciones?: string
   ): Compra {
     return new Compra(
-      new Id(id), codigo, numFactura, fechaFactura, fechaCompra,
-      fechaFabricacion, tipoAdquisicion, aplicaGarantia ?? false,
-      fechVencGarantia, new Id(proveedorId),
+      new Id(id),
+      codigo,
+      numFactura,
+      fechaFactura,
+      fechaCompra,
+      fechaFabricacion,
+      tipoAdquisicion,
+      aplicaGarantia ?? false,
+      fechVencGarantia,
+      new Id(proveedorId),
       fabricanteId ? new Id(fabricanteId) : undefined,
       distribuidorId ? new Id(distribuidorId) : undefined,
       proveedorSnap,
       fabricanteSnap ?? proveedorSnap,
       distribuidorSnap,
-      observaciones, createdAt, updatedAt,
+      observaciones,
+      createdAt,
+      updatedAt
     );
   }
 
@@ -121,8 +135,10 @@ export class Compra {
     if (data.distribuidorId !== undefined) {
       this.distribuidorId = data.distribuidorId != null ? new Id(data.distribuidorId) : undefined;
     }
-    if (data.proveedorSnap !== undefined) this.proveedorSnap = normalizeUppercaseText(data.proveedorSnap);
-    if (data.fabricanteSnap !== undefined) this.fabricanteSnap = normalizeUppercaseText(data.fabricanteSnap);
+    if (data.proveedorSnap !== undefined)
+      this.proveedorSnap = normalizeUppercaseText(data.proveedorSnap);
+    if (data.fabricanteSnap !== undefined)
+      this.fabricanteSnap = normalizeUppercaseText(data.fabricanteSnap);
     if (data.distribuidorSnap !== undefined) {
       this.distribuidorSnap = data.distribuidorSnap
         ? normalizeUppercaseText(data.distribuidorSnap)
@@ -137,22 +153,58 @@ export class Compra {
     return this.fechVencGarantia.getTime() >= Date.now();
   }
 
-  get getId(): Id { return this.id; }
-  get getCodigo(): string { return this.codigo; }
-  get getNumFactura(): string | undefined { return this.numFactura; }
-  get getFechaFactura(): Date | undefined { return this.fechaFactura; }
-  get getFechaCompra(): Date { return this.fechaCompra; }
-  get getFechaFabricacion(): Date | undefined { return this.fechaFabricacion; }
-  get getTipoAdquisicion(): TipoAdquisicion { return this.tipoAdquisicion; }
-  get getAplicaGarantia(): boolean { return this.aplicaGarantia; }
-  get getFechVencGarantia(): Date | undefined { return this.fechVencGarantia; }
-  get getProveedorId(): Id { return this.proveedorId; }
-  get getFabricanteId(): Id | undefined { return this.fabricanteId; }
-  get getDistribuidorId(): Id | undefined { return this.distribuidorId; }
-  get getProveedorSnap(): string { return this.proveedorSnap; }
-  get getFabricanteSnap(): string | undefined { return this.fabricanteSnap; }
-  get getDistribuidorSnap(): string | undefined { return this.distribuidorSnap; }
-  get getObservaciones(): string | undefined { return this.observaciones; }
-  get getCreatedAt(): Date { return this.createdAt; }
-  get getUpdatedAt(): Date { return this.updatedAt; }
+  get getId(): Id {
+    return this.id;
+  }
+  get getCodigo(): string {
+    return this.codigo;
+  }
+  get getNumFactura(): string | undefined {
+    return this.numFactura;
+  }
+  get getFechaFactura(): Date | undefined {
+    return this.fechaFactura;
+  }
+  get getFechaCompra(): Date {
+    return this.fechaCompra;
+  }
+  get getFechaFabricacion(): Date | undefined {
+    return this.fechaFabricacion;
+  }
+  get getTipoAdquisicion(): TipoAdquisicion {
+    return this.tipoAdquisicion;
+  }
+  get getAplicaGarantia(): boolean {
+    return this.aplicaGarantia;
+  }
+  get getFechVencGarantia(): Date | undefined {
+    return this.fechVencGarantia;
+  }
+  get getProveedorId(): Id {
+    return this.proveedorId;
+  }
+  get getFabricanteId(): Id | undefined {
+    return this.fabricanteId;
+  }
+  get getDistribuidorId(): Id | undefined {
+    return this.distribuidorId;
+  }
+  get getProveedorSnap(): string {
+    return this.proveedorSnap;
+  }
+  get getFabricanteSnap(): string | undefined {
+    return this.fabricanteSnap;
+  }
+  get getDistribuidorSnap(): string | undefined {
+    return this.distribuidorSnap;
+  }
+  get getObservaciones(): string | undefined {
+    return this.observaciones;
+  }
+  get getCreatedAt(): Date {
+    return this.createdAt;
+  }
+  get getUpdatedAt(): Date {
+    return this.updatedAt;
+  }
 }

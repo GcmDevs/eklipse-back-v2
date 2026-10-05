@@ -1,4 +1,4 @@
-import { Id, normalizeUppercaseText } from "@common/domain/value-objects";
+import { Id, normalizeUppercaseText } from '@common/domain/value-objects';
 
 export class Modelo {
   private constructor(
@@ -15,7 +15,7 @@ export class Modelo {
       normalizeUppercaseText(nombre),
       new Id(marcaId),
       new Date(),
-      new Date(),
+      new Date()
     );
   }
 

@@ -186,12 +186,12 @@ export class CustomDevolucionSumpacImpl extends BaseSource {
           const estAbiert = i.estancias.filter(el => !el.fechaEgreso);
           if (estAbiert.length) i.estancias = estAbiert;
           i.estancias.map(e => {
-            delete e.ingresoId,
+            (delete e.ingresoId,
               delete e.esTrasladoAUrgencia,
               delete e.dias,
               delete e.valor,
               delete e.fechaIngreso,
-              delete e.CamaId;
+              delete e.CamaId);
           });
         }
       });

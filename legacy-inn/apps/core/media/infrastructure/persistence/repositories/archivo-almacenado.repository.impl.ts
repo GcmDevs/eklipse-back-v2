@@ -1,6 +1,4 @@
-import {
-    resolveRepository
-} from '@common/infrastructure/persistence/transactional';
+import { resolveRepository } from '@common/infrastructure/persistence/transactional';
 import { BaseSource } from '@common/infrastructure/services';
 import { ArchivoAlmacenado } from '@core/media/domain/entities';
 import { ArchivoAlmacenadoRepository } from '@core/media/domain/repositories';

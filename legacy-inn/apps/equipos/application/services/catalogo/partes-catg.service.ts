@@ -13,84 +13,89 @@ import { ParteCatgRepository } from '@equipos/domain/repositories/catalogo';
 import { Inject, Injectable } from '@nestjs/common';
 
 export type ResolveParteAccesorioInput = {
-    parteId?: number;
-    parte?: string;
+  parteId?: number;
+  parte?: string;
 };
 
 export type ResolvedParteAccesorio = {
-    parteId: number;
-    parteSnap: string;
+  parteId: number;
+  parteSnap: string;
 };
 
 @Injectable()
 export class PartesCatgService {
-    constructor(@Inject(PARTES_REPOSITORY)
-    private readonly partesCatgRepository: ParteCatgRepository) { }
+  constructor(
+    @Inject(PARTES_REPOSITORY)
+    private readonly partesCatgRepository: ParteCatgRepository
+  ) {}
 
-    async findOrCreate(parteNombre: string): Promise<ParteCatg> {
-        const parteSnap = normalizeParteCatgText(parteNombre);
-        if (!parteSnap) {
-            throw new BadInputError('El nombre de la parte es requerido');
-        }
-
-        const exacto = await this.partesCatgRepository.findByParte(parteSnap);
-        if (exacto) return exacto;
-
-        const similar = await this.findBestSimilarMatch(parteSnap);
-        if (similar) return similar;
-
-        return this.partesCatgRepository.save(ParteCatg.create(parteSnap));
+  async findOrCreate(parteNombre: string): Promise<ParteCatg> {
+    const parteSnap = normalizeParteCatgText(parteNombre);
+    if (!parteSnap) {
+      throw new BadInputError('El nombre de la parte es requerido');
     }
 
-    async resolveForAccesorio({ parteId, parte }: ResolveParteAccesorioInput): Promise<ResolvedParteAccesorio> {
-        const nombre = parte?.trim();
+    const exacto = await this.partesCatgRepository.findByParte(parteSnap);
+    if (exacto) return exacto;
 
-        if (nombre) {
-            const resolved = await this.findOrCreate(nombre);
-            return {
-                parteId: resolved.getId.getValor,
-                parteSnap: resolved.getParte,
-            };
-        }
+    const similar = await this.findBestSimilarMatch(parteSnap);
+    if (similar) return similar;
 
-        if (parteId != null && parteId > 0) {
-            const catalogo = await this.findById(parteId, new FindThrowOptions());
-            return {
-                parteId,
-                parteSnap: catalogo!.getParte,
-            };
-        }
+    return this.partesCatgRepository.save(ParteCatg.create(parteSnap));
+  }
 
-        throw new BadInputError('parteId o parte es requerido para el accesorio');
+  async resolveForAccesorio({
+    parteId,
+    parte,
+  }: ResolveParteAccesorioInput): Promise<ResolvedParteAccesorio> {
+    const nombre = parte?.trim();
+
+    if (nombre) {
+      const resolved = await this.findOrCreate(nombre);
+      return {
+        parteId: resolved.getId.getValor,
+        parteSnap: resolved.getParte,
+      };
     }
 
-    async findAll(limit?: number, parte?: string): Promise<ParteCatgRead[]> {
-        limit = limit ?? PaginationConstants.DEFAULT_PAGE_LIMIT;
-        return this.partesCatgRepository.findAllAndCount(limit, parte);
+    if (parteId != null && parteId > 0) {
+      const catalogo = await this.findById(parteId, new FindThrowOptions());
+      return {
+        parteId,
+        parteSnap: catalogo!.getParte,
+      };
     }
 
-    public async findById(
-        id: number,
-        options: FindThrowOptions = new FindThrowOptions()
-    ): Promise<ParteCatg | null> {
-        const parteFound = await this.partesCatgRepository.findById(id);
-        if (!parteFound && options.throwIfNotFound) {
-            throw new ResourceNotFoundError(`Parte con id: ${id} no encontrado`);
-        }
-        return parteFound;
-    }
+    throw new BadInputError('parteId o parte es requerido para el accesorio');
+  }
 
-    private async findBestSimilarMatch(parteSnap: string): Promise<ParteCatg | null> {
-        const candidates = await this.partesCatgRepository.findCandidatesForSimilarity(parteSnap);
-        let best: { entity: ParteCatg; score: number } | null = null;
+  async findAll(limit?: number, parte?: string): Promise<ParteCatgRead[]> {
+    limit = limit ?? PaginationConstants.DEFAULT_PAGE_LIMIT;
+    return this.partesCatgRepository.findAllAndCount(limit, parte);
+  }
 
-        for (const candidate of candidates) {
-            const score = parteCatgSimilarity(parteSnap, candidate.getParte);
-            if (score < PARTE_CATG_SIMILARITY_THRESHOLD) continue;
-            if (!best || score > best.score) {
-                best = { entity: candidate, score };
-            }
-        }
-        return best?.entity ?? null;
+  public async findById(
+    id: number,
+    options: FindThrowOptions = new FindThrowOptions()
+  ): Promise<ParteCatg | null> {
+    const parteFound = await this.partesCatgRepository.findById(id);
+    if (!parteFound && options.throwIfNotFound) {
+      throw new ResourceNotFoundError(`Parte con id: ${id} no encontrado`);
     }
+    return parteFound;
+  }
+
+  private async findBestSimilarMatch(parteSnap: string): Promise<ParteCatg | null> {
+    const candidates = await this.partesCatgRepository.findCandidatesForSimilarity(parteSnap);
+    let best: { entity: ParteCatg; score: number } | null = null;
+
+    for (const candidate of candidates) {
+      const score = parteCatgSimilarity(parteSnap, candidate.getParte);
+      if (score < PARTE_CATG_SIMILARITY_THRESHOLD) continue;
+      if (!best || score > best.score) {
+        best = { entity: candidate, score };
+      }
+    }
+    return best?.entity ?? null;
+  }
 }

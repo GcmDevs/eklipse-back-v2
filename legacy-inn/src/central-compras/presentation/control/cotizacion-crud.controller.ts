@@ -10,7 +10,7 @@ import { Authorities, CommonGuards } from '@common/presentation/decorators';
 import { INN_AUTHORITIES } from '@authorities/inventario';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { CotizacionCrudSource } from '@inn/central-compras/infrastructure/repos';
 import { editFileName } from '@common/presentation/helpers';
 import { OldCrearCotizacionDto } from '../dtos';

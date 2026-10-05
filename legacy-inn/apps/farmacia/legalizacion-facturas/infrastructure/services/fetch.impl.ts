@@ -4,7 +4,7 @@ import { Between, IsNull } from 'typeorm';
 import { BaseSource } from '@common/infrastructure/services';
 import { LegalizacionFacturaOrm } from '@orm/inn/farmacia/legalizacion-factura';
 import { ENVIRONMENTS } from 'src/app.environments';
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { INN_AUTHORITIES } from '@authorities/inventario';
 import { GCM_CONTEXTS, GcmContextType } from '@common/domain/types';
 

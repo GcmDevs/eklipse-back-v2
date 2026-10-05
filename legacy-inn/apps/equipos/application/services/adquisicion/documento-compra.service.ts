@@ -34,7 +34,7 @@ export class DocumentoCompraService {
     private readonly txManager: TransactionManager,
     private readonly stagingFileService: StagingFileService,
     private readonly tipoDocCategoriaService: TipoDocCategoriaActivoService
-  ) { }
+  ) {}
 
   async create(
     compraId: number,

@@ -22,7 +22,8 @@ import {
 } from '../dtos';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { FILE_LOCATIONS, GcmContexts } from '@common/application/constants';
+import { GcmContexts } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import {
   AddOrdenToCotizacionImpl,
   ConfirmarOrdenImpl,

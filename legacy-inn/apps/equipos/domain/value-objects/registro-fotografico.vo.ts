@@ -11,9 +11,7 @@ export interface FotoItem {
 }
 
 export class RegistroFotografico {
-  private constructor(
-    private readonly fotos: FotoItem[],
-  ) { }
+  private constructor(private readonly fotos: FotoItem[]) {}
 
   static create(items: FotoItem[] = []): RegistroFotografico {
     if (!items.length) {
@@ -30,32 +28,28 @@ export class RegistroFotografico {
     const ids = activas.map(x => x.archivoId);
     if (new Set(ids).size !== ids.length) {
       throw new BadInputError(
-        'El registro fotográfico contiene archivos duplicados. Cada archivo debe enviarse una sola vez.',
+        'El registro fotográfico contiene archivos duplicados. Cada archivo debe enviarse una sola vez.'
       );
     }
 
     const withOrden = activas.map((foto, index) => ({
       ...foto,
-      orden: foto.orden ?? (index + 1),
+      orden: foto.orden ?? index + 1,
     }));
 
     const ordenes = withOrden.map(x => x.orden);
     if (new Set(ordenes).size !== ordenes.length) {
       throw new BadInputError(
-        'El registro fotográfico contiene posiciones repetidas. Cada fotografía debe tener un orden único.',
+        'El registro fotográfico contiene posiciones repetidas. Cada fotografía debe tener un orden único.'
       );
     }
 
     const principales = withOrden.filter(f => f.principal);
     if (principales.length > 1) {
-      throw new BadInputError(
-        'Solo puede marcarse una fotografía como principal.',
-      );
+      throw new BadInputError('Solo puede marcarse una fotografía como principal.');
     }
 
-    const ordenadas = [...withOrden].sort(
-      (a, b) => (a.orden ?? 0) - (b.orden ?? 0),
-    );
+    const ordenadas = [...withOrden].sort((a, b) => (a.orden ?? 0) - (b.orden ?? 0));
 
     const normalizadas = ordenadas.map((foto, index) => ({
       ...foto,

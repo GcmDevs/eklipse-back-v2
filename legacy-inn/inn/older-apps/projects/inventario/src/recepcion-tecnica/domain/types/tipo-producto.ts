@@ -1,7 +1,10 @@
 export type TipoProductoTypeCode = 1 | 2 | 3;
 
 export class TipoProductoType {
-  constructor(private code: TipoProductoTypeCode, private forHumans: string) {}
+  constructor(
+    private code: TipoProductoTypeCode,
+    private forHumans: string
+  ) {}
 
   public getCode(): TipoProductoTypeCode {
     return this.code;

@@ -24,11 +24,9 @@ export class FichaTecnicaTipoEquipoEmbeddable {
     length: 'max',
     nullable: true,
     transformer: variableMedidaTransformer,
-    
   })
   dtCalibVariables?: VariableCalibracion;
 
   @Column({ name: 'DTCALIBNORMAPLICABLE', type: 'varchar', length: 120, nullable: true })
   dtCalibNormaAplicable?: string;
 }
-

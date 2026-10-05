@@ -1,4 +1,10 @@
-import { ClasificacionUso, EstadoVehiculo, TipoActivo, TipoCombustible, UnidadMedidaCombustible } from '../enums';
+import {
+  ClasificacionUso,
+  EstadoVehiculo,
+  TipoActivo,
+  TipoCombustible,
+  UnidadMedidaCombustible,
+} from '../enums';
 
 export interface VehiculoModeloRead {
   id: number;
