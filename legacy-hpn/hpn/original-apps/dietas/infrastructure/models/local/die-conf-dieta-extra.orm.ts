@@ -37,7 +37,7 @@ export class DietaConfExtraOrm {
 
   verifyIfConfigIsLessThanMaxDays(days = 3) {
     const date = new Date(`${this.fechaUltimaDietaRegistrada}`).getTime();
-    const now = new Date(`${getDateToString(new Date())}:00:00`).getTime();
+    const now = new Date(getDateToString(new Date())).getTime();
     const diff = now - date;
 
     const result = diff < 86400000 * days;
