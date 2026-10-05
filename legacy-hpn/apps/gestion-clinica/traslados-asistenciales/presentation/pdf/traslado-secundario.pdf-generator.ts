@@ -1120,8 +1120,8 @@ export async function generateTrasladoSecundarioPdf(
       tieneMedicas && tieneEnfermeria
         ? 'NOTAS MÉDICAS Y DE ENFERMERÍA'
         : tieneMedicas
-        ? 'NOTAS MÉDICAS'
-        : 'NOTAS DE ENFERMERÍA',
+          ? 'NOTAS MÉDICAS'
+          : 'NOTAS DE ENFERMERÍA',
       tieneMedicas && tieneEnfermeria ? 'ASI-FT-35/36' : tieneMedicas ? 'ASI-FT-36' : 'ASI-FT-35',
       seccionesNotas,
       { M, CW, PH }

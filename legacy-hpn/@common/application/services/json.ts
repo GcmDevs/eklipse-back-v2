@@ -1,7 +1,4 @@
-export const safeParseJson = <T> (
-  raw: string | null | undefined,
-  fallback: T,
-): T  => {
+export const safeParseJson = <T>(raw: string | null | undefined, fallback: T): T => {
   if (raw == null || raw === '') {
     return fallback;
   }
@@ -11,12 +8,9 @@ export const safeParseJson = <T> (
   } catch {
     return fallback;
   }
-}
+};
 
-export const unwrapJsonString = (
-  value: string,
-  maxDepth = 2,
-): unknown | undefined => {
+export const unwrapJsonString = (value: string, maxDepth = 2): unknown | undefined => {
   let current: unknown = value;
 
   for (let i = 0; i < maxDepth; i++) {
@@ -32,4 +26,4 @@ export const unwrapJsonString = (
   }
 
   return current;
-}
+};

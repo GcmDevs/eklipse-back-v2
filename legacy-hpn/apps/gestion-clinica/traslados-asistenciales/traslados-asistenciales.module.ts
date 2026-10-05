@@ -39,4 +39,4 @@ import { TrasladosRealtimeGateway } from './presentation/gateways/traslados-real
     TrasladosRealtimeGateway,
   ],
 })
-export class TrasladosAsistencialesModule { }
+export class TrasladosAsistencialesModule {}

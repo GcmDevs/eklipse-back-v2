@@ -13,7 +13,12 @@ export class AguachicaController extends BaseSource {
   async execute() {
     try {
       const ctx = this.auth.context;
-      const codigos = ctx === GCM_CONTEXTS.AGUACHICA ? ['22','23','30','31','32'] : GCM_CONTEXTS.VALLEDUPAR ? ['10','11','12','13','14','15'] : [];
+      const codigos =
+        ctx === GCM_CONTEXTS.AGUACHICA
+          ? ['22', '23', '30', '31', '32']
+          : GCM_CONTEXTS.VALLEDUPAR
+            ? ['10', '11', '12', '13', '14', '15']
+            : [];
       const date = new Date();
       const dateFt = new Date(`${date.toISOString().split('T')[0]}:00:00`);
 

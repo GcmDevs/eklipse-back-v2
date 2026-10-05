@@ -19,7 +19,6 @@ import { EstanciaOrm } from '@orm/temp';
 import { Between, IsNull } from 'typeorm';
 @Injectable()
 export class TurnoSource extends BaseSource {
-
   public async create(body: CreateTurnoDto): Promise<boolean> {
     let transactionStarted = false;
     try {
@@ -34,7 +33,6 @@ export class TurnoSource extends BaseSource {
       const entregaTurnoRp = this.qr.manager.getRepository(EntregaTurnoOrm);
 
       const cambioTurnoRp = this.qr.manager.getRepository(CambioTurnoOrm);
-
 
       const ultimoTurno = await entregaTurnoRp.findOne({
         where: { subgrupoId: body.subgrupoId, centroAtencionId: body.centroId },
@@ -58,18 +56,15 @@ export class TurnoSource extends BaseSource {
         medicoEntregaTurnoId: this.auth.id,
         estadoCode: ESTADOS.EN_PROCESO.getCode(),
         fecha: new Date(),
-        isActivo: true
-      })
+        isActivo: true,
+      });
 
       const entregaTurnoCreada = await entregaTurnoRp.save(newEntregaTurno);
 
-      const medicoIds = body.medicoIds
+      const medicoIds = body.medicoIds;
 
       if (medicoIds.length > 0) {
-
-        await Promise.all(
-          body.medicoIds.map(id => this.verifyEntityExist('GENUSUARIO', id))
-        );
+        await Promise.all(body.medicoIds.map(id => this.verifyEntityExist('GENUSUARIO', id)));
 
         const cambios = body.medicoIds.map(id =>
           cambioTurnoRp.create({
@@ -77,11 +72,10 @@ export class TurnoSource extends BaseSource {
             fecha: new Date(),
             medicoId: id,
             motivo: 'AYUDANTE',
-            tipo: 2
+            tipo: 2,
           })
         );
-        await cambioTurnoRp.save(cambios)
-
+        await cambioTurnoRp.save(cambios);
       }
       await this.qr.commitTransaction();
       return true;
@@ -138,13 +132,9 @@ export class TurnoSource extends BaseSource {
         if (minutos < 240) {
           const restante = Math.ceil(240 - minutos);
           const horas = Math.floor(restante / 60);
-          const mins = restante % 60
-          const mensaje = horas > 0
-            ? `${horas}h ${mins}min`
-            : `${mins}min`;
-          throw new Error(
-            `Debe esperar ${mensaje} más para habilitar el turno`
-          );
+          const mins = restante % 60;
+          const mensaje = horas > 0 ? `${horas}h ${mins}min` : `${mins}min`;
+          throw new Error(`Debe esperar ${mensaje} más para habilitar el turno`);
         }
       }
 
@@ -157,7 +147,7 @@ export class TurnoSource extends BaseSource {
         newEntregaTurnoRecibicoNoEntregado.isActivo = false;
         newEntregaTurnoRecibicoNoEntregado.estadoCode = ESTADOS.NO_ENTREGADO.getCode();
         newEntregaTurnoRecibicoNoEntregado.observacion = body.motivo;
-        newEntregaTurnoRecibicoNoEntregado.habilitadoId = this.auth.id
+        newEntregaTurnoRecibicoNoEntregado.habilitadoId = this.auth.id;
         await entregaTurnoRp.save(newEntregaTurnoRecibicoNoEntregado);
 
         if (entregaTurno.isActivo) {
@@ -178,7 +168,7 @@ export class TurnoSource extends BaseSource {
             : ESTADOS.NO_ENTREGADO.getCode();
         entregaTurno.isActivo = false;
         entregaTurno.observacion = body.motivo;
-        entregaTurno.habilitadoId = this.auth.id
+        entregaTurno.habilitadoId = this.auth.id;
         await entregaTurnoRp.save(entregaTurno);
       }
 
@@ -282,11 +272,8 @@ export class TurnoSource extends BaseSource {
         order: { fecha: 'DESC', id: 'DESC' },
       });
 
-
       if (!entregaTurno) {
-        throw new Error(
-          `El turno aún no ha sido iniciado por el médico encargado.`
-        );
+        throw new Error(`El turno aún no ha sido iniciado por el médico encargado.`);
       }
 
       /*   if (entregaTurno) { */
@@ -336,9 +323,7 @@ export class TurnoSource extends BaseSource {
       });
 
       const ingresosActivos = new Set(
-        estanciasActivas
-          .filter(est => est.ingreso)
-          .map(est => est.ingreso.id)
+        estanciasActivas.filter(est => est.ingreso).map(est => est.ingreso.id)
       );
 
       for (const paciente of body.pacientes) {
@@ -414,7 +399,6 @@ export class TurnoSource extends BaseSource {
       const estanciaRp = this.qr.manager.getRepository(EstanciaOrm);
       const etPacienteTurnoRp = this.qr.manager.getRepository(ETPacienteTurnoOrm);
 
-
       // Buscar la entrega pendiente por recibir
       const entregaTurno = await entregaTurnoRp.findOne({
         where: {
@@ -448,7 +432,7 @@ export class TurnoSource extends BaseSource {
           medicoId: entregaTurno.medicoRecibeTurnoId,
           motivo: body.motivo,
           fecha: new Date(),
-          tipo: 1
+          tipo: 1,
         });
         await cambioTurnoRp.save(cambio);
         // El nuevo médico pasa a ser quien recibe
@@ -461,7 +445,7 @@ export class TurnoSource extends BaseSource {
 
       entregaTurno.estadoCode = ESTADOS.RECIBIDO.getCode();
 
-      entregaTurno.isActivo = false
+      entregaTurno.isActivo = false;
 
       const estanciasActivas = await estanciaRp.find({
         where: {
@@ -472,9 +456,7 @@ export class TurnoSource extends BaseSource {
       });
 
       const ingresosActivos = new Set(
-        estanciasActivas
-          .filter(est => est.ingreso)
-          .map(est => est.ingreso.id)
+        estanciasActivas.filter(est => est.ingreso).map(est => est.ingreso.id)
       );
 
       for (const paciente of body.pacientes) {

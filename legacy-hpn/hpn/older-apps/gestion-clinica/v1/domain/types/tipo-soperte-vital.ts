@@ -1,7 +1,10 @@
 export type TipoSoporteVitalTypeCode = 1 | 2 | 3 | 4 | 5;
 
 export class TipoSoporteVitalType {
-  constructor(private code: TipoSoporteVitalTypeCode, private forHumans: string) {}
+  constructor(
+    private code: TipoSoporteVitalTypeCode,
+    private forHumans: string
+  ) {}
 
   public getCode(): TipoSoporteVitalTypeCode {
     return this.code;

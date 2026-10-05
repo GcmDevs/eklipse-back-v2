@@ -1,5 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { FILE_LOCATIONS, TABLE_NAMES } from '@common/application/constants';
+import { TABLE_NAMES } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import {
   TrasladoAsignacionOrm,
   TrasladoAsistencialOrm,

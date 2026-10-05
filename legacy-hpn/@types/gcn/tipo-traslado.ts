@@ -1,7 +1,10 @@
 export type TipoTrasladoTypeCode = 1 | 2;
 
 export class TipoTrasladoType {
-  constructor(private code: TipoTrasladoTypeCode, private forHumans: string) {}
+  constructor(
+    private code: TipoTrasladoTypeCode,
+    private forHumans: string
+  ) {}
 
   public getCode(): TipoTrasladoTypeCode {
     return this.code;

@@ -4,3 +4,4 @@ export * from './registro-clinico.orm';
 export * from './paciente-evolucion.orm';
 export * from './cambio-turno.orm';
 export * from './prealta.orm';
+export * from './paciente-temporal.orm';

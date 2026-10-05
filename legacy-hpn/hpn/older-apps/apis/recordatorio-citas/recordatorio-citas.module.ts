@@ -6,4 +6,4 @@ import { RecordatorioCitasImpl } from './infrastructure/services/recordatorio-ci
   controllers: [RecordatorioCitasController],
   providers: [RecordatorioCitasImpl],
 })
-export class RecordatorioCitasModule { }
+export class RecordatorioCitasModule {}

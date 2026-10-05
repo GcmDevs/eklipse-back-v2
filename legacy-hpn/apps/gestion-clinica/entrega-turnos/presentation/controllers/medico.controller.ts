@@ -6,7 +6,7 @@ import { MedicoImpl } from '@gestion-clinica/entrega-turnos/infrastructure/repos
 @CommonGuards()
 @Controller('v4/entrega-turnos/medico')
 export class MedicoController {
-  constructor(private _medicoSource: MedicoImpl) { }
+  constructor(private _medicoSource: MedicoImpl) {}
 
   @Authorities([HPN_AUTHORITIES.GESTION_CLINICA.ENTREGA_TURNO])
   @Get('/:turnoId')
@@ -21,7 +21,7 @@ export class MedicoController {
 
   @Authorities([HPN_AUTHORITIES.GESTION_CLINICA.ENTREGA_TURNO])
   @Post('add')
-  public create(@Body() body: { medicoId: number, turnoId: number }) {
+  public create(@Body() body: { medicoId: number; turnoId: number }) {
     try {
       const result = this._medicoSource.create(body);
       return result;
@@ -29,5 +29,4 @@ export class MedicoController {
       throw new BadRequestException(error.message);
     }
   }
-
 }

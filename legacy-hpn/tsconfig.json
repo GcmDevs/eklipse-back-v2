@@ -22,6 +22,7 @@
       "@hpn/*": ["src/*"],
       "@authorities/*": ["./@authorities/*"],
       "@common/*": ["./@common/*"],
+      "@common/application/file-locations": ["../@common/application/file-locations"],
       "@env": ["../env"],
       "@orm": ["@orm"],
       "@orm/*": ["@orm/*"],

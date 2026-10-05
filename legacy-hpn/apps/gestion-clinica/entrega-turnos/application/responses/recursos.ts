@@ -4,12 +4,12 @@ import { EstadoTypeCode } from '../types';
 export class dataRes {
   pacientes: ATPacienteHpnRes[];
   entregaTurnoPorSubgrupoActual: EntergaTurnoSubgrupoRes;
+  temporalesConfigurados?: boolean;
 }
 
-
 interface UsuarioReponse {
-  cedula?: string,
-  nombreCompleto?: string
+  cedula?: string;
+  nombreCompleto?: string;
 }
 
 export class ATRegistroClinicoRes {
@@ -23,15 +23,15 @@ export class ATRegistroClinicoRes {
   reporteImg: string;
   reporteLab: string;
   tratamiento: string;
-  subgrupo: {codigo?: string, nombre?: string}
-  usuarioMedicoGuarda: UsuarioReponse
+  subgrupo: { codigo?: string; nombre?: string };
+  usuarioMedicoGuarda: UsuarioReponse;
   turno: {
-    fechaInicio: Date | null
-    fechaFin: Date | null
-    medicoEntrega: UsuarioReponse | null
-    medicoRecibe: UsuarioReponse | null
-    habilitador: UsuarioReponse | null 
-  }
+    fechaInicio: Date | null;
+    fechaFin: Date | null;
+    medicoEntrega: UsuarioReponse | null;
+    medicoRecibe: UsuarioReponse | null;
+    habilitador: UsuarioReponse | null;
+  };
 }
 
 export class EntergaTurnoSubgrupoRes {
@@ -57,6 +57,11 @@ export class ATPacienteHpnRes {
   eps: EntidadRes;
   entregaTurno: EntregaTurnoRes[] | null;
   evolucion: string;
+  esTemporal?: boolean;
+  asignacionTemporalId?: number;
+  subgrupoTemporal?: EntidadRes;
+  subgrupoAsignado?: EntidadRes;
+  especialidadesTratantes: string[];
 }
 export class EntregaTurnoRes {
   id: number;

@@ -1,7 +1,10 @@
 export type TransactionDietaTypeCode = 1 | 2 | 3 | 4;
 
 export class TransactionDietaType {
-  constructor(private code: TransactionDietaTypeCode, private forHumans: string) {}
+  constructor(
+    private code: TransactionDietaTypeCode,
+    private forHumans: string
+  ) {}
 
   public getCode(): TransactionDietaTypeCode {
     return this.code;

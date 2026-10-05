@@ -3,7 +3,11 @@ import { CtmType } from '@common/domain/types';
 export type AgruEstanProloIpsCode = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
 
 export class AgruEstanProloIpsType extends CtmType<AgruEstanProloIpsCode> {
-  constructor(code: AgruEstanProloIpsCode, forHumans: string, private items: any[]) {
+  constructor(
+    code: AgruEstanProloIpsCode,
+    forHumans: string,
+    private items: any[]
+  ) {
     super(code, forHumans, null);
   }
 

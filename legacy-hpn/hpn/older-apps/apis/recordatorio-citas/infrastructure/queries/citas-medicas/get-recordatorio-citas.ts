@@ -1,5 +1,5 @@
 export const getRecordatorioCitasQuery = () => {
-    return `
+  return `
 
     SELECT N0.ccmfeccit                      AS FECHOR_INICIAL_CITA,
        N0.ccmfincit                      AS FECHOR_FINAL_CITA,

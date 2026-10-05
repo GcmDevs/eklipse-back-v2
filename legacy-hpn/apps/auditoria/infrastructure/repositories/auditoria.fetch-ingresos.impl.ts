@@ -48,8 +48,8 @@ export class AuditoriaFetchIngresosImpl extends BaseSource {
             },
           ]
         : subGrupoId
-        ? [{ fechaEgreso: IsNull(), cama: { subGrupoId } }]
-        : [{ fechaEgreso: IsNull() }],
+          ? [{ fechaEgreso: IsNull(), cama: { subGrupoId } }]
+          : [{ fechaEgreso: IsNull() }],
       take: pattern ? 5 : undefined,
       order: { id: 'DESC' },
       relations: [
@@ -75,8 +75,8 @@ export class AuditoriaFetchIngresosImpl extends BaseSource {
             },
           ]
         : subGrupoId
-        ? [{ fechaEgreso: Between(nowOneDayLessWtFt, nowWtFt), cama: { subGrupoId } }]
-        : [{ fechaEgreso: Between(nowOneDayLessWtFt, nowWtFt) }],
+          ? [{ fechaEgreso: Between(nowOneDayLessWtFt, nowWtFt), cama: { subGrupoId } }]
+          : [{ fechaEgreso: Between(nowOneDayLessWtFt, nowWtFt) }],
       take: pattern ? 5 : undefined,
       order: { id: 'DESC' },
       relations: [

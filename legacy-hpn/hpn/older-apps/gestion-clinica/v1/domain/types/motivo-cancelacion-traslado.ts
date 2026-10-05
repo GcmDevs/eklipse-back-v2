@@ -1,7 +1,10 @@
 export type MotivoCancelacionTrasladoTypeCode = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
 export class MotivoCancelacionTrasladoType {
-  constructor(private code: MotivoCancelacionTrasladoTypeCode, private forHumans: string) {}
+  constructor(
+    private code: MotivoCancelacionTrasladoTypeCode,
+    private forHumans: string
+  ) {}
 
   public getCode(): MotivoCancelacionTrasladoTypeCode {
     return this.code;

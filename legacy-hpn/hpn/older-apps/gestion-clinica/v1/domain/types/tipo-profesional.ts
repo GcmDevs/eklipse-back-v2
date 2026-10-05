@@ -1,7 +1,10 @@
 export type TipoProfesionalCode = 1 | 4 | 5;
 
 export class TipoProfesionalType {
-  constructor(private code: TipoProfesionalCode, private forHumans: string) {}
+  constructor(
+    private code: TipoProfesionalCode,
+    private forHumans: string
+  ) {}
 
   public getCode(): TipoProfesionalCode {
     return this.code;

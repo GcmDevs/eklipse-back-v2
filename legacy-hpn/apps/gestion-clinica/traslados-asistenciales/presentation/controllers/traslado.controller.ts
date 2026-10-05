@@ -20,7 +20,7 @@ import {
 } from '../dtos';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { nonEditFileName } from '@common/presentation/helpers';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';

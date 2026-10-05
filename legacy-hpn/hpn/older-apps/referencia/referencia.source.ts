@@ -453,8 +453,8 @@ export class ReferenciaSource extends BaseSource {
           solicitud.origenSolicitudCode === 1
             ? 'Demanda Interna'
             : solicitud.origenSolicitudCode === 2
-            ? 'Referencia'
-            : 'Desconocido';
+              ? 'Referencia'
+              : 'Desconocido';
 
         let message = '';
 

@@ -1,7 +1,10 @@
 export type DieEstadoCode = 1 | 2 | 3;
 
 export class DieEstadoType {
-  constructor(private code: DieEstadoCode, private forHumans: string) {}
+  constructor(
+    private code: DieEstadoCode,
+    private forHumans: string
+  ) {}
 
   public getCode(): DieEstadoCode {
     return this.code;

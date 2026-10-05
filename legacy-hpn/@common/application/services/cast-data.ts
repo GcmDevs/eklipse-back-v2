@@ -1,4 +1,4 @@
-import { safeParseJson } from "./json";
+import { safeParseJson } from './json';
 
 interface ToNumberOptions {
   default?: number;

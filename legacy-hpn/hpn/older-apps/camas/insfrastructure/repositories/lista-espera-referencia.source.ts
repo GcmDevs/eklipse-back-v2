@@ -20,9 +20,8 @@ export class ListaEsperaCamaReferenciaSourceRepository extends BaseSource {
       // const fechaInicial = new Date(fechaIni).toISOString().split('T')[0];
       // const fechaFinal = new Date(fechaFin).toISOString().split('T')[0];
 
-      const hospiResult: ListaEsperaCamaResponseQuery[] = await qr.manager.query(
-        getListaEsperaQuery()
-      );
+      const hospiResult: ListaEsperaCamaResponseQuery[] =
+        await qr.manager.query(getListaEsperaQuery());
       const referenciaResult: ListaEsperaReferenciaResponseQuery[] = await qr.manager.query(
         getListaEsperaReferenciaQuery()
       );

@@ -23,7 +23,11 @@ export type AgruEstanProloErpCode =
   | 20;
 
 export class AgruEstanProloErpType extends CtmType<AgruEstanProloErpCode> {
-  constructor(code: AgruEstanProloErpCode, forHumans: string, private items: any[]) {
+  constructor(
+    code: AgruEstanProloErpCode,
+    forHumans: string,
+    private items: any[]
+  ) {
     super(code, forHumans, null);
   }
 

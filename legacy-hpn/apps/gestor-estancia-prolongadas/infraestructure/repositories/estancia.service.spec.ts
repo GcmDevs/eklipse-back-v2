@@ -22,7 +22,11 @@ const createRepository = (): MockRepository => ({
   findOne: jest.fn(),
   find: jest.fn(),
   create: jest.fn(payload => payload),
-  save: jest.fn(async payload => ({ id: 100, createdAt: new Date('2026-05-05T21:00:00.000Z'), ...payload })),
+  save: jest.fn(async payload => ({
+    id: 100,
+    createdAt: new Date('2026-05-05T21:00:00.000Z'),
+    ...payload,
+  })),
 });
 
 const createService = () => {

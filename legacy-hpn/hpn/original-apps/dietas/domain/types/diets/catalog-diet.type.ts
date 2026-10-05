@@ -4,7 +4,11 @@ import { SELCATDI, SelectCatalogDietType } from './select-catalog.type';
 export type CatalogDietCode = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10;
 
 export class CatalogDietType extends CtmType<CatalogDietCode> {
-  constructor(code: CatalogDietCode, forHumans: string, private type: SelectCatalogDietType) {
+  constructor(
+    code: CatalogDietCode,
+    forHumans: string,
+    private type: SelectCatalogDietType
+  ) {
     super(code, forHumans);
   }
 

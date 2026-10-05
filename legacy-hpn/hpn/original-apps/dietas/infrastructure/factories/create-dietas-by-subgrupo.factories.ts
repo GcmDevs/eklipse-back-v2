@@ -145,6 +145,6 @@ const _generateDieExtension = (jornadaCode: JornadaCode) => {
   return jornadaCode === JORNADAS_DIETA.DESAYUNO.getCode()
     ? 'Desayuno'
     : jornadaCode === JORNADAS_DIETA.ALMUERZO.getCode()
-    ? 'Almuerzo'
-    : 'Cena';
+      ? 'Almuerzo'
+      : 'Cena';
 };

@@ -1,7 +1,10 @@
 export type EntidadTypeCode = 1 | 2 | 3;
 
 export class EntidadType {
-  constructor(private code: EntidadTypeCode, private forHumans: string) {}
+  constructor(
+    private code: EntidadTypeCode,
+    private forHumans: string
+  ) {}
 
   public getCode(): EntidadTypeCode {
     return this.code;

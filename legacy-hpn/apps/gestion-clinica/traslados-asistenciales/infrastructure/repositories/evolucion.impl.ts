@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { In } from 'typeorm';
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { deleteFile } from '@common/presentation/helpers';
 import {
   TrasladoAsignacionOrm,

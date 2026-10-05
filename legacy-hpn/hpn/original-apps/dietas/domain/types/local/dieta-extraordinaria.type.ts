@@ -1,7 +1,10 @@
 export type DietaExtraCode = '27' | '28' | '29';
 
 export class DietaExtraType {
-  constructor(private code: DietaExtraCode, private forHumans: string) {}
+  constructor(
+    private code: DietaExtraCode,
+    private forHumans: string
+  ) {}
 
   public getCode(): DietaExtraCode {
     return this.code;

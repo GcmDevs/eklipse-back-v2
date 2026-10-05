@@ -19,7 +19,7 @@ import { TrasladosRealtimeGateway } from '../gateways/traslados-realtime.gateway
 export class SeguimientoTrasladoController {
   constructor(
     private _source: SeguimientoTrasladoImpl,
-    private readonly _events: TrasladosRealtimeGateway,
+    private readonly _events: TrasladosRealtimeGateway
   ) {}
 
   @ApiOperation({ summary: 'Registrar la entrega del paciente' })
@@ -28,7 +28,12 @@ export class SeguimientoTrasladoController {
   public async entregarPaciente(@Body() body: EntregaMovilDto) {
     try {
       const result = await this._source.entregarPaciente(body);
-      if (result) this._events.publish({ tipo: 'ENTREGA', trasladoId: body.trasladoId, contextoCode: body.contextoCode });
+      if (result)
+        this._events.publish({
+          tipo: 'ENTREGA',
+          trasladoId: body.trasladoId,
+          contextoCode: body.contextoCode,
+        });
       return result;
     } catch (error) {
       throw new BadRequestException(error.message);
@@ -41,7 +46,12 @@ export class SeguimientoTrasladoController {
   public async recibirPaciente(@Body() body: EntregaMovilDto) {
     try {
       const result = await this._source.recibirPaciente(body);
-      if (result) this._events.publish({ tipo: 'RECEPCION', trasladoId: body.trasladoId, contextoCode: body.contextoCode });
+      if (result)
+        this._events.publish({
+          tipo: 'RECEPCION',
+          trasladoId: body.trasladoId,
+          contextoCode: body.contextoCode,
+        });
       return result;
     } catch (error) {
       throw new BadRequestException(error.message);
@@ -54,7 +64,11 @@ export class SeguimientoTrasladoController {
   public async asignar(@Body() body: AsignarTrasladoDto) {
     try {
       const result = await this._source.asignar(body);
-      if (result) this._events.publish({ tipo: 'ASIGNACION', trasladoId: body.trasladoId, contextoCode: body.contextoCode }, [body.conductor?.documento, body.auxiliar?.documento, body.medico?.documento]);
+      if (result)
+        this._events.publish(
+          { tipo: 'ASIGNACION', trasladoId: body.trasladoId, contextoCode: body.contextoCode },
+          [body.conductor?.documento, body.auxiliar?.documento, body.medico?.documento]
+        );
       return result;
     } catch (error) {
       throw new BadRequestException(error.message);
@@ -67,7 +81,11 @@ export class SeguimientoTrasladoController {
   public async reassign(@Body() body: ReasignarTrasladoDto) {
     try {
       const result = await this._source.reasignar(body);
-      if (result) this._events.publish({ tipo: 'REASIGNACION', trasladoId: body.trasladoId, contextoCode: body.contextoCode }, [body.conductor?.documento, body.auxiliar?.documento, body.medico?.documento]);
+      if (result)
+        this._events.publish(
+          { tipo: 'REASIGNACION', trasladoId: body.trasladoId, contextoCode: body.contextoCode },
+          [body.conductor?.documento, body.auxiliar?.documento, body.medico?.documento]
+        );
       return result;
     } catch (error) {
       throw new BadRequestException(error.message);
@@ -80,7 +98,12 @@ export class SeguimientoTrasladoController {
   public async iniciarRetorno(@Body() body: IniciarRetornoDto) {
     try {
       const result = await this._source.iniciarRetorno(body);
-      if (result) this._events.publish({ tipo: 'RETORNO', trasladoId: body.trasladoId, contextoCode: body.contextoCode });
+      if (result)
+        this._events.publish({
+          tipo: 'RETORNO',
+          trasladoId: body.trasladoId,
+          contextoCode: body.contextoCode,
+        });
       return result;
     } catch (error) {
       throw new BadRequestException(error.message);
@@ -93,7 +116,12 @@ export class SeguimientoTrasladoController {
   public async registrarComplicacion(@Body() body: RegistrarComplicacionDto) {
     try {
       const result = await this._source.registrarComplicacion(body);
-      if (result) this._events.publish({ tipo: 'INCIDENTE', trasladoId: body.trasladoId, contextoCode: body.contextoCode });
+      if (result)
+        this._events.publish({
+          tipo: 'INCIDENTE',
+          trasladoId: body.trasladoId,
+          contextoCode: body.contextoCode,
+        });
       return result;
     } catch (error) {
       throw new BadRequestException(error.message);

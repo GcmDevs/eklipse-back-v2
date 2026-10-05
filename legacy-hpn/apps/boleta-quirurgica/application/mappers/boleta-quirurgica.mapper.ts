@@ -3,10 +3,13 @@ import { sanitizeBoletaQuirurgicaKey, sanitizeBoletaQuirurgicaValue } from '../s
 type QueryRow = Record<string, unknown>;
 
 function mapRow(row: QueryRow) {
-  return Object.entries(row).reduce((accumulator, [key, value]) => {
-    accumulator[sanitizeBoletaQuirurgicaKey(key)] = sanitizeBoletaQuirurgicaValue(value);
-    return accumulator;
-  }, {} as Record<string, unknown>);
+  return Object.entries(row).reduce(
+    (accumulator, [key, value]) => {
+      accumulator[sanitizeBoletaQuirurgicaKey(key)] = sanitizeBoletaQuirurgicaValue(value);
+      return accumulator;
+    },
+    {} as Record<string, unknown>
+  );
 }
 
 export function mapBoletaQuirurgicaRows<T extends QueryRow>(rows: T[]) {

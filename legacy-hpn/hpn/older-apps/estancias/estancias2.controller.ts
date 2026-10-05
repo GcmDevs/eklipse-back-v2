@@ -7,7 +7,7 @@ import { CommonGuards } from '@common/presentation/decorators';
 @ApiTags('V1/V2/V3')
 @Controller('v10/uci-sheets/estancias')
 export class Estancias2Controller {
-  constructor(private readonly servicio: EstanciasService) { }
+  constructor(private readonly servicio: EstanciasService) {}
 
   @Get()
   async traer_paciente_acostados() {
@@ -34,5 +34,4 @@ export class Estancias2Controller {
       };
     }
   }
-
 }

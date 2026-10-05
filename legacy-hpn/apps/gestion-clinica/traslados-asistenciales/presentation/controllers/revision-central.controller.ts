@@ -13,7 +13,7 @@ import { TrasladosRealtimeGateway } from '../gateways/traslados-realtime.gateway
 export class TrasladoRevisionCentralController {
   constructor(
     private _source: TrasladoRevisionCentralImpl,
-    private readonly _events: TrasladosRealtimeGateway,
+    private readonly _events: TrasladosRealtimeGateway
   ) {}
 
   @ApiOperation({ summary: 'Tomar decisión en la revisión central del traslado' })
@@ -22,7 +22,12 @@ export class TrasladoRevisionCentralController {
   public async decidir(@Body() body: CreateRevisionCentralDto) {
     try {
       const result = await this._source.decidir(body);
-      if (result) this._events.publish({ tipo: 'DECISION', trasladoId: body.trasladoId, contextoCode: body.contextoCode });
+      if (result)
+        this._events.publish({
+          tipo: 'DECISION',
+          trasladoId: body.trasladoId,
+          contextoCode: body.contextoCode,
+        });
       return result;
     } catch (error) {
       throw new BadRequestException(error.message);
@@ -35,7 +40,12 @@ export class TrasladoRevisionCentralController {
   public async cancel(@Body() body: CancelTrasladoDto) {
     try {
       const result = await this._source.cancel(body);
-      if (result) this._events.publish({ tipo: 'CANCELACION', trasladoId: body.trasladoId, contextoCode: body.contextoCode });
+      if (result)
+        this._events.publish({
+          tipo: 'CANCELACION',
+          trasladoId: body.trasladoId,
+          contextoCode: body.contextoCode,
+        });
       return result;
     } catch (error) {
       throw new BadRequestException(error.message);

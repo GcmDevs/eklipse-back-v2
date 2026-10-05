@@ -4,7 +4,7 @@ export class EstadoPacienteType {
   constructor(
     private _code: EstadoPacienteCode,
     private _forHumans: string
-  ) { }
+  ) {}
 
   public getCode(): EstadoPacienteCode {
     return this._code;
@@ -20,9 +20,12 @@ export const MUERTO = new EstadoPacienteType(2, 'MUERTO');
 
 export function estadoPacienteTypeFactory(code: EstadoPacienteCode): EstadoPacienteType {
   switch (code) {
-    case 1: return VIVO;
-    case 2: return MUERTO;
-    default: return VIVO;
+    case 1:
+      return VIVO;
+    case 2:
+      return MUERTO;
+    default:
+      return VIVO;
   }
 }
 

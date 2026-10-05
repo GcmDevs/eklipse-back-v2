@@ -52,7 +52,6 @@ export class ETPacienteTurnoOrm {
    @JoinColumn([{ name: TABLE_NAMES.hpn.entregaTurno.registroClinico, referencedColumnName: 'id' }])
    registroClinico: ETRegistroClinicoOrm; */
 
-
   /* ODL */
   /*   @ManyToOne(() => PacienteOrm, paciente => paciente.pacientesTurnos)
   @JoinColumn([{ name: 'GENPACIEN', referencedColumnName: 'id' }])

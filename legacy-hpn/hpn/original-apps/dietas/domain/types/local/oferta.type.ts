@@ -4,7 +4,11 @@ import { CONDICION_OFERTA, CondicionOfertaType } from './condicion-oferta.type';
 export type OfertaCode = 2 | 3 | 9 | 10;
 
 export class OfertaType extends CtmType<OfertaCode> {
-  constructor(code: OfertaCode, forHumans: string, private type: CondicionOfertaType) {
+  constructor(
+    code: OfertaCode,
+    forHumans: string,
+    private type: CondicionOfertaType
+  ) {
     super(code, forHumans);
   }
 
