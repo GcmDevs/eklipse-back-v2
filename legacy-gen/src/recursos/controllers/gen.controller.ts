@@ -8,7 +8,10 @@ import { AreaServicioImpl, DependenciaImpl } from '../services/gen';
 @CommonGuards()
 @Controller('v4/gen/recursos')
 export class RecursosController {
-  constructor(private _areasServicio: AreaServicioImpl, private _dependencias: DependenciaImpl) {}
+  constructor(
+    private _areasServicio: AreaServicioImpl,
+    private _dependencias: DependenciaImpl
+  ) {}
 
   @ApiOkResponse({ type: EntidadBasicaRes })
   @ApiQuery({ name: 'pattern', required: false, type: String })

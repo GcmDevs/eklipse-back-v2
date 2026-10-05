@@ -1,7 +1,10 @@
 export type TipoOrdenDespachoTypeCode = 0 | 1;
 
 export class TipoOrdenDespachoType {
-  constructor(private code: TipoOrdenDespachoTypeCode, private forHumans: string) {}
+  constructor(
+    private code: TipoOrdenDespachoTypeCode,
+    private forHumans: string
+  ) {}
 
   public getCode(): TipoOrdenDespachoTypeCode {
     return this.code;

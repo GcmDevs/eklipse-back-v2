@@ -3,7 +3,7 @@ import { BaseSource } from '@common/infrastructure/services';
 import { deleteFile } from '@common/presentation/helpers';
 import { AddSopRadI } from '@crn/rad/presentation/dtos';
 import { ENVIRONMENTS } from 'src/app.environments';
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { SoporteOrm } from '@orm/crn/rdc';
 import { FacturaOrm } from '@orm/sln';
 

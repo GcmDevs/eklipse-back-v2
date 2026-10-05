@@ -1,7 +1,10 @@
 export type TipoSolicitudTypeCode = 1 | 2 | 3 | 4;
 
 export class TipoSolicitudType {
-  constructor(private code: TipoSolicitudTypeCode, private forHumans: string) {}
+  constructor(
+    private code: TipoSolicitudTypeCode,
+    private forHumans: string
+  ) {}
 
   public getCode(): TipoSolicitudTypeCode {
     return this.code;

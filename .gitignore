@@ -1,5 +1,4 @@
 # compiled output
-/.vscode
 /node_modules
 /.env
 /env.ts
@@ -11,6 +10,7 @@ skills-lock.json
 /private
 /public
 /dist
+temp_auto_push.bat
 /.cursor
 /fileserver/dist
 /legacy-gen/dist
@@ -22,4 +22,5 @@ skills-lock.json
 /historia-clinica/dist
 /facturacion/dist
 /cartera/dist
-/inventario/dist
+/inventario/dist.gitignore
+branch_structure.json

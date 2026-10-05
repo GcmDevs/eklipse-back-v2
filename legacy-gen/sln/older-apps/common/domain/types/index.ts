@@ -1,5 +1,8 @@
 export class GcmType<T> {
-  constructor(private code: T, private forHumans: string) {}
+  constructor(
+    private code: T,
+    private forHumans: string
+  ) {}
 
   public getCode(): T {
     return this.code;

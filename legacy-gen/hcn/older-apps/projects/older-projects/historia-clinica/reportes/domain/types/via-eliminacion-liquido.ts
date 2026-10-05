@@ -19,7 +19,10 @@ export type ViaEliminacionLiquidosTypeCode =
   | 99;
 
 export class ViaEliminacionLiquidosType {
-  constructor(private code: ViaEliminacionLiquidosTypeCode, private forHumans: string) {}
+  constructor(
+    private code: ViaEliminacionLiquidosTypeCode,
+    private forHumans: string
+  ) {}
 
   public getCode(): ViaEliminacionLiquidosTypeCode {
     return this.code;

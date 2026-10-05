@@ -8,7 +8,10 @@ import { LoginUserDto } from '../dtos';
 @ApiTags('Auth')
 @Controller('v1/sec/auth')
 export class AuthController {
-  constructor(private _loginUser: LoginUserImpl, private _loginTercero: LoginTerceroImpl) {}
+  constructor(
+    private _loginUser: LoginUserImpl,
+    private _loginTercero: LoginTerceroImpl
+  ) {}
 
   @Get('contexts')
   public avalaibleContexts() {

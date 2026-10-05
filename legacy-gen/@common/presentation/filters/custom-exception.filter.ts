@@ -35,7 +35,7 @@ export class CustomExceptionFilter implements ExceptionFilter {
 
     const errorMessage = Array.isArray(message?.message)
       ? message.message.join(', ')
-      : message?.message ?? message ?? 'Algo salió mal';
+      : (message?.message ?? message ?? 'Algo salió mal');
 
     response.status(status).json({
       status: false,
