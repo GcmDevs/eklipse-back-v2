@@ -18,6 +18,7 @@ import { ENTREGADO } from '@gestion-clinica/entrega-turnos/application/types';
 import { ATRegistroClinicoRes } from '@gestion-clinica/entrega-turnos/application/responses';
 import { IngresoOrm } from '@orm/gen';
 import { In, IsNull, Not } from 'typeorm';
+import { validarCapacidadRegistro } from './registro-clinico-capacidad';
 
 @Injectable()
 export class RegistroClinicoImpl extends BaseSource {
@@ -501,6 +502,7 @@ export class RegistroClinicoImpl extends BaseSource {
       }
 
       //Crear registro clínico asociado al paciente turno actual
+      await validarCapacidadRegistro(this.qr.manager, body.datosClinicos);
       const newRegistroClinico = etRegistroClinicoRp.create({
         fechaRegistro: new Date(),
         pacienteTurnoId: pacienteTurno.id,
@@ -588,6 +590,7 @@ export class RegistroClinicoImpl extends BaseSource {
       }
 
       if (diagnostico) registroClinico.diagnostico = diagnostico;
+      await validarCapacidadRegistro(this.qr.manager, body.datosClinicos);
       if (reporteLab) registroClinico.reporteLab = reporteLab;
       if (reporteImg) registroClinico.reporteImg = reporteImg;
       if (pendientes) registroClinico.pendientes = pendientes;
