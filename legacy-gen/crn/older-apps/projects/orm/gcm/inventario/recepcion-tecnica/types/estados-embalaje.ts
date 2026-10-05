@@ -1,7 +1,10 @@
 export type EstadosEmbalajeTypeCode = 1 | 2;
 
 export class EstadosEmbalajeType {
-  constructor(private code: EstadosEmbalajeTypeCode, private forHumans: string) {}
+  constructor(
+    private code: EstadosEmbalajeTypeCode,
+    private forHumans: string
+  ) {}
 
   public getCode(): EstadosEmbalajeTypeCode {
     return this.code;

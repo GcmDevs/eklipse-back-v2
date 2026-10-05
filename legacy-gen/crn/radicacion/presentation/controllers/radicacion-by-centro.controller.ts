@@ -1,4 +1,5 @@
-import { ALL_CENTROS_ID, FILE_LOCATIONS } from '@common/application/constants';
+import { ALL_CENTROS_ID } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { Authorities, CommonGuards } from '@common/presentation/decorators';
 import { nonEditFileName } from '@common/presentation/helpers';
 import {

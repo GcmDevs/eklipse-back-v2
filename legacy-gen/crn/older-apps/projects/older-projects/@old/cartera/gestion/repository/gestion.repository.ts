@@ -8,7 +8,7 @@ import { GcmContexts } from '@crn/old/common/application/constants';
 import { ConciliacionCarteraEntity } from '../../conciliacion/entity';
 import * as fs from 'fs';
 import { deleteFile } from '@common/presentation/helpers';
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 
 @Injectable()
 export class GestionRepository extends BaseSource {

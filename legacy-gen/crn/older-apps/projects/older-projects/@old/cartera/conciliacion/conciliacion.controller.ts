@@ -19,7 +19,7 @@ import * as path from 'path';
 import { Authorities } from '@crn/old/common/presentation/decorators';
 import { CommonGuards } from '@crn/old/common/presentation/decorators';
 import { editFileName, pdfFileFilter } from '@crn/old/common/presentation/file-saver';
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { CRN_AUTHORITIES } from '@authorities/cartera';
 
 @CommonGuards()

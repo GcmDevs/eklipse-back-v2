@@ -8,7 +8,7 @@ import { Injectable } from '@nestjs/common';
 import { GcmContexts } from '@crn/old/common/application/constants';
 import { ENVIRONMENTS } from 'src/app.environments';
 import { deleteFile } from '@common/presentation/helpers';
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 
 @Injectable()
 export class ConciliacionRepository extends BaseSource {

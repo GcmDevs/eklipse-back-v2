@@ -12,7 +12,10 @@ import { CreateAuthorityDto } from '../dtos';
 @ApiTags('Authorities')
 @Controller('v1/sec/authorities')
 export class AuthoritiesController {
-  constructor(private _crud: AuthoritiesCrudImpl, private _services: AuthoritiesServicesImpl) {}
+  constructor(
+    private _crud: AuthoritiesCrudImpl,
+    private _services: AuthoritiesServicesImpl
+  ) {}
 
   @Authorities([
     SEC_AUTHORITIES.AUTHORITIES.MANAGE_ALL_AUTHORITIES,

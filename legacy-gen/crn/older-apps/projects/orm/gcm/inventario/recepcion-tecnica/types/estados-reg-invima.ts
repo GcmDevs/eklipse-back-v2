@@ -1,7 +1,10 @@
 export type EstadoRegInvimaTypeCode = 1 | 2 | 3 | 4 | 5;
 
 export class EstadoRegInvimaType {
-  constructor(private code: EstadoRegInvimaTypeCode, private forHumans: string) {}
+  constructor(
+    private code: EstadoRegInvimaTypeCode,
+    private forHumans: string
+  ) {}
 
   public getCode(): EstadoRegInvimaTypeCode {
     return this.code;

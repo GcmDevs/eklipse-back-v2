@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  HttpException,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { BadRequestException, HttpException, InternalServerErrorException } from '@nestjs/common';
 
 const SQL_FK_VIOLATION_MESSAGE =
   'Uno de los datos enviados no es válido o no existe. Verifique la información e intente de nuevo.';

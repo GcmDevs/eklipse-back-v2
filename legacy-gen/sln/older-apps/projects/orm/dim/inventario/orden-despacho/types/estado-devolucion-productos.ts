@@ -1,7 +1,10 @@
 export type EstadoDevolucionProductosTypeCode = 1 | 2 | 3;
 
 export class EstadoDevolucionProductosType {
-  constructor(private code: EstadoDevolucionProductosTypeCode, private forHumans: string) {}
+  constructor(
+    private code: EstadoDevolucionProductosTypeCode,
+    private forHumans: string
+  ) {}
 
   public getCode(): EstadoDevolucionProductosTypeCode {
     return this.code;

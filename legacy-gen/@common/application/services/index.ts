@@ -23,12 +23,6 @@ export const removeTimeZone = (date: Date) => {
   return new Date(date.getTime() - 300 * 60000);
 };
 
-/** @deprecated Realmente no devuelve una fecha */
-export const getDateToString = (date: Date) => {
-  const result = date.toISOString().split('T')[0];
-  return result as any as Date;
-};
-
 /** @deprecated El nombre no deja clara su función */
 export const generateDateFromQuery = (date: Date, endOfDay = false) => {
   return new Date(`${date}${endOfDay ? ':23:59' : ':00:00'}`);
@@ -48,17 +42,17 @@ export const findImageFromContext = (contexto: GcmContextType, centroId?: number
       ? centroId === undefined
         ? 'alta-centro.jpg'
         : centroId === 2
-        ? 'alta-centro.jpg'
-        : 'old-valledupar.jpg'
+          ? 'alta-centro.jpg'
+          : 'old-valledupar.jpg'
       : contexto === GCM_CONTEXTS.AGUACHICA
-      ? 'aguachica.jpg'
-      : contexto === GCM_CONTEXTS.AMMEDICAL
-      ? 'ammedical.png'
-      : contexto === GCM_CONTEXTS.SANJUAN
-      ? 'sanjuan.jpg'
-      : contexto === GCM_CONTEXTS.VALLEDUPAR
-      ? 'valledupar.jpg'
-      : 'ammedical.png'
+        ? 'aguachica.jpg'
+        : contexto === GCM_CONTEXTS.AMMEDICAL
+          ? 'ammedical.png'
+          : contexto === GCM_CONTEXTS.SANJUAN
+            ? 'sanjuan.jpg'
+            : contexto === GCM_CONTEXTS.VALLEDUPAR
+              ? 'valledupar.jpg'
+              : 'ammedical.png'
   }`;
 };
 
