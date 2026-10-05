@@ -1,8 +1,8 @@
-import { UsuariosCreativos } from "@common/domain/enums";
-import { Id } from "@common/domain/value-objects";
-import { EstadoVersionFormato, TipoEventoVersionFormato } from "../enums";
-import { VersionFormatoEvento } from "./auditoria";
-import { SeccionVersionFormato } from "./secciones";
+import { UsuariosCreativos } from '@common/domain/enums';
+import { Id } from '@common/domain/value-objects';
+import { EstadoVersionFormato, TipoEventoVersionFormato } from '../enums';
+import { VersionFormatoEvento } from './auditoria';
+import { SeccionVersionFormato } from './secciones';
 
 export class VersionFormatoFmt {
   private constructor(
@@ -19,20 +19,18 @@ export class VersionFormatoFmt {
     private readonly creadoPor: UsuariosCreativos,
     private readonly creadoPorId: Id,
     private readonly createdAt: Date,
-    private updatedAt: Date,
-  ) { }
-
+    private updatedAt: Date
+  ) {}
 
   static create(data: {
-    formatoId: number,
-    version: number,
-    etiquetaVersion: string | null,
-    secciones: SeccionVersionFormato[],
-    configuracionImagenesId: number,
-    schema: Record<string, unknown>,
-    creadoPorId: number
+    formatoId: number;
+    version: number;
+    etiquetaVersion: string | null;
+    secciones: SeccionVersionFormato[];
+    configuracionImagenesId: number;
+    schema: Record<string, unknown>;
+    creadoPorId: number;
   }): VersionFormatoFmt {
-
     if (data.version <= 0) {
       throw new Error('La versión debe ser mayor a 0');
     }
@@ -55,7 +53,6 @@ export class VersionFormatoFmt {
     );
   }
 
-
   static rebuild(
     id: number,
     formatoId: number,
@@ -72,7 +69,6 @@ export class VersionFormatoFmt {
     createdAt: Date,
     updatedAt: Date
   ): VersionFormatoFmt {
-
     return new VersionFormatoFmt(
       new Id(id),
       new Id(formatoId),
@@ -90,7 +86,6 @@ export class VersionFormatoFmt {
       updatedAt
     );
   }
-
 
   get getId(): Id {
     return this.id;
@@ -138,31 +133,26 @@ export class VersionFormatoFmt {
   clone(
     nuevoFormatoId: number,
     usuarioCreadorId: number,
-    etiquetaVersion: string | null,
+    etiquetaVersion: string | null
   ): VersionFormatoFmt {
-    if (!this.isPublicado()) throw new Error(`No se puede clonar a partir de una version no publicada o en borrador`)
+    if (!this.isPublicado())
+      throw new Error(`No se puede clonar a partir de una version no publicada o en borrador`);
 
     const configImgsId = this.getConfiguracionImagenesId;
 
     const nuevasSecciones = this.getSecciones.map(sec =>
-      SeccionVersionFormato.create(
-        undefined,
-        sec.getSeccionId.getValor,
-        sec.getOrdenMostrado
-      )
+      SeccionVersionFormato.create(undefined, sec.getSeccionId.getValor, sec.getOrdenMostrado)
     );
 
-    const nuevaVersion = VersionFormatoFmt.create(
-      {
-        formatoId: nuevoFormatoId,
-        version: 1,
-        etiquetaVersion,
-        secciones: nuevasSecciones,
-        configuracionImagenesId: configImgsId.getValor,
-        schema: this.schema,
-        creadoPorId: usuarioCreadorId
-      }
-    );
+    const nuevaVersion = VersionFormatoFmt.create({
+      formatoId: nuevoFormatoId,
+      version: 1,
+      etiquetaVersion,
+      secciones: nuevasSecciones,
+      configuracionImagenesId: configImgsId.getValor,
+      schema: this.schema,
+      creadoPorId: usuarioCreadorId,
+    });
 
     return nuevaVersion;
   }
@@ -184,7 +174,6 @@ export class VersionFormatoFmt {
 
     this.secciones.push(seccion);
   }
-
 
   publish(usuarioId: number): VersionFormatoEvento {
     if (this.estado !== EstadoVersionFormato.BORRADOR) {

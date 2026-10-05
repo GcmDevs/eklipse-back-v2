@@ -17,15 +17,8 @@ export class MarcaMapper {
   }
 
   static toDomain(orm: MarcaOrm): Marca {
-    return Marca.rebuild(
-      orm.id,
-      orm.nombre,
-      orm.createdAt,
-      orm.updatedAt,
-      orm?.descripcion
-    );
+    return Marca.rebuild(orm.id, orm.nombre, orm.createdAt, orm.updatedAt, orm?.descripcion);
   }
-
 
   static toView(orm: MarcaOrm): MarcaRead {
     return {
@@ -33,7 +26,7 @@ export class MarcaMapper {
       nombre: orm.nombre,
       descripcion: orm.descripcion,
       createdAt: orm.createdAt,
-      updatedAt: orm.updatedAt
+      updatedAt: orm.updatedAt,
     };
   }
 

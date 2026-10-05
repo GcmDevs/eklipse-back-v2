@@ -19,31 +19,46 @@ export class AccesorioUnidadService {
     private readonly repository: IAccesorioUnidadRepository,
     private readonly eventoService: AuditEquipoService,
     @Inject(TRANSACTION_MANAGER)
-    private readonly txManager: TransactionManager,
-  ) { }
+    private readonly txManager: TransactionManager
+  ) {}
 
   async create(
     equipoId: number,
     accesorioEstandarId: number,
     parteSnap: string,
     estado?: EstadoAccesorioUnidad,
-    observaciones?: string,
+    observaciones?: string
   ): Promise<AccesorioUnidadRead> {
     return this.txManager.transactional(async () => {
-      const saved = await this.repository.createFromEstandar(equipoId, accesorioEstandarId, parteSnap, estado, observaciones);
+      const saved = await this.repository.createFromEstandar(
+        equipoId,
+        accesorioEstandarId,
+        parteSnap,
+        estado,
+        observaciones
+      );
       return this.repository.findViewById(saved.getId.getValor);
     });
   }
 
   async createBatch(
     equipoId: number,
-    items: Array<{ accesorioEstandarId: number; parteSnap: string; estado?: EstadoAccesorioUnidad; observaciones?: string }>,
+    items: Array<{
+      accesorioEstandarId: number;
+      parteSnap: string;
+      estado?: EstadoAccesorioUnidad;
+      observaciones?: string;
+    }>
   ): Promise<AccesorioUnidadRead[]> {
     return this.txManager.transactional(async () => {
       const results: AccesorioUnidad[] = [];
       for (const item of items) {
         const saved = await this.repository.createFromEstandar(
-          equipoId, item.accesorioEstandarId, item.parteSnap, item.estado, item.observaciones,
+          equipoId,
+          item.accesorioEstandarId,
+          item.parteSnap,
+          item.estado,
+          item.observaciones
         );
         results.push(saved);
       }
@@ -55,7 +70,7 @@ export class AccesorioUnidadService {
 
   async findById(
     id: number,
-    options: FindThrowOptions = new FindThrowOptions(),
+    options: FindThrowOptions = new FindThrowOptions()
   ): Promise<AccesorioUnidad | null> {
     const accesorioFound = await this.repository.findById(id);
     if (!accesorioFound && options.throwIfNotFound) {
@@ -68,7 +83,11 @@ export class AccesorioUnidadService {
     return this.repository.findByEquipoId(equipoId);
   }
 
-  async changeEstado(equipoId: number, id: number, estado: EstadoAccesorioUnidad): Promise<AccesorioUnidadRead> {
+  async changeEstado(
+    equipoId: number,
+    id: number,
+    estado: EstadoAccesorioUnidad
+  ): Promise<AccesorioUnidadRead> {
     if (estado == null) {
       throw new BadInputError('estado es requerido');
     }
@@ -82,11 +101,7 @@ export class AccesorioUnidadService {
     });
   }
 
-  async update(
-    equipoId: number,
-    id: number,
-    observaciones?: string,
-  ): Promise<AccesorioUnidadRead> {
+  async update(equipoId: number, id: number, observaciones?: string): Promise<AccesorioUnidadRead> {
     return this.txManager.transactional(async () => {
       await this.assertBelongsToEquipo(equipoId, id);
       const entity = await this.findById(id, { throwIfNotFound: true });
@@ -102,7 +117,11 @@ export class AccesorioUnidadService {
       const entity = await this.findById(id, { throwIfNotFound: true });
       entity.descontinue();
       const saved = await this.repository.update(entity);
-      await this.registerEventoManual(equipoId, entity, TipoAuditTipoEquipo.ACCESORIO_DESCONTINUADO);
+      await this.registerEventoManual(
+        equipoId,
+        entity,
+        TipoAuditTipoEquipo.ACCESORIO_DESCONTINUADO
+      );
       return this.repository.findViewById(saved.getId.getValor);
     });
   }
@@ -111,7 +130,7 @@ export class AccesorioUnidadService {
     equipoId: number,
     entity: AccesorioUnidad,
     accion: TipoAuditTipoEquipo,
-    referenciaId?: number,
+    referenciaId?: number
   ): Promise<void> {
     const usuario = getUser();
     await this.eventoService.register({
@@ -133,14 +152,14 @@ export class AccesorioUnidadService {
   private buildDescripcionManual(accion: TipoAuditTipoEquipo, parteSnap: string): string {
     return accion === TipoAuditTipoEquipo.ACCESORIO_DESCONTINUADO
       ? `Accesorio "${parteSnap}" descontinuado manualmente del equipo`
-      : 'Accesorio Modificado'
+      : 'Accesorio Modificado';
   }
 
   private async assertBelongsToEquipo(equipoId: number, id: number): Promise<AccesorioUnidad> {
     const current = await this.repository.findById(id);
     if (!current || current.getEquipoId.getValor !== equipoId) {
       throw new ResourceNotFoundError(
-        `AccesorioUnidad con id: ${id} no encontrado para el equipo ${equipoId}`,
+        `AccesorioUnidad con id: ${id} no encontrado para el equipo ${equipoId}`
       );
     }
     return current;

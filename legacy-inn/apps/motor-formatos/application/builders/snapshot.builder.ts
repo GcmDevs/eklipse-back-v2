@@ -1,12 +1,28 @@
 import { ensureArray } from '@common/application/services';
 import { BadInputError } from '@common/domain/errors';
 import {
-  ComponenteGrupoEjecucionSchema, ComponenteRangoSchema, ComponenteSchema,
-  ComponenteTablaSchema, ComponenteTextoLibreSchema, EstructuraFormatoSchema,
-  ItemGrupoSchema, KeyPrefix, OrigenSeccion, SeccionPlantillaFmt, SeccionSchema, TipoComponente
+  ComponenteGrupoEjecucionSchema,
+  ComponenteRangoSchema,
+  ComponenteSchema,
+  ComponenteTablaSchema,
+  ComponenteTextoLibreSchema,
+  EstructuraFormatoSchema,
+  ItemGrupoSchema,
+  KeyPrefix,
+  OrigenSeccion,
+  SeccionPlantillaFmt,
+  SeccionSchema,
+  TipoComponente,
 } from 'apps/motor-formatos/domain';
 import { EjecucionMantItemOrm, GrupoEjecucionMantOrm } from 'apps/motor-formatos/infrastructure';
-import { ComponenteGrupoEjecucionDto, ComponenteRangoDto, ComponenteTablaDto, ComponenteTextoLibreDto, DesignVersionFormatoDto, SeccionDto } from 'apps/motor-formatos/presentation/dto';
+import {
+  ComponenteGrupoEjecucionDto,
+  ComponenteRangoDto,
+  ComponenteTablaDto,
+  ComponenteTextoLibreDto,
+  DesignVersionFormatoDto,
+  SeccionDto,
+} from 'apps/motor-formatos/presentation/dto';
 import { KeyUtils } from '../utils/key.utils';
 
 export class SnapshotBuilder {
@@ -14,9 +30,8 @@ export class SnapshotBuilder {
     dto: DesignVersionFormatoDto,
     catalogoSecciones: SeccionPlantillaFmt[],
     catalogoGrupos: GrupoEjecucionMantOrm[],
-    catalogoItems: EjecucionMantItemOrm[],
+    catalogoItems: EjecucionMantItemOrm[]
   ): EstructuraFormatoSchema {
-
     const grupoMap = new Map(catalogoGrupos.map(g => [g.id, g]));
     const itemMap = new Map(catalogoItems.map(i => [i.id, i]));
 
@@ -30,14 +45,15 @@ export class SnapshotBuilder {
   private static buildSeccion(
     dto: SeccionDto,
     grupoMap: Map<number, GrupoEjecucionMantOrm>,
-    itemMap: Map<number, EjecucionMantItemOrm>,
+    itemMap: Map<number, EjecucionMantItemOrm>
   ): SeccionSchema {
     return {
       key: KeyUtils.preserveOrGenerate(dto.key, KeyPrefix.sec, dto.nombre),
       orden: dto.orden,
       nombre: dto.nombre,
       origen: dto.origen,
-      seccionCatalogoId: dto.origen === OrigenSeccion.CATALOGO ? (dto.seccionCatalogoId ?? null) : null,
+      seccionCatalogoId:
+        dto.origen === OrigenSeccion.CATALOGO ? (dto.seccionCatalogoId ?? null) : null,
       componentes: ensureArray(dto.componentes)
         .sort((a, b) => a.orden - b.orden)
         .map(comp => SnapshotBuilder.buildComponente(comp, grupoMap, itemMap)),
@@ -47,7 +63,7 @@ export class SnapshotBuilder {
   private static buildComponente(
     comp: SeccionDto['componentes'][number],
     grupoMap: Map<number, GrupoEjecucionMantOrm>,
-    itemMap: Map<number, EjecucionMantItemOrm>,
+    itemMap: Map<number, EjecucionMantItemOrm>
   ): ComponenteSchema {
     switch (comp.tipo) {
       case TipoComponente.GRUPO_EJECUCION:
@@ -66,9 +82,8 @@ export class SnapshotBuilder {
   private static buildGrupo(
     dto: ComponenteGrupoEjecucionDto,
     grupoMap: Map<number, GrupoEjecucionMantOrm>,
-    itemMap: Map<number, EjecucionMantItemOrm>,
+    itemMap: Map<number, EjecucionMantItemOrm>
   ): ComponenteGrupoEjecucionSchema {
-    
     const catGrupo = dto.catalogoGrupoId ? grupoMap.get(dto.catalogoGrupoId) : null;
     const nombre = catGrupo?.nombre ?? dto.nombre;
 

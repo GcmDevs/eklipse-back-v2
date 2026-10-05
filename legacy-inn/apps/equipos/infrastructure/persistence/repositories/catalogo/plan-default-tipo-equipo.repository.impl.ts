@@ -1,4 +1,7 @@
-import { applyActivoStatusToQb, TypeOrmTransactionContext } from '@common/infrastructure/persistence/transactional';
+import {
+  applyActivoStatusToQb,
+  TypeOrmTransactionContext,
+} from '@common/infrastructure/persistence/transactional';
 import { BaseSource } from '@common/infrastructure/services';
 import { PlanDefaultTipoEquipo } from '@equipos/domain/entities/catalogo/plan-default-tipo-equipo.entity';
 import { PlanDefaultTipoEquipoRead } from '@equipos/domain/read';
@@ -8,10 +11,15 @@ import { PlanDefaultTipoEquipoOrm } from '@orm/inn/equipos/catalogo/plan-default
 import { Injectable } from '@nestjs/common';
 
 @Injectable()
-export class TypeOrmPlanDefaultTipoEquipoRepository extends BaseSource implements PlanDefaultTipoEquipoRepository {
+export class TypeOrmPlanDefaultTipoEquipoRepository
+  extends BaseSource
+  implements PlanDefaultTipoEquipoRepository
+{
   private get repository() {
     const qr = TypeOrmTransactionContext.getQueryRunner();
-    return qr ? qr.manager.getRepository(PlanDefaultTipoEquipoOrm) : this.conn.getRepository(PlanDefaultTipoEquipoOrm);
+    return qr
+      ? qr.manager.getRepository(PlanDefaultTipoEquipoOrm)
+      : this.conn.getRepository(PlanDefaultTipoEquipoOrm);
   }
 
   private qbBase(alias = 'p') {
@@ -35,9 +43,16 @@ export class TypeOrmPlanDefaultTipoEquipoRepository extends BaseSource implement
     return orm ? PlanDefaultTipoEquipoMapper.toDomain(orm) : null;
   }
 
-  async findAll({ tipoEquipoId, search, limit }: { tipoEquipoId: number; search?: string; limit?: number }): Promise<PlanDefaultTipoEquipoRead[]> {
-    const qb = this.qbBase()
-      .where('p.tipoEquipo = :tipoEquipoId', { tipoEquipoId });
+  async findAll({
+    tipoEquipoId,
+    search,
+    limit,
+  }: {
+    tipoEquipoId: number;
+    search?: string;
+    limit?: number;
+  }): Promise<PlanDefaultTipoEquipoRead[]> {
+    const qb = this.qbBase().where('p.tipoEquipo = :tipoEquipoId', { tipoEquipoId });
     applyActivoStatusToQb(qb, 'p.activo');
 
     if (search?.trim()) {
@@ -75,13 +90,14 @@ export class TypeOrmPlanDefaultTipoEquipoRepository extends BaseSource implement
   }
 
   async findViewById(id: number): Promise<PlanDefaultTipoEquipoRead | null> {
-    const orm = await this.qbBase()
-      .where('p.id = :id', { id })
-      .getOne();
+    const orm = await this.qbBase().where('p.id = :id', { id }).getOne();
     return orm ? PlanDefaultTipoEquipoMapper.toView(orm) : null;
   }
 
-  async findAllAndCount(page: number, limit: number): Promise<[PlanDefaultTipoEquipoRead[], number]> {
+  async findAllAndCount(
+    page: number,
+    limit: number
+  ): Promise<[PlanDefaultTipoEquipoRead[], number]> {
     return this.findAllView(page, limit);
   }
 }

@@ -1,5 +1,5 @@
-import { Id, normalizeUppercaseText } from "@common/domain/value-objects";
-import { FichaTecnicaTipoEquipo } from "@equipos/domain/value-objects";
+import { Id, normalizeUppercaseText } from '@common/domain/value-objects';
+import { FichaTecnicaTipoEquipo } from '@equipos/domain/value-objects';
 
 export class TipoEquipo {
   private constructor(
@@ -12,8 +12,8 @@ export class TipoEquipo {
     private activo: boolean,
     private fichaTecnica: FichaTecnicaTipoEquipo | undefined,
     private readonly createdAt: Date,
-    private updatedAt: Date,
-  ) { }
+    private updatedAt: Date
+  ) {}
 
   static create(
     nombre: string,
@@ -21,12 +21,20 @@ export class TipoEquipo {
     subclaseId: number,
     tipoActivoId: number,
     observaciones?: string,
-    fichaTecnica?: FichaTecnicaTipoEquipo,
+    fichaTecnica?: FichaTecnicaTipoEquipo
   ): TipoEquipo {
     const now = new Date();
     return new TipoEquipo(
-      new Id(), normalizeUppercaseText(nombre), new Id(modeloId), new Id(subclaseId), new Id(tipoActivoId),
-      observaciones, true, fichaTecnica, now, now,
+      new Id(),
+      normalizeUppercaseText(nombre),
+      new Id(modeloId),
+      new Id(subclaseId),
+      new Id(tipoActivoId),
+      observaciones,
+      true,
+      fichaTecnica,
+      now,
+      now
     );
   }
 
@@ -40,11 +48,19 @@ export class TipoEquipo {
     updatedAt: Date,
     observaciones?: string,
     activo?: boolean,
-    fichaTecnica?: FichaTecnicaTipoEquipo,
+    fichaTecnica?: FichaTecnicaTipoEquipo
   ): TipoEquipo {
     return new TipoEquipo(
-      new Id(id), nombre, new Id(modeloId), new Id(subclaseId), new Id(tipoActivoId),
-      observaciones, activo ?? true, fichaTecnica, createdAt, updatedAt,
+      new Id(id),
+      nombre,
+      new Id(modeloId),
+      new Id(subclaseId),
+      new Id(tipoActivoId),
+      observaciones,
+      activo ?? true,
+      fichaTecnica,
+      createdAt,
+      updatedAt
     );
   }
 
@@ -54,7 +70,7 @@ export class TipoEquipo {
     subclaseId: number,
     tipoActivoId: number,
     observaciones: string | undefined,
-    fichaTecnica: FichaTecnicaTipoEquipo,
+    fichaTecnica: FichaTecnicaTipoEquipo
   ): void {
     this.nombre = normalizeUppercaseText(nombre);
     this.modeloId = new Id(modeloId);
@@ -65,7 +81,7 @@ export class TipoEquipo {
     this.updatedAt = new Date();
   }
 
-  modifyBasic(data: { nombre?: string; observaciones?: string | null; }): void {
+  modifyBasic(data: { nombre?: string; observaciones?: string | null }): void {
     if (data.nombre !== undefined) this.nombre = normalizeUppercaseText(data.nombre);
     if (data.observaciones !== undefined) this.observaciones = data.observaciones ?? undefined;
     this.updatedAt = new Date();
@@ -81,14 +97,34 @@ export class TipoEquipo {
     this.updatedAt = new Date();
   }
 
-  get getId(): Id { return this.id; }
-  get getNombre(): string { return this.nombre; }
-  get getModeloId(): Id { return this.modeloId; }
-  get getSubclaseId(): Id { return this.subclaseId; }
-  get getTipoActivoId(): Id { return this.tipoActivoId; }
-  get getObservaciones(): string | undefined { return this.observaciones; }
-  get getActivo(): boolean { return this.activo; }
-  get getFichaTecnica(): FichaTecnicaTipoEquipo | undefined { return this.fichaTecnica; }
-  get getCreatedAt(): Date { return this.createdAt; }
-  get getUpdatedAt(): Date { return this.updatedAt; }
+  get getId(): Id {
+    return this.id;
+  }
+  get getNombre(): string {
+    return this.nombre;
+  }
+  get getModeloId(): Id {
+    return this.modeloId;
+  }
+  get getSubclaseId(): Id {
+    return this.subclaseId;
+  }
+  get getTipoActivoId(): Id {
+    return this.tipoActivoId;
+  }
+  get getObservaciones(): string | undefined {
+    return this.observaciones;
+  }
+  get getActivo(): boolean {
+    return this.activo;
+  }
+  get getFichaTecnica(): FichaTecnicaTipoEquipo | undefined {
+    return this.fichaTecnica;
+  }
+  get getCreatedAt(): Date {
+    return this.createdAt;
+  }
+  get getUpdatedAt(): Date {
+    return this.updatedAt;
+  }
 }

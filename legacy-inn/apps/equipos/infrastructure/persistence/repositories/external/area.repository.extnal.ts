@@ -1,16 +1,15 @@
-import { BaseSource } from "@common/infrastructure/services";
-import { AreaServicioOrm } from "@orm/gen";
-import { ILike, Repository } from "typeorm";
-
+import { BaseSource } from '@common/infrastructure/services';
+import { AreaServicioOrm } from '@orm/gen';
+import { ILike, Repository } from 'typeorm';
 
 export class TypeOrmAreaRepository extends BaseSource {
-  private readonly repository: Repository<AreaServicioOrm> = this.conn.getRepository(AreaServicioOrm);
-
+  private readonly repository: Repository<AreaServicioOrm> =
+    this.conn.getRepository(AreaServicioOrm);
 
   async findById(id: number): Promise<AreaServicioOrm | null> {
     const areaFound = await this.repository.findOne({
-      where: { id: id }
-    })
+      where: { id: id },
+    });
     return areaFound ?? null;
   }
 
@@ -26,22 +25,20 @@ export class TypeOrmAreaRepository extends BaseSource {
     return areasFound;
   }
 
-
   public async findAllAndCount(skip: number, take: number): Promise<[AreaServicioOrm[], number]> {
     const [areasFound, count] = await this.repository.findAndCount({
       take: take,
-      skip: (skip! - 1) * take
+      skip: (skip! - 1) * take,
     });
 
-    return [areasFound, count]
+    return [areasFound, count];
   }
 
-
   async update(marca: Partial<AreaServicioOrm>): Promise<AreaServicioOrm> {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 
   async delete(id: number): Promise<void> {
-    throw new Error("Method not implemented.");
+    throw new Error('Method not implemented.');
   }
 }

@@ -4,10 +4,7 @@ import { getUser } from '@common/infrastructure/services';
 import { CONSECUTIVOS_CODES, ConsecutivoService } from '@core/consecutivos/application';
 import { StagingFileService } from '@core/media/application/services/staging.archivo.service';
 import { Inject, Injectable } from '@nestjs/common';
-import {
-  commitEvidenciasTanqueo,
-  validateEvidenciasStaging,
-} from '@vehiculos/application/helpers';
+import { commitEvidenciasTanqueo, validateEvidenciasStaging } from '@vehiculos/application/helpers';
 import { Tanqueo, Vehiculo } from '@vehiculos/domain/entities';
 import { OrigenTanqueo } from '@vehiculos/domain/enums';
 import {

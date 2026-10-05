@@ -14,14 +14,14 @@ type FormatoServiceLike = {
   findByIdAndTipo(
     id: number,
     tipo: TipoMantenimiento,
-    options?: FindThrowOptions,
+    options?: FindThrowOptions
   ): Promise<FormatoOperativo | null>;
 };
 
 export async function buildPlanActividad(
   formatoService: FormatoServiceLike,
   tipo: TipoActividad,
-  data: CreatePlanActividadDto,
+  data: CreatePlanActividadDto
 ): Promise<PlanActividad> {
   let formatoId: number | null = data.formatoId ?? null;
 
@@ -29,16 +29,16 @@ export async function buildPlanActividad(
     const formato = await formatoService.findByIdAndTipo(
       data.formatoId,
       TipoMantenimiento.PREVENTIVO,
-      { throwIfNotFound: false },
+      { throwIfNotFound: false }
     );
     if (!formato) {
       throw new ResourceNotFoundError(
-        `Formato de mantenimiento preventivo con id: ${data.formatoId} no encontrado`,
+        `Formato de mantenimiento preventivo con id: ${data.formatoId} no encontrado`
       );
     }
     if (formato.getModo !== ModoFormato.OPERATIVO) {
       throw new BadInputError(
-        'No se puede asociar el equipo a un formato tipo plantilla, solo a operativos',
+        'No se puede asociar el equipo a un formato tipo plantilla, solo a operativos'
       );
     }
     formatoId = formato.getId.getValor;
@@ -52,6 +52,6 @@ export async function buildPlanActividad(
     data.seRealizaPorExterno ?? false,
     data.diasAnticipacionNotificacion ?? null,
     data.origenInicializacion,
-    data.observaciones,
+    data.observaciones
   );
 }

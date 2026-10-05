@@ -169,13 +169,13 @@ export class FetchItemsImpl extends BaseSource {
       result.stockMinimo = result.promedioConsumo
         ? result.promedioConsumo / 2
         : existenciaActual
-        ? existenciaActual.stockMinimo
-        : 0;
+          ? existenciaActual.stockMinimo
+          : 0;
       result.stockMaximo = result.promedioConsumo
         ? (result.promedioConsumo / 2) * 3
         : existenciaActual
-        ? existenciaActual.stockMaximo
-        : 0;
+          ? existenciaActual.stockMaximo
+          : 0;
 
       result.existenciaActual += existenciaActual ? existenciaActual.existenciaActual : 0;
       result.puntoReposicion += existenciaActual ? existenciaActual.puntoReposicion : 0;

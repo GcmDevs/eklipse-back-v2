@@ -12,7 +12,7 @@ export class TipoDocCategoriaActivoMapper {
       orm.reglasTipoActivo ?? ReglasObligatoriedadTipoActivo.fromPrimitives([]),
       orm.createdAt,
       orm.updatedAt,
-      orm.descripcion,
+      orm.descripcion
     );
   }
 
@@ -31,7 +31,7 @@ export class TipoDocCategoriaActivoMapper {
   static toView(
     orm: TipoDocCategoriaActivoOrm,
     tipoActivoNombres?: Map<number, string>,
-    tipoActivoIdFiltro?: number,
+    tipoActivoIdFiltro?: number
   ): TipoDocCategoriaActivoRead {
     const reglas = orm.reglasTipoActivo?.getReglas() ?? [];
     const reglasTipoActivo = reglas.map(r => ({
@@ -40,9 +40,10 @@ export class TipoDocCategoriaActivoMapper {
       esObligatorio: r.esObligatorio,
     }));
 
-    const reglaFiltro = tipoActivoIdFiltro != null
-      ? reglas.find(r => r.tipoActivoId === tipoActivoIdFiltro)
-      : undefined;
+    const reglaFiltro =
+      tipoActivoIdFiltro != null
+        ? reglas.find(r => r.tipoActivoId === tipoActivoIdFiltro)
+        : undefined;
 
     return {
       id: orm.id,
@@ -59,7 +60,7 @@ export class TipoDocCategoriaActivoMapper {
   static toViewList(
     orms: TipoDocCategoriaActivoOrm[],
     tipoActivoNombres?: Map<number, string>,
-    tipoActivoIdFiltro?: number,
+    tipoActivoIdFiltro?: number
   ): TipoDocCategoriaActivoRead[] {
     return orms.map(orm => this.toView(orm, tipoActivoNombres, tipoActivoIdFiltro));
   }

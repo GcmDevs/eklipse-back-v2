@@ -28,7 +28,7 @@ export function particionarItemsConteo<
     isActivo: boolean;
     isActivoEstante: boolean;
     isDeleted?: boolean | null;
-  }
+  },
 >(items: TItem[], productos: TProducto[]) {
   const productosPorId = new Map(productos.map(producto => [producto.id, producto]));
   const activos: TItem[] = [];
@@ -169,7 +169,7 @@ export function vincularDetallesConConteos<
   TDetalle extends {
     conteoInventarioId: number | undefined;
     conteoInventario: TConteo | undefined;
-  }
+  },
 >(conteos: TConteo[], detalles: TDetalle[]): TDetalle[] {
   if (conteos.length !== detalles.length) {
     throw new Error('La cantidad de conteos y detalles no coincide');

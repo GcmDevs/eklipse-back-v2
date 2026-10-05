@@ -8,11 +8,8 @@ export interface TipoEquipoRepository extends BaseRepository<TipoEquipo, TipoEqu
     page: number,
     limit: number,
     filters: EntityStatusQuery & { modeloId?: number; subclaseId?: number },
-    search?: string,
+    search?: string
   ): Promise<[TipoEquipoRead[], number]>;
 
-  findViewById(
-    id: number,
-    filters?: EntityStatusQuery,
-  ): Promise<TipoEquipoRead | null>;
+  findViewById(id: number, filters?: EntityStatusQuery): Promise<TipoEquipoRead | null>;
 }

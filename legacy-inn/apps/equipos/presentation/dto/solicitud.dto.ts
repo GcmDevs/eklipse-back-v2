@@ -6,7 +6,12 @@ import {
   RequiredText,
 } from '@common/presentation/decorators';
 import { PaginationDto } from '@common/presentation/dto';
-import { EstadoEquipo, EstadoSolicitud, MotivoCambioEstadoEquipo, TipoAccionAprobacion } from '@equipos/domain/enums';
+import {
+  EstadoEquipo,
+  EstadoSolicitud,
+  MotivoCambioEstadoEquipo,
+  TipoAccionAprobacion,
+} from '@equipos/domain/enums';
 
 export class RejectSolicitudDto {
   @RequiredText({ maxLength: 400 })

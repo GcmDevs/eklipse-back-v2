@@ -14,7 +14,6 @@ import {
   ValidateNested,
 } from 'class-validator';
 
-
 export class FiltersExportEquiposListDto {
   @IsOptional()
   @IsArray()

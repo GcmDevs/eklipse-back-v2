@@ -1,4 +1,18 @@
-import { OptionalBoolean, OptionalDateString, OptionalEnum, OptionalInteger, OptionalIntegerArray, OptionalNested, OptionalNestedArray, OptionalNestedWhen, OptionalText, RequiredEnum, RequiredInteger, RequiredNested, RequiredText } from '@common/presentation/decorators';
+import {
+  OptionalBoolean,
+  OptionalDateString,
+  OptionalEnum,
+  OptionalInteger,
+  OptionalIntegerArray,
+  OptionalNested,
+  OptionalNestedArray,
+  OptionalNestedWhen,
+  OptionalText,
+  RequiredEnum,
+  RequiredInteger,
+  RequiredNested,
+  RequiredText,
+} from '@common/presentation/decorators';
 import { PaginationDto } from '@common/presentation/dto';
 import { IntersectionType, OmitType, PartialType, PickType } from '@nestjs/mapped-types';
 import { EstadoEquipo, MotivoCambioEstadoEquipo } from '../../domain/enums';
@@ -101,7 +115,7 @@ export class CreateEquipoDto {
 export class ComplementoImportLegacyDto extends IntersectionType(
   PickType(CreateEquipoDto, ['tipoEquipoId', 'compraId'] as const),
   PartialType(OmitType(CreateEquipoDto, ['numeroPlaca', 'tipoEquipoId', 'compraId'] as const))
-) { }
+) {}
 
 export class ImportEquipoLegacyDto {
   @RequiredText({ maxLength: 255 })
@@ -123,7 +137,7 @@ export class UpdateEquipoDto extends PartialType(
     'planCalibracion',
     'registroFotografico',
   ] as const)
-) { }
+) {}
 
 export class FilterEquipoDto extends PaginationDto {
   @OptionalEnum(EstadoEquipo)
@@ -153,4 +167,4 @@ export class DarDeBajaEquipoDto {
   fechaBaja?: Date;
 }
 
-export class FilterResumenEquipoDto extends OmitType(FilterEquipoDto, ['page', 'limit'] as const) { }
+export class FilterResumenEquipoDto extends OmitType(FilterEquipoDto, ['page', 'limit'] as const) {}

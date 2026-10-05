@@ -1,8 +1,7 @@
-import { VersionFormatoEvento } from "apps/motor-formatos/domain/entities/auditoria";
-import { EventoAuditVersionFormatoOrm } from "../../persistence/orm/auditoria";
+import { VersionFormatoEvento } from 'apps/motor-formatos/domain/entities/auditoria';
+import { EventoAuditVersionFormatoOrm } from '../../persistence/orm/auditoria';
 
 export class VersionFormatoEventoMapper {
-
   static toOrm(domain: VersionFormatoEvento): EventoAuditVersionFormatoOrm {
     const orm = new EventoAuditVersionFormatoOrm();
 
@@ -21,7 +20,7 @@ export class VersionFormatoEventoMapper {
       orm.versionFormatoId,
       orm.tipoEvento,
       orm.usuarioId,
-      orm.createdAt,
+      orm.createdAt
     );
   }
 }

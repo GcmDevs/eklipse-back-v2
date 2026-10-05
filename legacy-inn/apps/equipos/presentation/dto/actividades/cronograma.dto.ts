@@ -1,4 +1,11 @@
-import { OptionalEnum, OptionalInteger, OptionalNumber, OptionalText, RequiredEnum, RequiredInteger } from '@common/presentation/decorators';
+import {
+  OptionalEnum,
+  OptionalInteger,
+  OptionalNumber,
+  OptionalText,
+  RequiredEnum,
+  RequiredInteger,
+} from '@common/presentation/decorators';
 import { TipoActividad, EstadoCronograma } from '@equipos/domain/enums';
 
 export class CreateCronogramaDto {

@@ -1,6 +1,5 @@
-import { EjecucionMantItemRead } from "apps/motor-formatos/application/read";
-import { EjecucionMantItemOrm } from "../../persistence";
-
+import { EjecucionMantItemRead } from 'apps/motor-formatos/application/read';
+import { EjecucionMantItemOrm } from '../../persistence';
 
 export class EjecucionMantItemMapper {
   static toView(orm: EjecucionMantItemOrm): EjecucionMantItemRead {

@@ -18,10 +18,7 @@ import {
   hasVehiculoIdFiltro,
 } from '../eklipse-refs';
 import { TanqueoInconsistenciaOrm, TanqueoOrm } from '../orm';
-import {
-  runVehiculosPersist,
-  scopeForTanqueo,
-} from '../errors/vehiculos-persistence.error';
+import { runVehiculosPersist, scopeForTanqueo } from '../errors/vehiculos-persistence.error';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 import { resolveRepository } from '@common/infrastructure/persistence/transactional';
 

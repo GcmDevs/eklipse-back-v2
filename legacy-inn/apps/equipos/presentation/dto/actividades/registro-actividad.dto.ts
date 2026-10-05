@@ -48,7 +48,8 @@ export class EjecucionExternaEmbebidaDto {
 
   @RequiredEnumWhen(
     MotivoEjecucionExternaExcepcional,
-    (o: EjecucionExternaEmbebidaDto) => o.esExcepcional === true)
+    (o: EjecucionExternaEmbebidaDto) => o.esExcepcional === true
+  )
   motivoExcepcional?: MotivoEjecucionExternaExcepcional;
 
   @OptionalText({ maxLength: 400 })

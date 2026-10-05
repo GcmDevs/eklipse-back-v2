@@ -1,19 +1,24 @@
-import { TypeOrmTransactionContext } from "@common/infrastructure/persistence/transactional";
-import { BaseSource } from "@common/infrastructure/services";
-import { SolicitudAprobacion } from "@equipos/domain/entities";
-import { EstadoSolicitud, TipoAccionAprobacion } from "@equipos/domain/enums";
-import { SolicitudRead } from "@equipos/domain/read";
-import { SolicitudRepository } from "@equipos/domain/repositories";
-import { SolicitudAprobacionMapper } from "@equipos/infrastructure/mappers";
-import { FilterSolicitudDto } from "@equipos/presentation/dto";
-import { Injectable } from "@nestjs/common";
-import { SolicitudAprobacionOrm } from "@orm/inn/equipos";
+import { TypeOrmTransactionContext } from '@common/infrastructure/persistence/transactional';
+import { BaseSource } from '@common/infrastructure/services';
+import { SolicitudAprobacion } from '@equipos/domain/entities';
+import { EstadoSolicitud, TipoAccionAprobacion } from '@equipos/domain/enums';
+import { SolicitudRead } from '@equipos/domain/read';
+import { SolicitudRepository } from '@equipos/domain/repositories';
+import { SolicitudAprobacionMapper } from '@equipos/infrastructure/mappers';
+import { FilterSolicitudDto } from '@equipos/presentation/dto';
+import { Injectable } from '@nestjs/common';
+import { SolicitudAprobacionOrm } from '@orm/inn/equipos';
 
 @Injectable()
-export class TypeOrmSolicitudAprobacionRepository extends BaseSource implements SolicitudRepository {
+export class TypeOrmSolicitudAprobacionRepository
+  extends BaseSource
+  implements SolicitudRepository
+{
   private get repository() {
     const qr = TypeOrmTransactionContext.getQueryRunner();
-    return qr ? qr.manager.getRepository(SolicitudAprobacionOrm) : this.conn.getRepository(SolicitudAprobacionOrm);
+    return qr
+      ? qr.manager.getRepository(SolicitudAprobacionOrm)
+      : this.conn.getRepository(SolicitudAprobacionOrm);
   }
 
   async save(solicitud: SolicitudAprobacion): Promise<SolicitudAprobacion> {
@@ -39,7 +44,8 @@ export class TypeOrmSolicitudAprobacionRepository extends BaseSource implements 
   }
 
   async findAllView(filters: FilterSolicitudDto): Promise<[SolicitudRead[], number]> {
-    const qb = this.repository.createQueryBuilder('soli')
+    const qb = this.repository
+      .createQueryBuilder('soli')
       .leftJoinAndSelect('soli.equipo', 'equipo');
 
     if (filters.equipoId) qb.andWhere('soli.equipoId = :equipoId', { equipoId: filters.equipoId });
@@ -47,9 +53,12 @@ export class TypeOrmSolicitudAprobacionRepository extends BaseSource implements 
     if (filters.tipo) qb.andWhere('soli.tipoAccion = :tipo', { tipo: filters.tipo });
     if (filters.search) {
       const search = filters.search.trim();
-      qb.andWhere(`(soli.solicitanteNombre LIKE :search) OR CAST(soli.numero AS VARCHAR) LIKE :search`, {
-        search: `%${search}%`
-      });
+      qb.andWhere(
+        `(soli.solicitanteNombre LIKE :search) OR CAST(soli.numero AS VARCHAR) LIKE :search`,
+        {
+          search: `%${search}%`,
+        }
+      );
     }
 
     qb.orderBy('soli.createdAt', 'DESC')

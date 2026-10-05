@@ -8,10 +8,14 @@ import {
   FORMATO_SCHEMA_QUERY,
   FormatoSchemaQuery,
   OrigenSeccion,
-  TipoComponente
+  TipoComponente,
 } from 'apps/motor-formatos/domain';
 import { EjecucionMantItemOrm, GrupoEjecucionMantOrm } from 'apps/motor-formatos/infrastructure';
-import { CloneFormatoPlantillaDto, ComponenteGrupoEjecucionDto, DesignVersionFormatoDto } from 'apps/motor-formatos/presentation/dto';
+import {
+  CloneFormatoPlantillaDto,
+  ComponenteGrupoEjecucionDto,
+  DesignVersionFormatoDto,
+} from 'apps/motor-formatos/presentation/dto';
 import { SnapshotBuilder } from '../builders';
 import { EjecucionMantService } from './ejecuciones-mant.service';
 import { SeccionesService } from './seccion.service';
@@ -25,9 +29,8 @@ export class FormatoEngineService {
     @Inject(FORMATO_SCHEMA_QUERY)
     private readonly formatoSchemaQuery: FormatoSchemaQuery,
     private readonly seccionesService: SeccionesService,
-    private readonly ejecucionMantService: EjecucionMantService,
-  ) { }
-
+    private readonly ejecucionMantService: EjecucionMantService
+  ) {}
 
   public async clone({
     formatoBaseId,
@@ -41,22 +44,18 @@ export class FormatoEngineService {
     formatoId: number;
     versionId: number;
   }> {
-
-    const formatoBase =
-      await this.formatoRepository.findByIdWithSpecificVersion(
-        formatoBaseId,
-        versionFormatoId,
-      );
+    const formatoBase = await this.formatoRepository.findByIdWithSpecificVersion(
+      formatoBaseId,
+      versionFormatoId
+    );
 
     if (!formatoBase) {
-      throw new ResourceNotFoundError(
-        `Formato con id: ${formatoBaseId} no encontrado`,
-      );
+      throw new ResourceNotFoundError(`Formato con id: ${formatoBaseId} no encontrado`);
     }
 
     if (formatoBase.getVersiones.length === 0) {
       throw new ConflictException(
-        `La versión ${versionFormatoId} no pertenece al formato ${formatoBaseId}`,
+        `La versión ${versionFormatoId} no pertenece al formato ${formatoBaseId}`
       );
     }
 
@@ -64,30 +63,23 @@ export class FormatoEngineService {
     if (formatoDestinoId) {
       if (nombre || codigo || descripcion) {
         throw new BadInputError(
-          'No debe enviar nombre, codigo o descripción cuando se usa formato destino',
+          'No debe enviar nombre, codigo o descripción cuando se usa formato destino'
         );
       }
 
-      formatoDestino =
-        await this.formatoRepository.findById(formatoDestinoId);
+      formatoDestino = await this.formatoRepository.findById(formatoDestinoId);
       if (!formatoDestino) {
         throw new ResourceNotFoundError(
-          `Formato destino con id: ${formatoDestinoId} no encontrado`,
+          `Formato destino con id: ${formatoDestinoId} no encontrado`
         );
       }
-    }
-
-    else {
+    } else {
       if (!nombre || !codigo) {
-        throw new BadInputError(
-          'nombre y codigo son requeridos para clonar a un nuevo formato',
-        );
+        throw new BadInputError('nombre y codigo son requeridos para clonar a un nuevo formato');
       }
     }
 
-    const slug = formatoDestino
-      ? undefined
-      : await generateSlug(nombre);
+    const slug = formatoDestino ? undefined : await generateSlug(nombre);
 
     const clonado = formatoBase.clone(
       nombre,
@@ -97,14 +89,11 @@ export class FormatoEngineService {
       versionFormatoId,
       etiquetaVersion ?? null,
       descripcion,
-      formatoDestino,
+      formatoDestino
     );
 
     const saved = await this.formatoRepository.save(clonado);
-    const ultimaVersion =
-      saved.getVersiones[
-      saved.getVersiones.length - 1
-      ];
+    const ultimaVersion = saved.getVersiones[saved.getVersiones.length - 1];
 
     return {
       formatoId: saved.getId.getValor,
@@ -119,7 +108,9 @@ export class FormatoEngineService {
     if (!version) throw new ResourceNotFoundError('Version no encontrada');
     if (version.isPublicado()) throw new BadInputError('No puedes editar una versión publicada');
 
-    const configImagenes = await this.seccionesService.findSeccionAnexImagenesById(dto.configuracionImagenesId)
+    const configImagenes = await this.seccionesService.findSeccionAnexImagenesById(
+      dto.configuracionImagenesId
+    );
     if (dto.configuracionImagenesId && !configImagenes)
       throw new ResourceNotFoundError('Configuracion de imagenes no encontrada');
 
@@ -150,8 +141,7 @@ export class FormatoEngineService {
 
   public async publish(versionId: number): Promise<void> {
     const version = await this.formatoRepository.findVersionFormato(versionId);
-    if (!version)
-      throw new ResourceNotFoundError(`Version ${versionId} no encontrada`);
+    if (!version) throw new ResourceNotFoundError(`Version ${versionId} no encontrada`);
 
     const alreadyPublished = await this.formatoRepository.existPublishedByFormato(
       version.getFormatoId.getValor
@@ -166,8 +156,7 @@ export class FormatoEngineService {
 
   public async unPublish(versionId: number): Promise<void> {
     const version = await this.formatoRepository.findVersionFormato(versionId);
-    if (!version)
-      throw new ResourceNotFoundError(`Versión ${versionId} no encontrada`);
+    if (!version) throw new ResourceNotFoundError(`Versión ${versionId} no encontrada`);
 
     const evento = version.unPublish(getUser().id);
     await this.formatoRepository.saveVersionFormato(version);
@@ -177,7 +166,6 @@ export class FormatoEngineService {
   private async loadCatalogoGrupos(
     dto: DesignVersionFormatoDto
   ): Promise<{ grupos: GrupoEjecucionMantOrm[]; items: EjecucionMantItemOrm[] }> {
-
     const todosComponentes = dto.secciones.flatMap(s => s.componentes);
     const gruposDto = todosComponentes.filter(
       (c): c is ComponenteGrupoEjecucionDto =>
@@ -193,7 +181,9 @@ export class FormatoEngineService {
 
     const [grupos, items] = await Promise.all([
       this.ejecucionMantService.findGrpsEjecucionByIds(grupoIds),
-      itemIds.length ? this.ejecucionMantService.findEjecucionesItemsByIds(itemIds) : Promise.resolve([]),
+      itemIds.length
+        ? this.ejecucionMantService.findEjecucionesItemsByIds(itemIds)
+        : Promise.resolve([]),
     ]);
 
     if (grupos.length !== grupoIds.length)
@@ -203,8 +193,7 @@ export class FormatoEngineService {
   }
 
   private validateDto(dto: DesignVersionFormatoDto): void {
-    if (!dto.secciones?.length)
-      throw new BadInputError('Debe tener al menos una sección');
+    if (!dto.secciones?.length) throw new BadInputError('Debe tener al menos una sección');
 
     const errores: string[] = [];
 
@@ -238,8 +227,7 @@ export class FormatoEngineService {
           }
           case TipoComponente.RANGO: {
             const r = comp as any;
-            if (r.min >= r.max)
-              errores.push(`Rango "${r.etiqueta}": min debe ser menor que max`);
+            if (r.min >= r.max) errores.push(`Rango "${r.etiqueta}": min debe ser menor que max`);
             break;
           }
         }

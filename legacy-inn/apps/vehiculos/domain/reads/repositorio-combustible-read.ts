@@ -1,4 +1,9 @@
-import { EstadoTanqueo, TipoCombustible, TipoMovimientoCombustible, UnidadMedidaCombustible } from '../enums';
+import {
+  EstadoTanqueo,
+  TipoCombustible,
+  TipoMovimientoCombustible,
+  UnidadMedidaCombustible,
+} from '../enums';
 import { EvidenciaTanqueoRead, UsuarioRefRead } from './tanqueo-read';
 import { VehiculoRead } from './vehiculo-read';
 

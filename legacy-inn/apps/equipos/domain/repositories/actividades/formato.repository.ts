@@ -11,7 +11,12 @@ export interface FormatoRepository extends BaseRepository<Formato, FormatoRead> 
   saveVersionFormatoEventoAud(evento: VersionFormatoEvento): Promise<VersionFormatoEvento>;
   findByIdWithoutVersions(id: number): Promise<FormatoRead | null>;
   findByIdWithSpecificVersion(formatoId: number, versionId: number): Promise<Formato | null>;
-  findAllAndCount(skip: number, take: number, search?: string, modo?: ModoFormato): Promise<[FormatoRead[], number]>;
+  findAllAndCount(
+    skip: number,
+    take: number,
+    search?: string,
+    modo?: ModoFormato
+  ): Promise<[FormatoRead[], number]>;
   findVersionFormato(versionFormatoId: number): Promise<VersionFormatoFmt | null>;
   findLastPublishedVersion(formatoId: number): Promise<VersionFormatoFmt | null>;
   existPublishedByFormato(formatoId: number): Promise<boolean>;

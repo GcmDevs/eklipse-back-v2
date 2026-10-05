@@ -1,6 +1,13 @@
 import { GeneralActivoLegacyView } from '@equipos/infrastructure/persistence/views/external';
 import { AccesorioUnidadOrm } from './accesorio-unidad.orm';
-import { CronogramaOrm, EjecucionExternaOrm, FormatoOrm, PlanActividadOrm, RegistroActividadOrm, ReprogramacionActividadOrm } from './actividades';
+import {
+  CronogramaOrm,
+  EjecucionExternaOrm,
+  FormatoOrm,
+  PlanActividadOrm,
+  RegistroActividadOrm,
+  ReprogramacionActividadOrm,
+} from './actividades';
 import { CompraOrm } from './adquisicion';
 import { EquipoBajaOrm } from './baja-equipo.orm';
 import {
@@ -67,5 +74,5 @@ export const ORM_EQPS_ENTITIES = [
   EjecucionExternaOrm,
   EventoAuditEquipoOrm,
   AuditTipoEquipoOrm,
-  IncidenciasExternasEquiposGestserView
+  IncidenciasExternasEquiposGestserView,
 ];

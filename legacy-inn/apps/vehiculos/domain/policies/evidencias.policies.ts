@@ -6,7 +6,9 @@ export const EVIDENCIAS_ABASTECIMIENTO: readonly TipoEvidencia[] = [
   TipoEvidencia.FACTURA,
 ];
 
-export const EVIDENCIAS_TANQUEO_ESTACION: readonly TipoEvidencia[] = [TipoEvidencia.TABLERO_INICIAL];
+export const EVIDENCIAS_TANQUEO_ESTACION: readonly TipoEvidencia[] = [
+  TipoEvidencia.TABLERO_INICIAL,
+];
 
 export const EVIDENCIAS_TANQUEO_REPOSITORIO: readonly TipoEvidencia[] = [
   TipoEvidencia.FOTO_REPO_ANTES,

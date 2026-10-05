@@ -1,7 +1,7 @@
-import { FilterSolicitudDto } from "@equipos/presentation/dto";
-import { SolicitudAprobacion } from "../entities";
-import { TipoAccionAprobacion } from "../enums";
-import { SolicitudRead } from "../read";
+import { FilterSolicitudDto } from '@equipos/presentation/dto';
+import { SolicitudAprobacion } from '../entities';
+import { TipoAccionAprobacion } from '../enums';
+import { SolicitudRead } from '../read';
 
 export interface SolicitudRepository {
   save(solicitud: SolicitudAprobacion): Promise<SolicitudAprobacion>;

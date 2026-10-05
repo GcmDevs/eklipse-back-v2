@@ -3,7 +3,12 @@ import {
   buildEvidenciasTanqueoRead,
   toMinimalTanqueoEvidenceRead,
 } from '@vehiculos/domain/helpers/evidencias-lectura.helper';
-import { EvidenciaTanqueoRead, ResumenTanqueosRead, TanqueoRead, UsuarioRefRead } from '@vehiculos/domain/reads';
+import {
+  EvidenciaTanqueoRead,
+  ResumenTanqueosRead,
+  TanqueoRead,
+  UsuarioRefRead,
+} from '@vehiculos/domain/reads';
 import { Inconsistencia } from '@vehiculos/domain/types';
 import { OrigenTanqueo } from '@vehiculos/domain/enums';
 import { EstadoEvidencia } from '@vehiculos/domain/enums/estados.enum';
@@ -147,11 +152,7 @@ export class TanqueoMapper {
     estaciones: Map<number, EstacionServicioOrm>
   ): TanqueoRead[] {
     return orms.map(orm =>
-      TanqueoMapper.toView(
-        orm,
-        vehiculos.get(orm.activoId),
-        estaciones.get(orm.estacionServicioId)
-      )
+      TanqueoMapper.toView(orm, vehiculos.get(orm.activoId), estaciones.get(orm.estacionServicioId))
     );
   }
 
@@ -174,8 +175,7 @@ export class TanqueoMapper {
     view.usuarioNombre = orm.usuario?.nombreCompleto ?? '';
     view.kilometraje = orm.kilometraje;
     view.kilometrosRecorridos = orm.kilometrosRecorridos;
-    view.valorTotalPagado =
-      orm.valorTotalPagado != null ? Number(orm.valorTotalPagado) : null;
+    view.valorTotalPagado = orm.valorTotalPagado != null ? Number(orm.valorTotalPagado) : null;
     view.cantidadCombustible =
       orm.cantidadCombustible != null ? Number(orm.cantidadCombustible) : undefined;
     view.unidadMedidaCombustible = orm.unidadMedidaCombustible;

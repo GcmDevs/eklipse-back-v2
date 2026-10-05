@@ -5,9 +5,8 @@ import { AreaMapper } from '@equipos/infrastructure';
 import { FilterNombreAreaDto, ResponseAreaDto } from '@equipos/presentation/dto';
 import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 
-
 @Controller('v4/inn/areas')
-export class AreaController  extends BaseShelteredController {
+export class AreaController extends BaseShelteredController {
   constructor(private readonly areaService: AreaService) {
     super();
   }
@@ -21,7 +20,6 @@ export class AreaController  extends BaseShelteredController {
     return { data: areasResponse };
   }
 
-  
   @Get('/:id')
   public async getOneById(
     @Param('id', ParseIntPipe) id: number

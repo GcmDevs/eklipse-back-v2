@@ -2,7 +2,6 @@ import { UnidadMedida } from '@equipos/domain/entities';
 import { ResponseUnidadMedidaDto } from '@equipos/presentation/dto';
 import { UnidadMedidaOrm } from '@orm/inn/equipos';
 
-
 export class UnidadMedidaMapper {
   static toOrm(domain: UnidadMedida): UnidadMedidaOrm {
     const orm = new UnidadMedidaOrm();
@@ -14,12 +13,7 @@ export class UnidadMedidaMapper {
   }
 
   static toDomain(orm: UnidadMedidaOrm): UnidadMedida {
-    return UnidadMedida.rebuild(
-      orm.id,
-      orm.nombre,
-      orm.simbolo,
-      orm.esBase,
-    );
+    return UnidadMedida.rebuild(orm.id, orm.nombre, orm.simbolo, orm.esBase);
   }
 
   static toResponse(domain: UnidadMedida): ResponseUnidadMedidaDto {
@@ -27,7 +21,7 @@ export class UnidadMedidaMapper {
       id: domain.getId.getValor,
       nombre: domain.getNombre,
       simbolo: domain.getSimbolo,
-      esBase: domain.getEsBase
+      esBase: domain.getEsBase,
     };
   }
 }

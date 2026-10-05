@@ -1,7 +1,10 @@
 export type ClaseProductoTypeCode = 0 | 1;
 
 export class ClaseProductoType {
-  constructor(private code: ClaseProductoTypeCode, private forHumans: string) {}
+  constructor(
+    private code: ClaseProductoTypeCode,
+    private forHumans: string
+  ) {}
 
   public getCode(): ClaseProductoTypeCode {
     return this.code;

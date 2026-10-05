@@ -27,7 +27,7 @@ import {
 } from '@orm/inn/activos-fijos/servicio-tecnico';
 import { prioridadTypeFactory } from '@ctypes/gen';
 import { ENVIRONMENTS } from 'src/app.environments';
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 
 export const sstNotaOrmToAfnNotaSoliSerTecRes = (
   nota: SSTNotaOrm,

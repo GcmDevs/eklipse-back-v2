@@ -33,13 +33,13 @@ export class FormatoOrm extends BaseTimestampedOrm {
   @Column({ name: 'MODO', enum: ModoFormato })
   modoFormato: ModoFormato;
 
-  @OneToMany(() => VersionFormatoFmtOrm, (versionFormat) => versionFormat.formato, { cascade: true })
+  @OneToMany(() => VersionFormatoFmtOrm, versionFormat => versionFormat.formato, { cascade: true })
   versiones: VersionFormatoFmtOrm[];
 
   @Column({ type: 'bit', default: true, name: 'ACTIVO' })
   activo: boolean;
 
-  @Column({ name: 'CREADOPOR', type: 'nvarchar', length: 30, nullable: false})
+  @Column({ name: 'CREADOPOR', type: 'nvarchar', length: 30, nullable: false })
   creadoPor: UsuariosCreativos;
 
   @Column({ name: 'CREADOPOROID' })

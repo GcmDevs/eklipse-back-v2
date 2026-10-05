@@ -6,7 +6,7 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
-  PrimaryGeneratedColumn
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { EstadoUsuarioCode } from '../../../@gtypes/gen/usuarios';
 import { _PrivSecAuthOrm } from './authority.orm';

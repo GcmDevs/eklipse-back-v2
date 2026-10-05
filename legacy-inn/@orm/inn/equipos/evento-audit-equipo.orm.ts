@@ -1,7 +1,7 @@
-import { TABLE_NAMES } from "@common/application/constants";
-import { BaseCreatedOrm } from "@common/infrastructure/orm";
-import { TipoEventoAuditEquipo } from "@equipos/domain/enums/tipos-audit-equipo.enum";
-import { Column, Entity } from "typeorm";
+import { TABLE_NAMES } from '@common/application/constants';
+import { BaseCreatedOrm } from '@common/infrastructure/orm';
+import { TipoEventoAuditEquipo } from '@equipos/domain/enums/tipos-audit-equipo.enum';
+import { Column, Entity } from 'typeorm';
 
 @Entity({ name: TABLE_NAMES.inn.eqp.eventos })
 export class EventoAuditEquipoOrm extends BaseCreatedOrm {
@@ -34,4 +34,4 @@ export class EventoAuditEquipoOrm extends BaseCreatedOrm {
 
   @Column({ name: 'SECUENCIA', type: 'int', nullable: true })
   secuencia: number;
-}   
+}

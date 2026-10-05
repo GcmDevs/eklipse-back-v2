@@ -4,7 +4,7 @@ import { CargarFacturaControlGastosPayload } from '@farmacia/control-gastos/appl
 import { BaseSource } from '@common/infrastructure/services';
 import { ControlGastoHistorialOrm, ControlGastoOrm } from '@orm/inn/farmacia/control-gastos';
 import { deleteFile } from '@common/presentation/helpers';
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { ESTADOS_CONTROL_GASTO } from '@ctypes/inn/farmacia/control-gastos';
 import { INN_AUTHORITIES } from '@authorities/inventario';
 

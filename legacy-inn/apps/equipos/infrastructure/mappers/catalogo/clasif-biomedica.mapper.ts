@@ -1,5 +1,5 @@
-import { ClasificacionBiomedica } from "@equipos/domain/value-objects";
-import { ClasificacionBiomedicaEmbeddable } from "@orm/inn/equipos/supports";
+import { ClasificacionBiomedica } from '@equipos/domain/value-objects';
+import { ClasificacionBiomedicaEmbeddable } from '@orm/inn/equipos/supports';
 
 export class ClasificacionBiomedicaMapper {
   static toOrm(domain: ClasificacionBiomedica): ClasificacionBiomedicaEmbeddable {
@@ -31,5 +31,4 @@ export class ClasificacionBiomedicaMapper {
       orm?.expedienteRegSanitario
     );
   }
-
 }

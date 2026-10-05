@@ -6,7 +6,7 @@ import { fetchAuthsByUser } from '../services';
 
 @Injectable()
 export class AuthoritiesGuard implements CanActivate {
-  constructor(private reflector: Reflector) { }
+  constructor(private reflector: Reflector) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const authorities = this.reflector.get<string[]>('authorities', context.getHandler());
@@ -25,10 +25,10 @@ export class AuthoritiesGuard implements CanActivate {
     } else {
       userAuthorities = [];
     }
-    
+
     const hasAnyAuthority = () =>
       userAuthorities.some((authority: string) => authorities.includes(authority));
-    
+
     return hasAnyAuthority();
   }
 }

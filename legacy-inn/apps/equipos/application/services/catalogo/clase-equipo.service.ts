@@ -6,12 +6,15 @@ import { SubclaseEquipo } from '@equipos/domain/entities/catalogo/subclase-equip
 import { ClaseEquipoRead, SubclaseEquipoRead } from '@equipos/domain/read';
 import { ClaseEquipoRepository } from '@equipos/domain/repositories/catalogo/clase-equipo.repository';
 import { SubclaseEquipoRepository } from '@equipos/domain/repositories/catalogo/subclase-equipo.repository';
-import { CLASE_EQUIPO_REPOSITORY, SUBCLASE_EQUIPO_REPOSITORY } from '@equipos/domain/repositories/tokens';
+import {
+  CLASE_EQUIPO_REPOSITORY,
+  SUBCLASE_EQUIPO_REPOSITORY,
+} from '@equipos/domain/repositories/tokens';
 import {
   CreateClaseEquipoDto,
   CreateSubclaseEquipoDto,
   UpdateClaseEquipoDto,
-  UpdateSubclaseEquipoDto
+  UpdateSubclaseEquipoDto,
 } from '@equipos/presentation/dto';
 import { Inject, Injectable } from '@nestjs/common';
 
@@ -23,10 +26,15 @@ export class ClaseEquipoService {
     @Inject(SUBCLASE_EQUIPO_REPOSITORY)
     private readonly subclaseRepository: SubclaseEquipoRepository,
     @Inject(TRANSACTION_MANAGER)
-    private readonly txManager: TransactionManager,
-  ) { }
+    private readonly txManager: TransactionManager
+  ) {}
 
-  async createClase({ tipoActivoId, nombre, codigo, descripcion }: CreateClaseEquipoDto): Promise<ClaseEquipoRead> {
+  async createClase({
+    tipoActivoId,
+    nombre,
+    codigo,
+    descripcion,
+  }: CreateClaseEquipoDto): Promise<ClaseEquipoRead> {
     const clase = ClaseEquipo.create(tipoActivoId, nombre, codigo, descripcion);
     return this.txManager.transactional(async () => {
       const saved = await this.claseRepository.save(clase);
@@ -36,7 +44,7 @@ export class ClaseEquipoService {
 
   async findClaseById(
     id: number,
-    options: FindThrowOptions = new FindThrowOptions(),
+    options: FindThrowOptions = new FindThrowOptions()
   ): Promise<ClaseEquipo | null> {
     const claseFound = await this.claseRepository.findById(id);
     if (!claseFound && options.throwIfNotFound) {
@@ -68,7 +76,7 @@ export class ClaseEquipoService {
 
   async createSubclase(
     claseId: number,
-    { nombre, codigo, descripcion }: CreateSubclaseEquipoDto,
+    { nombre, codigo, descripcion }: CreateSubclaseEquipoDto
   ): Promise<SubclaseEquipoRead> {
     await this.findClaseById(claseId, { throwIfNotFound: true });
     const subclase = SubclaseEquipo.create(claseId, nombre, codigo, descripcion);
@@ -81,13 +89,13 @@ export class ClaseEquipoService {
   async findSubclaseById(
     claseId: number,
     subclaseId: number,
-    options: FindThrowOptions = new FindThrowOptions(),
+    options: FindThrowOptions = new FindThrowOptions()
   ): Promise<SubclaseEquipo | null> {
     const subclaseFound = await this.subclaseRepository.findById(subclaseId);
     if (!subclaseFound || subclaseFound.getClaseId.getValor !== claseId) {
       if (options.throwIfNotFound) {
         throw new ResourceNotFoundError(
-          `SubclaseEquipo con id: ${subclaseId} no encontrada en clase: ${claseId}`,
+          `SubclaseEquipo con id: ${subclaseId} no encontrada en clase: ${claseId}`
         );
       }
       return null;
@@ -103,7 +111,7 @@ export class ClaseEquipoService {
   async updateSubclase(
     claseId: number,
     subclaseId: number,
-    data: UpdateSubclaseEquipoDto,
+    data: UpdateSubclaseEquipoDto
   ): Promise<SubclaseEquipoRead> {
     return this.txManager.transactional(async () => {
       const entity = await this.findSubclaseById(claseId, subclaseId, { throwIfNotFound: true });
@@ -128,7 +136,9 @@ export class ClaseEquipoService {
     }
     const clase = await this.claseRepository.findById(subclase.getClaseId.getValor);
     if (!clase) {
-      throw new ResourceNotFoundError(`ClaseEquipo con id: ${subclase.getClaseId.getValor} no encontrada`);
+      throw new ResourceNotFoundError(
+        `ClaseEquipo con id: ${subclase.getClaseId.getValor} no encontrada`
+      );
     }
     return clase.getTipoActivoId.getValor;
   }

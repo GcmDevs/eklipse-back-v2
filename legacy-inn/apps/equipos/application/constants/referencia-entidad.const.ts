@@ -9,4 +9,4 @@ export const REFERENCIA_ENTIDAD = {
   COMPRA: `COMPRA::${TABLE_NAMES.inn.eqp.adquisiciones}`,
 } as const;
 
-export type ReferenciaEntidad = typeof REFERENCIA_ENTIDAD[keyof typeof REFERENCIA_ENTIDAD];
+export type ReferenciaEntidad = (typeof REFERENCIA_ENTIDAD)[keyof typeof REFERENCIA_ENTIDAD];

@@ -1,10 +1,8 @@
-import { TipoMedidaCodigo } from "../enums";
-import { Medida } from "./medida.vo";
+import { TipoMedidaCodigo } from '../enums';
+import { Medida } from './medida.vo';
 
 export class MedidasTecnicas {
-  private constructor(
-    private readonly medidas: Medida[]
-  ) {}
+  private constructor(private readonly medidas: Medida[]) {}
 
   static create(medidas: Medida[] = []): MedidasTecnicas {
     return new MedidasTecnicas(medidas);
@@ -13,9 +11,7 @@ export class MedidasTecnicas {
   static fromPrimitives(data: any[]): MedidasTecnicas {
     if (!data) return this.create();
 
-    return new MedidasTecnicas(
-      data.map(dt => Medida.fromPrimitive(dt))
-    );
+    return new MedidasTecnicas(data.map(dt => Medida.fromPrimitive(dt)));
   }
 
   toPrimitives() {

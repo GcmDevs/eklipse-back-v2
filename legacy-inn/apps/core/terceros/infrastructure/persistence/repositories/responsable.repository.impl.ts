@@ -1,21 +1,19 @@
-import { BaseSource } from "@common/infrastructure/services";
-import { ResponsableView } from "@orm/cor";
-import { Repository } from "typeorm";
+import { BaseSource } from '@common/infrastructure/services';
+import { ResponsableView } from '@orm/cor';
+import { Repository } from 'typeorm';
 
 export class TypeOrmResponsableRepository extends BaseSource {
-    private readonly repository: Repository<ResponsableView> = this.conn.getRepository(ResponsableView);
+  private readonly repository: Repository<ResponsableView> =
+    this.conn.getRepository(ResponsableView);
 
-    public async findById(id: number): Promise<ResponsableView | null> {
-        const responsableFound = await this.repository.findOne({
-            where: { responsableId: id },
-        });
-        return responsableFound ?? null;
-    }
+  public async findById(id: number): Promise<ResponsableView | null> {
+    const responsableFound = await this.repository.findOne({
+      where: { responsableId: id },
+    });
+    return responsableFound ?? null;
+  }
 
-  async findAll(
-    take: number,
-    search?: string,
-  ): Promise<ResponsableView[]> {
+  async findAll(take: number, search?: string): Promise<ResponsableView[]> {
     const qb = this.repository.createQueryBuilder('resp');
 
     if (search?.trim()) {
@@ -28,6 +26,6 @@ export class TypeOrmResponsableRepository extends BaseSource {
       .orderBy('resp.responsableNombre', 'ASC')
       .getMany();
 
-    return responsablesFounds
+    return responsablesFounds;
   }
 }

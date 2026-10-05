@@ -1,15 +1,16 @@
-import { DOMAIN_EVENT_DISPATCHER, DomainEventBase, EventDispatcher, TransactionManager } from "@common/application/services";
-import { Inject, Injectable, Optional } from "@nestjs/common";
-import { DataSource } from "typeorm";
-import { BaseSource } from "../../services";
-import { TypeOrmTransactionContext } from "./typeorm-transaction-context";
-
+import {
+  DOMAIN_EVENT_DISPATCHER,
+  DomainEventBase,
+  EventDispatcher,
+  TransactionManager,
+} from '@common/application/services';
+import { Inject, Injectable, Optional } from '@nestjs/common';
+import { DataSource } from 'typeorm';
+import { BaseSource } from '../../services';
+import { TypeOrmTransactionContext } from './typeorm-transaction-context';
 
 @Injectable()
-export class TypeOrmTransactionManagerImpl
-  extends BaseSource
-  implements TransactionManager {
-
+export class TypeOrmTransactionManagerImpl extends BaseSource implements TransactionManager {
   @Optional()
   @Inject(DOMAIN_EVENT_DISPATCHER)
   private readonly dispatcher: EventDispatcher;
@@ -24,7 +25,10 @@ export class TypeOrmTransactionManagerImpl
       if (aggregates?.length && this.dispatcher) {
         const events = aggregates.flatMap(agg => agg.pullEvents());
         if (events.length) {
-          if (correlationId) events.forEach(ev => { ev.correlationId = correlationId; });
+          if (correlationId)
+            events.forEach(ev => {
+              ev.correlationId = correlationId;
+            });
           await this.dispatcher.dispatch(events);
         }
       }
@@ -43,7 +47,9 @@ export class TypeOrmTransactionManagerImpl
           const events = aggregates.flatMap(agg => agg.pullEvents());
           if (events.length) {
             if (correlationId) {
-              events.forEach(ev => { ev.correlationId = correlationId; });
+              events.forEach(ev => {
+                ev.correlationId = correlationId;
+              });
             }
             await this.dispatcher.dispatch(events);
           }

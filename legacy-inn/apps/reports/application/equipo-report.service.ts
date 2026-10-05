@@ -15,15 +15,13 @@ export class EquipoReportService {
   constructor(
     private readonly repository: TypeOrmEquipoReportRepository,
     private readonly pdfGenerator: PuppeteerPdfGenerator,
-    private readonly stagingFileService: StagingFileService,
+    private readonly stagingFileService: StagingFileService
   ) {}
 
   public async exportPdfReportByEquipoId(equipoId: number): Promise<Buffer> {
     const equipo = await this.repository.findHdvReport(equipoId);
     if (!equipo) {
-      throw new NotFoundException(
-        `No se encontró el equipo con id ${equipoId}`,
-      );
+      throw new NotFoundException(`No se encontró el equipo con id ${equipoId}`);
     }
 
     const documentosEquipo = [...equipo.tipoEquipoRel.documentos, ...equipo.compra.documentos];
@@ -33,35 +31,26 @@ export class EquipoReportService {
 
     const responsable = equipo.responsable?.responsableId
       ? await this.repository.findDepartamentoEquipoByResponsableId(
-          equipo.responsable.responsableId,
+          equipo.responsable.responsableId
         )
       : null;
 
     const documentos = this.resolveDocumentosTipoEquipo(documentosEquipo);
 
-    const reportData = HdvEquipoReportMapper.toHojaVidaPdfReport(
-      equipo,
-      responsable,
-      documentos,
-    );
+    const reportData = HdvEquipoReportMapper.toHojaVidaPdfReport(equipo, responsable, documentos);
 
     const fotos = ensureArray(equipo.registroFotografico?.getFotos());
-    const fotoPrincipal = fotos.find((f) => f.principal) ?? fotos[0];
+    const fotoPrincipal = fotos.find(f => f.principal) ?? fotos[0];
     if (fotoPrincipal?.archivoId) {
-      reportData.identificacion.fotoEquipo = await this.resolveFotoDataUri(
-        fotoPrincipal.archivoId,
-      );
+      reportData.identificacion.fotoEquipo = await this.resolveFotoDataUri(fotoPrincipal.archivoId);
     }
 
     const templatePath = path.join(
       process.cwd(),
-      'apps/reports/infrastructure/exporters/pdf/templates/report-hdvequipo.template.hbs',
+      'apps/reports/infrastructure/exporters/pdf/templates/report-hdvequipo.template.hbs'
     );
 
-    const logoPath = path.join(
-      process.cwd(),
-      '../private/clinicas/alta-centro.jpg',
-    );
+    const logoPath = path.join(process.cwd(), '../private/clinicas/alta-centro.jpg');
     const images: Record<string, string> = {};
     if (fs.existsSync(logoPath)) {
       const logoBase64 = fs.readFileSync(logoPath, { encoding: 'base64' });
@@ -78,22 +67,19 @@ export class EquipoReportService {
     });
   }
 
-
   private resolveDocumentosTipoEquipo(
-    documentosTipoEquipo: DocumentoTipoEquipoOrm[],
+    documentosTipoEquipo: DocumentoTipoEquipoOrm[]
   ): DocumentoEquipoPdf[] {
     return documentosTipoEquipo
-      .filter((d) => d.activo !== false)
-      .map((d) => ({
+      .filter(d => d.activo !== false)
+      .map(d => ({
         nombre: d.tipoDocumento?.nombre ?? '',
         aplica: !!d.aplica,
         observaciones: d.observaciones ?? undefined,
       }));
   }
 
-  private async resolveFotoDataUri(
-    archivoId: number,
-  ): Promise<string | undefined> {
+  private async resolveFotoDataUri(archivoId: number): Promise<string | undefined> {
     try {
       const archivo = await this.stagingFileService.findById(archivoId, {
         throwIfNotFound: false,

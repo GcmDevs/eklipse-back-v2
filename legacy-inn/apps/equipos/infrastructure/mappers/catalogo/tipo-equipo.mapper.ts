@@ -15,7 +15,7 @@ export class TipoEquipoMapper {
       orm.updatedAt,
       orm.observaciones,
       orm.activo,
-      FichaTecnicaTipoEquipoMapper.toDomain(orm.fichaTecnica),
+      FichaTecnicaTipoEquipoMapper.toDomain(orm.fichaTecnica)
     );
   }
 
@@ -43,8 +43,8 @@ export class TipoEquipoMapper {
         nombre: orm.modelo.nombre,
         marca: {
           id: orm.modelo.marca.id,
-          nombre: orm.modelo.marca.nombre
-        }
+          nombre: orm.modelo.marca.nombre,
+        },
       },
       subclaseId: orm.subclase?.id,
       subclaseNombre: orm.subclase?.nombre,
@@ -53,7 +53,7 @@ export class TipoEquipoMapper {
       observaciones: orm.observaciones,
       activo: orm.activo,
       fichaTecnica: FichaTecnicaTipoEquipoMapper.toView(orm.fichaTecnica),
-      documentos: (orm.documentos ?? []).map((d) => ({
+      documentos: (orm.documentos ?? []).map(d => ({
         id: d.id,
         tipoEquipoId: d.tipoEquipo?.id ?? orm.id,
         tipoDocumentoId: d.tipoDocumento?.id,
@@ -74,7 +74,7 @@ export class TipoEquipoMapper {
   static toView(orm: TipoEquipoOrm): TipoEquipoRead {
     return {
       ...this.toEmbeddedView(orm),
-      accesorios: (orm.accesoriosEstandar ?? []).map((a) => ({
+      accesorios: (orm.accesoriosEstandar ?? []).map(a => ({
         id: a.id,
         tipoEquipoId: a.tipoEquipo?.id ?? orm.id,
         parteId: a.parte?.id,
@@ -86,13 +86,14 @@ export class TipoEquipoMapper {
         observaciones: a.observaciones,
         activo: a.activo ?? true,
       })),
-      planesDefault: (orm.planesDefault ?? []).map((p) => ({
+      planesDefault: (orm.planesDefault ?? []).map(p => ({
         id: p.id,
         tipoEquipoId: p.tipoEquipo?.id ?? orm.id,
         tipo: p.tipo,
-        periocidad: p.periocidad?.valor != null && p.periocidad?.unidad
-          ? { valor: p.periocidad.valor, unidad: p.periocidad.unidad }
-          : null,
+        periocidad:
+          p.periocidad?.valor != null && p.periocidad?.unidad
+            ? { valor: p.periocidad.valor, unidad: p.periocidad.unidad }
+            : null,
         diasAntNotif: p.diasAntNotif,
         realizaExterno: p.realizaExterno,
         formatoId: p.formato?.id,
@@ -106,6 +107,6 @@ export class TipoEquipoMapper {
   }
 
   static toViewList(orms: TipoEquipoOrm[]): TipoEquipoRead[] {
-    return orms.map((orm) => this.toView(orm));
+    return orms.map(orm => this.toView(orm));
   }
 }

@@ -4,7 +4,7 @@ import { gcmContextFactory } from '@common/domain/types';
 import { BaseSource } from '@common/infrastructure/services';
 import { ESTADOS_CONTROL_GASTO } from '@ctypes/inn/farmacia/control-gastos';
 import { deleteFile } from '@common/presentation/helpers';
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { CreateLegalizacionFacturasPayload } from '@farmacia/legalizacion-facturas/application/payloads';
 import {
   LegalizacionFacturaHistorialOrm,

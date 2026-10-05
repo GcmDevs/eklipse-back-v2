@@ -1,11 +1,11 @@
-import { TipoAccionAprobacion } from "@equipos/domain/enums";
+import { TipoAccionAprobacion } from '@equipos/domain/enums';
 
 export interface ProcessSolicitudBase {
-    equipoId: number;
-    tipoAccion: TipoAccionAprobacion;
-    payload: Record<string, any>;
+  equipoId: number;
+  tipoAccion: TipoAccionAprobacion;
+  payload: Record<string, any>;
 }
 
 export interface ProcessSolicitudInput extends ProcessSolicitudBase {
-    directaAccess: boolean;
+  directaAccess: boolean;
 }

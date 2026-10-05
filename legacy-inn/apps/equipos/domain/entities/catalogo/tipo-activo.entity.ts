@@ -1,5 +1,5 @@
-import { BadInputError } from "@common/domain/errors";
-import { Id, normalizeUppercaseText } from "@common/domain/value-objects";
+import { BadInputError } from '@common/domain/errors';
+import { Id, normalizeUppercaseText } from '@common/domain/value-objects';
 
 export class TipoActivo {
   private constructor(
@@ -9,14 +9,14 @@ export class TipoActivo {
     private descripcion: string | undefined,
     private activo: boolean,
     private readonly createdAt: Date,
-    private updatedAt: Date,
+    private updatedAt: Date
   ) {}
 
   static create(
     nombre: string,
     codigo: string,
     descripcion?: string,
-    activo: boolean = true,
+    activo: boolean = true
   ): TipoActivo {
     const now = new Date();
     return new TipoActivo(
@@ -26,7 +26,7 @@ export class TipoActivo {
       descripcion,
       activo,
       now,
-      now,
+      now
     );
   }
 
@@ -37,7 +37,7 @@ export class TipoActivo {
     createdAt: Date,
     updatedAt: Date,
     descripcion?: string,
-    activo?: boolean,
+    activo?: boolean
   ): TipoActivo {
     return new TipoActivo(
       new Id(id),
@@ -46,7 +46,7 @@ export class TipoActivo {
       descripcion,
       activo ?? true,
       createdAt,
-      updatedAt,
+      updatedAt
     );
   }
 
@@ -73,11 +73,25 @@ export class TipoActivo {
     this.updatedAt = new Date();
   }
 
-  get getId(): Id { return this.id; }
-  get getNombre(): string { return this.nombre; }
-  get getCodigo(): string { return this.codigo; }
-  get getDescripcion(): string | undefined { return this.descripcion; }
-  get getActivo(): boolean { return this.activo; }
-  get getCreatedAt(): Date { return this.createdAt; }
-  get getUpdatedAt(): Date { return this.updatedAt; }
+  get getId(): Id {
+    return this.id;
+  }
+  get getNombre(): string {
+    return this.nombre;
+  }
+  get getCodigo(): string {
+    return this.codigo;
+  }
+  get getDescripcion(): string | undefined {
+    return this.descripcion;
+  }
+  get getActivo(): boolean {
+    return this.activo;
+  }
+  get getCreatedAt(): Date {
+    return this.createdAt;
+  }
+  get getUpdatedAt(): Date {
+    return this.updatedAt;
+  }
 }

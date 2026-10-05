@@ -6,8 +6,15 @@ import { AccesorioTipoEquipoOrm } from '@orm/inn/equipos/catalogo/accesorio-tipo
 export class AccesorioTipoEquipoMapper {
   static toDomain(orm: AccesorioTipoEquipoOrm): AccesorioTipoEquipo {
     return AccesorioTipoEquipo.rebuild(
-      orm.id, orm.tipoEquipo?.id, orm.parte?.id, orm.parteSnap,
-      orm.cantidad, orm.marca?.id, orm.referencia, orm.observaciones, orm.activo ?? true,
+      orm.id,
+      orm.tipoEquipo?.id,
+      orm.parte?.id,
+      orm.parteSnap,
+      orm.cantidad,
+      orm.marca?.id,
+      orm.referencia,
+      orm.observaciones,
+      orm.activo ?? true
     );
   }
 

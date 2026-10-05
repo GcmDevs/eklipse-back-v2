@@ -1,4 +1,4 @@
-import { Id, normalizeUppercaseText } from "@common/domain/value-objects";
+import { Id, normalizeUppercaseText } from '@common/domain/value-objects';
 
 export class SubclaseEquipo {
   private constructor(
@@ -9,7 +9,7 @@ export class SubclaseEquipo {
     private descripcion: string | undefined,
     private activo: boolean,
     private readonly createdAt: Date,
-    private updatedAt: Date,
+    private updatedAt: Date
   ) {}
 
   static create(
@@ -17,7 +17,7 @@ export class SubclaseEquipo {
     nombre: string,
     codigo: string,
     descripcion?: string,
-    activo: boolean = true,
+    activo: boolean = true
   ): SubclaseEquipo {
     const now = new Date();
     return new SubclaseEquipo(
@@ -28,7 +28,7 @@ export class SubclaseEquipo {
       descripcion,
       activo,
       now,
-      now,
+      now
     );
   }
 
@@ -40,7 +40,7 @@ export class SubclaseEquipo {
     createdAt: Date,
     updatedAt: Date,
     descripcion?: string,
-    activo?: boolean,
+    activo?: boolean
   ): SubclaseEquipo {
     return new SubclaseEquipo(
       new Id(id),
@@ -50,7 +50,7 @@ export class SubclaseEquipo {
       descripcion,
       activo ?? true,
       createdAt,
-      updatedAt,
+      updatedAt
     );
   }
 
@@ -59,12 +59,7 @@ export class SubclaseEquipo {
     this.updatedAt = new Date();
   }
 
-  update(data: {
-    claseId?: number;
-    nombre?: string;
-    codigo?: string;
-    descripcion?: string;
-  }): void {
+  update(data: { claseId?: number; nombre?: string; codigo?: string; descripcion?: string }): void {
     if (data.claseId !== undefined) this.claseId = new Id(data.claseId);
     if (data.nombre !== undefined) this.nombre = normalizeUppercaseText(data.nombre);
     if (data.codigo !== undefined) this.codigo = normalizeUppercaseText(data.codigo);
@@ -72,12 +67,28 @@ export class SubclaseEquipo {
     this.updatedAt = new Date();
   }
 
-  get getId(): Id { return this.id; }
-  get getClaseId(): Id { return this.claseId; }
-  get getNombre(): string { return this.nombre; }
-  get getCodigo(): string { return this.codigo; }
-  get getDescripcion(): string | undefined { return this.descripcion; }
-  get getActivo(): boolean { return this.activo; }
-  get getCreatedAt(): Date { return this.createdAt; }
-  get getUpdatedAt(): Date { return this.updatedAt; }
+  get getId(): Id {
+    return this.id;
+  }
+  get getClaseId(): Id {
+    return this.claseId;
+  }
+  get getNombre(): string {
+    return this.nombre;
+  }
+  get getCodigo(): string {
+    return this.codigo;
+  }
+  get getDescripcion(): string | undefined {
+    return this.descripcion;
+  }
+  get getActivo(): boolean {
+    return this.activo;
+  }
+  get getCreatedAt(): Date {
+    return this.createdAt;
+  }
+  get getUpdatedAt(): Date {
+    return this.updatedAt;
+  }
 }

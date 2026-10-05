@@ -12,10 +12,7 @@ export class TypeOrmProveedorRepository extends BaseSource {
     return proveedorFound ?? null;
   }
 
-  async findAll(
-    take: number,
-    search?: string,
-  ): Promise<ProveedorOrm[]> {
+  async findAll(take: number, search?: string): Promise<ProveedorOrm[]> {
     const qb = this.repository.createQueryBuilder('prov');
 
     if (search?.trim()) {
@@ -23,12 +20,8 @@ export class TypeOrmProveedorRepository extends BaseSource {
         search: `%${search.trim()}%`,
       });
     }
-    const proveedoresFounds = await qb
-      .take(take)
-      .orderBy('prov.nombre', 'ASC')
-      .getMany();
+    const proveedoresFounds = await qb.take(take).orderBy('prov.nombre', 'ASC').getMany();
 
-    return proveedoresFounds
+    return proveedoresFounds;
   }
-
 }

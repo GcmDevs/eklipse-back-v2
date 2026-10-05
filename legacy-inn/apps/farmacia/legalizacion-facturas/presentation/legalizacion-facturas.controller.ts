@@ -11,7 +11,7 @@ import { diskStorage } from 'multer';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 import { INN_AUTHORITIES } from '@authorities/inventario';
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { Authorities, CommonGuards } from '@common/presentation/decorators';
 import { nonEditFileName } from '@common/presentation/helpers';
 

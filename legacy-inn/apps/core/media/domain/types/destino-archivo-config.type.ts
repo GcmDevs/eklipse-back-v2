@@ -1,6 +1,6 @@
-import { CategoriaArchivo } from "../enums/categorias-archivo.enum";
+import { CategoriaArchivo } from '../enums/categorias-archivo.enum';
 
 export interface DestinoArchivoConfig {
-    category: CategoriaArchivo,
-    module: string;
+  category: CategoriaArchivo;
+  module: string;
 }

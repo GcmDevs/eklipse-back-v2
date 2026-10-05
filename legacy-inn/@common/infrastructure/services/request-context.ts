@@ -32,4 +32,4 @@ export const getUser = (): UserRequest => {
   const usuario = RequestContext.get().usuario;
   if (!usuario) throw new Error('Usuario no disponible en RequestContext');
   return usuario;
-}
+};

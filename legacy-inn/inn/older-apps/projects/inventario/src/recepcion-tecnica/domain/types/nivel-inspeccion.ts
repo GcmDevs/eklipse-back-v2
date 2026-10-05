@@ -18,7 +18,10 @@ export type NivelInspeccionTypeCode =
   | 99;
 
 export class NivelInspeccionType {
-  constructor(private code: NivelInspeccionTypeCode, private forHumans: string) {}
+  constructor(
+    private code: NivelInspeccionTypeCode,
+    private forHumans: string
+  ) {}
 
   public getCode(): NivelInspeccionTypeCode {
     return this.code;

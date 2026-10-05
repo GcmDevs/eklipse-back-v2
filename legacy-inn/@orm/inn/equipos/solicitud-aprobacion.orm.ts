@@ -1,14 +1,14 @@
-import { TABLE_NAMES } from "@common/application/constants";
-import { BaseTimestampedOrm } from "@common/infrastructure/orm";
-import { formatTiempoResolucion } from "@equipos/application/helpers";
-import { EstadoSolicitud, TipoAccionAprobacion } from "@equipos/domain/enums";
-import { Column, Entity, Index, JoinColumn, ManyToOne } from "typeorm";
-import { EquipoOrm } from "./equipo.orm";
+import { TABLE_NAMES } from '@common/application/constants';
+import { BaseTimestampedOrm } from '@common/infrastructure/orm';
+import { formatTiempoResolucion } from '@equipos/application/helpers';
+import { EstadoSolicitud, TipoAccionAprobacion } from '@equipos/domain/enums';
+import { Column, Entity, Index, JoinColumn, ManyToOne } from 'typeorm';
+import { EquipoOrm } from './equipo.orm';
 
 @Entity({ name: TABLE_NAMES.inn.eqp.solicitudes })
 @Index('UQ_EKINNEQPSOLICITUDESAPROBACION_CODIGO', ['codigo'], { unique: true })
 export class SolicitudAprobacionOrm extends BaseTimestampedOrm {
-  @Column({ name: 'CODIGO', type: 'nvarchar'})
+  @Column({ name: 'CODIGO', type: 'nvarchar' })
   codigo: string;
 
   @ManyToOne(() => EquipoOrm, { nullable: false })
@@ -52,6 +52,8 @@ export class SolicitudAprobacionOrm extends BaseTimestampedOrm {
   correlationId: string | null;
 
   get tiempoResolucionMin(): string | null {
-    return this.esAutoAprobada ? null : formatTiempoResolucion(this.createdAt, this.fechaResolucion);
+    return this.esAutoAprobada
+      ? null
+      : formatTiempoResolucion(this.createdAt, this.fechaResolucion);
   }
 }

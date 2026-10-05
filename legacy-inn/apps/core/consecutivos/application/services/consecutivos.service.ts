@@ -18,9 +18,8 @@ export class ConsecutivoService {
   ) {}
 
   public async generate(codigo: string): Promise<string> {
-    const consecutivo = await this.txManager.transactionalOn(
-      switchConn(GCM_CONTEXTS.EKLIPSE),
-      () => this.consecutivoRepository.incrementAndGet(codigo)
+    const consecutivo = await this.txManager.transactionalOn(switchConn(GCM_CONTEXTS.EKLIPSE), () =>
+      this.consecutivoRepository.incrementAndGet(codigo)
     );
 
     if (!consecutivo) {

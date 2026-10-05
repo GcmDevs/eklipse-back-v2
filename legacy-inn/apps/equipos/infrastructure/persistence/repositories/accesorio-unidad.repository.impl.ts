@@ -9,10 +9,15 @@ import { Injectable } from '@nestjs/common';
 import { AccesorioUnidadOrm } from '@orm/inn/equipos';
 
 @Injectable()
-export class TypeOrmAccesorioUnidadRepository extends BaseSource implements IAccesorioUnidadRepository {
+export class TypeOrmAccesorioUnidadRepository
+  extends BaseSource
+  implements IAccesorioUnidadRepository
+{
   private get repository() {
     const qr = TypeOrmTransactionContext.getQueryRunner();
-    return qr ? qr.manager.getRepository(AccesorioUnidadOrm) : this.conn.getRepository(AccesorioUnidadOrm);
+    return qr
+      ? qr.manager.getRepository(AccesorioUnidadOrm)
+      : this.conn.getRepository(AccesorioUnidadOrm);
   }
 
   private qbBase(alias = 'au') {
@@ -30,7 +35,10 @@ export class TypeOrmAccesorioUnidadRepository extends BaseSource implements IAcc
   }
 
   async findById(id: number): Promise<AccesorioUnidad | null> {
-    const orm = await this.repository.findOne({ where: { id }, relations: ['equipo', 'accesorioEstandar', 'accesorioEstandar.marca'] });
+    const orm = await this.repository.findOne({
+      where: { id },
+      relations: ['equipo', 'accesorioEstandar', 'accesorioEstandar.marca'],
+    });
     return orm ? AccesorioUnidadMapper.toDomain(orm) : null;
   }
 
@@ -47,15 +55,21 @@ export class TypeOrmAccesorioUnidadRepository extends BaseSource implements IAcc
     accesorioEstandarId: number,
     parteSnap: string,
     estado: EstadoAccesorioUnidad = EstadoAccesorioUnidad.ENTREGADO,
-    observaciones?: string,
+    observaciones?: string
   ): Promise<AccesorioUnidad> {
-    const entity = AccesorioUnidad.create(equipoId, accesorioEstandarId, parteSnap, estado, observaciones);
+    const entity = AccesorioUnidad.create(
+      equipoId,
+      accesorioEstandarId,
+      parteSnap,
+      estado,
+      observaciones
+    );
     return this.save(entity);
   }
 
   async findByAccesorioEstandarId(
     accesorioEstandarId: number,
-    equipoIds: number[],
+    equipoIds: number[]
   ): Promise<AccesorioUnidad[]> {
     if (!equipoIds.length) return [];
     const orms = await this.qbBase()
@@ -69,7 +83,7 @@ export class TypeOrmAccesorioUnidadRepository extends BaseSource implements IAcc
 
   async findEquipoIdsConAccesorio(
     accesorioEstandarId: number,
-    equipoIds: number[],
+    equipoIds: number[]
   ): Promise<number[]> {
     if (!equipoIds.length) return [];
     const founds = await this.repository
@@ -93,9 +107,7 @@ export class TypeOrmAccesorioUnidadRepository extends BaseSource implements IAcc
   }
 
   async findViewById(id: number): Promise<AccesorioUnidadRead | null> {
-    const orm = await this.qbBase()
-      .where('au.id = :id', { id })
-      .getOne();
+    const orm = await this.qbBase().where('au.id = :id', { id }).getOne();
     return orm ? AccesorioUnidadMapper.toView(orm) : null;
   }
 

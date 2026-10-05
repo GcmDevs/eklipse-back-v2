@@ -7,27 +7,24 @@ import { FIRMAS_PROVIDERS } from './application/services';
 import { UsuarioEqpService } from './application/services/usuario-eqp.service';
 import { TypeOrmFirmaRepository, TypeOrmUsuarioEqpRepository } from './infrastructure/persistence';
 import { FIRMAS_CONTROLLERS } from './presentation/controller';
-;
-
 @Module({
-    controllers: [...FIRMAS_CONTROLLERS],
-    providers: [...FIRMAS_PROVIDERS,
-        {
-            provide: USUARIO_REPOSITORY,
-            useClass: TypeOrmUsuarioEqpRepository,
-        },
-        {
-            provide: FIRMA_REPOSITORY,
-            useClass: TypeOrmFirmaRepository,
-        },
-        {
-            provide: TRANSACTION_MANAGER,
-            useClass: TypeOrmTransactionManagerImpl,
-        }
-    ],
-    imports: [
-        forwardRef(() => TercerosModule),
-    ],
-    exports: [UsuarioEqpService]
+  controllers: [...FIRMAS_CONTROLLERS],
+  providers: [
+    ...FIRMAS_PROVIDERS,
+    {
+      provide: USUARIO_REPOSITORY,
+      useClass: TypeOrmUsuarioEqpRepository,
+    },
+    {
+      provide: FIRMA_REPOSITORY,
+      useClass: TypeOrmFirmaRepository,
+    },
+    {
+      provide: TRANSACTION_MANAGER,
+      useClass: TypeOrmTransactionManagerImpl,
+    },
+  ],
+  imports: [forwardRef(() => TercerosModule)],
+  exports: [UsuarioEqpService],
 })
-export class FirmaModule { };
+export class FirmaModule {}

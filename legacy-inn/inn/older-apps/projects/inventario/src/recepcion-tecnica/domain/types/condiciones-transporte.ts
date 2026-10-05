@@ -1,7 +1,10 @@
 export type CondicionTransporteTypeCode = 1 | 2 | 3 | 4;
 
 export class CondicionTransporteType {
-  constructor(private code: CondicionTransporteTypeCode, private forHumans: string) {}
+  constructor(
+    private code: CondicionTransporteTypeCode,
+    private forHumans: string
+  ) {}
 
   public getCode(): CondicionTransporteTypeCode {
     return this.code;

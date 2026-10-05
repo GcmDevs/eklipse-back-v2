@@ -29,7 +29,7 @@ import { Authorities, CommonGuards } from '@common/presentation/decorators';
 import { INN_AUTHORITIES } from '@authorities/inventario';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { nonEditFileName } from '@common/presentation/helpers';
 import { RechazarDocumentoControlGastoImpl } from '@farmacia/control-gastos/infrastructure/services/rechazar.impl';
 import { HistorialGastoImpl } from '@farmacia/control-gastos/infrastructure/services/historial.impl';

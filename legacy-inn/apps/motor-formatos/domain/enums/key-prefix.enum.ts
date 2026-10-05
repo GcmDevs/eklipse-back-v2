@@ -5,5 +5,5 @@ export enum KeyPrefix {
   tbl = 'tbl',
   col = 'col',
   rng = 'rng',
-  txt = 'txt'
+  txt = 'txt',
 }

@@ -4,7 +4,6 @@ import { FormatoOrm } from '@orm/inn/equipos';
 import { VersionFormatoMapper } from 'apps/motor-formatos/infrastructure/mappers';
 
 export class FormatoMapper {
-
   public static toOrm(domain: Formato): FormatoOrm {
     const orm = new FormatoOrm();
 
@@ -22,9 +21,7 @@ export class FormatoMapper {
     orm.createdAt = domain.getCreatedAt;
     orm.updatedAt = domain.getUpdatedAt;
 
-    orm.versiones = domain.getVersiones?.map(v =>
-      VersionFormatoMapper.toOrm(v)
-    ) ?? [];
+    orm.versiones = domain.getVersiones?.map(v => VersionFormatoMapper.toOrm(v)) ?? [];
 
     return orm;
   }
@@ -44,7 +41,7 @@ export class FormatoMapper {
       orm.creadoPorId!,
       orm.createdAt,
       orm.updatedAt,
-      orm?.descripcion,
+      orm?.descripcion
     );
   }
 
@@ -62,14 +59,14 @@ export class FormatoMapper {
       creadoPor: orm.creadoPor,
       creadoPorId: orm.creadoPorId,
       versiones: (orm.versiones ?? []).map(version => ({
-        id: version.id, 
-        etiqueta: version?.etiquetaVersion ?? null,  
-        version: version?.version ?? null,  
-        estado: version?.estado, 
-        fechaPublicacion: version?.fechaPublicacion ?? null, 
-        creadoPorId: version?.creadoPorId ?? null, 
-        createdAt: version?.createdAt ?? null, 
-        updatedAt: version?.updatedAt ?? null, 
+        id: version.id,
+        etiqueta: version?.etiquetaVersion ?? null,
+        version: version?.version ?? null,
+        estado: version?.estado,
+        fechaPublicacion: version?.fechaPublicacion ?? null,
+        creadoPorId: version?.creadoPorId ?? null,
+        createdAt: version?.createdAt ?? null,
+        updatedAt: version?.updatedAt ?? null,
       })),
     };
   }
@@ -82,4 +79,3 @@ export class FormatoMapper {
     return ormList.map(orm => FormatoMapper.toView(orm));
   }
 }
-

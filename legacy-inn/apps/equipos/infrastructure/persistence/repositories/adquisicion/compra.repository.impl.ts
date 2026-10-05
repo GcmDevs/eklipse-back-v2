@@ -48,7 +48,8 @@ export class TypeOrmCompraRepository extends BaseSource implements ICompraReposi
   async findAllView(page: number, limit: number): Promise<[CompraRead[], number]> {
     const [orms, count] = await this.repository.findAndCount({
       relations: ['proveedor', 'fabricante', 'distribuidor'],
-      skip: (page - 1) * limit, take: limit,
+      skip: (page - 1) * limit,
+      take: limit,
     });
     return [CompraMapper.toViewList(orms), count];
   }
@@ -58,13 +59,15 @@ export class TypeOrmCompraRepository extends BaseSource implements ICompraReposi
   }
 
   async findViewById(id: number): Promise<CompraRead | null> {
-    const orm = await this.qbBase()
-      .where('c.id = :id', { id })
-      .getOne();
+    const orm = await this.qbBase().where('c.id = :id', { id }).getOne();
     return orm ? CompraMapper.toView(orm) : null;
   }
 
-  async findAllAndCount(page: number, limit: number, search?: string): Promise<[CompraRead[], number]> {
+  async findAllAndCount(
+    page: number,
+    limit: number,
+    search?: string
+  ): Promise<[CompraRead[], number]> {
     const qb = this.qbBase();
     if (search?.trim()) {
       qb.andWhere('(c.codigo LIKE :search OR proveedor.nombre LIKE :search)', {

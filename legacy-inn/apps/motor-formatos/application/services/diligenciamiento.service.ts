@@ -1,4 +1,4 @@
-import { FILE_LOCATIONS } from '@common/application/constants';
+import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { ensureArray } from '@common/application/services';
 import { TRANSACTION_MANAGER, TransactionManager } from '@common/application/services';
 import { FindThrowOptions } from '@common/domain/types';
@@ -12,7 +12,7 @@ import {
   RegistroDiligenciadoFmt,
   RegistroDiligenciadoFmtRead,
   RegistroDiligenciadoRepository,
-  RegistroImagen
+  RegistroImagen,
 } from 'apps/motor-formatos/domain';
 import { EstructuraFormatoSchema } from 'apps/motor-formatos/domain/types/schema.types';
 import { RespuestaComponente } from 'apps/motor-formatos/domain/types/submission.types';
@@ -32,16 +32,20 @@ export class DiligenciamientoService {
     private readonly txManager: TransactionManager,
     private readonly stagingService: StagingFileService,
     private readonly regActividadService: ActividadesService
-  ) { }
+  ) {}
 
   async fillIn(data: DiligenciarFormatoDto): Promise<RegistroDiligenciadoFmtRead> {
     const regActividad = await this.regActividadService.findById(data.registroActividadId);
     if (regActividad.getEquipoId.getValor !== data.equipoId)
-      throw new BadRequestException(`la activdad con id no pertenece al equipo con id ${regActividad.getEquipoId.getValor}`);
+      throw new BadRequestException(
+        `la activdad con id no pertenece al equipo con id ${regActividad.getEquipoId.getValor}`
+      );
 
     const formatoId = regActividad.getFormatoId.getValor;
     if (!formatoId)
-      throw new ConflictError(`El equipo asociado no tiene formato de diligenciamiento, modifique su plan y asocie el formato correspondiente`)
+      throw new ConflictError(
+        `El equipo asociado no tiene formato de diligenciamiento, modifique su plan y asocie el formato correspondiente`
+      );
 
     const version = await this.formatoService.findLastVersionFormatoPublished(formatoId);
     const schema = version.getSchema as unknown as EstructuraFormatoSchema;
@@ -56,19 +60,17 @@ export class DiligenciamientoService {
 
     return await this.txManager.transactional(async () => {
       await Promise.all(
-        ensureArray(data.imagenes).map(async (img) => {
+        ensureArray(data.imagenes).map(async img => {
           const archivo = await this.stagingService.findById(img.archivoId);
 
           if (!archivo) {
-            throw new ResourceNotFoundError(
-              `Archivo con id ${img.archivoId} no encontrado`,
-            );
+            throw new ResourceNotFoundError(`Archivo con id ${img.archivoId} no encontrado`);
           }
-        }),
+        })
       );
 
-      const imagenes = ensureArray(data.imagenes).map((img) =>
-        RegistroImagen.create({ key: img.key, archivoId: img.archivoId }),
+      const imagenes = ensureArray(data.imagenes).map(img =>
+        RegistroImagen.create({ key: img.key, archivoId: img.archivoId })
       );
 
       const diligenciadoPorId = getUser().id;
@@ -89,33 +91,33 @@ export class DiligenciamientoService {
     });
   }
 
-
   async updateBorrador(
     registroDiligenciadoId: number,
-    data: DiligenciarFormatoDto,
+    data: DiligenciarFormatoDto
   ): Promise<RegistroDiligenciadoFmtRead> {
     const registro = await this.regDilgRepository.findById(registroDiligenciadoId);
     if (!registro)
       throw new ResourceNotFoundError(`Registro ${registroDiligenciadoId} no encontrado`);
 
-    const version = await this.formatoService.findVersionFormato(registro.getVersionFormatoId.getValor);
-    if (!version)
-      throw new ResourceNotFoundError('Version de formato no encontrada');
+    const version = await this.formatoService.findVersionFormato(
+      registro.getVersionFormatoId.getValor
+    );
+    if (!version) throw new ResourceNotFoundError('Version de formato no encontrada');
 
     const schema = version.getSchema as unknown as EstructuraFormatoSchema;
     SchemaValidator.validate(schema, data.respuestas as Record<string, RespuestaComponente>);
 
     const datoSnapshot = SubmissionBuilder.build(
       schema,
-      data.respuestas as Record<string, RespuestaComponente>,
+      data.respuestas as Record<string, RespuestaComponente>
     );
 
     await this.txManager.transactional(async () => {
       registro.updateBorrador(
         datoSnapshot,
-        ensureArray(data.imagenes).map((img) =>
-          RegistroImagen.create({ key: img.key, archivoId: img.archivoId }),
-        ),
+        ensureArray(data.imagenes).map(img =>
+          RegistroImagen.create({ key: img.key, archivoId: img.archivoId })
+        )
       );
 
       await this.regDilgRepository.save(registro);
@@ -124,9 +126,7 @@ export class DiligenciamientoService {
     return this.regDilgRepository.findViewById(registroDiligenciadoId);
   }
 
-  async complete(
-    registroDiligenciadoId: number
-  ): Promise<RegistroDiligenciadoFmtRead> {
+  async complete(registroDiligenciadoId: number): Promise<RegistroDiligenciadoFmtRead> {
     const registro = await this.regDilgRepository.findById(registroDiligenciadoId);
     if (!registro)
       throw new ResourceNotFoundError(`Registro ${registroDiligenciadoId} no encontrado`);
@@ -147,7 +147,9 @@ export class DiligenciamientoService {
   ): Promise<RegistroDiligenciadoFmtRead | null> {
     const regDilgo = await this.regDilgRepository.findViewByRegActividad(registroActividadId);
     if (!regDilgo && options.throwIfNotFound) {
-      throw new ResourceNotFoundError(`No se encontro ningun registro para la actividad con id: ${registroActividadId}`);
+      throw new ResourceNotFoundError(
+        `No se encontro ningun registro para la actividad con id: ${registroActividadId}`
+      );
     }
 
     return regDilgo;
@@ -159,43 +161,41 @@ export class DiligenciamientoService {
     return regDilgo;
   }
 
-
   private async commitImagenes(
     imagenes: DiligenciarFormatoDto['imagenes'],
-    referenciaId: number,
+    referenciaId: number
   ): Promise<{ key: string; archivoId: number | null }[]> {
     if (!imagenes?.length) return [];
-    return Promise.all(imagenes.map(async i => {
-      if (i.archivoId) {
-        await this.stagingService.commit(
-          {
-            archivoId: i.archivoId,
-            contexto: TipoContextoArchivo.FIRMA.REG_DILIGENCIADO.ACTIVIDAD,
-            module: FILE_LOCATIONS.inn.eqp.actividaes,
-            referenciaId,
-          },
-          RESTRICCIONES_MIME_STAGING.IMAGENES,
-        );
-      }
-      return { key: i.key, archivoId: i.archivoId };
-    }));
+    return Promise.all(
+      imagenes.map(async i => {
+        if (i.archivoId) {
+          await this.stagingService.commit(
+            {
+              archivoId: i.archivoId,
+              contexto: TipoContextoArchivo.FIRMA.REG_DILIGENCIADO.ACTIVIDAD,
+              module: FILE_LOCATIONS.inn.eqp.actividaes,
+              referenciaId,
+            },
+            RESTRICCIONES_MIME_STAGING.IMAGENES
+          );
+        }
+        return { key: i.key, archivoId: i.archivoId };
+      })
+    );
   }
 
-
-  private async ensureDiligenciamientoPermitido(
-    regActividadAsociadoId: number,
-  ): Promise<void> {
+  private async ensureDiligenciamientoPermitido(regActividadAsociadoId: number): Promise<void> {
     const regActividad = await this.regActividadService.findById(regActividadAsociadoId);
 
     if (!regActividad)
       throw new ResourceNotFoundError(
-        `Registro de actividad ${regActividadAsociadoId} no encontrado`,
+        `Registro de actividad ${regActividadAsociadoId} no encontrado`
       );
 
     if (regActividad.getModalidadPlanificada === ModalidadEjecucionActividad.EXTERNA)
       throw new BadInputError(
         'Esta actividad está configurada como ejecución externa en el plan. ' +
-        'No aplica diligenciamiento de formato.',
+          'No aplica diligenciamiento de formato.'
       );
 
     const existente = await this.regDilgRepository.findByRegActividad(regActividadAsociadoId);
@@ -203,12 +203,12 @@ export class DiligenciamientoService {
       if (existente.isCompletado() || existente.isAprobado())
         throw new BadInputError(
           `Ya existe un registro diligenciado en estado "${existente.getEstado}" ` +
-          'para esta actividad. No se puede crear uno nuevo.',
+            'para esta actividad. No se puede crear uno nuevo.'
         );
 
       throw new BadInputError(
         `Ya existe un registro diligenciado en borrador (id: ${existente.getId.getValor}) ` +
-        'para esta actividad. Use la funcion de actualización de borrador.',
+          'para esta actividad. Use la funcion de actualización de borrador.'
       );
     }
   }

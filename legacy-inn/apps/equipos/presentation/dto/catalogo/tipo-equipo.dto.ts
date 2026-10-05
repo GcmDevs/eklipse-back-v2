@@ -1,4 +1,9 @@
-import { FilterEstadoMasHijosDto, FilterSearchDto, FilterSearchPaginatedDto, LimitDto } from '@common/presentation/dto';
+import {
+  FilterEstadoMasHijosDto,
+  FilterSearchDto,
+  FilterSearchPaginatedDto,
+  LimitDto,
+} from '@common/presentation/dto';
 import {
   OptionalBoolean,
   OptionalEnum,
@@ -184,7 +189,6 @@ export class CreatePlanDefaultTipoEquipoDto {
 export class UpdatePlanDefaultTipoEquipoDto extends PartialType(CreatePlanDefaultTipoEquipoDto) {}
 
 export class FilterPlanDefaultTipoEquipoDto extends IntersectionType(FilterSearchDto, LimitDto) {}
-
 
 class CreatePlanDefaultNestedDto {
   @RequiredText({ maxLength: 30 })

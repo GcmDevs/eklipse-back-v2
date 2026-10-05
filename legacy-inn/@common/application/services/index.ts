@@ -26,7 +26,7 @@ export const removeTimeZone = (date: Date) => {
 /** @deprecated Realmente no devuelve una fecha */
 export const getDateToString = (date: Date) => {
   const result = date.toISOString().split('T')[0];
-  return result as any as Date;
+  return new Date(`${result}:00:00`);
 };
 
 /** @deprecated El nombre no deja clara su función */
@@ -48,17 +48,17 @@ export const findImageFromContext = (contexto: GcmContextType, centroId?: number
       ? centroId === undefined
         ? 'alta-centro.jpg'
         : centroId === 2
-        ? 'alta-centro.jpg'
-        : 'old-valledupar.jpg'
+          ? 'alta-centro.jpg'
+          : 'old-valledupar.jpg'
       : contexto === GCM_CONTEXTS.AGUACHICA
-      ? 'aguachica.jpg'
-      : contexto === GCM_CONTEXTS.AMMEDICAL
-      ? 'ammedical.png'
-      : contexto === GCM_CONTEXTS.SANJUAN
-      ? 'sanjuan.jpg'
-      : contexto === GCM_CONTEXTS.VALLEDUPAR
-      ? 'valledupar.jpg'
-      : 'ammedical.png'
+        ? 'aguachica.jpg'
+        : contexto === GCM_CONTEXTS.AMMEDICAL
+          ? 'ammedical.png'
+          : contexto === GCM_CONTEXTS.SANJUAN
+            ? 'sanjuan.jpg'
+            : contexto === GCM_CONTEXTS.VALLEDUPAR
+              ? 'valledupar.jpg'
+              : 'ammedical.png'
   }`;
 };
 

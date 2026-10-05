@@ -12,8 +12,8 @@ export class ServicioTecnicoBaseSource extends BaseSource {
         data.estadoCode === estadoFinalizado.getCode()
           ? 'FINALIZADA'
           : data.isAprobado
-          ? 'APROBADA'
-          : 'RECHAZADA'
+            ? 'APROBADA'
+            : 'RECHAZADA'
       }${data.nota ? `: ${data.nota}.` : '.'}`;
     }
     return data;
