@@ -200,7 +200,18 @@ export const transformToResponse = (data: SolicitudPedidoOrm[], context: GcmCont
         id: detalle.id,
         productoId: detalle.productoId,
         codigo: detalle.producto.codigo,
-        descripcion: detalle.producto.descripcionLarga,
+        descripcion:
+          detalle.producto.descripcionLarga?.trim() ||
+          detalle.producto.descripcionCorta?.trim() ||
+          detalle.producto.codigo?.trim() ||
+          '',
+        codigoSub: detalle.producto.codigoSub == null ? null : Number(detalle.producto.codigoSub),
+        tipo:
+          Number(detalle.producto.tipoCode) === 1
+            ? 'SUMINISTRO'
+            : Number(detalle.producto.tipoCode) === 2
+              ? 'MEDICAMENTO'
+              : null,
         prioridadCode: detalle.estadoCode,
         prioridad: estadoProductosTypeFactory(detalle.estadoCode).getForHumans(),
         cantidadSolicitada,

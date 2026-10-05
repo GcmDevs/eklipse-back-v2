@@ -1,5 +1,4 @@
 # compiled output
-/.vscode
 /node_modules
 /.env
 /env.ts
@@ -9,6 +8,7 @@ skills-lock.json
 /rsa
 /ignored
 /private
+temp_auto_push.bat
 /public
 /dist
 /.cursor
@@ -18,4 +18,5 @@ skills-lock.json
 /facturacion/dist
 /cartera/dist
 /inventario/dist
-.public
+.public.gitignore
+branch_structure.json
