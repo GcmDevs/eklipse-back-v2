@@ -3,7 +3,7 @@ import {
   CatalogDietCode,
   CatalogDietType,
   catalogDietTypeFactory,
-} from '@hpn/ori/die/domain/types/diets';
+} from '@lgc/die/domain/types/diets';
 import { CatalogPriceOrm } from './catalog-price.orm';
 import { ScheduleOrm } from './schedule.orm';
 import { DIE_ENT_NAMES } from './_entity-names';

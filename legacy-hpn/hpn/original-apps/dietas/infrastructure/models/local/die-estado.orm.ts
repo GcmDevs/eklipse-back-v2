@@ -7,10 +7,10 @@ import {
   MotivoDevolucionDietaType,
   dieEstadoTypeFactory,
   motivosDevolucionDietaTypeFactory,
-} from '@hpn/ori/die/domain/types/local';
+} from '@lgc/die/domain/types/local';
 import { PacienteOrm } from './paciente.orm';
 import { CamaOrm } from './cama.orm';
-import { DetalleOfertaI } from '@hpn/ori/die/infrastructure/data-transfers';
+import { DetalleOfertaI } from '@lgc/die/infrastructure/data-transfers';
 import { DimItdDietOrm } from '../diets/diet.orm';
 
 @Entity('PDYDIEEST')

@@ -1,11 +1,11 @@
 import { ApiTags } from '@nestjs/swagger';
 import { BadRequestException, Body, Controller, Get, Post, Put, Query } from '@nestjs/common';
-import { DIETAS_FAMILIARES, MERIENDAS } from '@hpn/ori/die/infrastructure/precio-dietas/common';
-import { motivosDevolucionDietaTypeFactory } from '@hpn/ori/die/domain/types/local';
+import { DIETAS_FAMILIARES, MERIENDAS } from '@lgc/die/infrastructure/precio-dietas/common';
+import { motivosDevolucionDietaTypeFactory } from '@lgc/die/domain/types/local';
 import { Authorities, CommonGuards } from '@common/presentation/decorators';
 import { FetchDietasByFechaHandler, DietasCrudHandler } from '../handlers';
-import { UpdateDietaDto } from '@hpn/ori/die/application/data-transfers';
-import { DIE_AUTHORITIES } from '@hpn/ori/die/application/constants';
+import { UpdateDietaDto } from '@lgc/die/application/data-transfers';
+import { DIE_AUTHORITIES } from '@lgc/die/application/constants';
 import { removeTimeZone } from '@common/application/services';
 import { getDateRangeByDay } from '../helpers';
 import { CreateDietaDto } from '../dtos';

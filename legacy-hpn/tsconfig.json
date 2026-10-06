@@ -40,7 +40,7 @@
       "@hpn/ek-types/*": ["hpn/@ek-types/*"],
       "@hpn/orm": ["hpn/@orm"],
       "@hpn/orm/*": ["hpn/@orm/*"],
-      "@hpn/ori/die/*": ["hpn/original-apps/dietas/*"],
+      "@lgc/die/*": ["hpn/original-apps/dietas/*"],
       "@hpn/ori/resources/*": ["hpn/original-apps/resources/*"],
       "@hpn/gestion-clinica/v1/*": ["hpn/older-apps/gestion-clinica/v1/*"],
       "@hpn/old/valores-criticos/*": ["hpn/older-apps/valores-criticos/*"],

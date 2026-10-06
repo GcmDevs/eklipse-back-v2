@@ -6,7 +6,7 @@ import {
   ESTADOS_JORNADA,
   MotivoDevolucionDietaCode,
   dieEstadoTypeFactory,
-} from '@hpn/ori/die/domain/types/local';
+} from '@lgc/die/domain/types/local';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';

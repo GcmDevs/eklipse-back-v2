@@ -1,10 +1,10 @@
 import { ApiTags } from '@nestjs/swagger';
 import { BadRequestException, Body, Controller, Get, Put, Query } from '@nestjs/common';
-import { ItdBillingImpl } from '@hpn/ori/die/infrastructure/services';
+import { ItdBillingImpl } from '@lgc/die/infrastructure/services';
 import { Authorities, CommonGuards } from '@common/presentation/decorators';
 import { removeTimeZone } from '@common/application/services';
 import { DietaNoRecibidaDto } from '../dtos';
-import { DIE_AUTHORITIES } from '@hpn/ori/die/application/constants';
+import { DIE_AUTHORITIES } from '@lgc/die/application/constants';
 
 @CommonGuards()
 @ApiTags('v1 - Dietas')

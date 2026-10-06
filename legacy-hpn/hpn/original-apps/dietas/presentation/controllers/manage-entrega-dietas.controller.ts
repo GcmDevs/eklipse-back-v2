@@ -1,13 +1,13 @@
 import { ApiTags } from '@nestjs/swagger';
 import { BadRequestException, Controller, Get, Param, Query } from '@nestjs/common';
 import { Authorities, CommonGuards } from '@common/presentation/decorators';
-import { ManageEntregaDietasImpl } from '@hpn/ori/die/infrastructure/services';
-import { DIE_AUTHORITIES } from '@hpn/ori/die/application/constants';
+import { ManageEntregaDietasImpl } from '@lgc/die/infrastructure/services';
+import { DIE_AUTHORITIES } from '@lgc/die/application/constants';
 import {
   ESTADOS_DIETA,
   ESTADOS_JORNADA,
   MotivoDevolucionDietaCode,
-} from '@hpn/ori/die/domain/types/local';
+} from '@lgc/die/domain/types/local';
 
 @CommonGuards()
 @ApiTags('v1 - Dietas')

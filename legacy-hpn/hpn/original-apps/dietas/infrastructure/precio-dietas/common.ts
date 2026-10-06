@@ -1,5 +1,5 @@
 import { GcmContextType } from '@common/domain/types';
-import { JornadaType } from '@hpn/ori/die/domain/types/local';
+import { JornadaType } from '@lgc/die/domain/types/local';
 
 export interface DataDieFPI {
   context: GcmContextType;

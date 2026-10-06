@@ -3,7 +3,7 @@ import {
   DieJorEstadoType,
   DieEstadoType,
   MotivoDevolucionDietaType,
-} from '@hpn/ori/die/domain/types/local';
+} from '@lgc/die/domain/types/local';
 
 export interface InfoDietaCentroDto {
   id: number;

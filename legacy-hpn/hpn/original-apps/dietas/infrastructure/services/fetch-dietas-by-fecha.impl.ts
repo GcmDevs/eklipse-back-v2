@@ -4,10 +4,10 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { DieCentroOrm, DieEstadoOrm } from '../models/local';
 import { JornadaI, OfertaI } from '../data-transfers';
 import { CatalogOrm, ScheduleOrm } from '../models/diets';
-import { groupByKeyExtend, TakGrouped } from '@hpn/ori/die/presentation/helpers';
+import { groupByKeyExtend, TakGrouped } from '@lgc/die/presentation/helpers';
 import { refactorizeDietaCodeToConfig } from '../queries';
 import { BaseSource } from '@common/infrastructure/services';
-import { catalogDietTypeFactory } from '@hpn/ori/die/domain/types/diets';
+import { catalogDietTypeFactory } from '@lgc/die/domain/types/diets';
 import { getDateToString } from '@common/application/services';
 
 @Injectable()

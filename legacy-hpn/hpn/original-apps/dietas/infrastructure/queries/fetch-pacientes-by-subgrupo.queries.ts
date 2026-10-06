@@ -1,4 +1,4 @@
-import { DieEstadoCode, OFERTA } from '@hpn/ori/die/domain/types/local';
+import { DieEstadoCode, OFERTA } from '@lgc/die/domain/types/local';
 import { DetalleOfertaI, OfertaI } from '../data-transfers';
 import { orderBy } from 'lodash';
 import { GCM_CONTEXTS, GcmContextType } from '@common/domain/types';

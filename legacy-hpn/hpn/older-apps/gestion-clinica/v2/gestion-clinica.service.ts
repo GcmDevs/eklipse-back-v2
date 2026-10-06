@@ -30,7 +30,7 @@ import {
 } from './gestion-clinica.queries';
 import { In } from 'typeorm';
 import { cloneDeep, uniq } from 'lodash';
-import { groupByKeyExtend } from '@hpn/ori/die/presentation/helpers';
+import { groupByKeyExtend } from '@lgc/die/presentation/helpers';
 import { UsuarioOrm } from '@hpn/old/orm/general';
 import { GestionOrm } from '@hpn/gestion-clinica/v1/infrastructure/orm/gestion.orm';
 

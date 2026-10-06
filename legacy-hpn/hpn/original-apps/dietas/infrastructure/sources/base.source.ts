@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { CentroOrm } from '@hpn/ori/die/infrastructure/models/local';
+import { CentroOrm } from '@lgc/die/infrastructure/models/local';
 import { BaseSource } from '@common/infrastructure/services';
 import { CatalogOrm, ScheduleOrm } from '../models/diets';
 import { IsNull } from 'typeorm';
-import { TakGrouped, groupByKeyExtend } from '@hpn/ori/die/presentation/helpers';
-import { catalogDietTypeFactory } from '@hpn/ori/die/domain/types/diets';
+import { TakGrouped, groupByKeyExtend } from '@lgc/die/presentation/helpers';
+import { catalogDietTypeFactory } from '@lgc/die/domain/types/diets';
 import { OfertaI } from '../data-transfers';
 import { orderBy } from 'lodash';
 

@@ -1,4 +1,4 @@
-import { JORNADAS_DIETA, JornadaType } from '@hpn/ori/die/domain/types/local';
+import { JORNADAS_DIETA, JornadaType } from '@lgc/die/domain/types/local';
 import { CONSISTENCIAS_LIQUIDAS, CONSISTENCIAS_SOLIDAS, DataDieFPI } from '../common';
 
 const dietaTradicional = (combinacionCode: string, jornada: JornadaType) => {
