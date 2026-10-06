@@ -36,7 +36,11 @@
       "@hpn/lgc/aud/types/*": ["./legacy/auditoria/@types/*"],
       "@hpn/lgc/aud/types": ["./legacy/auditoria/@types"],
       "@hpn/lgc/aud/orm/*": ["./legacy/auditoria/@orm/*"],
-      "@hpn/lgc/aud/orm": ["./legacy/auditoria/@orm"]
+      "@hpn/lgc/aud/orm": ["./legacy/auditoria/@orm"],
+      // Dietas (lgc)
+      "@lgc/die/*": ["./legacy/dietas/*"],
+      "@lgc/die/types/*": ["./legacy/dietas/@types/*"],
+
     }
   },
   "include": [

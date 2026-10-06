@@ -1,5 +1,6 @@
 import { LGC_TAS_ENTITIES } from '@hpn/lgc/tas/orm';
 import { LGC_AUD_ENTITIES } from '../legacy/auditoria/@orm';
+import { LGC_DIE_ENTITIES } from '@lgc/die/infrastructure/orm';
 import { ORM_ADN_ENTITIES } from '@orm/adn';
 import { ORM_GEN_ENTITIES } from '@orm/gen';
 import { ORM_HPN_ENTITIES } from '@orm/hpn';
@@ -14,6 +15,7 @@ export const ENTITIES = [
   JustForVerifyOrm,
   ...LGC_TAS_ENTITIES,
   ...LGC_AUD_ENTITIES,
+  ...LGC_DIE_ENTITIES,
   ...ORM_ADN_ENTITIES,
   ...ORM_GEN_ENTITIES,
   ...ORM_HPN_ENTITIES,
