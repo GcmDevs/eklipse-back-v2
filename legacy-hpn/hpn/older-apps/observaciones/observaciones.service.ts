@@ -10,7 +10,7 @@ import {
   gcmContextFactory,
   GcmContextType,
 } from '@common/domain/types';
-import { groupByKey } from '@hpn/ori/die/presentation/helpers';
+import { groupByKey } from '@lgc/die/presentation/helpers';
 import { UsuarioOrm } from '@hpn/old/orm/general';
 import { In } from 'typeorm';
 

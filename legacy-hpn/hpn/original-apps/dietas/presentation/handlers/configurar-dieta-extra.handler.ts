@@ -1,5 +1,5 @@
-import { ConfigurarDietasExtraordinariasImpl } from '@hpn/ori/die/infrastructure/services';
-import { ConfDietExtraPayload } from '@hpn/ori/die/application/data-transfers';
+import { ConfigurarDietasExtraordinariasImpl } from '@lgc/die/infrastructure/services';
+import { ConfDietExtraPayload } from '@lgc/die/application/data-transfers';
 import { BadRequestException, Injectable } from '@nestjs/common';
 
 @Injectable()

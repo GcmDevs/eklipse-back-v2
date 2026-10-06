@@ -1,7 +1,7 @@
 import { Inject } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
-import { ConfDietExtraPayload } from '@hpn/ori/die/application/data-transfers';
+import { ConfDietExtraPayload } from '@lgc/die/application/data-transfers';
 import { TransactionDietaService } from './transaction';
 import { dataToConfDieExtra } from '../factories';
 import { BaseSource } from '@common/infrastructure/services';

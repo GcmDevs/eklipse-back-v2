@@ -2,12 +2,12 @@ import { IsNull } from 'typeorm';
 import { orderBy } from 'lodash';
 import { ApiTags } from '@nestjs/swagger';
 import { BadRequestException, Controller, Get, Param, Query } from '@nestjs/common';
-import { CatalogOrm, ScheduleOrm } from '@hpn/ori/die/infrastructure/models/diets';
+import { CatalogOrm, ScheduleOrm } from '@lgc/die/infrastructure/models/diets';
 import { Authorities, CommonGuards } from '@common/presentation/decorators';
-import { catalogDietTypeFactory } from '@hpn/ori/die/domain/types/diets';
-import { DietasBaseSource } from '@hpn/ori/die/infrastructure/sources';
-import { DIE_AUTHORITIES } from '@hpn/ori/die/application/constants';
-import { OFERTA } from '@hpn/ori/die/domain/types/local';
+import { catalogDietTypeFactory } from '@lgc/die/domain/types/diets';
+import { DietasBaseSource } from '@lgc/die/infrastructure/sources';
+import { DIE_AUTHORITIES } from '@lgc/die/application/constants';
+import { OFERTA } from '@lgc/die/domain/types/local';
 import { groupByKeyExtend } from '../helpers';
 
 @CommonGuards()

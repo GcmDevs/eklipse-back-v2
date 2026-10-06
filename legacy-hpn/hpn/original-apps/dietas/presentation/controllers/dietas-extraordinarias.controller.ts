@@ -2,7 +2,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ConfDietaExtraHandler, FetchDietasByFechaHandler } from '../handlers';
 import { Authorities, CommonGuards } from '@common/presentation/decorators';
-import { DIE_AUTHORITIES } from '@hpn/ori/die/application/constants';
+import { DIE_AUTHORITIES } from '@lgc/die/application/constants';
 import { ConfDietaExtraRequest } from '../dtos';
 import { getDateRangeByDay } from '../helpers';
 

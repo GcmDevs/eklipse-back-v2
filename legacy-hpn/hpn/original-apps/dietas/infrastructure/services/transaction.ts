@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { TransactionDietaOrm } from '../models/local';
-import { JornadaCode, TransactionDietaTypeCode } from '@hpn/ori/die/domain/types/local';
+import { JornadaCode, TransactionDietaTypeCode } from '@lgc/die/domain/types/local';
 import { BaseSource } from '@common/infrastructure/services';
 
 @Injectable()

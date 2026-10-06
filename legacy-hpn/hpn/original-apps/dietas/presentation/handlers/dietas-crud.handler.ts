@@ -1,8 +1,5 @@
-import {
-  ActualizarDietasImpl,
-  CreateDietasBySubgrupoImpl,
-} from '@hpn/ori/die/infrastructure/services';
-import { UpdateDietaDto } from '@hpn/ori/die/application/data-transfers';
+import { ActualizarDietasImpl, CreateDietasBySubgrupoImpl } from '@lgc/die/infrastructure/services';
+import { UpdateDietaDto } from '@lgc/die/application/data-transfers';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateDietaDto } from '../dtos';
 

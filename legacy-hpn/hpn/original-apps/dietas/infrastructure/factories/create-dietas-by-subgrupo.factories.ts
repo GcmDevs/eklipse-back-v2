@@ -1,4 +1,4 @@
-import { DietaDto } from '@hpn/ori/die/presentation/dtos';
+import { DietaDto } from '@lgc/die/presentation/dtos';
 import {
   JornadaType,
   ESTADOS_JORNADA,
@@ -6,7 +6,7 @@ import {
   DIETAS_EXTRA,
   JornadaCode,
   JORNADAS_DIETA,
-} from '@hpn/ori/die/domain/types/local';
+} from '@lgc/die/domain/types/local';
 import {
   DieCentroOrm,
   DieJornadaOrm,

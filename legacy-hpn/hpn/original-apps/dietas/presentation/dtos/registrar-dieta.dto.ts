@@ -1,4 +1,4 @@
-import { JornadaCode } from '@hpn/ori/die/domain/types/local';
+import { JornadaCode } from '@lgc/die/domain/types/local';
 import { Type } from 'class-transformer';
 import {
   IsArray,

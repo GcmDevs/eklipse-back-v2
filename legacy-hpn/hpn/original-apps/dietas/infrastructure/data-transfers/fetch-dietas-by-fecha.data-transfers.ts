@@ -1,4 +1,4 @@
-import { DieEstadoCode, MotivoDevolucionDietaCode } from '@hpn/ori/die/domain/types/local';
+import { DieEstadoCode, MotivoDevolucionDietaCode } from '@lgc/die/domain/types/local';
 
 export interface DietaEstadoResponse {
   OID: number;

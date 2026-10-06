@@ -1,6 +1,6 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { DIE_ENT_NAMES } from './_entity-names';
-import { DAY_IN_MS } from '@hpn/ori/die/application/constants';
+import { DAY_IN_MS } from '@lgc/die/application/constants';
 import { CatalogOrm } from './catalog.orm';
 import { CentroOrm } from '../local';
 import { removeTimeZone } from '@common/application/services';

@@ -7,7 +7,7 @@ import {
   dieJorEstadoTypeFactory,
   jornadasDietaTypeFactory,
   jornadasDietaTypeFactoryByNameForHumans,
-} from '@hpn/ori/die/domain/types/local';
+} from '@lgc/die/domain/types/local';
 import { DieCentroOrm } from './die-centro.orm';
 import { DieSubgrupoOrm } from './die-sub-grupo.orm';
 import { ScheduleOrm } from '../diets';

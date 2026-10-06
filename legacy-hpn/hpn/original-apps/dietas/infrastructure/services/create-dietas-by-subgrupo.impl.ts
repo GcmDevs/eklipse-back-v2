@@ -2,18 +2,14 @@ import { Request } from 'express';
 import { In } from 'typeorm';
 import { REQUEST } from '@nestjs/core';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import {
-  jornadasDietaTypeFactory,
-  JORNADAS_DIETA,
-  JornadaType,
-} from '@hpn/ori/die/domain/types/local';
+import { jornadasDietaTypeFactory, JORNADAS_DIETA, JornadaType } from '@lgc/die/domain/types/local';
 import {
   dieCentroFactory,
   dietaEstadoFactory,
   dietaSubgrupoFactory,
   dietaJornadaFactory,
 } from '../factories';
-import { CreateDietaDto, DietaDto } from '@hpn/ori/die/presentation/dtos';
+import { CreateDietaDto, DietaDto } from '@lgc/die/presentation/dtos';
 import { getDateToString, removeTimeZone } from '@common/application/services';
 import { fetchCamasRegistradasEnJornadaQuery } from '../queries';
 import { TransactionDietaService } from './transaction';
@@ -27,7 +23,7 @@ import {
   SubgrupoOrm,
 } from '../models/local';
 import { ScheduleOrm } from '../models/diets';
-import { DIE_AUTHORITIES } from '@hpn/ori/die/application/constants';
+import { DIE_AUTHORITIES } from '@lgc/die/application/constants';
 import { DietasBaseSource } from '../sources';
 import { GCM_CONTEXTS, GcmContextType } from '@common/domain/types';
 

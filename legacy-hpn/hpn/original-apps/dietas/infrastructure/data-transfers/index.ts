@@ -1,4 +1,4 @@
-import { CondicionOfertaCode, OfertaCode } from '@hpn/ori/die/domain/types/local';
+import { CondicionOfertaCode, OfertaCode } from '@lgc/die/domain/types/local';
 export * from './fetch-dietas-by-fecha.data-transfers';
 export * from './estado-dieta.response';
 

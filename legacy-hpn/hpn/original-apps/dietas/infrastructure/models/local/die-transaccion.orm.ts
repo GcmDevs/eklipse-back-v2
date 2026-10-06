@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import { JornadaCode, TransactionDietaTypeCode } from '@hpn/ori/die/domain/types/local';
+import { JornadaCode, TransactionDietaTypeCode } from '@lgc/die/domain/types/local';
 
 /** Manager de transacciones en pedidos de dietas. */
 @Entity('PDYDIETRANST')

@@ -1,4 +1,4 @@
-import { ConfDietExtraPayload } from '@hpn/ori/die/application/data-transfers';
+import { ConfDietExtraPayload } from '@lgc/die/application/data-transfers';
 import { DietaConfExtraOrm } from '../models/local';
 
 export const dataToConfDieExtra = (

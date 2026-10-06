@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import { GeneroCode, GeneroType, generoTypeFactory } from '@hpn/ori/die/domain/types/local';
+import { GeneroCode, GeneroType, generoTypeFactory } from '@lgc/die/domain/types/local';
 
 @Entity('GENPACIEN')
 export class PacienteOrm {

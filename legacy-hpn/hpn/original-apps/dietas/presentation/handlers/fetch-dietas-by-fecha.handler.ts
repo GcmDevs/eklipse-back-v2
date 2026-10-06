@@ -1,8 +1,8 @@
 import {
   FetchDietasByFechaImpl,
   FetchPacientesBySubgrupoImpl,
-} from '@hpn/ori/die/infrastructure/services';
-import { DieCentroOrm } from '@hpn/ori/die/infrastructure/models/local';
+} from '@lgc/die/infrastructure/services';
+import { DieCentroOrm } from '@lgc/die/infrastructure/models/local';
 import { BadRequestException, Injectable } from '@nestjs/common';
 
 @Injectable()

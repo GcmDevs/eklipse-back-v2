@@ -1,4 +1,4 @@
-import { JornadaCode } from '@hpn/ori/die/domain/types/local';
+import { JornadaCode } from '@lgc/die/domain/types/local';
 import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
 export class ConfDietaExtraRequest {

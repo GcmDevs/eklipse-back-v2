@@ -1,4 +1,4 @@
-import { UpdateDietaDto } from '@hpn/ori/die/application/data-transfers';
+import { UpdateDietaDto } from '@lgc/die/application/data-transfers';
 import { validRangeForJornada } from '../utils';
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Request } from 'express';
@@ -14,9 +14,9 @@ import {
   DieSubgrupoOrm,
   DietaConfExtraOrm,
 } from '../models/local';
-import { ESTADOS_DIETA } from '@hpn/ori/die/domain/types/local';
+import { ESTADOS_DIETA } from '@lgc/die/domain/types/local';
 import { ScheduleOrm } from '../models/diets';
-import { DIE_AUTHORITIES } from '@hpn/ori/die/application/constants';
+import { DIE_AUTHORITIES } from '@lgc/die/application/constants';
 import { fetchCamasRegistradasEnJornadaQuery } from '../queries';
 import { getDateToString, removeTimeZone } from '@common/application/services';
 

@@ -1,10 +1,10 @@
 import { Between, In, IsNull, Like, MoreThan } from 'typeorm';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { BaseSource } from '@common/infrastructure/services';
-import { groupByKeyExtend } from '@hpn/ori/die/presentation/helpers';
+import { groupByKeyExtend } from '@lgc/die/presentation/helpers';
 import { CatalogOrm, DimItdDietOrm, ScheduleOrm } from '../models/diets';
 import { CentroOrm, DieEstadoOrm, DieJornadaOrm, DieSubgrupoOrm } from '../models/local';
-import { DietaNoRecibidaDto } from '@hpn/ori/die/presentation/dtos';
+import { DietaNoRecibidaDto } from '@lgc/die/presentation/dtos';
 import { getDateToString } from '@common/application/services';
 import {
   CONSISTENCIAS_LIQUIDAS,

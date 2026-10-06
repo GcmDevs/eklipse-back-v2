@@ -29,7 +29,7 @@ import {
   tercerosGCMbyCentro,
 } from 'hpn/older-apps/gestion-clinica/v2/gestion-clinica.queries';
 import { cloneDeep, uniq } from 'lodash';
-import { groupByKey } from '@hpn/ori/die/presentation/helpers';
+import { groupByKey } from '@lgc/die/presentation/helpers';
 import { GestionOrm } from '@hpn/gestion-clinica/v1/infrastructure/orm/gestion.orm';
 
 @Injectable()
