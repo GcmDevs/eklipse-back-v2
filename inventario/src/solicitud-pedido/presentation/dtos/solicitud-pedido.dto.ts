@@ -72,6 +72,11 @@ export class CreateSolicitudPedidoProductoPayload {
 }
 
 export class ActualizarDespachoProductoPayload {
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  productoDespachadoId?: number;
+
   @IsInt()
   @Min(1)
   solicitudPedidoProductoId: number;

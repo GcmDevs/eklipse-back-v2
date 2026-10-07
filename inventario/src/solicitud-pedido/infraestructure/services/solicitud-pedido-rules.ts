@@ -38,6 +38,9 @@ export const validarExistenciasDespacho = (
     if (!existencia?.productoEncontrado) {
       throw new Error(`El producto ${codigo} no existe en Dinamica`);
     }
+    if (!Number.isFinite(existencia.cantidad)) {
+      throw new Error(`No fue posible validar la existencia del producto ${codigo}`);
+    }
     if (existencia.cantidad <= 0) {
       throw new Error(`El producto ${codigo} no tiene existencia disponible en Dinamica`);
     }

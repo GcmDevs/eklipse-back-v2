@@ -1,6 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { UsuarioOrm } from '@inn/orm/gen';
+import { ProductoOrm } from '@inn/orm/inn/productos';
 import { EstadoDespachoProductoCode } from '@inn/types/inn/solicitud-pedido';
 import { SolicitudPedidoProductoOrm } from './solicitud-pedido-producto.orm';
 
@@ -11,6 +12,13 @@ export class SolicitudPedidoProductoDespachoOrm {
 
   @Column({ name: 'SOLPEPRODID' })
   solicitudPedidoProductoId: number;
+
+  @Column({ name: 'INNPRODUCDESPACHADO', nullable: true })
+  productoDespachadoId: number | null;
+
+  @ManyToOne(() => ProductoOrm, { nullable: true })
+  @JoinColumn({ name: 'INNPRODUCDESPACHADO', referencedColumnName: 'id' })
+  productoDespachado: ProductoOrm | null;
 
   @ManyToOne(() => SolicitudPedidoProductoOrm, producto => producto.despachos)
   @JoinColumn({ name: 'SOLPEPRODID' })
