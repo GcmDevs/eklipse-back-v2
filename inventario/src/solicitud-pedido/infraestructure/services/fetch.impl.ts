@@ -25,11 +25,44 @@ import {
   SolicitudProductoOtraSedeReferencia,
   SolicitudProductoOtraSedeResponse,
 } from './otras-sedes';
+import { UsuarioOrm } from '@inn/orm/gen';
+import { cargarReferenciasDespacho, ReferenciaDespachoResponse } from './catalogo-referencias';
 
 @Injectable()
 export class FetchSolicitudPedidosImpl extends BaseSource {
   @Inject(ExistenciasDinamicaImpl)
   private readonly _existenciasDinamica: ExistenciasDinamicaImpl;
+
+  public async findUsuarioAM(id: number): Promise<UsuarioOrm | null> {
+    const ctx = GCM_CONTEXTS.AMMEDICAL;
+    const qr = this.dynamicQR(ctx);
+    try {
+      await qr.connect();
+      const usuario = await qr.manager.getRepository(UsuarioOrm).findOne({
+        where: { id },
+      });
+
+      return usuario;
+    } catch (error: any) {
+      throw new Error(`Error consultando usuario en AMMedical: ${error.message}`);
+    } finally {
+      await qr.release();
+    }
+  }
+
+  public async resolverUsuariosDespacho(solicitudes: SolicitudPedidoOrm[]): Promise<void> {
+    const usuarios = new Map<number, UsuarioOrm | null>();
+    for (const solicitud of solicitudes) {
+      for (const producto of solicitud.productos) {
+        for (const despacho of producto.despachos ?? []) {
+          if (!usuarios.has(despacho.usuarioId)) {
+            usuarios.set(despacho.usuarioId, await this.findUsuarioAM(despacho.usuarioId));
+          }
+          despacho.usuario = usuarios.get(despacho.usuarioId) ?? null;
+        }
+      }
+    }
+  }
 
   public async execute(fechaInicio: Date, fechaFin: Date) {
     const showAllContext = await this.hasAnyAuthority([
@@ -69,8 +102,10 @@ export class FetchSolicitudPedidosImpl extends BaseSource {
             'historial.sede',
             'productos',
             'productos.producto',
+            'productos.agrupamiento',
+            'productos.producto.agrupamiento',
             'productos.despachos',
-            'productos.despachos.usuario',
+            'productos.despachos.productoDespachado',
             'productos.usuarioRechazo',
             'productos.cierresSobrepedido',
             'productos.cierresSobrepedido.solicitudNueva',
@@ -84,8 +119,13 @@ export class FetchSolicitudPedidosImpl extends BaseSource {
           ],
           order: { fechaCreacion: 'DESC', historial: { fechaCambio: 'DESC' } },
         });
-
-        response.push(...transformToResponse(SolicitudPedidos, el));
+        await this.resolverUsuariosDespacho(SolicitudPedidos);
+        const registros = transformToResponse(SolicitudPedidos, el);
+        await cargarReferenciasDespacho(
+          qr,
+          registros.flatMap(solicitud => solicitud.productos)
+        );
+        response.push(...registros);
       } catch (error: any) {
         throw new Error(`Error consultando ${el.getCode()}: ${error.message}`);
       } finally {
@@ -96,7 +136,11 @@ export class FetchSolicitudPedidosImpl extends BaseSource {
     const codigosProductos = [
       ...new Set(
         response.flatMap(solicitud =>
-          solicitud.productos.map(producto => normalizarCodigoProducto(producto.codigo))
+          solicitud.productos.flatMap(producto =>
+            producto.agrupamientoId
+              ? producto.referencias.map(referencia => normalizarCodigoProducto(referencia.codigo))
+              : [normalizarCodigoProducto(producto.codigo)]
+          )
         )
       ),
     ].filter(Boolean);
@@ -120,6 +164,21 @@ export const agregarExistenciasAmmedical = (
 ): void => {
   solicitudes.forEach(solicitud => {
     solicitud.productos.forEach(producto => {
+      if (producto.agrupamientoId) {
+        producto.referencias.forEach(referencia => {
+          const stock = existencias.get(normalizarCodigoProducto(referencia.codigo));
+          referencia.existenciaDinamica = stock?.cantidad ?? 0;
+          referencia.productoEncontrado = stock?.productoEncontrado ?? false;
+        });
+        producto.existenciaAmmedical = producto.referencias.reduce(
+          (total, referencia) => total + referencia.existenciaDinamica,
+          0
+        );
+        producto.productoExisteEnAmmedical = producto.referencias.some(
+          referencia => referencia.productoEncontrado
+        );
+        return;
+      }
       const existencia = existencias.get(normalizarCodigoProducto(producto.codigo));
       producto.existenciaAmmedical = existencia?.cantidad ?? 0;
       producto.productoExisteEnAmmedical = existencia?.productoEncontrado ?? false;
@@ -145,7 +204,7 @@ export const agregarSolicitudesEnOtrasSedes = (
         return;
       }
 
-      const codigo = normalizarCodigoProducto(producto.codigo);
+      const codigo = normalizarCodigoProducto(producto.codigoAgrupamiento || producto.codigo);
       if (!codigo) return;
 
       referencias.push({
@@ -199,8 +258,16 @@ export const transformToResponse = (data: SolicitudPedidoOrm[], context: GcmCont
       return {
         id: detalle.id,
         productoId: detalle.productoId,
-        codigo: detalle.producto.codigo,
+        agrupamientoId: detalle.agrupamientoId ?? null,
+        codigoAgrupamiento:
+          detalle.agrupamiento?.codigo?.trim() ||
+          detalle.producto.agrupamiento?.codigo?.trim() ||
+          null,
+        referencias: [] as ReferenciaDespachoResponse[],
+        codigo: detalle.agrupamiento?.codigo?.trim() || detalle.producto.codigo,
         descripcion:
+          detalle.agrupamiento?.nombre?.trim() ||
+          detalle.agrupamiento?.codigo?.trim() ||
           detalle.producto.descripcionLarga?.trim() ||
           detalle.producto.descripcionCorta?.trim() ||
           detalle.producto.codigo?.trim() ||
@@ -257,18 +324,32 @@ export const transformToResponse = (data: SolicitudPedidoOrm[], context: GcmCont
             (primerDespacho, segundoDespacho) =>
               segundoDespacho.fechaCreacion.getTime() - primerDespacho.fechaCreacion.getTime()
           )
-          .map(movimiento => ({
-            id: movimiento.id,
-            cantidadEnviada: Number(movimiento.cantidad),
-            cantidadAcumulada: Number(movimiento.cantidadAcumulada),
-            estadoDespachoCode: movimiento.estadoDespachoCode,
-            estadoDespacho: estadoDespachoProductoTypeFactory(
-              movimiento.estadoDespachoCode
-            ).getForHumans(),
-            observacion: movimiento.observacion ?? null,
-            fechaCreacion: movimiento.fechaCreacion,
-            usuario: movimiento.usuario,
-          })),
+          .map(movimiento => {
+            // Solo los movimientos heredados sin ID corresponden al hijo original.
+            const referencia =
+              movimiento.productoDespachadoId == null
+                ? detalle.producto
+                : movimiento.productoDespachado;
+            return {
+              id: movimiento.id,
+              productoDespachadoId: movimiento.productoDespachadoId ?? detalle.productoId,
+              codigoDespachado: referencia?.codigo?.trim() || '',
+              descripcionDespachada:
+                referencia?.descripcionLarga?.trim() ||
+                referencia?.descripcionCorta?.trim() ||
+                referencia?.codigo?.trim() ||
+                '',
+              cantidadEnviada: Number(movimiento.cantidad),
+              cantidadAcumulada: Number(movimiento.cantidadAcumulada),
+              estadoDespachoCode: movimiento.estadoDespachoCode,
+              estadoDespacho: estadoDespachoProductoTypeFactory(
+                movimiento.estadoDespachoCode
+              ).getForHumans(),
+              observacion: movimiento.observacion ?? null,
+              fechaCreacion: movimiento.fechaCreacion,
+              usuario: movimiento.usuario,
+            };
+          }),
       };
     });
     const tieneRechazos = productos.some(

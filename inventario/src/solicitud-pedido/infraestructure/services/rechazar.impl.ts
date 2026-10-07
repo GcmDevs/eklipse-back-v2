@@ -38,7 +38,7 @@ export class RechazarSolicitudPedidoImpl extends BaseSource {
       const historialRp = qr.manager.getRepository(SolicitudPedidoHistorialOrm);
       const solicitud = await solicitudRp.findOne({
         where: { id: payload.solicitudPedidoId },
-        relations: ['productos', 'productos.producto'],
+        relations: ['productos', 'productos.producto', 'productos.agrupamiento'],
         lock: { mode: 'pessimistic_write' },
       });
 
@@ -105,7 +105,7 @@ export class RechazarSolicitudPedidoImpl extends BaseSource {
       await productoRp.save(productosSeleccionados);
       await solicitudRp.save(solicitud);
 
-      const codigos = productosSeleccionados.map(producto => producto.producto.codigo.trim());
+      const codigos = productosSeleccionados.map(producto => producto.agrupamiento?.codigo?.trim() || producto.producto.codigo.trim());
       await historialRp.save(
         historialRp.create({
           solicitudPedidoId: solicitud.id,
@@ -127,7 +127,7 @@ export class RechazarSolicitudPedidoImpl extends BaseSource {
         estadoCode: solicitud.estadoCode,
         productosRechazados: productosSeleccionados.map(producto => ({
           solicitudPedidoProductoId: producto.id,
-          codigo: producto.producto.codigo,
+          codigo: producto.agrupamiento?.codigo?.trim() || producto.producto.codigo,
           cantidadRechazada: Number(producto.cantidadRechazada),
         })),
       };

@@ -1,6 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 import { ProductoOrm } from '@inn/orm/inn/productos';
+import { AgrupamientoOrm } from '@inn/orm/inn/productos/inn/agrupamiento.orm';
 import { EstadoDespachoProductoCode, EstadoProductosCode } from '@inn/types/inn/solicitud-pedido';
 import { SolicitudPedidoOrm } from './solicitud-pedido.orm';
 import { UsuarioOrm } from '@inn/orm/gen';
@@ -21,6 +22,14 @@ export class SolicitudPedidoProductoOrm {
 
   @Column({ name: 'INNPRODUC' })
   productoId: number;
+
+  // INNPRODUC conserva una referencia de catálogo por compatibilidad; no es el hijo despachado.
+  @Column({ name: 'INNAGRUPAMI', nullable: true })
+  agrupamientoId: number | null;
+
+  @ManyToOne(() => AgrupamientoOrm, { nullable: true })
+  @JoinColumn({ name: 'INNAGRUPAMI', referencedColumnName: 'id' })
+  agrupamiento: AgrupamientoOrm | null;
 
   @ManyToOne(() => ProductoOrm)
   @JoinColumn({ name: 'INNPRODUC', referencedColumnName: 'id' })

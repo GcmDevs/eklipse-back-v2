@@ -1,10 +1,18 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { AgrupamientoOrm } from './inn/agrupamiento.orm';
 import { ClaseProductoCode, ClaseProductoType, TipoProductoCode } from '@inn/types/inn/productos';
 
 @Entity('INNPRODUC')
 export class ProductoOrm {
   @PrimaryGeneratedColumn({ name: 'OID' })
   id: number;
+
+  @Column({ name: 'INNAGRUPAMI', nullable: true })
+  agrupamientoId: number | null;
+
+  @ManyToOne(() => AgrupamientoOrm)
+  @JoinColumn({ name: 'INNAGRUPAMI' })
+  agrupamiento: AgrupamientoOrm;
 
   @Column({ name: 'IPRCODIGO' })
   codigo: string;

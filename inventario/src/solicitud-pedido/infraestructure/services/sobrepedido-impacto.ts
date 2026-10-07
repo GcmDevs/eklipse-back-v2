@@ -63,7 +63,8 @@ export const buscarSolicitudesImpactadas = async (
   productoRp: Repository<SolicitudPedidoProductoOrm>,
   sedeId: number,
   productoIds: number[],
-  bloquear = false
+  bloquear = false,
+  agrupamientoIds: number[] = []
 ): Promise<SolicitudPedidoOrm[]> => {
   const estadosCerradosProducto = [
     ESTADOS_DESPACHO_PRODUCTO.FACTURADO.getCode(),
@@ -71,14 +72,28 @@ export const buscarSolicitudesImpactadas = async (
     ESTADOS_DESPACHO_PRODUCTO.RECHAZADO.getCode(),
   ];
   const coincidencias = await productoRp.find({
-    where: {
-      productoId: In(productoIds),
-      estadoDespachoCode: Not(In(estadosCerradosProducto)),
-      solicitudPedido: {
-        sedeId,
-        estadoCode: Not(In(ESTADOS_SOLICITUD_PEDIDO_CERRADOS_CODES)),
+    where: [
+      {
+        productoId: In(productoIds),
+        estadoDespachoCode: Not(In(estadosCerradosProducto)),
+        solicitudPedido: {
+          sedeId,
+          estadoCode: Not(In(ESTADOS_SOLICITUD_PEDIDO_CERRADOS_CODES)),
+        },
       },
-    },
+      ...(agrupamientoIds.length
+        ? [
+            {
+              agrupamientoId: In(agrupamientoIds),
+              estadoDespachoCode: Not(In(estadosCerradosProducto)),
+              solicitudPedido: {
+                sedeId,
+                estadoCode: Not(In(ESTADOS_SOLICITUD_PEDIDO_CERRADOS_CODES)),
+              },
+            },
+          ]
+        : []),
+    ],
     relations: ['solicitudPedido'],
     order: { solicitudPedido: { fechaCreacion: 'ASC' }, id: 'ASC' },
     ...(bloquear ? { lock: { mode: 'pessimistic_write' as const } } : {}),
@@ -94,7 +109,7 @@ export const buscarSolicitudesImpactadas = async (
 
   return solicitudRp.find({
     where: { id: In(solicitudIds) },
-    relations: ['sede', 'productos', 'productos.producto'],
+    relations: ['sede', 'productos', 'productos.producto', 'productos.agrupamiento'],
     order: { fechaCreacion: 'ASC', productos: { id: 'ASC' } },
     ...(bloquear ? { lock: { mode: 'pessimistic_write' as const } } : {}),
   });
@@ -102,9 +117,11 @@ export const buscarSolicitudesImpactadas = async (
 
 export const construirImpactoSobrepedido = (
   solicitudes: SolicitudPedidoOrm[],
-  productoIdsNuevos: number[]
+  productoIdsNuevos: number[],
+  agrupamientoIdsNuevos: number[] = []
 ): ImpactoSobrepedidoResponse => {
   const productosNuevos = new Set(productoIdsNuevos);
+  const agrupamientosNuevos = new Set(agrupamientoIdsNuevos);
   const detalleSolicitudes = [...solicitudes]
     .sort((a, b) => a.id - b.id)
     .map(solicitud => ({
@@ -118,7 +135,8 @@ export const construirImpactoSobrepedido = (
           const cantidadPendiente = calcularCantidadPendienteProducto(producto);
           const afectado = cantidadPendiente > 0;
           const tipoCierre = afectado
-            ? productosNuevos.has(producto.productoId)
+            ? productosNuevos.has(producto.productoId) ||
+              agrupamientosNuevos.has(producto.agrupamientoId)
               ? ('REEMPLAZADO' as const)
               : ('CERRADO_SIN_TRASLADO' as const)
             : null;
@@ -126,8 +144,12 @@ export const construirImpactoSobrepedido = (
           return {
             solicitudPedidoProductoId: producto.id,
             productoId: producto.productoId,
-            codigo: producto.producto.codigo.trim(),
-            descripcion: producto.producto.descripcionLarga.trim(),
+            codigo: producto.agrupamiento?.codigo?.trim() || producto.producto.codigo.trim(),
+            descripcion:
+              producto.agrupamiento?.nombre?.trim() || producto.agrupamiento?.codigo?.trim() ||
+              producto.producto.descripcionLarga?.trim() ||
+              producto.producto.descripcionCorta?.trim() ||
+              producto.producto.codigo.trim(),
             estadoDespachoCode: producto.estadoDespachoCode,
             estadoDespacho: estadoDespachoProductoTypeFactory(
               producto.estadoDespachoCode

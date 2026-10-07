@@ -1,4 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { In } from 'typeorm';
+import { ProductoOrm } from '@inn/orm/inn/productos';
 
 import { BaseSource } from '@common/infrastructure/services';
 import {
@@ -22,6 +24,24 @@ import {
   validarExistenciasDespacho,
 } from './solicitud-pedido-rules';
 
+export function validarReferenciaDespacho(
+  detalle: Pick<SolicitudPedidoProductoOrm, 'agrupamientoId' | 'productoId'>,
+  referencia: ProductoOrm | undefined,
+  referenciaId?: number
+): void {
+  if (!referencia || referencia.isBloqueado)
+    throw new Error('Seleccione una referencia hija habilitada para despachar');
+  if (
+    detalle.agrupamientoId &&
+    Number(referencia.agrupamientoId) !== Number(detalle.agrupamientoId)
+  ) {
+    throw new Error('La referencia seleccionada no pertenece al producto padre solicitado');
+  }
+  if (!detalle.agrupamientoId && referenciaId && referenciaId !== detalle.productoId) {
+    throw new Error('Las solicitudes históricas deben despacharse con su referencia original');
+  }
+}
+
 @Injectable()
 export class ActualizarDespachoSolicitudPedidoImpl extends BaseSource {
   @Inject(ExistenciasDinamicaImpl)
@@ -42,7 +62,7 @@ export class ActualizarDespachoSolicitudPedidoImpl extends BaseSource {
 
       const solicitudPedido = await solicitudPedidoRp.findOne({
         where: { id: payload.solicitudPedidoId },
-        relations: ['productos', 'productos.producto'],
+        relations: ['productos', 'productos.producto', 'productos.agrupamiento'],
         lock: { mode: 'pessimistic_write' },
       });
 
@@ -60,6 +80,12 @@ export class ActualizarDespachoSolicitudPedidoImpl extends BaseSource {
       if (new Set(detallesIds).size !== detallesIds.length) {
         throw new Error('No puede enviar el mismo producto mas de una vez');
       }
+      const idsReferencias = [
+        ...new Set(payload.productos.map(item => item.productoDespachadoId).filter(Boolean)),
+      ];
+      const referencias = idsReferencias.length
+        ? await qr.manager.getRepository(ProductoOrm).findBy({ id: In(idsReferencias) })
+        : [];
 
       const detallesPayload = payload.productos.map(productoPayload => {
         const detalle = solicitudPedido.productos.find(
@@ -71,6 +97,10 @@ export class ActualizarDespachoSolicitudPedidoImpl extends BaseSource {
             `El producto de solicitud ${productoPayload.solicitudPedidoProductoId} no pertenece a esta solicitud`
           );
         }
+        const referencia = detalle.agrupamientoId
+          ? referencias.find(producto => producto.id === productoPayload.productoDespachadoId)
+          : detalle.producto;
+        validarReferenciaDespacho(detalle, referencia, productoPayload.productoDespachadoId);
         if (detalle.estadoDespachoCode === ESTADOS_DESPACHO_PRODUCTO.FACTURADO.getCode()) {
           throw new Error(`El producto ${detalle.producto.codigo} ya se encuentra facturado`);
         }
@@ -103,6 +133,7 @@ export class ActualizarDespachoSolicitudPedidoImpl extends BaseSource {
 
         return {
           detalle,
+          referencia,
           productoPayload,
           cantidadSolicitada,
           cantidadDespachada,
@@ -111,8 +142,8 @@ export class ActualizarDespachoSolicitudPedidoImpl extends BaseSource {
       });
 
       const cantidadesPorCodigo = new Map<string, number>();
-      detallesPayload.forEach(({ detalle, cantidadDespachada }) => {
-        const codigo = normalizarCodigoProducto(detalle.producto.codigo);
+      detallesPayload.forEach(({ referencia, cantidadDespachada }) => {
+        const codigo = normalizarCodigoProducto(referencia.codigo);
         cantidadesPorCodigo.set(
           codigo,
           (cantidadesPorCodigo.get(codigo) ?? 0) + cantidadDespachada
@@ -127,6 +158,7 @@ export class ActualizarDespachoSolicitudPedidoImpl extends BaseSource {
       const despachos = detallesPayload.map(
         ({
           detalle,
+          referencia,
           productoPayload,
           cantidadSolicitada,
           cantidadDespachada,
@@ -142,6 +174,7 @@ export class ActualizarDespachoSolicitudPedidoImpl extends BaseSource {
 
           return despachoRp.create({
             solicitudPedidoProductoId: detalle.id,
+            productoDespachadoId: referencia.id,
             cantidad: cantidadDespachada,
             cantidadAcumulada: cantidadEnviadaAcumulada,
             estadoDespachoCode: estado.estadoCode,
@@ -177,8 +210,14 @@ export class ActualizarDespachoSolicitudPedidoImpl extends BaseSource {
         solicitudPedidoId: solicitudPedido.id,
         numeroSolicitud: solicitudPedido.numeroSolicitud,
         estadoCode: solicitudPedido.estadoCode,
-        despachosRegistrados: despachos.map(despacho => ({
+        despachosRegistrados: despachos.map((despacho, index) => ({
           solicitudPedidoProductoId: despacho.solicitudPedidoProductoId,
+          productoDespachadoId: despacho.productoDespachadoId,
+          codigoDespachado: detallesPayload[index].referencia.codigo.trim(),
+          descripcionDespachada:
+            detallesPayload[index].referencia.descripcionLarga?.trim() ||
+            detallesPayload[index].referencia.descripcionCorta?.trim() ||
+            detallesPayload[index].referencia.codigo.trim(),
           cantidadEnviada: Number(despacho.cantidad),
           cantidadAcumulada: Number(despacho.cantidadAcumulada),
           estadoDespachoCode: despacho.estadoDespachoCode,
@@ -204,7 +243,7 @@ export class ActualizarDespachoSolicitudPedidoImpl extends BaseSource {
           return {
             id: detalle.id,
             productoId: detalle.productoId,
-            codigo: detalle.producto.codigo,
+            codigo: detalle.agrupamiento?.codigo?.trim() || detalle.producto.codigo,
             cantidadSolicitada,
             cantidadEnviada,
             cantidadPendiente: productoFacturado

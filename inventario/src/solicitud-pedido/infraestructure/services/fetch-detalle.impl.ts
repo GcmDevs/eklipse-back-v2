@@ -11,15 +11,23 @@ import {
 } from '@inn/types/inn/solicitud-pedido';
 import { contextoSolicitudPedidoFactory } from './contexto-solicitud-pedido.util';
 import { ExistenciasDinamicaImpl, normalizarCodigoProducto } from './existencias-dinamica.impl';
-import { agregarExistenciasAmmedical, transformToResponse } from './fetch.impl';
+import {
+  agregarExistenciasAmmedical,
+  FetchSolicitudPedidosImpl,
+  transformToResponse,
+} from './fetch.impl';
 import {
   agregarReferenciasProductosEnOtrasSedes,
   SolicitudProductoOtraSedeReferencia,
 } from './otras-sedes';
 import { calcularCantidadPendienteProducto } from './sobrepedido-impacto';
+import { cargarReferenciasDespacho } from './catalogo-referencias';
 
 @Injectable()
 export class FetchDetalleSolicitudPedidoImpl extends BaseSource {
+  @Inject(FetchSolicitudPedidosImpl)
+  private readonly _fetchSolicitudes: FetchSolicitudPedidosImpl;
+
   @Inject(ExistenciasDinamicaImpl)
   private readonly _existenciasDinamica: ExistenciasDinamicaImpl;
 
@@ -45,8 +53,10 @@ export class FetchDetalleSolicitudPedidoImpl extends BaseSource {
           'sede',
           'productos',
           'productos.producto',
+          'productos.agrupamiento',
+          'productos.producto.agrupamiento',
           'productos.despachos',
-          'productos.despachos.usuario',
+          'productos.despachos.productoDespachado',
           'productos.usuarioRechazo',
           'productos.cierresSobrepedido',
           'productos.cierresSobrepedido.solicitudNueva',
@@ -63,14 +73,16 @@ export class FetchDetalleSolicitudPedidoImpl extends BaseSource {
 
       if (!solicitud) throw new Error('No existe la solicitud de pedido indicada');
 
+      await this._fetchSolicitudes.resolverUsuariosDespacho([solicitud]);
       const response = transformToResponse([solicitud], ctx);
-      const codigos = response[0].productos.map(producto =>
-        normalizarCodigoProducto(producto.codigo)
-      );
+      await cargarReferenciasDespacho(qr, response[0].productos);
+      const codigos = response[0].productos.flatMap(producto => producto.agrupamientoId
+        ? producto.referencias.map(referencia => normalizarCodigoProducto(referencia.codigo))
+        : [normalizarCodigoProducto(producto.codigo)]);
       const existencias = await this._existenciasDinamica.obtenerPorCodigos(codigos);
       agregarExistenciasAmmedical(response, existencias);
       if (esGestor) {
-        const referencias = await this._buscarReferenciasOtrasSedes(codigos);
+        const referencias = await this._buscarReferenciasOtrasSedes(response[0].productos.map(producto => producto.codigoAgrupamiento || producto.codigo));
         agregarReferenciasProductosEnOtrasSedes(response, referencias);
       }
 
@@ -105,24 +117,35 @@ export class FetchDetalleSolicitudPedidoImpl extends BaseSource {
       const qr = this.dynamicQR(contexto);
       try {
         await qr.connect();
-        const productos = await qr.manager.getRepository(SolicitudPedidoProductoOrm).find({
-          where: {
-            estadoDespachoCode: Not(In(estadosCerradosProducto)),
-            producto: { codigo: In(codigosNormalizados) },
-            solicitudPedido: {
-              sedeId: Not(IsNull()),
-              estadoCode: Not(In(ESTADOS_SOLICITUD_PEDIDO_CERRADOS_CODES)),
-            },
+        const filtroActivo = {
+          estadoDespachoCode: Not(In(estadosCerradosProducto)),
+          solicitudPedido: {
+            sedeId: Not(IsNull()),
+            estadoCode: Not(In(ESTADOS_SOLICITUD_PEDIDO_CERRADOS_CODES)),
           },
-          relations: ['producto', 'solicitudPedido', 'solicitudPedido.sede'],
+        };
+        const productos = await qr.manager.getRepository(SolicitudPedidoProductoOrm).find({
+          where: [
+            { ...filtroActivo, agrupamiento: { codigo: In(codigosNormalizados) } },
+            {
+              ...filtroActivo,
+              producto: [
+                { agrupamiento: { codigo: In(codigosNormalizados) } },
+                { codigo: In(codigosNormalizados) },
+              ],
+            },
+          ],
+          relations: ['producto', 'producto.agrupamiento', 'agrupamiento', 'solicitudPedido', 'solicitudPedido.sede'],
         });
 
         productos.forEach(producto => {
+          const codigo = normalizarCodigoProducto(producto.agrupamiento?.codigo || producto.producto.agrupamiento?.codigo || producto.producto.codigo);
+          if (!codigosNormalizados.includes(codigo)) return;
           const cantidadPendiente = calcularCantidadPendienteProducto(producto);
           if (cantidadPendiente <= 0) return;
 
           referencias.push({
-            codigo: normalizarCodigoProducto(producto.producto.codigo),
+            codigo,
             sedeKey: `${contexto.getCode()}:${producto.solicitudPedido.sede.id}`,
             solicitudPedidoId: producto.solicitudPedido.id,
             numeroSolicitud: producto.solicitudPedido.numeroSolicitud,

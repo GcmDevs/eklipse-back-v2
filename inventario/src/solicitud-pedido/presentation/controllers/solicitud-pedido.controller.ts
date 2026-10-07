@@ -134,6 +134,10 @@ export class SolicitudPedidoController {
       throw new BadRequestException(error.message);
     }
   }
+  @Authorities([
+    INN_AUTHORITIES.SOLICITUD_PEDIDO.SOLICITAR_PEDIDO,
+    INN_AUTHORITIES.SOLICITUD_PEDIDO.FACTURAR_PEDIDO,
+  ])
   @Get('buscar-producto/:codigo')
   async buscarProducto(
     @Param('codigo') codigo: string,
