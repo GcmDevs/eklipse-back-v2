@@ -1,3 +1,3 @@
-// Consulta suministrada por el usuario, conservada sin modificar.
+// El catálogo solo necesita estas columnas; evita descargar las plantillas binarias de DIAPLANOTIF.
 export const DIAGNOSTICOS_ONCOLOGICOS_SQL =
-  'select DIAGTIPCANCER,* from GENDIAGNO WHERE (DIADIAONCO = 1)';
+  'SELECT DIAGTIPCANCER, DIACODIGO, DIANOMBRE FROM GENDIAGNO WHERE DIADIAONCO = 1';
