@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, Logger } from '@nestjs/common';
 import { BaseSource } from '@common/infrastructure/services/base.source';
 import { DataSource, QueryRunner } from 'typeorm';
 import {
@@ -19,6 +19,7 @@ import {
 import { DIAGNOSTICOS_ONCOLOGICOS_SQL } from '../queries/diagnosticos';
 import { clasificarCancer, normalizarCie10 } from './clasificacion-cancer';
 import { edadAlDiagnostico } from './edad-diagnostico';
+import { COMPLETAR_TRATAMIENTO_SQL } from '../queries/completar-tratamiento';
 import { CONSULTAS_CAC, REGISTRO_PACIENTE_SQL } from '../queries/cac.queries';
 import { PACIENTE_CAC_SQL } from '../queries/paciente';
 import {
@@ -53,9 +54,12 @@ import { prepararListadoCac } from '../queries/listado';
 import { prepararExportacionCac } from '../queries/exportar';
 import { FilaExportacionCac, generarExcelCac } from './excel-cac';
 import { ExcelCacResponse } from '../../presentation/dtos/excel.dto';
+import { SLN_AUTHORITIES } from '@inn/authorities';
+import { ADMIN_AUTHORITY } from '@common/application/constants';
 
 @Injectable()
 export class CuentaAltoCostoImpl extends BaseSource {
+  private readonly logger = new Logger(CuentaAltoCostoImpl.name);
   public async exportarExcel(filtros: FiltrosListadoCac): Promise<ExcelCacResponse> {
     const consulta = prepararExportacionCac(filtros);
     let filas: FilaExportacionCac[];
@@ -97,28 +101,31 @@ export class CuentaAltoCostoImpl extends BaseSource {
   }
 
   public async diagnosticosOncologicos(): Promise<CatalogoOncologicoResponse> {
+    const inicio = Date.now();
+    this.logger.log('Catálogo CIE-10: iniciando consulta oncológica en GENDIAGNO.');
     try {
       const filas: {
         DIACODIGO: string;
         DIANOMBRE: string;
-        DIAGTIPCANCER: number | number[] | null;
+        DIAGTIPCANCER: number | null;
       }[] = await this.conn.query(DIAGNOSTICOS_ONCOLOGICOS_SQL);
+      this.logger.log(
+        `Catálogo CIE-10: consulta completada, ${filas.length} diagnósticos en ${Date.now() - inicio} ms.`
+      );
       return {
         diagnosticos: filas
           .map(fila => ({
             codigo: String(fila.DIACODIGO).trim(),
             nombre: String(fila.DIANOMBRE ?? '').trim(),
-            // La consulta original repite DIAGTIPCANCER mediante *, MSSQL puede devolver un array.
-            tipoCancer:
-              fila.DIAGTIPCANCER == null
-                ? null
-                : Number(
-                    Array.isArray(fila.DIAGTIPCANCER) ? fila.DIAGTIPCANCER[0] : fila.DIAGTIPCANCER
-                  ),
+            tipoCancer: fila.DIAGTIPCANCER == null ? null : Number(fila.DIAGTIPCANCER),
           }))
           .sort((a, b) => a.codigo.localeCompare(b.codigo)),
       };
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        `Catálogo CIE-10: falló la consulta después de ${Date.now() - inicio} ms.`,
+        error instanceof Error ? error.stack : String(error)
+      );
       throw new BadRequestException('No fue posible cargar los diagnósticos oncológicos.');
     }
   }
@@ -133,10 +140,22 @@ export class CuentaAltoCostoImpl extends BaseSource {
     return Object.fromEntries(entradas) as unknown as RecursosPacienteCacResponse;
   }
 
-  public async consultar(
+  public async consultarAutorizado(
     tipoDocumento: number,
     documento: string,
     codigoCie10?: string
+  ): Promise<ConsultaCacResponse> {
+    const puedeGestionar = await this.hasAnyAuthority([
+      ADMIN_AUTHORITY, SLN_AUTHORITIES.CUENTA_ALTO_COSTO.GESTIONAR,
+    ]);
+    return this.consultar(tipoDocumento, documento, codigoCie10, !puedeGestionar);
+  }
+
+  public async consultar(
+    tipoDocumento: number,
+    documento: string,
+    codigoCie10?: string,
+    soloExistentes = false
   ): Promise<ConsultaCacResponse> {
     const busqueda = validarBusqueda(tipoDocumento, documento);
     const codigo = codigoCie10 === undefined ? undefined : validarCodigoCie10(codigoCie10);
@@ -161,6 +180,15 @@ export class CuentaAltoCostoImpl extends BaseSource {
         throw new ConflictException(
           'Hay registros CAC duplicados para el mismo documento y CIE-10. Revisa los duplicados antes de continuar.'
         );
+      if (soloExistentes && (!diagnosticos.length ||
+        (codigo !== undefined && !codigos.includes(codigo.toUpperCase())))) {
+        return {
+          paciente: null,
+          registro: null,
+          diagnosticos,
+          aviso: 'El permiso Ver informes solo permite consultar registros CAC ya creados.',
+        };
+      }
       const existencia = prepararConsulta(EXISTENCIA_PACIENTE_SQL, {
         PACTIPDOC: busqueda.tipoDocumento,
         PACNUMDOC: busqueda.documento,
@@ -246,7 +274,11 @@ export class CuentaAltoCostoImpl extends BaseSource {
       item => normalizarCie10(item.codigo) === normalizarCie10(dto.datos.CODCIE10!)
     );
     if (diagnosticos.length !== 1)
-      throw new BadRequestException('Selecciona un CIE-10 válido y único del catálogo oncológico.');
+      throw new BadRequestException(
+        diagnosticos.length === 0
+          ? `Código CIE-10 «${dto.datos.CODCIE10}»: no está disponible en el catálogo oncológico. Solicita la revisión de este código antes de guardar.`
+          : `Código CIE-10 «${dto.datos.CODCIE10}»: aparece repetido en el catálogo oncológico. Solicita la revisión de los duplicados antes de guardar.`
+      );
     // Los registros nuevos guardan el código del catálogo; las llaves existentes se conservan.
     if (dto.version === null) dto.datos.CODCIE10 = diagnosticos[0].codigo;
     dto.datos.NOMNEOPLASIA = normalizarCie10(dto.datos.CODCIE10!);
@@ -266,13 +298,15 @@ export class CuentaAltoCostoImpl extends BaseSource {
         throw new ConflictException(
           'El registro cambió desde que lo abriste. Vuelve a consultar antes de guardar.'
         );
-      if (actual) {
-        if (
-          actual.datos.FECINFORMEHISTO !== dto.datos.FECINFORMEHISTO ||
-          actual.datos.EDADDX !== dto.datos.EDADDX
-        )
+      const fechaInformeDefinida = !!actual?.datos.FECINFORMEHISTO?.trim();
+      if (fechaInformeDefinida && actual.datos.FECINFORMEHISTO !== dto.datos.FECINFORMEHISTO)
+        throw new BadRequestException(
+          'La fecha del informe histopatológico queda definida una vez diligenciada y guardada.'
+        );
+      if (fechaInformeDefinida && actual.datos.EDADDX?.trim()) {
+        if (actual.datos.EDADDX !== dto.datos.EDADDX)
           throw new BadRequestException(
-            'La fecha del informe histopatológico y la edad al diagnóstico quedan definidas al guardar el registro.'
+            'La edad al diagnóstico queda definida una vez calculada y guardada.'
           );
       } else {
         const edad = edadAlDiagnostico(consulta.paciente.fechaNacimiento, dto.datos.FECINFORMEHISTO);
@@ -289,11 +323,16 @@ export class CuentaAltoCostoImpl extends BaseSource {
       if (
         actual &&
         (actual.datos.CODCIE10 !== dto.datos.CODCIE10 ||
-          actual.datos.IDETIPOTRATAMIENTO !== dto.datos.IDETIPOTRATAMIENTO)
+          (!!actual.datos.IDETIPOTRATAMIENTO?.trim() &&
+            actual.datos.IDETIPOTRATAMIENTO !== dto.datos.IDETIPOTRATAMIENTO))
       ) {
         throw new BadRequestException(
-          'El diagnóstico y tipo de tratamiento quedan definidos al crear el registro'
+          'El diagnóstico y el tipo de tratamiento ya diligenciado quedan definidos al guardar el registro'
         );
+      }
+      if (actual && !actual.datos.IDETIPOTRATAMIENTO?.trim()) {
+        const completar = prepararConsulta(COMPLETAR_TRATAMIENTO_SQL, dto.datos);
+        await this.qr.query(completar.sql, completar.parametros);
       }
       for (const seccion of CONSULTAS_CAC) {
         const lectura = prepararConsulta(seccion.select, dto.datos);

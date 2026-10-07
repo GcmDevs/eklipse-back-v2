@@ -11,6 +11,7 @@ skills-lock.json
 /inventario/private
 /public
 /dist
+temp_auto_push.bat
 /.cursor
 /legacy-gen/dist
 temp_auto_push.bat
@@ -31,3 +32,4 @@ temp_auto_push.bat
 /inventario/private
 .gitignore
 branch_structure.json
+/inventario/private.gitignore
