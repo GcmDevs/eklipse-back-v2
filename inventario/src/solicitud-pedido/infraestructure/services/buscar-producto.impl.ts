@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { In, Not } from 'typeorm';
+import { In, IsNull, Not } from 'typeorm';
 
 import { BaseSource } from '@common/infrastructure/services';
 import { gcmContextFactory } from '@common/domain/types';
 import { ProductoOrm } from '@inn/orm/inn/productos';
 import { SolicitudPedidoProductoOrm } from '@inn/orm/inn/solicitud-pedido';
+import { obtenerConfiguracionReporte } from './reporte-configuracion';
 import {
   estadoSolicitudPedidoTypeFactory,
   ESTADOS_DESPACHO_PRODUCTO,
@@ -26,6 +27,7 @@ export interface BuscarProductoResponse extends ValidacionProductoResponse {
   id: number;
   codigo: string;
   descripcion: string;
+  existenciaActual: number;
 }
 
 @Injectable()
@@ -36,22 +38,62 @@ export class BuscarProductoImpl extends BaseSource {
     }
 
     const ctx = gcmContextFactory(this.auth.context.getCode());
+    const { almacenes } = obtenerConfiguracionReporte(ctx.getCode(), sedeId);
 
     const qr = this.dynamicQR(ctx);
-    await qr.connect();
 
     try {
+      await qr.connect();
       const productoRp = qr.manager.getRepository(ProductoOrm);
-      const producto = await productoRp.findOne({
-        where: { codigo },
+      const codigoNormalizado = codigo?.trim().toUpperCase();
+      let producto = await productoRp.findOne({
+        where: [
+          { agrupamiento: { codigo: codigoNormalizado }, isBloqueado: false },
+          { agrupamiento: { codigo: codigoNormalizado }, isBloqueado: IsNull() },
+        ],
+        relations: ['agrupamiento'],
+        order: { id: 'ASC' },
       });
+      if (!producto) {
+        const hijo = await productoRp.findOne({
+          where: { codigo: codigoNormalizado },
+          relations: ['agrupamiento'],
+        });
+        if (hijo?.agrupamientoId)
+          producto = await productoRp.findOne({
+            where: [
+              { agrupamientoId: hijo.agrupamientoId, isBloqueado: false },
+              { agrupamientoId: hijo.agrupamientoId, isBloqueado: IsNull() },
+            ],
+            relations: ['agrupamiento'],
+            order: { id: 'ASC' },
+          });
+      }
 
-      if (!producto) throw new Error('No existe producto con este código');
+      if (!producto?.agrupamiento?.codigo)
+        throw new Error('No existe un producto padre habilitado para este código');
+      const hijos = await productoRp.findBy({ agrupamientoId: producto.agrupamientoId });
+
+      const filtroAlmacenes = almacenes
+        ? ` AND A.OID IN (${almacenes.map((_, index) => `@${index + 2}`).join(', ')})`
+        : '';
+      const [stock] = await qr.query(
+        `SELECT COALESCE(SUM(F.IFICANTID), 0) AS existenciaActual
+         FROM INNFISICO F
+         INNER JOIN INNALMACE A ON A.OID = F.INNALMACE
+         INNER JOIN INNPRODUC P ON P.OID = F.INNPRODUC
+         WHERE P.INNAGRUPAMI = @0 AND A.ACACODIGO = @1${filtroAlmacenes}`,
+        [producto.agrupamientoId, sedeId, ...(almacenes ?? [])]
+      );
+      const existenciaActual = Number(stock?.existenciaActual);
+      if (stock?.existenciaActual == null || !Number.isFinite(existenciaActual)) {
+        throw new Error('No fue posible consultar la existencia actual del producto');
+      }
 
       const solicitudProductoRp = qr.manager.getRepository(SolicitudPedidoProductoOrm);
       const productosPendientes = await solicitudProductoRp.find({
         where: {
-          productoId: producto.id,
+          productoId: In(hijos.map(hijo => hijo.id)),
           estadoDespachoCode: Not(
             In([
               ESTADOS_DESPACHO_PRODUCTO.FACTURADO.getCode(),
@@ -102,8 +144,9 @@ export class BuscarProductoImpl extends BaseSource {
 
       return {
         id: producto.id,
-        codigo: producto.codigo,
-        descripcion: producto.descripcionLarga,
+        codigo: producto.agrupamiento.codigo.trim(),
+        descripcion: producto.agrupamiento.nombre?.trim() || producto.agrupamiento.codigo.trim(),
+        existenciaActual,
         existeEnOtraSolicitud: solicitudes.length > 0,
         solicitudes,
       };

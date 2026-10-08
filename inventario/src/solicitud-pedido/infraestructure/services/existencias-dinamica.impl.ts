@@ -37,7 +37,11 @@ export class ExistenciasDinamicaImpl extends BaseSource {
         productos.forEach(producto => {
           const codigo = normalizarCodigoProducto(producto.codigo);
           const cantidad = (producto.existencias ?? []).reduce(
-            (total, existencia) => total + Number(existencia.cantidad ?? 0),
+            (total, existencia) => {
+              const cantidad = Number(existencia.cantidad ?? 0);
+              if (!Number.isFinite(cantidad)) throw new Error(`Existencia inválida para ${codigo}`);
+              return total + cantidad;
+            },
             0
           );
           const existenciaActual = existencias.get(codigo);
