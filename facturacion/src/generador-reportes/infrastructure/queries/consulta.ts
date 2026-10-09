@@ -1,0 +1,18 @@
+// Parámetros posicionales de TypeORM para SQL Server. No interpolar datos del usuario.
+export const PACIENTE_REPORTES_SQL = `SELECT TOP (2)
+  OID, PACNUMDOC, PACPRINOM, PACSEGNOM, PACPRIAPE, PACSEGAPE
+FROM GENPACIEN
+WHERE PACNUMDOC = @0`;
+
+export const INGRESOS_REPORTES_SQL = `SELECT AINCONSEC, AINFECING,
+  CASE AINESTADO
+    WHEN 0 THEN 'Registrado'
+    WHEN 1 THEN 'Facturado'
+    WHEN 2 THEN 'Anulado'
+    WHEN 3 THEN 'Bloqueado'
+    WHEN 4 THEN 'Cerrado'
+    ELSE 'Desconocido'
+  END AS ESTADO_INGRESO
+FROM ADNINGRESO
+WHERE GENPACIEN = @0
+ORDER BY AINFECING DESC`;
