@@ -16,7 +16,7 @@ export class ProgramacionBoletaQuirurgicaImpl extends BaseSource {
       await this.qr.startTransaction();
       transactionStarted = true;
       if (body.observacionPendiente?.trim()) {
-        await guardarObservacionPendiente(this.qr, body, 'PROGRAMACION', this.auth.user.fullName);
+        await guardarObservacionPendiente(this.qr, body, 'PROGRAMA', this.auth.user.fullName);
       }
 
       const programacionRp = this.qr.manager.getRepository(BoletaQuirurgicaProgramacionOrm);

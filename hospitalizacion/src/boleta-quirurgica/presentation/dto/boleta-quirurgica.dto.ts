@@ -143,7 +143,7 @@ export class GuardarObservacionDto {
   fecha: string;
 
   @IsString()
-  @IsIn(['AUDITORIA', 'GESTOR', 'MAOS', 'PROGRAMACION', 'POST_QX'])
+  @IsIn(['AUDITORIA', 'GESTOR', 'MAOS', 'PROGRAMA', 'POST_QX'])
   @MaxLength(50)
   gestor: string;
 }
@@ -159,7 +159,7 @@ export class ObservacionesDto {
   folio: number;
 
   @IsString()
-  gestor: 'AUDITORIA' | 'GESTOR' | 'MAOS' | 'PROGRAMACION' | 'POST_QX';
+  gestor: 'AUDITORIA' | 'GESTOR' | 'MAOS' | 'PROGRAMA' | 'POST_QX';
 }
 
 export class GuardarProgramacionDto {
