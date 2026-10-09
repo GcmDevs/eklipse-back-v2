@@ -7,6 +7,8 @@ export interface FilaPacienteReportes {
   PACSEGNOM: string | null;
   PACPRIAPE: string | null;
   PACSEGAPE: string | null;
+  GPAFECNAC: Date | string | null;
+  SEXO: string | null;
 }
 
 export interface FilaIngresoReportes {
@@ -22,6 +24,11 @@ export function pacienteReportesFactory(fila: FilaPacienteReportes): PacienteRep
       .map(valor => (valor ?? '').trim())
       .filter(Boolean)
       .join(' '),
+    fechaNacimiento:
+      fila.GPAFECNAC instanceof Date
+        ? fila.GPAFECNAC.toISOString().slice(0, 10)
+        : (fila.GPAFECNAC?.slice(0, 10) ?? null),
+    sexo: fila.SEXO?.trim() || 'No registrado',
   };
 }
 

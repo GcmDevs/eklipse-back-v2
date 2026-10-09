@@ -16,6 +16,8 @@ describe('GeneradorReportesImpl', () => {
     PACSEGNOM: null,
     PACPRIAPE: ' PÉREZ ',
     PACSEGAPE: '',
+    GPAFECNAC: '1995-10-10',
+    SEXO: 'Femenino',
   };
   let servicio: GeneradorReportesImpl;
   let query: jest.Mock;
@@ -39,7 +41,14 @@ describe('GeneradorReportesImpl', () => {
     expect(query).toHaveBeenNthCalledWith(2, INGRESOS_REPORTES_SQL, [42]);
     expect(INGRESOS_REPORTES_SQL).toMatch(/ORDER BY AINFECING DESC/);
     expect(PACIENTE_REPORTES_SQL).not.toContain('001234');
-    expect(resultado.paciente).toEqual({ documento: '001234', nombreCompleto: 'ANA PÉREZ' });
+    expect(resultado.paciente).toEqual({
+      documento: '001234',
+      nombreCompleto: 'ANA PÉREZ',
+      fechaNacimiento: '1995-10-10',
+      sexo: 'Femenino',
+    });
+    expect(PACIENTE_REPORTES_SQL).toContain('GPAFECNAC');
+    expect(PACIENTE_REPORTES_SQL).toContain('CASE GPASEXPAC');
     expect(resultado.ingresos.map(ingreso => ingreso.estado)).toEqual(estados);
     expect(resultado.ingresos.map(ingreso => ingreso.consecutivo)).toEqual([
       200, 199, 198, 197, 196, 195,
@@ -50,7 +59,12 @@ describe('GeneradorReportesImpl', () => {
   it('conserva el paciente cuando no tiene ingresos', async () => {
     query.mockResolvedValueOnce([paciente]).mockResolvedValueOnce([]);
     expect(await servicio.consultar('001234')).toEqual({
-      paciente: { documento: '001234', nombreCompleto: 'ANA PÉREZ' },
+      paciente: {
+        documento: '001234',
+        nombreCompleto: 'ANA PÉREZ',
+        fechaNacimiento: '1995-10-10',
+        sexo: 'Femenino',
+      },
       ingresos: [],
     });
   });
@@ -102,5 +116,14 @@ describe('GeneradorReportesImpl', () => {
       .mockResolvedValueOnce([paciente])
       .mockResolvedValueOnce([{ AINCONSEC: 123, AINFECING: null, ESTADO_INGRESO: 'Cerrado' }]);
     expect((await servicio.consultar('001234')).ingresos[0].fechaIngreso).toBeNull();
+  });
+
+  it('conserva la ausencia de fecha de nacimiento y sexo sin inventar datos', async () => {
+    query
+      .mockResolvedValueOnce([{ ...paciente, GPAFECNAC: null, SEXO: null }])
+      .mockResolvedValueOnce([]);
+    const resultado = await servicio.consultar('001234');
+    expect(resultado.paciente.fechaNacimiento).toBeNull();
+    expect(resultado.paciente.sexo).toBe('No registrado');
   });
 });
