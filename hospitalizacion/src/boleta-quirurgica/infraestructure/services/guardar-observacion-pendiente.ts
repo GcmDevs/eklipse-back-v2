@@ -5,7 +5,7 @@ import { insertarObservacionQuery } from '../queries/observacion.query';
 export async function guardarObservacionPendiente(
   runner: QueryRunner,
   body: { ingreso: number; folio: number; observacionPendiente?: string },
-  gestor: 'AUDITORIA' | 'GESTOR' | 'MAOS' | 'PROGRAMACION',
+  gestor: 'AUDITORIA' | 'GESTOR' | 'MAOS' | 'PROGRAMA' | 'POST_QX',
   usuario: string
 ): Promise<void> {
   const observacion = body.observacionPendiente?.trim();
