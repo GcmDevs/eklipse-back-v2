@@ -102,6 +102,10 @@ export class CreateNotaSerTecPayload {
   @IsOptional()
   f2FileName: string;
 
+  @IsBoolean()
+  @IsOptional()
+  isAprobadoPorSistema: boolean;
+
   isAprobado: boolean;
   isEstadoAtencion: boolean;
 }
