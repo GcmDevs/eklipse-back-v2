@@ -24,7 +24,7 @@ import {
   stat,
 } from 'node:fs/promises';
 import { basename, isAbsolute, join, relative, resolve, sep } from 'node:path';
-import { EjecucionReportes } from '../../domain/ejecucion';
+import { EjecucionReportes, ProgresoReportes } from '../../domain/ejecucion';
 
 const JOB_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -46,6 +46,13 @@ interface EstadoWorker {
   message: string;
   updatedAt: string;
   files: ArchivoWorker[];
+  progress?: {
+    stage: ProgresoReportes['etapa'];
+    completed: number;
+    total: number | null;
+    current: number | null;
+    generalPercentage?: number;
+  };
 }
 interface Trabajo {
   id: string;
@@ -250,6 +257,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
                 status: 'failed',
                 updatedAt: new Date().toISOString(),
                 files: estado?.files ?? [],
+                ...(estado?.progress ? { progress: estado.progress } : {}),
                 message: agotado
                   ? 'La generación superó el tiempo máximo. Puedes volver a intentarlo.'
                   : 'La ejecución se interrumpió. Revisa Node.js, el navegador y el acceso a DG Web.',
@@ -293,6 +301,19 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
       estado: estado.status,
       mensaje: estado.message,
       updatedAt: estado.updatedAt,
+      ...(estado.progress
+        ? {
+            progreso: {
+              etapa: estado.progress.stage,
+              completados: estado.progress.completed,
+              total: estado.progress.total,
+              grupoActual: estado.progress.current,
+              ...(estado.progress.generalPercentage === undefined
+                ? {}
+                : { porcentajeGeneral: estado.progress.generalPercentage }),
+            },
+          }
+        : {}),
       archivos: estado.files.map((archivo, indice) => ({
         id: String(indice),
         nombre: archivo.name,
@@ -403,6 +424,13 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
         reporte.estado = 'failed';
         reporte.mensaje =
           'Algunos PDF guardados ya no están disponibles. Puedes consultar los archivos conservados.';
+        if (reporte.progreso)
+          reporte.progreso = {
+            etapa: 'completo',
+            completados: reporte.archivos.length,
+            total: estado.files.length,
+            grupoActual: null,
+          };
       }
       const anterior = encontrados.get(job.ingreso);
       // Una generación fallida posterior no oculta una descarga completa anterior.
@@ -434,7 +462,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
     if (!archivo) throw new NotFoundException();
     try {
       const ruta = await this.rutaArchivo(carpeta, archivo);
-      return { ruta, nombre: archivo.name };
+      return { ruta, nombre: archivo.name, bytes: (await stat(ruta)).size };
     } catch {
       throw new NotFoundException('Archivo no disponible.');
     }

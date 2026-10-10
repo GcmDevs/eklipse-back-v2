@@ -99,6 +99,7 @@ export class GeneradorReportesController {
     const resultado = await this.ejecuciones.archivo(id, archivo, this.propietario(request));
     return new StreamableFile(createReadStream(resultado.ruta), {
       type: 'application/pdf',
+      length: resultado.bytes,
       disposition: `attachment; filename*=UTF-8''${encodeURIComponent(resultado.nombre)}`,
     });
   }
