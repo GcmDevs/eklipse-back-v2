@@ -7,6 +7,14 @@ export interface ArchivoReporte {
   totalGrupos: number;
 }
 
+export interface ProgresoReportes {
+  etapa: 'preparacion' | 'historias-clinicas' | 'enfermeria' | 'finalizacion' | 'completo';
+  completados: number;
+  total: number | null;
+  grupoActual: number | null;
+  porcentajeGeneral?: number;
+}
+
 export interface EjecucionReportes {
   id: string;
   documento: string;
@@ -16,4 +24,5 @@ export interface EjecucionReportes {
   estado: 'starting' | 'running' | 'complete' | 'failed';
   mensaje: string;
   archivos: ArchivoReporte[];
+  progreso?: ProgresoReportes;
 }
