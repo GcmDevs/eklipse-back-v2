@@ -5,6 +5,7 @@ import { GCM_CONTEXTS, GcmContextType } from '@common/domain/types';
 import { BaseSource } from '@common/infrastructure/services';
 import { CreateSolicitudPedidoPayload } from '@inn/solicitud-pedido/presentation/dtos';
 import {
+  SolicitudPedidoBorradorOrm,
   SolicitudPedidoHistorialOrm,
   SolicitudPedidoOrm,
   SolicitudPedidoProductoOrm,
@@ -156,6 +157,12 @@ export class CreateSolicitudPedidoImpl extends BaseSource {
             : observacionSobrepedido,
         })
       );
+
+      await qr.manager.getRepository(SolicitudPedidoBorradorOrm).delete({
+        usuarioId: this.auth.id,
+        sedeId: body.sedeId,
+        contexto: body.contextCode,
+      });
 
       await qr.commitTransaction();
       return {

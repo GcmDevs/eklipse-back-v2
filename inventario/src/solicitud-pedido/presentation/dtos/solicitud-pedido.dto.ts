@@ -160,3 +160,54 @@ export class ReporteSolicitudPedidoQuery {
   @Min(1)
   sedeId: number;
 }
+
+export class ProductoBorradorPayload {
+  @IsInt()
+  @Min(1)
+  productoId: number;
+
+  @IsString()
+  codigo: string;
+
+  @IsString()
+  descripcion: string;
+
+  @IsIn([1, 2, 3])
+  estadoCode: 1 | 2 | 3;
+
+  @IsOptional()
+  @IsNumber()
+  cantidad: number | null;
+}
+
+export class GuardarBorradorSolicitudPedidoPayload {
+  @IsString()
+  @MinLength(1)
+  contextCode: GcmContextCode;
+
+  @IsInt()
+  @Min(1)
+  sedeId: number;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductoBorradorPayload)
+  productos: ProductoBorradorPayload[];
+
+  @IsOptional()
+  @IsBoolean()
+  porAgrupamiento?: boolean;
+}
+
+export class BorradorSolicitudPedidoQuery {
+  @IsString()
+  @MinLength(1)
+  contextCode: GcmContextCode;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  sedeId?: number;
+}
+

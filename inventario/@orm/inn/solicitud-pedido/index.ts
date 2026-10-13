@@ -3,12 +3,14 @@ import { SolicitudPedidoProductoOrm } from './solicitud-pedido-producto.orm';
 import { SolicitudPedidoProductoDespachoOrm } from './solicitud-pedido-producto-despacho.orm';
 import { SolicitudPedidoOrm } from './solicitud-pedido.orm';
 import { SolicitudPedidoSobrepedidoOrm } from './solicitud-pedido-sobrepedido.orm';
+import { SolicitudPedidoBorradorOrm } from './solicitud-pedido-borrador.orm';
 
 export * from './solicitud-pedido.orm';
 export * from './solicitud-pedido-historial.orm';
 export * from './solicitud-pedido-producto.orm';
 export * from './solicitud-pedido-producto-despacho.orm';
 export * from './solicitud-pedido-sobrepedido.orm';
+export * from './solicitud-pedido-borrador.orm';
 
 export const ORM_INN_SOLICITUD_PEDIDO_ENTITIES = [
   // --- AVOID NOWRAP --- //
@@ -17,4 +19,5 @@ export const ORM_INN_SOLICITUD_PEDIDO_ENTITIES = [
   SolicitudPedidoProductoOrm,
   SolicitudPedidoProductoDespachoOrm,
   SolicitudPedidoSobrepedidoOrm,
+  SolicitudPedidoBorradorOrm,
 ];
