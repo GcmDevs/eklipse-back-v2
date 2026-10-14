@@ -21,6 +21,7 @@ import {
 } from '@inn/lgc/afn/types/inn/activos-fijos';
 import { IsNull, Not } from 'typeorm';
 import { AFN_FILE_LOCATIONS } from '../../application/constants';
+import { ADMIN_AUTHORITY } from '@common/application/constants';
 import { dataToNuevaEntidadRes, NuevaEntidadRes } from '@common/infrastructure/responses';
 
 @Injectable()
@@ -164,7 +165,16 @@ export class NotaServicioTecnicoSource extends ServicioTecnicoBaseSource {
           throw new Error('La solicitud no ha sido iniciada');
         }
       } else {
-        if ([ESTADO_AFNITEM_SOL_SER_TEC.FINALIZADA].indexOf(estadoActual) < 0) {
+        const aprobacionEspecial =
+          payload.isAprobadoPorSistema === true && (await this.hasAnyAuthority([ADMIN_AUTHORITY]));
+        if (payload.isAprobadoPorSistema === true && !aprobacionEspecial) {
+          throw new Error('Solo un administrador puede realizar la verificación especial');
+        }
+
+        if (
+          [ESTADO_AFNITEM_SOL_SER_TEC.FINALIZADA].indexOf(estadoActual) < 0 &&
+          !aprobacionEspecial
+        ) {
           throw new Error('El estado de esta solicitud aun no es FINALIZADO');
         }
       }
