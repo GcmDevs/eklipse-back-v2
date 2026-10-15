@@ -1,11 +1,13 @@
-// Fuente: Estructura Cuenta Alto Costo - Objetivo (1).xlsx, hoja CAC, fila 6.
+// Catálogo base: Estructura Cuenta Alto Costo - Objetivo (1).xlsx, hoja CAC, fila 6.
+// HER2 usa las descripciones del Anexo 0247 confirmadas por el usuario.
 // Los códigos se conservan como texto numérico para mantener el contrato de persistencia.
 import type { CampoCac } from './cac.dto';
+import { completarCatalogosAnexo } from './catalogos-anexo-0247';
 export interface OpcionCampoCac {
   readonly codigo: string;
   readonly descripcion: string;
 }
-export const CATALOGOS_CAC: Readonly<Partial<Record<CampoCac, readonly OpcionCampoCac[]>>> = {
+const CATALOGOS_BASE: Readonly<Partial<Record<CampoCac, readonly OpcionCampoCac[]>>> = {
   CANPRIORIZADO: [
     {
       codigo: '1',
@@ -386,19 +388,19 @@ export const CATALOGOS_CAC: Readonly<Partial<Record<CampoCac, readonly OpcionCam
   MAMARESHER2: [
     {
       codigo: '1',
-      descripcion: 'Positiva (3+)',
+      descripcion: '+++ (positivo)',
     },
     {
       codigo: '2',
-      descripcion: 'Negativa (0, 1+, 2+)',
+      descripcion: '++ (equivoco o indeterminado)',
     },
     {
       codigo: '98',
-      descripcion: 'No aplica',
+      descripcion: 'No Aplica (no es cáncer de mama) o marcó la variable 31 con la opción 2.',
     },
     {
       codigo: '99',
-      descripcion: 'Solicitada sin información',
+      descripcion: 'Desconocido, el dato de esta variable no se encuentra descrito en los soportes clínicos.',
     },
   ],
   COLESTADDUKES: [
@@ -1870,3 +1872,5 @@ export const CATALOGOS_CAC: Readonly<Partial<Record<CampoCac, readonly OpcionCam
     },
   ],
 };
+
+export const CATALOGOS_CAC = completarCatalogosAnexo(CATALOGOS_BASE);
