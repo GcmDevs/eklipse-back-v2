@@ -11,3 +11,5 @@ export * from './otras-sedes';
 export * from './reporte.impl';
 export * from './reporte-solicitud-pedido';
 export * from './reporte-configuracion';
+export * from './borrador.impl';
+
