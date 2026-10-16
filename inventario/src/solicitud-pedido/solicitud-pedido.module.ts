@@ -10,6 +10,7 @@ import {
   ImpactoSobrepedidoImpl,
   ReporteSolicitudPedidoImpl,
   RechazarSolicitudPedidoImpl,
+  SolicitudPedidoBorradorImpl,
 } from './infraestructure/services';
 
 @Module({
@@ -24,6 +25,7 @@ import {
     RechazarSolicitudPedidoImpl,
     ImpactoSobrepedidoImpl,
     ReporteSolicitudPedidoImpl,
+    SolicitudPedidoBorradorImpl,
   ],
 })
 export class SolicitudPedidoModule {}

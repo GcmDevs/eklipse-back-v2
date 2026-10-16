@@ -4,10 +4,12 @@ import {
   Body,
   Controller,
   ConflictException,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
   Post,
+  Put,
   Query,
 } from '@nestjs/common';
 
@@ -15,7 +17,9 @@ import { INN_AUTHORITIES } from '@inn/authorities';
 import { Authorities } from '@common/presentation/decorators';
 import {
   ActualizarDespachoSolicitudPedidoPayload,
+  BorradorSolicitudPedidoQuery,
   CreateSolicitudPedidoPayload,
+  GuardarBorradorSolicitudPedidoPayload,
   ImpactoSobrepedidoPayload,
   ReporteSolicitudPedidoQuery,
   RechazarSolicitudPedidoPayload,
@@ -30,6 +34,7 @@ import {
   ImpactoSobrepedidoImpl,
   ReporteSolicitudPedidoImpl,
   RechazarSolicitudPedidoImpl,
+  SolicitudPedidoBorradorImpl,
 } from '@inn/solicitud-pedido/infraestructure/services';
 import { GcmContextCode } from '@common/domain/types';
 
@@ -44,8 +49,39 @@ export class SolicitudPedidoController {
     private readonly _fetchDetalle: FetchDetalleSolicitudPedidoImpl,
     private readonly _rechazar: RechazarSolicitudPedidoImpl,
     private readonly _impactoSobrepedido: ImpactoSobrepedidoImpl,
-    private readonly _reporte: ReporteSolicitudPedidoImpl
+    private readonly _reporte: ReporteSolicitudPedidoImpl,
+    private readonly _borrador: SolicitudPedidoBorradorImpl
   ) {}
+
+  @Authorities([INN_AUTHORITIES.SOLICITUD_PEDIDO.SOLICITAR_PEDIDO])
+  @Get('borrador')
+  async getBorrador(@Query() query: BorradorSolicitudPedidoQuery) {
+    try {
+      return await this._borrador.obtener(query.contextCode, query.sedeId);
+    } catch (error: any) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Authorities([INN_AUTHORITIES.SOLICITUD_PEDIDO.SOLICITAR_PEDIDO])
+  @Put('borrador')
+  async guardarBorrador(@Body() payload: GuardarBorradorSolicitudPedidoPayload) {
+    try {
+      return await this._borrador.guardar(payload);
+    } catch (error: any) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Authorities([INN_AUTHORITIES.SOLICITUD_PEDIDO.SOLICITAR_PEDIDO])
+  @Delete('borrador')
+  async eliminarBorrador(@Query() query: BorradorSolicitudPedidoQuery) {
+    try {
+      return await this._borrador.eliminar(query.contextCode, query.sedeId);
+    } catch (error: any) {
+      throw new BadRequestException(error.message);
+    }
+  }
 
   @Authorities([INN_AUTHORITIES.SOLICITUD_PEDIDO.SOLICITAR_PEDIDO])
   @Get('reporte')

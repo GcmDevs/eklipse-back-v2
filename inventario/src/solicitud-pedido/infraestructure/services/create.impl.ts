@@ -5,6 +5,7 @@ import { GCM_CONTEXTS, GcmContextType } from '@common/domain/types';
 import { BaseSource } from '@common/infrastructure/services';
 import { CreateSolicitudPedidoPayload } from '@inn/solicitud-pedido/presentation/dtos';
 import {
+  SolicitudPedidoBorradorOrm,
   SolicitudPedidoHistorialOrm,
   SolicitudPedidoOrm,
   SolicitudPedidoProductoOrm,
@@ -99,9 +100,10 @@ export class CreateSolicitudPedidoImpl extends BaseSource {
         agrupamientoIds
       );
       this._validarConfirmacionSobrepedido(body, impacto);
+      const observacionUsuario = body.observacion.trim();
       const observacionSobrepedido = solicitudesImpactadas.length
-        ? body.observacion?.trim() || OBSERVACION_AUTOMATICA_SOBREPEDIDO
-        : body.observacion?.trim() || null;
+        ? `${observacionUsuario}. ${OBSERVACION_AUTOMATICA_SOBREPEDIDO}`
+        : observacionUsuario;
 
       const ahora = new Date();
       const solicitudStored = await solicitudRp.save(
@@ -134,7 +136,7 @@ export class CreateSolicitudPedidoImpl extends BaseSource {
         solicitudesImpactadas,
         solicitudStored,
         productosNuevos,
-        observacionSobrepedido || '',
+        observacionSobrepedido,
         ahora,
         solicitudRp,
         productoSolicitudRp,
@@ -152,10 +154,16 @@ export class CreateSolicitudPedidoImpl extends BaseSource {
           observacion: solicitudesImpactadas.length
             ? `Creada por sobrepedido de ${solicitudesImpactadas
                 .map(solicitud => solicitud.numeroSolicitud)
-                .join(', ')}. Motivo: ${observacionSobrepedido}`
-            : observacionSobrepedido,
+                .join(', ')}. Motivo: ${observacionUsuario}`
+            : observacionUsuario,
         })
       );
+
+      await qr.manager.getRepository(SolicitudPedidoBorradorOrm).delete({
+        usuarioId: this.auth.id,
+        sedeId: body.sedeId,
+        contexto: body.contextCode,
+      });
 
       await qr.commitTransaction();
       return {
@@ -194,6 +202,16 @@ export class CreateSolicitudPedidoImpl extends BaseSource {
   }
 
   private _validarPayload(body: CreateSolicitudPedidoPayload): void {
+    if (
+      !body.observacion ||
+      typeof body.observacion !== 'string' ||
+      body.observacion.trim().length < 10
+    ) {
+      throw new Error('Debe ingresar una observación de al menos 10 caracteres');
+    }
+    if (body.observacion.trim().length > 1000) {
+      throw new Error('La observación no puede exceder los 1000 caracteres');
+    }
     if (!Number.isInteger(body.sedeId) || body.sedeId <= 0) {
       throw new Error('Debe enviar una sede válida');
     }
