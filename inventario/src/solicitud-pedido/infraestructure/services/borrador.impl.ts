@@ -12,6 +12,7 @@ export interface BorradorSolicitudPedidoResponse {
   contextCode: GcmContextCode;
   porAgrupamiento?: boolean;
   productos: any[];
+  observacion?: string;
   guardadoEn: string;
 }
 
@@ -48,6 +49,7 @@ export class SolicitudPedidoBorradorImpl extends BaseSource {
         contextCode,
         porAgrupamiento: datos.porAgrupamiento ?? true,
         productos: datos.productos ?? [],
+        observacion: datos.observacion ?? '',
         guardadoEn: borrador.fechaActualizacion.toISOString(),
       };
     } catch (error: any) {
@@ -84,6 +86,7 @@ export class SolicitudPedidoBorradorImpl extends BaseSource {
       const payloadJson = JSON.stringify({
         porAgrupamiento: payload.porAgrupamiento ?? true,
         productos: payload.productos,
+        observacion: payload.observacion ?? '',
       });
 
       if (!borrador) {
@@ -108,6 +111,7 @@ export class SolicitudPedidoBorradorImpl extends BaseSource {
         contextCode: payload.contextCode,
         porAgrupamiento: payload.porAgrupamiento ?? true,
         productos: payload.productos,
+        observacion: payload.observacion ?? '',
         guardadoEn: ahora.toISOString(),
       };
     } catch (error: any) {

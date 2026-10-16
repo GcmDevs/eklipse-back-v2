@@ -7,6 +7,7 @@ import {
   IsBoolean,
   IsIn,
   IsInt,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
@@ -29,10 +30,11 @@ export class CreateSolicitudPedidoPayload {
   @Type(() => CreateSolicitudPedidoProductoPayload)
   productos: CreateSolicitudPedidoProductoPayload[];
 
-  @IsOptional()
-  @IsString()
-  @MaxLength(1000)
-  observacion?: string;
+  @IsString({ message: 'La observación debe ser un texto' })
+  @IsNotEmpty({ message: 'La observación es obligatoria' })
+  @MinLength(10, { message: 'La observación debe contener al menos 10 caracteres' })
+  @MaxLength(1000, { message: 'La observación no puede exceder los 1000 caracteres' })
+  observacion: string;
 
   @IsOptional()
   @IsBoolean()
@@ -197,6 +199,11 @@ export class GuardarBorradorSolicitudPedidoPayload {
   @IsOptional()
   @IsBoolean()
   porAgrupamiento?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  observacion?: string;
 }
 
 export class BorradorSolicitudPedidoQuery {

@@ -105,7 +105,28 @@ export class RechazarSolicitudPedidoImpl extends BaseSource {
       await productoRp.save(productosSeleccionados);
       await solicitudRp.save(solicitud);
 
-      const codigos = productosSeleccionados.map(producto => producto.agrupamiento?.codigo?.trim() || producto.producto.codigo.trim());
+      const esRechazoCompleto =
+        payload.alcance === 'PEDIDO' ||
+        solicitud.estadoCode === ESTADOS_SOLICITUD_PEDIDO.RECHAZADO.getCode();
+
+      let observacionHistorial: string;
+      if (esRechazoCompleto) {
+        observacionHistorial = `Se rechaza la solicitud #${solicitud.numeroSolicitud}. Motivo: ${observacion}`;
+      } else {
+        const codigos = productosSeleccionados.map(
+          producto => producto.agrupamiento?.codigo?.trim() || producto.producto.codigo.trim()
+        );
+        const MAX_CODIGOS_VISIBLES = 8;
+        const codigosTexto =
+          codigos.length <= MAX_CODIGOS_VISIBLES
+            ? codigos.join(', ')
+            : `${codigos.slice(0, MAX_CODIGOS_VISIBLES).join(', ')} y ${
+                codigos.length - MAX_CODIGOS_VISIBLES
+              } productos más`;
+
+        observacionHistorial = `Rechazo de productos (${codigosTexto}). Motivo: ${observacion}`;
+      }
+
       await historialRp.save(
         historialRp.create({
           solicitudPedidoId: solicitud.id,
@@ -113,9 +134,7 @@ export class RechazarSolicitudPedidoImpl extends BaseSource {
           fechaCambio: ahora,
           usuarioId: this.auth.id,
           sedeId: solicitud.sedeId,
-          observacion: `${
-            payload.alcance === 'PEDIDO' ? 'Rechazo de la solicitud' : 'Rechazo de productos'
-          } (${codigos.join(', ')}). Motivo: ${observacion}`,
+          observacion: observacionHistorial,
         })
       );
 
