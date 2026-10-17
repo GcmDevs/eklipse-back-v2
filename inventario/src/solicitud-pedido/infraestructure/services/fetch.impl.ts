@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Between, IsNull, Not } from 'typeorm';
+import { Between, In, IsNull, Not } from 'typeorm';
 
 import { GCM_CONTEXTS, GcmContextType } from '@common/domain/types';
 import { BaseSource } from '@common/infrastructure/services';
@@ -33,31 +33,52 @@ export class FetchSolicitudPedidosImpl extends BaseSource {
   @Inject(ExistenciasDinamicaImpl)
   private readonly _existenciasDinamica: ExistenciasDinamicaImpl;
 
-  public async findUsuarioAM(id: number): Promise<UsuarioOrm | null> {
+  public async findUsuariosAM(ids: number[]): Promise<Map<number, UsuarioOrm>> {
+    const mapa = new Map<number, UsuarioOrm>();
+    const idsValidos = [...new Set(ids)].filter(id => Number.isInteger(id) && id > 0);
+    if (!idsValidos.length) return mapa;
+
     const ctx = GCM_CONTEXTS.AMMEDICAL;
     const qr = this.dynamicQR(ctx);
     try {
       await qr.connect();
-      const usuario = await qr.manager.getRepository(UsuarioOrm).findOne({
-        where: { id },
-      });
-
-      return usuario;
+      const batchSize = 1000;
+      for (let i = 0; i < idsValidos.length; i += batchSize) {
+        const batch = idsValidos.slice(i, i + batchSize);
+        const usuarios = await qr.manager.getRepository(UsuarioOrm).find({
+          where: { id: In(batch) },
+        });
+        usuarios.forEach(u => mapa.set(u.id, u));
+      }
+      return mapa;
     } catch (error: any) {
-      throw new Error(`Error consultando usuario en AMMedical: ${error.message}`);
+      throw new Error(`Error consultando usuarios en AMMedical: ${error.message}`);
     } finally {
       await qr.release();
     }
   }
 
+  public async findUsuarioAM(id: number): Promise<UsuarioOrm | null> {
+    const mapa = await this.findUsuariosAM([id]);
+    return mapa.get(id) ?? null;
+  }
+
   public async resolverUsuariosDespacho(solicitudes: SolicitudPedidoOrm[]): Promise<void> {
-    const usuarios = new Map<number, UsuarioOrm | null>();
+    const idsPendientes = new Set<number>();
     for (const solicitud of solicitudes) {
-      for (const producto of solicitud.productos) {
+      for (const producto of solicitud.productos ?? []) {
         for (const despacho of producto.despachos ?? []) {
-          if (!usuarios.has(despacho.usuarioId)) {
-            usuarios.set(despacho.usuarioId, await this.findUsuarioAM(despacho.usuarioId));
+          if (despacho.usuarioId) {
+            idsPendientes.add(despacho.usuarioId);
           }
+        }
+      }
+    }
+    if (!idsPendientes.size) return;
+    const usuarios = await this.findUsuariosAM([...idsPendientes]);
+    for (const solicitud of solicitudes) {
+      for (const producto of solicitud.productos ?? []) {
+        for (const despacho of producto.despachos ?? []) {
           despacho.usuario = usuarios.get(despacho.usuarioId) ?? null;
         }
       }
@@ -78,77 +99,51 @@ export class FetchSolicitudPedidosImpl extends BaseSource {
         ]
       : [this.auth.context];
 
-    const response: ReturnType<typeof transformToResponse> = [];
+    const resultadosPorContexto = await Promise.all(
+      ctxs.map(async el => {
+        const qr = this.dynamicQR(el);
+        try {
+          await qr.connect();
+          const solicitudPedidoRp = qr.manager.getRepository(SolicitudPedidoOrm);
 
-    for (let index = 0; index < ctxs.length; index++) {
-      const el = ctxs[index];
-      const qr = this.dynamicQR(el);
+          const SolicitudPedidos = await solicitudPedidoRp.find({
+            where: {
+              fechaCreacion: Between(fechaInicio, fechaFin),
+              sedeId: Not(IsNull()),
+            },
+            relations: [
+              'creadoPor',
+              'sede',
+              'productos',
+              'productos.producto',
+              'productos.agrupamiento',
+              'productos.despachos',
+              'productos.despachos.productoDespachado',
+              'productos.usuarioRechazo',
+            ],
+            order: { fechaCreacion: 'DESC' },
+          });
 
-      try {
-        await qr.connect();
+          return { SolicitudPedidos, context: el };
+        } catch (error: any) {
+          throw new Error(`Error consultando ${el.getCode()}: ${error.message}`);
+        } finally {
+          await qr.release();
+        }
+      })
+    );
 
-        const solicitudPedidoRp = qr.manager.getRepository(SolicitudPedidoOrm);
-
-        const SolicitudPedidos = await solicitudPedidoRp.find({
-          where: {
-            fechaCreacion: Between(fechaInicio, fechaFin),
-            sedeId: Not(IsNull()),
-          },
-          relations: [
-            'creadoPor',
-            'historial',
-            'historial.usuario',
-            'sede',
-            'historial.sede',
-            'productos',
-            'productos.producto',
-            'productos.agrupamiento',
-            'productos.producto.agrupamiento',
-            'productos.despachos',
-            'productos.despachos.productoDespachado',
-            'productos.usuarioRechazo',
-            'productos.cierresSobrepedido',
-            'productos.cierresSobrepedido.solicitudNueva',
-            'productos.cierresSobrepedido.usuario',
-            'cierresSobrepedido',
-            'cierresSobrepedido.solicitudNueva',
-            'cierresSobrepedido.usuario',
-            'origenesSobrepedido',
-            'origenesSobrepedido.solicitudAnterior',
-            'origenesSobrepedido.usuario',
-          ],
-          order: { fechaCreacion: 'DESC', historial: { fechaCambio: 'DESC' } },
-        });
-        await this.resolverUsuariosDespacho(SolicitudPedidos);
-        const registros = transformToResponse(SolicitudPedidos, el);
-        await cargarReferenciasDespacho(
-          qr,
-          registros.flatMap(solicitud => solicitud.productos)
-        );
-        response.push(...registros);
-      } catch (error: any) {
-        throw new Error(`Error consultando ${el.getCode()}: ${error.message}`);
-      } finally {
-        await qr.release();
-      }
+    // Resolver en un único batch optimizado los usuarios de despacho de todas las sedes
+    const todasLasSolicitudesOrm: SolicitudPedidoOrm[] = [];
+    for (const { SolicitudPedidos } of resultadosPorContexto) {
+      todasLasSolicitudesOrm.push(...SolicitudPedidos);
     }
+    await this.resolverUsuariosDespacho(todasLasSolicitudesOrm);
 
-    const codigosProductos = [
-      ...new Set(
-        response.flatMap(solicitud =>
-          solicitud.productos.flatMap(producto =>
-            producto.agrupamientoId
-              ? producto.referencias.map(referencia => normalizarCodigoProducto(referencia.codigo))
-              : [normalizarCodigoProducto(producto.codigo)]
-          )
-        )
-      ),
-    ].filter(Boolean);
-    const existenciasAmmedical =
-      await this._existenciasDinamica.obtenerPorCodigos(codigosProductos);
-
-    agregarExistenciasAmmedical(response, existenciasAmmedical);
-    agregarSolicitudesEnOtrasSedes(response);
+    const response: ReturnType<typeof transformToResponse> = [];
+    for (const { SolicitudPedidos, context } of resultadosPorContexto) {
+      response.push(...transformToResponse(SolicitudPedidos, context));
+    }
 
     return response.sort(
       (primeraSolicitud, segundaSolicitud) =>
@@ -399,7 +394,7 @@ export const transformToResponse = (data: SolicitudPedidoOrm[], context: GcmCont
       },
       sede: item.sede,
       creadoPor: item.creadoPor,
-      historial: item.historial,
+      historial: item.historial ?? [],
       tieneProductosSolicitadosEnOtrasSedes: false,
       productos,
     };
