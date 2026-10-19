@@ -1,0 +1,8 @@
+import { GCM_CONTEXTS, GcmContextType } from '@common/domain/types';
+
+export const TANQUEO_CONTEXTOS_GLOBALES: GcmContextType[] = [
+  GCM_CONTEXTS.AGUACHICA,
+  GCM_CONTEXTS.ALTACENTRO,
+  GCM_CONTEXTS.SANJUAN,
+  GCM_CONTEXTS.VALLEDUPAR,
+];
