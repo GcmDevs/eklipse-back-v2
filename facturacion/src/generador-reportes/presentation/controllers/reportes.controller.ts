@@ -88,6 +88,24 @@ export class GeneradorReportesController {
     return this.ejecuciones.consultar(id, this.propietario(request));
   }
 
+  @Post('ejecuciones/:id/reanudar')
+  @Header('Cache-Control', 'no-store')
+  @Authorities([SLN_AUTHORITIES.GENERADOR_REPORTES.CONSULTAR])
+  public async reanudar(@Param('id') id: string, @Req() request: Request) {
+    const propietario = this.propietario(request);
+    const ejecucion = await this.ejecuciones.consultar(id, propietario);
+    const consulta = await this.servicio.consultar(ejecucion.documento);
+    if (
+      !consulta.paciente ||
+      !consulta.ingresos.some(ingreso => String(ingreso.consecutivo) === ejecucion.ingreso)
+    ) {
+      throw new BadRequestException(
+        'El ingreso ya no está disponible para el paciente consultado.'
+      );
+    }
+    return this.ejecuciones.reanudar(id, propietario);
+  }
+
   @Get('ejecuciones/:id/archivos/:archivo')
   @Header('Cache-Control', 'no-store')
   @Authorities([SLN_AUTHORITIES.GENERADOR_REPORTES.CONSULTAR])

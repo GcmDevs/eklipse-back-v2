@@ -106,6 +106,44 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     return { id, destino };
   }
 
+  it('expone todas las fallas pendientes mientras el ejecutor continúa trabajando', async () => {
+    const job = await guardado({ estado: 'running' });
+    const ruta = join(job.destino, 'execution.json');
+    const estado = JSON.parse(await readFile(ruta, 'utf8'));
+    // Simula el ejecutor activo para que la consulta no lo clasifique como huérfano.
+    const datos = JSON.parse(await readFile(join(job.destino, 'job.json'), 'utf8'));
+    await writeFile(join(job.destino, 'job.json'), JSON.stringify({ ...datos, pid: process.pid }));
+    const pendingFailures = [2, 3].map(group => ({
+      occurredAt: '2026-10-15T12:00:00Z',
+      message: `Falló el grupo ${group}.`,
+      step: 'Descargando historias clínicas.',
+      stage: 'historias-clinicas',
+      group,
+      totalGroups: 3,
+      details: 'Tiempo agotado.',
+    }));
+    await writeFile(
+      ruta,
+      JSON.stringify({
+        ...estado,
+        message: 'Descargando enfermería.',
+        failure: pendingFailures[1],
+        pendingFailures,
+      })
+    );
+    const respuesta = await servicio.consultar(job.id, propietario);
+    expect(respuesta.estado).toBe('running');
+    expect(respuesta.reanudable).toBe(false);
+    expect(respuesta.mensaje).toBe('Descargando enfermería.');
+    expect(respuesta.fallasPendientes).toHaveLength(2);
+    expect(respuesta.fallasPendientes?.map(falla => falla.grupo)).toEqual([2, 3]);
+    expect(respuesta.fallasPendientes?.[0]).toMatchObject({
+      etapa: 'historias-clinicas',
+      paso: 'Descargando historias clínicas.',
+      totalGrupos: 3,
+    });
+  });
+
   it('descarga en ZIP los PDF existentes y conserva el aislamiento por usuario', async () => {
     const job = await guardado({ archivos: ['grupo-001.pdf', 'grupo-002.pdf', 'grupo-003.pdf'] });
     await rm(join(job.destino, 'grupo-003.pdf'));
@@ -131,6 +169,60 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
   it('rechaza un ZIP sin PDF disponibles', async () => {
     const job = await guardado({ archivos: [] });
     await expect(servicio.archivos(job.id, propietario)).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('ofrece solo los PDF unificados en el modal y ZIP conservando los enlaces de los originales', async () => {
+    const job = await guardado({
+      archivos: [
+        'grupo-001.pdf',
+        'grupo-002.pdf',
+        'historia-unificada.pdf',
+        'enfermeria-001.pdf',
+        'enfermeria-unificada.pdf',
+      ],
+    });
+    const rutaEstado = join(job.destino, 'execution.json');
+    const estado = JSON.parse(await readFile(rutaEstado, 'utf8'));
+    estado.files[0].superseded = true;
+    estado.files[1].superseded = true;
+    Object.assign(estado.files[2], { unified: true, pages: 10, group: 1, totalGroups: 2 });
+    Object.assign(estado.files[3], { superseded: true, kind: 'enfermeria' });
+    Object.assign(estado.files[4], {
+      unified: true,
+      pages: 8,
+      group: 1,
+      totalGroups: 2,
+      kind: 'enfermeria',
+    });
+    await writeFile(rutaEstado, JSON.stringify(estado));
+    const respuesta = await servicio.consultar(job.id, propietario);
+    expect(respuesta.archivos.map(archivo => archivo.id)).toEqual(['2', '4']);
+    expect(respuesta.archivos[0]).toMatchObject({
+      nombre: 'historia-unificada.pdf',
+      unificado: true,
+      paginas: 10,
+    });
+    expect(respuesta.archivos[1]).toMatchObject({
+      tipo: 'enfermeria',
+      unificado: true,
+      paginas: 8,
+    });
+    expect((await servicio.archivo(job.id, '1', propietario)).nombre).toBe('grupo-002.pdf');
+    expect((await servicio.archivo(job.id, '4', propietario)).nombre).toBe(
+      'enfermeria-unificada.pdf'
+    );
+    const resultado = await servicio.archivos(job.id, propietario);
+    const bloques: Buffer[] = [];
+    for await (const bloque of resultado.contenido) bloques.push(Buffer.from(bloque));
+    const zip = await JSZip.loadAsync(Buffer.concat(bloques));
+    expect(
+      Object.values(zip.files)
+        .filter(archivo => !archivo.dir)
+        .map(archivo => archivo.name)
+    ).toEqual([
+      'historias-clinicas/3-historia-unificada.pdf',
+      'enfermeria/5-enfermeria-unificada.pdf',
+    ]);
   });
 
   it('conserva el avance real de una ejecución interrumpida y admite estados antiguos', async () => {
@@ -207,8 +299,10 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
   it('prefiere la descarga completa más reciente ante una ejecución parcial posterior', async () => {
     await guardado({ fecha: '2026-10-07T12:00:00Z' });
     const reciente = await guardado({ fecha: '2026-10-08T12:00:00Z' });
-    await guardado({ fecha: '2026-10-09T12:00:00Z', estado: 'failed' });
-    expect((await servicio.listar('001234', ['20'], propietario))[0].id).toBe(reciente.id);
+    const fallida = await guardado({ fecha: '2026-10-09T12:00:00Z', estado: 'failed' });
+    const reporte = (await servicio.listar('001234', ['20'], propietario))[0];
+    expect(reporte.id).toBe(reciente.id);
+    expect(reporte.pendiente?.id).toBe(fallida.id);
   });
 
   it('omite archivos borrados, conserva sus identificadores y ofrece resultados parciales', async () => {
@@ -219,7 +313,8 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     expect(resultado[0].archivos.map(archivo => archivo.id)).toEqual(['1']);
     expect((await servicio.archivo(job.id, '1', propietario)).nombre).toBe('conservado.pdf');
     await rm(join(job.destino, 'conservado.pdf'));
-    expect(await servicio.listar('001234', ['20'], propietario)).toEqual([]);
+    const sinArchivos = await servicio.listar('001234', ['20'], propietario);
+    expect(sinArchivos[0]).toMatchObject({ estado: 'failed', archivos: [], reanudable: true });
   });
 
   it('devuelve una búsqueda vacía cuando todavía no se han guardado reportes', async () => {
@@ -261,6 +356,73 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     expect(resultado.mensaje).toContain('tiempo máximo');
     expect(resultado.progreso?.porcentajeGeneral).toBe(40);
     expect(resultado.archivos.length).toBe(1);
+    expect(resultado.fallo).toMatchObject({ paso: 'En proceso', grupo: 2, totalGrupos: 2 });
     expect((await servicio.archivo(job.id, '0', propietario)).nombre).toBe('grupo-001.pdf');
+  });
+
+  it('encuentra las fallas sin PDF y reanuda la misma ejecución sin perder archivos, errores o avance', async () => {
+    const vacia = await guardado({ ingreso: '21', estado: 'failed', archivos: [] });
+    expect((await servicio.listar('001234', ['21'], propietario))[0]).toMatchObject({
+      id: vacia.id,
+      reanudable: true,
+    });
+    const job = await guardado({
+      estado: 'failed',
+      progreso: {
+        stage: 'historias-clinicas',
+        completed: 1,
+        total: 3,
+        current: 2,
+        generalPercentage: 35,
+      },
+    });
+    const rutaEstado = join(job.destino, 'execution.json');
+    const estado = JSON.parse(await readFile(rutaEstado, 'utf8'));
+    estado.failure = {
+      occurredAt: new Date().toISOString(),
+      message: 'No cargó el grupo 2.',
+      step: 'Descargando historias clínicas.',
+      stage: 'historias-clinicas',
+      group: 2,
+      totalGroups: 3,
+      details: 'Esperando el documento listo.',
+    };
+    estado.failures = [estado.failure];
+    await writeFile(rutaEstado, JSON.stringify(estado));
+    await writeFile(
+      join(carpeta, 'src/worker.ts'),
+      `
+      const fs = require('node:fs/promises'); const path = require('node:path');
+      const folder = process.argv[process.argv.indexOf('--carpeta') + 1];
+      (async () => {
+        if (!process.argv.includes('--reanudar')) process.exit(2);
+        const previous = JSON.parse(await fs.readFile(path.join(folder, 'execution.json'), 'utf8'));
+        if (!previous.files.length || !previous.failures.length) process.exit(3);
+        await fs.writeFile(path.join(folder, 'execution.json'), JSON.stringify({...previous, status:'running', message:'Reanudando grupo 2.'}));
+        setTimeout(async () => await fs.writeFile(path.join(folder, 'execution.json'), JSON.stringify({...previous, status:'complete', message:'Completo.'})), 300);
+      })();
+    `
+    );
+    await expect(servicio.reanudar(job.id, { ...propietario, usuario: 8 })).rejects.toBeInstanceOf(
+      NotFoundException
+    );
+    const attempts = await Promise.allSettled([
+      servicio.reanudar(job.id, propietario),
+      servicio.reanudar(job.id, propietario),
+    ]);
+    expect(attempts.filter(result => result.status === 'fulfilled')).toHaveLength(1);
+    const resumed = attempts.find(
+      result => result.status === 'fulfilled'
+    ) as PromiseFulfilledResult<any>;
+    expect(resumed.value).toMatchObject({
+      id: job.id,
+      estado: 'starting',
+      progreso: { porcentajeGeneral: 35 },
+    });
+    const result = await esperar(job.id, 'complete');
+    expect(result.id).toBe(job.id);
+    expect(await readFile(join(job.destino, 'grupo-001.pdf'), 'utf8')).toContain('%PDF');
+    expect(JSON.parse(await readFile(rutaEstado, 'utf8')).failures).toHaveLength(1);
+    await expect(servicio.reanudar(job.id, propietario)).rejects.toBeInstanceOf(ConflictException);
   });
 });

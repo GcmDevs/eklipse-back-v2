@@ -40,8 +40,22 @@ interface ArchivoWorker {
   group: number;
   totalGroups: number;
   kind: 'historias-clinicas' | 'enfermeria';
+  unified?: boolean;
+  pages?: number;
+  superseded?: boolean;
 }
 interface EstadoWorker {
+  pendingFailures?: NonNullable<EstadoWorker['failure']>[];
+  failure?: {
+    occurredAt: string;
+    message: string;
+    step: string;
+    stage: string;
+    group: number | null;
+    totalGroups: number | null;
+    details: string;
+  };
+  failures?: EstadoWorker['failure'][];
   status: 'starting' | 'running' | 'complete' | 'failed';
   message: string;
   updatedAt: string;
@@ -128,7 +142,19 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
     const destino = join(carpeta, nombre);
     const temporal = destino + '.' + randomUUID() + '.tmp';
     await writeFile(temporal, JSON.stringify(valor, null, 2), 'utf8');
-    await rename(temporal, destino);
+    for (let intento = 0; ; intento++) {
+      try {
+        await rename(temporal, destino);
+        break;
+      } catch (error) {
+        if (
+          intento >= 4 ||
+          !['EPERM', 'EBUSY', 'EACCES'].includes((error as NodeJS.ErrnoException).code)
+        )
+          throw error;
+        await new Promise(resolve => setTimeout(resolve, 25 * 2 ** intento));
+      }
+    }
   }
 
   private async bloquear(trabajos: string) {
@@ -166,7 +192,19 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
     return ruta;
   }
 
-  async crear(documento: string, ingreso: string, propietario: PropietarioReportes) {
+  async reanudar(id: string, propietario: PropietarioReportes) {
+    const { job, estado } = await this.leer(id, propietario);
+    if (estado.status !== 'failed')
+      throw new ConflictException('Solo puedes reanudar una ejecución que se haya detenido.');
+    return this.crear(job.documento, job.ingreso, propietario, id);
+  }
+
+  async crear(
+    documento: string,
+    ingreso: string,
+    propietario: PropietarioReportes,
+    reanudarId?: string
+  ) {
     if (!/^\d{1,20}$/.test(documento) || !/^\d{1,20}$/.test(ingreso)) {
       throw new BadRequestException('Revisa la cédula y el ingreso.');
     }
@@ -184,7 +222,10 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
       const { carpeta, trabajos } = await this.ubicacion();
       await mkdir(trabajos, { recursive: true });
       bloqueo = await this.bloquear(trabajos);
-      const job: Trabajo = {
+      const anterior = reanudarId ? await this.leer(reanudarId, propietario) : undefined;
+      if (anterior && anterior.estado.status !== 'failed')
+        throw new ConflictException('La ejecución ya se está procesando o terminó.');
+      const job: Trabajo = anterior?.job ?? {
         id: randomUUID(),
         documento,
         ingreso,
@@ -192,8 +233,19 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
         createdAt: new Date().toISOString(),
       };
       const destino = join(trabajos, job.id);
-      await mkdir(destino);
+      if (!anterior) await mkdir(destino);
       await this.guardar(destino, 'job.json', job);
+      const inicio: EstadoWorker = {
+        ...anterior?.estado,
+        status: 'starting',
+        updatedAt: new Date().toISOString(),
+        message: anterior
+          ? 'Reanudando desde el último avance guardado.'
+          : 'Iniciando la generación.',
+        files: anterior?.estado.files ?? [],
+        failure: undefined,
+      };
+      await this.guardar(destino, 'execution.json', inicio);
       const child = spawn(
         process.env.EKLIPSE_AUTOMATION_NODE || process.execPath,
         [
@@ -205,6 +257,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
           ingreso,
           '--carpeta',
           destino,
+          ...(anterior ? ['--reanudar'] : []),
         ],
         {
           cwd: carpeta,
@@ -230,6 +283,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
       const rutaBloqueo = bloqueo;
       const limite = Number(process.env.EKLIPSE_AUTOMATION_TIMEOUT_MS ?? 1800000);
       let agotado = false;
+      let errorArranque: string | undefined;
       const timer = setTimeout(
         () => {
           agotado = true;
@@ -238,8 +292,8 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
         Number.isFinite(limite) && limite > 0 ? limite : 1800000
       );
       timer.unref();
-      child.once('error', () => {
-        /* close guarda el fallo de arranque. */
+      child.once('error', (error: NodeJS.ErrnoException) => {
+        errorArranque = error.code ?? 'ERROR';
       });
       child.once('close', () => {
         clearTimeout(timer);
@@ -253,15 +307,32 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
               /* No arrancó. */
             }
             if (!estado || !['complete', 'failed'].includes(estado.status)) {
+              const message = errorArranque
+                ? `No se pudo iniciar el ejecutor de reportes (${errorArranque}).`
+                : agotado
+                  ? 'La generación superó el tiempo máximo.'
+                  : 'La ejecución se interrumpió. Revisa Node.js, el navegador y el acceso a DG Web.';
+              const failure = {
+                occurredAt: new Date().toISOString(),
+                message,
+                step: estado?.message ?? 'Iniciando la ejecución.',
+                stage: estado?.progress?.stage ?? 'preparacion',
+                group: estado?.progress?.current ?? null,
+                totalGroups: estado?.progress?.total ?? null,
+                details: message,
+              };
               await this.guardar(destino, 'execution.json', {
+                ...estado,
                 status: 'failed',
                 updatedAt: new Date().toISOString(),
                 files: estado?.files ?? [],
                 ...(estado?.progress ? { progress: estado.progress } : {}),
-                message: agotado
-                  ? 'La generación superó el tiempo máximo. Puedes volver a intentarlo.'
-                  : 'La ejecución se interrumpió. Revisa Node.js, el navegador y el acceso a DG Web.',
+                failure,
+                failures: [...(estado?.failures ?? []), failure],
+                pendingFailures: [...(estado?.pendingFailures ?? []), failure],
+                message: `${message} Puedes reanudar conservando los PDF guardados.`,
               });
+              await this.guardar(destino, `fallo-${Date.now()}.json`, failure);
             }
           } finally {
             await unlink(rutaBloqueo).catch(() => {});
@@ -278,12 +349,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
       } finally {
         terminarPreparacion();
       }
-      return this.respuesta(job, {
-        status: 'starting',
-        message: 'Iniciando la generación.',
-        updatedAt: job.createdAt,
-        files: [],
-      });
+      return this.respuesta(job, inicio);
     } catch (error) {
       if (!this.child && bloqueo) await unlink(bloqueo).catch(() => {});
       throw error;
@@ -301,6 +367,33 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
       estado: estado.status,
       mensaje: estado.message,
       updatedAt: estado.updatedAt,
+      reanudable: estado.status === 'failed',
+      ...(estado.pendingFailures?.length
+        ? {
+            fallasPendientes: estado.pendingFailures.map(failure => ({
+              fecha: failure.occurredAt,
+              mensaje: failure.message,
+              paso: failure.step,
+              etapa: failure.stage,
+              grupo: failure.group,
+              totalGrupos: failure.totalGroups,
+              detalle: failure.details,
+            })),
+          }
+        : {}),
+      ...(estado.failure
+        ? {
+            fallo: {
+              fecha: estado.failure.occurredAt,
+              mensaje: estado.failure.message,
+              paso: estado.failure.step,
+              etapa: estado.failure.stage,
+              grupo: estado.failure.group,
+              totalGrupos: estado.failure.totalGroups,
+              detalle: estado.failure.details,
+            },
+          }
+        : {}),
       ...(estado.progress
         ? {
             progreso: {
@@ -314,14 +407,21 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
             },
           }
         : {}),
-      archivos: estado.files.map((archivo, indice) => ({
-        id: String(indice),
-        nombre: archivo.name,
-        bytes: archivo.bytes,
-        tipo: archivo.kind,
-        grupo: archivo.group,
-        totalGrupos: archivo.totalGroups,
-      })),
+      archivos: estado.files.flatMap((archivo, indice) =>
+        archivo.superseded
+          ? []
+          : [
+              {
+                id: String(indice),
+                nombre: archivo.name,
+                bytes: archivo.bytes,
+                tipo: archivo.kind,
+                grupo: archivo.group,
+                totalGrupos: archivo.totalGroups,
+                ...(archivo.unified ? { unificado: true, paginas: archivo.pages } : {}),
+              },
+            ]
+      ),
     };
   }
 
@@ -356,14 +456,29 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
     // que la pantalla deje de consultar antes de conocer la causa del cierre.
     if (
       ['starting', 'running'].includes(estado.status) &&
+      !this.reservando &&
       !procesoVivo(job.pid) &&
       (!this.child || this.child.pid !== job.pid)
     ) {
+      const failure = {
+        occurredAt: new Date().toISOString(),
+        message: 'La ejecución se interrumpió.',
+        step: estado.message,
+        stage: estado.progress?.stage ?? 'preparacion',
+        group: estado.progress?.current ?? null,
+        totalGroups: estado.progress?.total ?? null,
+        details: 'El proceso ejecutor se cerró antes de terminar.',
+      };
       estado = {
         ...estado,
         status: 'failed',
-        message: 'La ejecución se interrumpió. Puedes volver a intentarlo.',
+        failure,
+        failures: [...(estado.failures ?? []), failure],
+        pendingFailures: [...(estado.pendingFailures ?? []), failure],
+        message: 'La ejecución se interrumpió. Puedes reanudar desde el avance guardado.',
       };
+      await this.guardar(carpeta, 'execution.json', estado);
+      await this.guardar(carpeta, `fallo-${Date.now()}.json`, failure);
     }
     return { job, estado, carpeta };
   }
@@ -379,6 +494,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
     propietario: PropietarioReportes
   ): Promise<EjecucionReportes[]> {
     const encontrados = new Map<string, EjecucionReportes>();
+    const pendientes = new Map<string, EjecucionReportes>();
     if (!ingresos.length) return [];
     let trabajos: string;
     try {
@@ -419,19 +535,50 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
         }
       }
       reporte.archivos = reporte.archivos.filter(archivo => disponibles.has(archivo.id));
-      if (!reporte.archivos.length) continue;
-      if (reporte.estado === 'complete' && reporte.archivos.length !== estado.files.length) {
+      const esperados = estado.files.filter(archivo => !archivo.superseded).length;
+      if (reporte.estado === 'complete' && reporte.archivos.length !== esperados) {
+        const failure = {
+          occurredAt: new Date().toISOString(),
+          message: 'Algunos PDF guardados ya no están disponibles.',
+          step: 'Verificando los PDF guardados.',
+          stage: estado.progress?.stage ?? 'finalizacion',
+          group: null,
+          totalGroups: null,
+          details: 'Reanuda para descargar los grupos ausentes o reconstruir el PDF unificado.',
+        };
+        await this.guardar(contenido.carpeta, 'execution.json', {
+          ...estado,
+          status: 'failed',
+          failure,
+          failures: [...(estado.failures ?? []), failure],
+          pendingFailures: [...(estado.pendingFailures ?? []), failure],
+        });
         reporte.estado = 'failed';
+        reporte.reanudable = true;
+        reporte.fallo = {
+          fecha: failure.occurredAt,
+          mensaje: failure.message,
+          paso: failure.step,
+          etapa: failure.stage,
+          grupo: null,
+          totalGrupos: null,
+          detalle: failure.details,
+        };
         reporte.mensaje =
           'Algunos PDF guardados ya no están disponibles. Puedes consultar los archivos conservados.';
         if (reporte.progreso)
           reporte.progreso = {
             etapa: 'completo',
             completados: reporte.archivos.length,
-            total: estado.files.length,
+            total: esperados,
             grupoActual: null,
           };
       }
+      if (
+        reporte.estado === 'failed' &&
+        (!pendientes.has(job.ingreso) || pendientes.get(job.ingreso).createdAt < reporte.createdAt)
+      )
+        pendientes.set(job.ingreso, reporte);
       const anterior = encontrados.get(job.ingreso);
       // Una generación fallida posterior no oculta una descarga completa anterior.
       if (
@@ -443,7 +590,12 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
         encontrados.set(job.ingreso, reporte);
       }
     }
-    return [...encontrados.values()];
+    return [...encontrados.values()].map(reporte => {
+      const pendiente = pendientes.get(reporte.ingreso);
+      return pendiente && pendiente.id !== reporte.id && pendiente.createdAt > reporte.createdAt
+        ? { ...reporte, pendiente }
+        : reporte;
+    });
   }
 
   private async rutaArchivo(carpeta: string, archivo: ArchivoWorker) {
@@ -474,6 +626,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
     const entradas: ReturnType<typeof createReadStream>[] = [];
     let disponibles = 0;
     for (const [indice, archivo] of estado.files.entries()) {
+      if (archivo.superseded) continue;
       let ruta: string;
       try {
         ruta = await this.rutaArchivo(carpeta, archivo);

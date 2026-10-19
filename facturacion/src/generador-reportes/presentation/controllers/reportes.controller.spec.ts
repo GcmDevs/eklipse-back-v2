@@ -29,6 +29,7 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
   let app: INestApplication;
   const consultar = jest.fn();
   const crear = jest.fn();
+  const reanudar = jest.fn();
   const consultarEjecucion = jest.fn();
   const listar = jest.fn();
   const archivos = jest.fn();
@@ -41,7 +42,14 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
         { provide: GeneradorReportesImpl, useValue: { consultar } },
         {
           provide: EjecucionesReportesImpl,
-          useValue: { crear, consultar: consultarEjecucion, listar, archivo: jest.fn(), archivos },
+          useValue: {
+            crear,
+            reanudar,
+            consultar: consultarEjecucion,
+            listar,
+            archivo: jest.fn(),
+            archivos,
+          },
         },
       ],
     }).compile();
@@ -53,14 +61,13 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
   beforeEach(() => {
     consultar.mockReset().mockResolvedValue({ paciente: null, ingresos: [] });
     crear.mockReset().mockResolvedValue({ id: 'job-test', estado: 'starting' });
+    reanudar.mockReset().mockResolvedValue({ id: 'job-test', estado: 'starting' });
     consultarEjecucion.mockReset().mockResolvedValue({ id: 'job-test', estado: 'complete' });
     listar.mockReset().mockResolvedValue([]);
-    archivos
-      .mockReset()
-      .mockImplementation(async () => ({
-        contenido: Readable.from([Buffer.from('ZIP de prueba')]),
-        nombre: 'reportes-ingreso-20.zip',
-      }));
+    archivos.mockReset().mockImplementation(async () => ({
+      contenido: Readable.from([Buffer.from('ZIP de prueba')]),
+      nombre: 'reportes-ingreso-20.zip',
+    }));
     (fetchAuthsByUser as jest.Mock).mockReset().mockResolvedValue({ onlyCodes: ['004006001'] });
   });
 
@@ -71,6 +78,50 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
       .set('Authorization', 'Bearer falso')
       .expect(401);
     expect(consultar).not.toHaveBeenCalled();
+  });
+
+  it('reanuda con sesión, permiso y el ingreso validado de la ejecución original', async () => {
+    consultarEjecucion.mockResolvedValue({
+      id: 'job-test',
+      documento: '001234',
+      ingreso: '20',
+      estado: 'failed',
+    });
+    consultar.mockResolvedValue({
+      paciente: { documento: '001234' },
+      ingresos: [{ consecutivo: 20 }],
+    });
+    await request(app.getHttpServer())
+      .post('/v1/generador-reportes/ejecuciones/job-test/reanudar')
+      .set('Authorization', `Bearer ${token}`)
+      .send({})
+      .expect(201);
+    expect(reanudar).toHaveBeenCalledWith('job-test', {
+      usuario: 7,
+      contexto: 'ALTACENTRO',
+      esDinamica: true,
+    });
+    consultar.mockResolvedValue({
+      paciente: { documento: '001234' },
+      ingresos: [{ consecutivo: 21 }],
+    });
+    reanudar.mockClear();
+    await request(app.getHttpServer())
+      .post('/v1/generador-reportes/ejecuciones/job-test/reanudar')
+      .set('Authorization', `Bearer ${token}`)
+      .send({})
+      .expect(400);
+    expect(reanudar).not.toHaveBeenCalled();
+    await request(app.getHttpServer())
+      .post('/v1/generador-reportes/ejecuciones/job-test/reanudar')
+      .send({})
+      .expect(401);
+    (fetchAuthsByUser as jest.Mock).mockResolvedValue({ onlyCodes: [] });
+    await request(app.getHttpServer())
+      .post('/v1/generador-reportes/ejecuciones/job-test/reanudar')
+      .set('Authorization', `Bearer ${token}`)
+      .send({})
+      .expect(403);
   });
 
   it('entrega el ZIP con sesión, permiso y propietario de la ejecución', async () => {

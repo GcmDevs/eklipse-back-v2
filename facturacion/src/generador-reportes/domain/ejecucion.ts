@@ -5,6 +5,8 @@ export interface ArchivoReporte {
   tipo: 'historias-clinicas' | 'enfermeria';
   grupo: number;
   totalGrupos: number;
+  unificado?: boolean;
+  paginas?: number;
 }
 
 export interface ProgresoReportes {
@@ -16,6 +18,18 @@ export interface ProgresoReportes {
 }
 
 export interface EjecucionReportes {
+  fallasPendientes?: NonNullable<EjecucionReportes['fallo']>[];
+  pendiente?: EjecucionReportes;
+  reanudable?: boolean;
+  fallo?: {
+    fecha: string;
+    mensaje: string;
+    paso: string;
+    etapa: string;
+    grupo: number | null;
+    totalGrupos: number | null;
+    detalle: string;
+  };
   id: string;
   documento: string;
   ingreso: string;
