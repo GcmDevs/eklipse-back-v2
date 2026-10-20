@@ -6,6 +6,7 @@ import {
   IsArray,
   IsBoolean,
   IsInt,
+  IsIn,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -17,6 +18,15 @@ import {
 } from 'class-validator';
 
 export class CreateControlGastosPayload {
+  @IsOptional()
+  @IsIn([0, 19])
+  ordenRelacionadaTipoCode?: 0 | 19;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  ordenRelacionadaConsecutivo?: string;
+
   @IsNumber()
   @ValidateIf(or => or.area !== AREA.MAOS.getCode())
   @IsOptional()
