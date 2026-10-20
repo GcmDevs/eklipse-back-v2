@@ -12,8 +12,38 @@ const normalize = (value: string) =>
     .normalize('NFD')
     .replace(/[\u0300-\u036f]/g, '')
     .toUpperCase();
-const registroPattern = /\b(?:INVIMA\s*)?(\d{4}\s*(?:DM|RD|M)\s*-\s*\d+(?:\s*-\s*R\d+)?)/gi;
+const registroPattern = /\b(?:INVIMA\s*)?(\d{4}\s*(?:DM|RD|MB|M)\s*-\s*\d+(?:\s*-\s*R\d+)?)/gi;
 const profiles = [
+  {
+    id: 'DELTA',
+    match: /LABORATORIOS\s+DELTA/,
+    proveedor: 'Laboratorios Delta S.A.S.',
+    nit: '811009393',
+  },
+  {
+    id: 'VANTIVE',
+    match: /\bVANTIVE\s+S\.?A\.?S\.?/,
+    proveedor: 'Vantive S.A.S.',
+    nit: '901755480',
+  },
+  {
+    id: 'BAXTER',
+    match: /LABORATORIOS\s+BAXTER/,
+    proveedor: 'Laboratorios Baxter S.A.',
+    nit: '890300292',
+  },
+  {
+    id: 'CRUZ_VERDE',
+    match: /DROGUERIAS\s+Y\s+FARMACIAS\s+CRUZ\s+VERDE/,
+    proveedor: 'Droguerías y Farmacias Cruz Verde S.A.S.',
+    nit: '800149695',
+  },
+  {
+    id: 'B_BRAUN',
+    match: /\bB\.?\s*BRAUN\s+MEDICAL/,
+    proveedor: 'B. Braun Medical S.A.',
+    nit: '860026442',
+  },
   {
     id: 'LIFE',
     match: /LIFE SUMINISTROS/,
@@ -51,7 +81,7 @@ function row(
   const cum = declarados.length > 1 ? '' : codigo.trim();
   const tipo = regs.some(r => /^\d{4}(DM|RD)-/i.test(r))
     ? 'DISPOSITIVO'
-    : regs.some(r => /^\d{4}M-/i.test(r)) || /^\d+-\d+$/.test(cum)
+    : regs.some(r => /^\d{4}MB?-/i.test(r)) || /^\d+-\d+$/.test(cum)
       ? 'MEDICAMENTO'
       : formato === 'LIFE'
         ? 'DISPOSITIVO'
@@ -81,7 +111,22 @@ function bloques(text: string, start: RegExp): string[] {
 }
 function fecha(text: string, formato: string): string | null {
   let parts: string[] | null = null;
-  if (formato === 'LIFE') {
+  if (formato === 'BAXTER' || formato === 'VANTIVE') {
+    const m = text.match(/\b(20\d{2})\/(\d{2})\/(\d{2})\s+\d{1,2}:\d{2}/);
+    if (m) parts = [m[1], m[2], m[3]];
+  } else if (formato === 'B_BRAUN') {
+    const m = text.match(/Fecha Factura\s+(\d{2})\.(\d{2})\.(20\d{2})/i);
+    if (m) parts = [m[3], m[2], m[1]];
+  } else if (formato === 'DELTA') {
+    // pdf-parse places the expiry date before the invoice timestamp in this layout.
+    const m = text.match(/\b(\d{2})\/(\d{2})\/(20\d{2})\s+\d{1,2}:\d{2}:\d{2}/);
+    if (m) parts = [m[3], m[2], m[1]];
+  } else if (formato === 'CRUZ_VERDE') {
+    const m = normalize(text).match(
+      /FACTURA ELECTRONICA DE VENTA\s+CVF\d*\s+\d+\s+(\d{2})-(\d{2})-(20\d{2})/
+    );
+    if (m) parts = [m[3], m[2], m[1]];
+  } else if (formato === 'LIFE') {
     const m = text.match(/\b(20\d{2})\s+(\d{1,2})\s+(\d{1,2})\s+20\d{2}/);
     if (m) parts = [m[1], m[2], m[3]];
   } else if (formato === 'XINETIX') {
@@ -131,10 +176,81 @@ export function extraerFactura(pages: PaginaTexto[]): FacturaExtraida {
   if (formato === 'OFFIMEDICAS') numero = text.match(/^FDO\s+\d+/m)?.[0] || '';
   if (formato === 'EVEDISA')
     numero = text.match(/\bDIST\s*-\s*\d+/)?.[0].replace(/\s*-\s*/, ' ') || '';
+  if (formato === 'DELTA')
+    numero = text.match(/\bNo\.\s*(FE\s*\d+)/i)?.[1].replace(/\s/g, '') || '';
+  if (formato === 'VANTIVE' || formato === 'BAXTER' || formato === 'B_BRAUN')
+    numero = text.match(/FACTURA ELECTR[ÓO]NICA DE VENTA\s+No\.\s*(\d+)/i)?.[1] || '';
+  if (formato === 'CRUZ_VERDE')
+    numero =
+      text.match(/FACTURA ELECTR[ÓO]NICA DE VENTA\s+(CVF\d*\s+\d+)/i)?.[1].replace(/\s+/g, ' ') ||
+      '';
   const renglones: RenglonExtraido[] = [];
   for (const page of pages) {
     const t = page.text;
-    if (formato === 'LIFE') {
+    if (formato === 'BAXTER' || formato === 'VANTIVE') {
+      const body =
+        t.split(/VALOR TOTAL\s*\n/i)[1]?.split(/\n(?:Total Nro L[ií]neas:|IMPORTANTE:|SON:)/i)[0] ||
+        '';
+      for (const b of bloques(body, /^\d{1,4}\.-\s+/gm)) {
+        const product = b.replace(/^\d+\.-\s*/, '');
+        const unit = /\s+(?:EA|UN|UND|CAJ|CJ|FCO|BOL)\s+\d[\d.,]*/i.exec(product);
+        const desc = unit ? product.slice(0, unit.index) : product.split('\t')[0];
+        const columns = unit ? product.slice(unit.index) : '';
+        // CUM is the column immediately before the expiry date; lots/internal codes are excluded.
+        const codigo =
+          columns
+            .match(/\t(\d{1,12}\s*-\s*\d{1,8}|N\.A\.|N\/A|NA)[ \t]+\d{2}-\d{2}-\d{2}(?=\s|$)/i)?.[1]
+            .replace(/\s/g, '') || '';
+        renglones.push(row(b, desc, codigo, page.num, formato));
+      }
+    } else if (formato === 'DELTA') {
+      const body = t.split(/\nTel:|\nTotal Items:/i)[0];
+      const start =
+        /^\d[\d.,]*[ \t]+(?:\d{1,12}[ \t]*-[ \t]*\d{1,8}|\d[A-Z]\d+|N\.A\.|N\/A|NA)(?=\s|$)/gm;
+      for (const block of bloques(body, start)) {
+        const end = /\n(?:UD|UN|UND)\s*(?:\n|$)/i.exec(block);
+        const b = end ? block.slice(0, end.index + end[0].trimEnd().length) : block;
+        const reg = new RegExp(registroPattern.source, 'i').exec(b);
+        const afterReg = reg ? b.slice(reg.index + reg[0].length).trim() : b.split('\t').at(-1)!;
+        const desc = afterReg
+          .replace(
+            /^Caja\s+x\s+\d+\s+(?:amp\.?|vial|jer\.?\s+prell\.?)(?:\s+de\s+[\d.,]+\s*mL)?\s*/i,
+            ''
+          )
+          .replace(/\n(?:UD|UN|UND)\s*$/i, '');
+        const codigo =
+          b
+            .match(/^\d[\d.,]*[ \t]+(\d{1,12}[ \t]*-[ \t]*\d{1,8}|N\.A\.|N\/A|NA)(?=\s|$)/i)?.[1]
+            .replace(/\s/g, '') || '';
+        const r = row(b, desc, codigo, page.num, formato);
+        const ium = b.match(/^\d[\d.,]*[ \t]+(\d[A-Z]\d+(?:\r?\n\d+)?)/i)?.[1].replace(/\s/g, '');
+        if (ium)
+          r.advertencias.push(`La factura declara el IUM ${ium}; no se interpreta como CUM.`);
+        renglones.push(r);
+      }
+    } else if (formato === 'CRUZ_VERDE') {
+      const body =
+        t.split(/\nMEDIO DE PAGO\s*\n/i)[1]?.split(/L[ií]neas facturadas:|Pag\./i)[0] || '';
+      const start =
+        /^\d[\d.,]*[ \t]+\d[\d.,]*[ \t]+\d[\d.,]*[ \t]+\d+[ \t]+[A-Z]{2,4}[ \t]+(?:\d[\d.,]*[ \t]+){3}/gm;
+      for (const b of bloques(body, start)) {
+        const product = b.replace(new RegExp(start.source, 'i'), '');
+        const desc = product.split(/\bCUM\s*[:(]|\nCANTIDAD\b/i)[0];
+        renglones.push(row(b, desc, cumLabel(b), page.num, formato));
+      }
+    } else if (formato === 'B_BRAUN') {
+      const body =
+        t.split(/\nItem[^\n]*\n/i)[1]?.split(/\n(?:Carrera\b|Sub-Total\b|Pague por\b|CUFE:)/i)[0] ||
+        '';
+      const start = /^\d+[ \t]+\d[\d.,]*[ \t]+\d[\d.,]*[ \t]+\d[\d.,]*[ \t]+/gm;
+      for (const b of bloques(body, start)) {
+        const product = b.replace(new RegExp(start.source, 'i'), '');
+        const desc = product.split(
+          /\n[A-Z0-9][A-Z0-9./-]*[ \t]+(?:UN|UND|EA|CAJ)\b|\nReg\.\s*Sanitario/i
+        )[0];
+        renglones.push(row(b, desc, cumLabel(b), page.num, formato));
+      }
+    } else if (formato === 'LIFE') {
       const body = t.split(/Por favor abstenerse|\nSON:|\nSUBTOTAL|\nME OBLIGO/i)[0];
       for (const b of bloques(body, /^[A-Z]{2}\d{3,}\s+[^\n]+/gm)) {
         const desc = b

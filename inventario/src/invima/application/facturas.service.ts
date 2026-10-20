@@ -33,12 +33,10 @@ export class FacturasInvimaService extends BaseSource {
   }
 
   private async factura(id: number, manager = this.conn.manager, lock = false) {
-    const factura = await manager
-      .getRepository(InvimaFacturaOrm)
-      .findOne({
-        where: { id },
-        ...(lock ? { lock: { mode: 'pessimistic_write' as const } } : {}),
-      });
+    const factura = await manager.getRepository(InvimaFacturaOrm).findOne({
+      where: { id },
+      ...(lock ? { lock: { mode: 'pessimistic_write' as const } } : {}),
+    });
     if (!factura) throw new NotFoundException('Factura no encontrada en este contexto.');
     return factura;
   }
@@ -220,6 +218,27 @@ export class FacturasInvimaService extends BaseSource {
       pagina: input.pagina,
       limite: input.limite,
     };
+  }
+  async eliminar(id: number, version: number): Promise<void> {
+    await this.conn.transaction(async manager => {
+      const factura = await this.factura(id, manager, true);
+      if (factura.estado !== 'BORRADOR')
+        throw new ConflictException('Solo se pueden eliminar facturas en borrador.');
+      if (factura.version !== version)
+        throw new ConflictException('La factura cambió. Actualice el listado antes de eliminar.');
+      const items = manager.getRepository(InvimaFacturaItemOrm);
+      const renglones = await items.find({ where: { facturaId: id } });
+      if (renglones.some(r => r.productoId !== null))
+        throw new ConflictException('La factura tiene productos asociados y no se puede eliminar.');
+      await items.delete({ facturaId: id });
+      const deleted = await manager.getRepository(InvimaFacturaOrm).delete({
+        id,
+        version,
+        estado: 'BORRADOR',
+      });
+      if (deleted.affected !== 1)
+        throw new ConflictException('La factura cambió. Actualice el listado antes de eliminar.');
+    });
   }
   async guardar(id: number, input: GuardarFacturaDto) {
     await this.conn.transaction(async manager => {

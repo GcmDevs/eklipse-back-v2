@@ -43,3 +43,6 @@ export class ListarFacturasDto {
   @Type(() => Number) @IsInt() @Min(1) @Max(100) limite = 20;
   @IsOptional() @Transform(trim) @IsString() @MaxLength(240) q?: string;
 }
+export class EliminarFacturaDto {
+  @Type(() => Number) @IsInt() @Min(1) version: number;
+}

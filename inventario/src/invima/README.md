@@ -33,10 +33,15 @@ La pantalla principal lista facturas; /inn/invima/facturas/:id permite revisar s
 - POST facturas: multipart con un único archivo en el campo archivo; devuelve BORRADOR y sus renglones. Se usa pdf-parse 2.4.5 en un proceso hijo terminable, sin escribir el PDF al disco. Node debe ser compatible con pdf-parse (validado en Node 24.21).
 - GET facturas?pagina=1&limite=20&q=: lista paginada con conteos calculados sobre las últimas versiones, sin consultar INVIMA. GET facturas/:id incluye los renglones, originales y resultados actuales.
 - PUT facturas/:id: version, numero, proveedor, nitProveedor, fecha (AAAA-MM-DD o null) y renglones. Cada renglón lleva id si ya existe, productoVersion si tiene producto, tipo, descripcion, codigoDeclarado, registroSanitario y excluido. Los campos originales, usuario y contexto no se aceptan del cliente. Deben enviarse también los renglones excluidos; no se borran los omitidos.
+- DELETE facturas/:id?version=1: elimina definitivamente un borrador y sus renglones, devuelve 204 y permite volver a cargar ese PDF. Exige la versión actual y administrador o permiso 006005002. El bloqueo transaccional es el mismo de guardar: si la factura fue revisada, cambió de versión o tiene productos asociados, rechaza con 409 sin borrar datos. Facturas inexistentes en el contexto devuelven 404. El listado solicita confirmación antes de enviar la eliminación; las facturas revisadas no muestran esta acción. No requiere migración SQL.
 - Guardar crea/actualiza productos en una transacción. Cada renglón tiene identidad propia, incluso si repite CUM. Cambiar sus datos reinicia solo su verificación; conserva el historial y el fragmento original. Los productos vinculados se editan desde su factura.
 - Se guardan metadatos, nombre y hash del archivo, formato y versión del extractor, fragmentos de renglones, páginas y advertencias. No se conserva el PDF ni el texto completo de sus páginas. El hash detecta cargas repetidas dentro del contexto.
 
-Se reconocen los formatos suministrados de Evedisa, Offimedicas, Xinetix, Sicmafarma y Life. Hay reglas para continuaciones entre páginas, CUM seguido inmediatamente por IUM y múltiples lotes por renglón. Los formatos desconocidos permiten revisión/captura manual. N.A., identificadores ambiguos y códigos incompletos permanecen visibles; no se inventa un consecutivo de CUM.
+Se reconocen los formatos suministrados de Evedisa, Offimedicas, Xinetix, Sicmafarma, Life, Laboratorios Delta, Vantive, Laboratorios Baxter, Cruz Verde y B. Braun. El extractor versión 2 agrega los últimos cinco formatos y registros sanitarios MB. Las verificaciones y extracciones guardadas conservan su versión original.
+
+Hay reglas para continuaciones entre páginas, CUM seguido inmediatamente por IUM y múltiples lotes por renglón. Delta distingue el IUM de un CUM, conserva el código en el fragmento y muestra una advertencia; reconoce registros MB partidos entre líneas. Cruz Verde conserva ceros iniciales y reconstruye CUM divididos entre líneas. Baxter y Vantive leen el CUM de su columna, sin confundirlo con lote, fecha o referencia; se conservan los renglones facturados separados aunque repitan CUM. Los renglones sin identificadores quedan para clasificación/revisión manual. B. Braun utiliza el registro sanitario de dispositivo y conserva referencias, expediente y lotes solo como evidencia; no los convierte en CUM. Se omiten las páginas de totales sin productos.
+
+Los formatos desconocidos permiten revisión/captura manual. N.A., identificadores ambiguos y códigos incompletos permanecen visibles; no se inventa un consecutivo de CUM. Agregar formatos no modifica facturas ya guardadas ni requiere migración SQL.
 
 Los límites predeterminados son 10 MB, 50 páginas, 500 renglones y 30 segundos. INVIMA_PDF_MAX_BYTES, INVIMA_PDF_MAX_PAGES, INVIMA_PDF_MAX_ROWS e INVIMA_PDF_TIMEOUT_MS permiten reducirlos. Hay como máximo dos extracciones concurrentes por proceso; las adicionales reciben HTTP 429. PDF sin texto, protegido, dañado, excesivo o con tiempo agotado tiene un error específico. No se incluye OCR.
 
@@ -44,7 +49,7 @@ Para validar localmente los originales (solo lectura de archivos, sin guardar fa
 
     node -r ts-node/register inventario/scripts/verificar-facturas-invima.ts <ruta.pdf> [otras-rutas.pdf]
 
-Este script verifica los conteos de las siete muestras, número de factura, CUM con ceros y continuidad de página. Las pruebas automatizadas utilizan documentos sintéticos; los PDF originales no forman parte del repositorio.
+Este script verifica las doce muestras disponibles (120 renglones), número y fecha de factura, asociaciones de descripción/CUM, ceros iniciales, separación de IUM, registros MB, dispositivos y continuidad de página. Los cinco formatos nuevos aportan 6 renglones de Delta, 3 de Vantive, 30 de Baxter, 13 de Cruz Verde y 2 de B. Braun. Las pruebas automatizadas utilizan documentos sintéticos; los PDF originales no forman parte del repositorio.
 
 ## Dispositivos y reactivos
 

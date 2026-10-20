@@ -1,7 +1,9 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
   Param,
   ParseIntPipe,
   Post,
@@ -19,7 +21,7 @@ import { ADMIN_AUTHORITY } from '@common/application/constants';
 import { INN_AUTHORITIES } from '@inn/authorities';
 import { FacturasInvimaService } from '../application/facturas.service';
 import { limitePdfBytes } from '../infrastructure/pdf-extractor.service';
-import { GuardarFacturaDto, ListarFacturasDto } from './factura.dto';
+import { EliminarFacturaDto, GuardarFacturaDto, ListarFacturasDto } from './factura.dto';
 import { InvimaDatabaseFilter } from './invima-database.filter';
 
 @ApiTags('Facturas INVIMA')
@@ -61,5 +63,11 @@ export class FacturasInvimaController {
   @Put(':id')
   guardar(@Param('id', ParseIntPipe) id: number, @Body() input: GuardarFacturaDto) {
     return this.service.guardar(id, input);
+  }
+  @Authorities([ADMIN_AUTHORITY, INN_AUTHORITIES.PRODUCTOS.VERIFICACION_INVIMA])
+  @Delete(':id')
+  @HttpCode(204)
+  async eliminar(@Param('id', ParseIntPipe) id: number, @Query() input: EliminarFacturaDto) {
+    await this.service.eliminar(id, input.version);
   }
 }

@@ -1,6 +1,6 @@
 import { TipoProductoInvima } from './invima.models';
 
-export const EXTRACTOR_VERSION = '1';
+export const EXTRACTOR_VERSION = '2';
 export interface RenglonFactura {
   tipo: TipoProductoInvima;
   descripcion: string;

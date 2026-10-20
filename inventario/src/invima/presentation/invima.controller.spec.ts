@@ -8,7 +8,7 @@ import { AuthoritiesGuard } from '@common/infrastructure/guards/authorities.guar
 import { fetchAuthsByUser } from '@common/infrastructure/services';
 import { InvimaController } from './invima.controller';
 import { FacturasInvimaController } from './facturas.controller';
-import { GuardarFacturaDto } from './factura.dto';
+import { EliminarFacturaDto, GuardarFacturaDto } from './factura.dto';
 import { ConfirmarCandidatoDto, GuardarMedicamentoDto, PaginaCandidatoDto } from './invima.dto';
 
 jest.mock('@common/application/services', () => ({
@@ -23,7 +23,7 @@ jest.mock('@common/infrastructure/guards', () => ({
     .AuthoritiesGuard,
 }));
 describe('Permisos de las interfaces INVIMA', () => {
-  it.each(['subir', 'listar', 'detalle', 'guardar'])(
+  it.each(['subir', 'listar', 'detalle', 'guardar', 'eliminar'])(
     'protege el endpoint de facturas %s',
     async method => {
       const handler = FacturasInvimaController.prototype[method];
@@ -90,6 +90,13 @@ describe('Permisos de las interfaces INVIMA', () => {
   );
 });
 describe('Validación de entrada INVIMA', () => {
+  it('exige una versión positiva para eliminar borradores', async () => {
+    for (const version of [undefined, 0, -1, 'abc'])
+      expect(
+        (await validate(plainToInstance(EliminarFacturaDto, { version }))).length
+      ).toBeGreaterThan(0);
+    expect(await validate(plainToInstance(EliminarFacturaDto, { version: '1' }))).toHaveLength(0);
+  });
   it('valida renglones anidados y descarta evidencia, contexto e identidad enviados por el cliente', async () => {
     const dto = plainToInstance(GuardarFacturaDto, {
       version: 1,

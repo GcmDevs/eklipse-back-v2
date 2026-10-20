@@ -36,6 +36,15 @@ function setup() {
       findOne: async ({ where }: any) => copy(rows.find(r => match(r, where)) || null),
       findOneBy: async (where: any) => copy(rows.find(r => match(r, where)) || null),
       find: async ({ where }: any = {}) => copy(rows.filter(r => match(r, where))),
+      delete: jest.fn(async (where: any) => {
+        let affected = 0;
+        for (let i = rows.length - 1; i >= 0; i--)
+          if (match(rows[i], where)) {
+            rows.splice(i, 1);
+            affected++;
+          }
+        return { affected };
+      }),
       createQueryBuilder: () => {
         const q: any = {};
         for (const k of ['innerJoin', 'leftJoin', 'select', 'addSelect', 'andWhere'])
@@ -173,5 +182,63 @@ describe('Facturas INVIMA, persistencia y revisión', () => {
     const factura = await a.service.subir(a.file);
     await expect(b.service.detalle(factura.id)).rejects.toMatchObject({ status: 404 });
     expect(await b.connection.getRepository(InvimaFacturaItemOrm).find()).toEqual([]);
+  });
+  it('elimina solo el borrador y sus renglones y permite volver a cargar el mismo PDF', async () => {
+    const { service, file, connection, pdf } = setup();
+    const draft = await service.subir(file);
+    const otro = await service.subir({ ...file, buffer: Buffer.from('otro-pdf') });
+    await service.eliminar(draft.id, draft.version);
+    await expect(service.detalle(draft.id)).rejects.toMatchObject({ status: 404 });
+    expect(
+      await connection.getRepository(InvimaFacturaItemOrm).find({ where: { facturaId: draft.id } })
+    ).toEqual([]);
+    expect((await service.detalle(otro.id)).renglones).toHaveLength(2);
+    expect((await service.subir(file)).estado).toBe('BORRADOR');
+    expect(pdf.extraer).toHaveBeenCalledTimes(3);
+  });
+  it('rechaza eliminar una factura revisada o con versión obsoleta sin modificarla', async () => {
+    const { service, file } = setup();
+    const draft = await service.subir(file);
+    await expect(service.eliminar(draft.id, draft.version + 1)).rejects.toMatchObject({
+      status: 409,
+    });
+    expect((await service.detalle(draft.id)).renglones).toHaveLength(2);
+    const revisada = await service.guardar(draft.id, input(draft));
+    await expect(service.eliminar(revisada.id, revisada.version)).rejects.toMatchObject({
+      status: 409,
+    });
+    expect((await service.detalle(revisada.id)).renglones[0].producto.id).toBe(
+      revisada.renglones[0].producto.id
+    );
+  });
+  it('no elimina facturas ajenas al contexto ni borradores con productos asociados', async () => {
+    const a = setup(),
+      b = setup();
+    const draft = await a.service.subir(a.file);
+    await expect(b.service.eliminar(draft.id, draft.version)).rejects.toMatchObject({
+      status: 404,
+    });
+    const repo = a.connection.getRepository(InvimaFacturaItemOrm);
+    const item = (await repo.find({ where: { facturaId: draft.id } }))[0];
+    await repo.save({ ...item, productoId: 99 });
+    await expect(a.service.eliminar(draft.id, draft.version)).rejects.toMatchObject({
+      status: 409,
+    });
+    expect(await repo.find({ where: { facturaId: draft.id } })).toHaveLength(2);
+  });
+  it('revierte el borrado de renglones si falla el borrado final de la factura', async () => {
+    const { service, file, connection } = setup();
+    const draft = await service.subir(file);
+    const getRepository = connection.manager.getRepository;
+    connection.manager.getRepository = (type: any) => {
+      const repo = getRepository(type);
+      if (type === InvimaFacturaOrm)
+        repo.delete = async () => {
+          throw new Error('Fallo SQL');
+        };
+      return repo;
+    };
+    await expect(service.eliminar(draft.id, draft.version)).rejects.toThrow('Fallo SQL');
+    expect((await service.detalle(draft.id)).renglones).toHaveLength(2);
   });
 });
