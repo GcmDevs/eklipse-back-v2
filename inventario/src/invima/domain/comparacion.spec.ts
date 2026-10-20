@@ -70,7 +70,11 @@ describe('Comparación INVIMA', () => {
       true
     );
     expect(result.resultado).toBe('REVISION');
-    expect(result.advertencias).toHaveLength(2);
+    expect(result.advertencias.join(' ')).toContain('No se encontró el CUM indicado');
+    expect(result.advertencias.join(' ')).toContain(
+      'No se encontró el registro sanitario indicado'
+    );
+    expect(result.advertencias.join(' ')).toContain('difiere del ingresado');
   });
   it('no elige CUM con estados contradictorios o páginas sin revisar', () => {
     expect(

@@ -25,8 +25,8 @@ export class InvimaController {
   constructor(private readonly service: InvimaService) {}
   @Authorities([ADMIN_AUTHORITY, INN_AUTHORITIES.PRODUCTOS.VERIFICACION_INVIMA])
   @Get('productos')
-  listar() {
-    return this.service.listar();
+  listar(@Query('sinFactura') sinFactura?: string) {
+    return this.service.listar(undefined, sinFactura === 'true');
   }
   @Authorities([ADMIN_AUTHORITY, INN_AUTHORITIES.PRODUCTOS.VERIFICACION_INVIMA])
   @Post('productos')

@@ -7,11 +7,13 @@ import {
 } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
+import { EntityManager, In } from 'typeorm';
 import { BaseSource } from '@common/infrastructure/services';
 import {
   InvimaConfirmacionOrm,
   InvimaProductoOrm,
   InvimaVerificacionOrm,
+  InvimaFacturaItemOrm,
 } from '@inn/orm/inn/invima';
 import { construirFiltro, evaluarCoincidencias } from '../domain/comparacion';
 import { CriterioInvima, EvidenciaInvima, MedicamentoInput } from '../domain/invima.models';
@@ -70,14 +72,23 @@ export class InvimaService extends BaseSource {
         : null,
     };
   }
-  async listar() {
-    const productos = await this.conn
-      .getRepository(InvimaProductoOrm)
-      .find({ order: { id: 'DESC' } });
+  async listar(ids?: number[], sinFactura = false) {
+    if (ids && !ids.length) return [];
+    const repository = this.conn.getRepository(InvimaProductoOrm);
+    const productos = sinFactura
+      ? await repository
+          .createQueryBuilder('p')
+          .where('NOT EXISTS (SELECT 1 FROM EKINNIVFACTURAITEM i WHERE i.PRODUCTOID = p.OID)')
+          .orderBy('p.id', 'DESC')
+          .getMany()
+      : await repository.find({
+          ...(ids ? { where: { id: In(ids) } } : {}),
+          order: { id: 'DESC' },
+        });
     // One joined query avoids loading the (potentially large) complete evidence for the list.
     const candidatoSql = `CASE WHEN c.id IS NOT NULL THEN c.candidato
       WHEN v.resultado = 'EXACTA' THEN JSON_QUERY(v.evidencia, '$.seleccionado') END`;
-    const ultimas = await this.conn
+    const query = this.conn
       .getRepository(InvimaProductoOrm)
       .createQueryBuilder('p')
       .innerJoin(
@@ -94,7 +105,12 @@ export class InvimaService extends BaseSource {
       .addSelect('c.id', 'confirmacionId')
       .addSelect(`JSON_VALUE(${candidatoSql}, '$.cum')`, 'cumVerificado')
       .addSelect(`JSON_VALUE(${candidatoSql}, '$.estadoCum')`, 'estadoCum')
-      .getRawMany();
+      .addSelect(`JSON_VALUE(${candidatoSql}, '$.estadoRegistro')`, 'estadoRegistro');
+    if (ids || sinFactura) {
+      if (!productos.length) return [];
+      query.andWhere('p.id IN (:...ids)', { ids: productos.map(p => p.id) });
+    }
+    const ultimas = await query.getRawMany();
     const byProducto = new Map(ultimas.map(v => [Number(v.productoId), v]));
     return productos.map(p => {
       const ultima = byProducto.get(p.id);
@@ -104,13 +120,14 @@ export class InvimaService extends BaseSource {
         resultado: ultima?.confirmacionId ? 'CONFIRMADA' : (ultima?.resultado ?? 'PENDIENTE'),
         cumVerificado: ultima?.cumVerificado?.trim() || null,
         estadoCum: ultima?.estadoCum?.trim() || null,
+        estadoRegistro: ultima?.estadoRegistro?.trim() || null,
         ultimaVerificacion: ultima ?? null,
       };
     });
   }
-  async crear(input: MedicamentoInput) {
+  async crear(input: MedicamentoInput, manager: EntityManager = this.conn.manager) {
     const now = new Date();
-    const p = await this.conn.getRepository(InvimaProductoOrm).save({
+    const p = await manager.getRepository(InvimaProductoOrm).save({
       datos: JSON.stringify(this.datos(input)),
       version: 1,
       ultimaVerificacionId: null,
@@ -125,11 +142,13 @@ export class InvimaService extends BaseSource {
       ultimaVerificacion: null,
       cumVerificado: null,
       estadoCum: null,
+      estadoRegistro: null,
     };
   }
   private datos(input: MedicamentoInput): MedicamentoInput {
     return Object.fromEntries(
       [
+        'tipo',
         'nombre',
         'cum',
         'registroSanitario',
@@ -137,11 +156,22 @@ export class InvimaService extends BaseSource {
         'concentracion',
         'formaFarmaceutica',
         'presentacion',
-      ].map(key => [key, (input[key] ?? '').trim()])
+      ].map(key => [key, (input[key] ?? (key === 'tipo' ? 'MEDICAMENTO' : '')).trim()])
     ) as unknown as MedicamentoInput;
   }
-  async editar(id: number, input: MedicamentoInput & { version?: number }) {
-    return this.conn.transaction(async manager => {
+  async editar(
+    id: number,
+    input: MedicamentoInput & { version?: number },
+    transactionManager?: EntityManager
+  ) {
+    if (
+      !transactionManager &&
+      (await this.conn.getRepository(InvimaFacturaItemOrm).findOneBy({ productoId: id }))
+    )
+      throw new BadRequestException(
+        'Edite este producto desde su factura para conservar la revisión.'
+      );
+    const work = async (manager: EntityManager) => {
       const p = await this.producto(id, manager, true);
       if (input.version !== p.version)
         throw new ConflictException('El medicamento cambió. Actualice el listado antes de editar.');
@@ -157,14 +187,20 @@ export class InvimaService extends BaseSource {
         ultimaVerificacion: null,
         cumVerificado: null,
         estadoCum: null,
+        estadoRegistro: null,
       };
-    });
+    };
+    return transactionManager ? work(transactionManager) : this.conn.transaction(work);
   }
   async verificar(productoId: number) {
     const p = await this.producto(productoId);
     const entrada = JSON.parse(p.datos) as MedicamentoInput;
+    if (entrada.tipo === 'SIN_CLASIFICAR')
+      throw new BadRequestException('Clasifique el producto antes de verificar.');
+    const item = await this.conn.getRepository(InvimaFacturaItemOrm).findOneBy({ productoId });
+    if (item?.excluido) throw new BadRequestException('El renglón está excluido de la factura.');
     const criterios: CriterioInvima[] = [
-      ...(entrada.cum ? ['CUM' as const] : []),
+      ...(entrada.cum && entrada.tipo !== 'DISPOSITIVO' ? ['CUM' as const] : []),
       ...(entrada.registroSanitario ? ['REGISTRO' as const] : []),
       'NOMBRE',
     ];
@@ -174,7 +210,7 @@ export class InvimaService extends BaseSource {
     for (criterio of criterios) {
       const where = construirFiltro(entrada, criterio);
       ultima = await Promise.all(
-        fuentesInvima().map(f => this.socrata.consultar(f, criterio, where))
+        fuentesInvima(entrada.tipo).map(f => this.socrata.consultar(f, criterio, where))
       );
       evidencia.consultas.push(...ultima);
       if (ultima.some(c => c.paginas.some(page => page.candidatos.length))) break;

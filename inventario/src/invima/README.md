@@ -4,7 +4,7 @@ Ruta de Eklipse: /inn/invima. Backend: /v4/inn/invima. Los productos pertenecen 
 
 ## Activación
 
-1. Ejecutar inventario/database/migrations/20261020_invima.sql en cada base de contexto que habilite el módulo (SQL Server 2016 o superior por ISJSON).
+1. Ejecutar, en orden, inventario/database/migrations/20261020_invima.sql y 20261020_invima_facturas.sql en cada base de contexto que habilite el módulo (SQL Server 2016 o superior por ISJSON). Las migraciones no se ejecutan al iniciar el servidor.
 2. Asignar el permiso 006005002, «Verificación INVIMA», mediante la administración de permisos existente. La migración registra el permiso sin concederlo; si el código ya pertenece a otra función, aborta. Quien tenga el permiso activo ADMINISTRADOR (001001001), directamente o por su rol, puede usar todos los endpoints sin necesitar 006005002.
 3. Configurar, si se requiere, INVIMA_APP_TOKEN en el entorno del proceso del backend.
 4. Validar las fuentes con el script de comprobación antes de habilitar el acceso del equipo.
@@ -24,9 +24,35 @@ Para consultas reales (solo lectura), PowerShell:
     $env:TS_NODE_PROJECT='inventario/tsconfig.json'
     node -r ts-node/register inventario/scripts/verificar-fuentes-invima.ts
 
-El script valida metadatos y búsquedas por CUM, registro sanitario y nombre en las cuatro fuentes. Su salida no incluye el app token.
+El script valida metadatos y búsquedas por CUM, registro sanitario y nombre en las cuatro fuentes de medicamentos, y por registro/nombre en la fuente de dispositivos. Su salida no incluye el app token.
 
-## API y persistencia
+## Facturas PDF
+
+La pantalla principal lista facturas; /inn/invima/facturas/:id permite revisar sus renglones y verificar los productos incluidos. /inn/invima/sin-factura conserva los registros anteriores. Se admiten medicamentos, dispositivos y reactivos; SIN_CLASIFICAR no se consulta hasta que el usuario elija un tipo.
+
+- POST facturas: multipart con un único archivo en el campo archivo; devuelve BORRADOR y sus renglones. Se usa pdf-parse 2.4.5 en un proceso hijo terminable, sin escribir el PDF al disco. Node debe ser compatible con pdf-parse (validado en Node 24.21).
+- GET facturas?pagina=1&limite=20&q=: lista paginada con conteos calculados sobre las últimas versiones, sin consultar INVIMA. GET facturas/:id incluye los renglones, originales y resultados actuales.
+- PUT facturas/:id: version, numero, proveedor, nitProveedor, fecha (AAAA-MM-DD o null) y renglones. Cada renglón lleva id si ya existe, productoVersion si tiene producto, tipo, descripcion, codigoDeclarado, registroSanitario y excluido. Los campos originales, usuario y contexto no se aceptan del cliente. Deben enviarse también los renglones excluidos; no se borran los omitidos.
+- Guardar crea/actualiza productos en una transacción. Cada renglón tiene identidad propia, incluso si repite CUM. Cambiar sus datos reinicia solo su verificación; conserva el historial y el fragmento original. Los productos vinculados se editan desde su factura.
+- Se guardan metadatos, nombre y hash del archivo, formato y versión del extractor, fragmentos de renglones, páginas y advertencias. No se conserva el PDF ni el texto completo de sus páginas. El hash detecta cargas repetidas dentro del contexto.
+
+Se reconocen los formatos suministrados de Evedisa, Offimedicas, Xinetix, Sicmafarma y Life. Hay reglas para continuaciones entre páginas, CUM seguido inmediatamente por IUM y múltiples lotes por renglón. Los formatos desconocidos permiten revisión/captura manual. N.A., identificadores ambiguos y códigos incompletos permanecen visibles; no se inventa un consecutivo de CUM.
+
+Los límites predeterminados son 10 MB, 50 páginas, 500 renglones y 30 segundos. INVIMA_PDF_MAX_BYTES, INVIMA_PDF_MAX_PAGES, INVIMA_PDF_MAX_ROWS e INVIMA_PDF_TIMEOUT_MS permiten reducirlos. Hay como máximo dos extracciones concurrentes por proceso; las adicionales reciben HTTP 429. PDF sin texto, protegido, dañado, excesivo o con tiempo agotado tiene un error específico. No se incluye OCR.
+
+Para validar localmente los originales (solo lectura de archivos, sin guardar facturas):
+
+    node -r ts-node/register inventario/scripts/verificar-facturas-invima.ts <ruta.pdf> [otras-rutas.pdf]
+
+Este script verifica los conteos de las siete muestras, número de factura, CUM con ceros y continuidad de página. Las pruebas automatizadas utilizan documentos sintéticos; los PDF originales no forman parte del repositorio.
+
+## Dispositivos y reactivos
+
+INVIMA_DATASET_DISPOSITIVOS configura la quinta fuente (por defecto y4qt-w6tk). Su campo de nombre se llama prodcuto en la API. Se consultan registro_sanitario y después nombre, con deduplicación de roles, paginación estable, metadatos, plazo y reintento del cliente común. El registro puede tener varias marcas o presentaciones: la asociación siempre necesita confirmación manual.
+
+Los números que una factura de dispositivos rotula CUM quedan en codigoDeclarado; no se transforman en CUM de medicamentos. Los candidatos de esta fuente devuelven cum y estadoCum en null, y conservan estadoRegistro, grupo, marca y fechas publicadas. La interfaz muestra Estado CUM: No aplica. Una fuente fallida significa INCOMPLETA, nunca SIN_COINCIDENCIAS.
+
+## API de productos y persistencia
 
 - GET/POST productos: listar o registrar.
 - El listado incluye cumVerificado y estadoCum, ambos anulables. Se extraen de la coincidencia confirmada o exacta de la última verificación de la versión actual, sin consultar nuevamente a INVIMA ni descargar el historial. Crear o editar devuelve ambos campos en null.

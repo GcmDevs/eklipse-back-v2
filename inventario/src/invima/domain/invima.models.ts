@@ -8,7 +8,9 @@ export const RESULTADOS_INVIMA = [
 ] as const;
 export type ResultadoInvima = (typeof RESULTADOS_INVIMA)[number];
 export type CriterioInvima = 'CUM' | 'REGISTRO' | 'NOMBRE';
+export type TipoProductoInvima = 'MEDICAMENTO' | 'DISPOSITIVO' | 'SIN_CLASIFICAR';
 export interface MedicamentoInput {
+  tipo?: TipoProductoInvima;
   nombre: string;
   cum?: string;
   registroSanitario?: string;
@@ -27,14 +29,16 @@ export interface CandidatoInvima {
   fuenteId: string;
   dataset: string;
   url: string;
-  cum: string;
+  cum: string | null;
   nombre: string;
   titular: string;
   registroSanitario: string;
   presentacion: string;
   formaFarmaceutica: string;
   estadoRegistro: string;
-  estadoCum: string;
+  estadoCum: string | null;
+  grupo?: string;
+  marca?: string;
   fechaExpedicion: string;
   fechaVencimiento: string;
   fechaActivo: string;

@@ -23,17 +23,21 @@ export function separarCum(value: string): [string, string] | null {
 // SoQL literals escape quotes by doubling them. URLSearchParams performs URL encoding once.
 const literal = (value: string) => `'${value.replace(/'/g, "''")}'`;
 export function construirFiltro(input: MedicamentoInput, criterio: CriterioInvima): string {
+  const dispositivo = input.tipo === 'DISPOSITIVO';
   if (criterio === 'CUM') {
     const parts = separarCum(input.cum ?? '');
     if (!parts) throw new Error('El CUM debe tener formato expediente-consecutivo.');
     return `expedientecum = ${parts[0]} AND consecutivocum = ${parts[1]}`;
   }
   if (criterio === 'REGISTRO') {
-    return `replace(replace(upper(registrosanitario), 'INVIMA', ''), ' ', '') = ${literal(normalizarRegistro(input.registroSanitario!))}`;
+    return `replace(replace(upper(${dispositivo ? 'registro_sanitario' : 'registrosanitario'}), 'INVIMA', ''), ' ', '') = ${literal(normalizarRegistro(input.registroSanitario!))}`;
   }
   // contains treats %, _ and quotes as text rather than LIKE wildcards.
   return [...new Set(input.nombre.trim().split(/\s+/))]
-    .map(word => `contains(unaccent(upper(producto)), unaccent(upper(${literal(word)})))`)
+    .map(
+      word =>
+        `contains(unaccent(upper(${dispositivo ? 'prodcuto' : 'producto'})), unaccent(upper(${literal(word)})))`
+    )
     .join(' AND ');
 }
 export function evaluarCoincidencias(
@@ -44,7 +48,13 @@ export function evaluarCoincidencias(
   exhaustiva = true
 ): { resultado: ResultadoInvima; seleccionado: CandidatoInvima | null; advertencias: string[] } {
   const advertencias: string[] = [];
-  if (input.cum && (criterio !== 'CUM' || !candidatos.length))
+  if (input.registroSanitario && criterio === 'NOMBRE')
+    advertencias.push(
+      completa
+        ? 'No se encontró el registro sanitario indicado; las alternativas requieren revisión.'
+        : 'No fue posible confirmar el registro sanitario indicado con cobertura completa.'
+    );
+  if (input.tipo !== 'DISPOSITIVO' && input.cum && (criterio !== 'CUM' || !candidatos.length))
     advertencias.push(
       'No se encontró el CUM indicado; los resultados alternativos requieren revisión.'
     );
@@ -70,6 +80,7 @@ export function evaluarCoincidencias(
   );
   const exacta =
     completa &&
+    input.tipo !== 'DISPOSITIVO' &&
     exhaustiva &&
     criterio === 'CUM' &&
     identidades.size === 1 &&

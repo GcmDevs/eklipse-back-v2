@@ -120,6 +120,42 @@ function setup(encontrado = candidato) {
   };
 }
 describe('Flujo de registro, consulta e historial INVIMA', () => {
+  it('consulta dispositivos por registro en su fuente y exige confirmación manual', async () => {
+    const { service, socrata } = setup();
+    socrata.consultar.mockImplementation(async (fuente, criterio, where) => ({
+      fuente,
+      criterio,
+      where,
+      consultadaEn: new Date().toISOString(),
+      actualizadaEn: 100,
+      paginas: [
+        {
+          offset: 0,
+          hayMas: false,
+          candidatos: [{ ...candidato, fuenteId: 'dispositivos', cum: null, estadoCum: null }],
+        },
+      ],
+    }));
+    const p = await service.crear({
+      tipo: 'DISPOSITIVO',
+      nombre: 'GUANTES',
+      registroSanitario: candidato.registroSanitario,
+    });
+    const v = await service.verificar(p.id);
+    expect(v.resultado).toBe('REVISION');
+    expect(v.evidencia.seleccionado).toBeNull();
+    expect(socrata.consultar).toHaveBeenCalledTimes(1);
+    expect(socrata.consultar.mock.calls[0][0].id).toBe('dispositivos');
+    expect(socrata.consultar.mock.calls[0][2]).toContain('registro_sanitario');
+    const confirmed = await service.confirmar(p.id, v.id, candidato.clave);
+    expect(confirmed.confirmacion.candidato.estadoCum).toBeNull();
+  });
+  it('no consulta fuentes para un producto sin clasificar', async () => {
+    const { service, socrata } = setup();
+    const p = await service.crear({ tipo: 'SIN_CLASIFICAR', nombre: 'Producto' });
+    await expect(service.verificar(p.id)).rejects.toMatchObject({ status: 400 });
+    expect(socrata.consultar).not.toHaveBeenCalled();
+  });
   it.each(['Activo', '', 'Otro estado publicado'])(
     'devuelve el estado CUM exacto guardado: %s',
     async estadoCum => {

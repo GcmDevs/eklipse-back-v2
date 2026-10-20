@@ -16,7 +16,7 @@ export class InvimaDatabaseFilter extends BaseExceptionFilter {
     const number = driver.number ?? driver.originalError?.info?.number;
     if (
       number !== 208 ||
-      !/\bEKINNIV(?:PRODUCTO|VERIFICACION|CONFIRMACION)\b/i.test(driver.message)
+      !/\bEKINNIV(?:PRODUCTO|VERIFICACION|CONFIRMACION|FACTURA|FACTURAITEM)\b/i.test(driver.message)
     ) {
       super.catch(exception, host);
       return;
@@ -30,7 +30,7 @@ export class InvimaDatabaseFilter extends BaseExceptionFilter {
         error: 'Servicio no disponible',
         code: 'INVIMA_MIGRACION_PENDIENTE',
         message:
-          'Las tablas de INVIMA no existen en la base de datos activa del backend. Revise la conexión y aplique la migración 20261020_invima.sql en esa base. Si cambió el archivo .env, reinicie el backend.',
+          'Faltan tablas de INVIMA en la base activa. Revise la conexión y aplique las migraciones 20261020_invima.sql y 20261020_invima_facturas.sql en esa base. Si cambió .env, reinicie el backend.',
       },
       503
     );

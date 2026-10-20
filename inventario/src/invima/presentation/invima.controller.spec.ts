@@ -7,6 +7,8 @@ import { validate } from 'class-validator';
 import { AuthoritiesGuard } from '@common/infrastructure/guards/authorities.guard';
 import { fetchAuthsByUser } from '@common/infrastructure/services';
 import { InvimaController } from './invima.controller';
+import { FacturasInvimaController } from './facturas.controller';
+import { GuardarFacturaDto } from './factura.dto';
 import { ConfirmarCandidatoDto, GuardarMedicamentoDto, PaginaCandidatoDto } from './invima.dto';
 
 jest.mock('@common/application/services', () => ({
@@ -14,12 +16,35 @@ jest.mock('@common/application/services', () => ({
 }));
 jest.mock('@common/infrastructure/services', () => ({ fetchAuthsByUser: jest.fn() }));
 jest.mock('../application/invima.service', () => ({ InvimaService: class {} }));
+jest.mock('../application/facturas.service', () => ({ FacturasInvimaService: class {} }));
 jest.mock('@common/infrastructure/guards', () => ({
   JwtAuthGuard: class JwtAuthGuard {},
   AuthoritiesGuard: jest.requireActual('@common/infrastructure/guards/authorities.guard')
     .AuthoritiesGuard,
 }));
 describe('Permisos de las interfaces INVIMA', () => {
+  it.each(['subir', 'listar', 'detalle', 'guardar'])(
+    'protege el endpoint de facturas %s',
+    async method => {
+      const handler = FacturasInvimaController.prototype[method];
+      expect(Reflect.getMetadata('authorities', handler)).toEqual([ADMIN_AUTHORITY, '006005002']);
+      expect(Reflect.getMetadata(GUARDS_METADATA, FacturasInvimaController)).toHaveLength(2);
+      const ctx: any = {
+        getHandler: () => handler,
+        switchToHttp: () => ({
+          getRequest: () => ({ headers: { authorization: 'Bearer prueba' } }),
+        }),
+      };
+      for (const [codes, allowed] of [
+        [[ADMIN_AUTHORITY], true],
+        [['006005002'], true],
+        [[], false],
+      ] as const) {
+        (fetchAuthsByUser as jest.Mock).mockResolvedValue({ onlyCodes: codes });
+        expect(await new AuthoritiesGuard(new Reflector()).canActivate(ctx)).toBe(allowed);
+      }
+    }
+  );
   it.each(['listar', 'crear', 'editar', 'verificar', 'historial', 'candidatos', 'confirmar'])(
     'permite administrador o permiso específico en %s',
     method => {
@@ -65,6 +90,31 @@ describe('Permisos de las interfaces INVIMA', () => {
   );
 });
 describe('Validación de entrada INVIMA', () => {
+  it('valida renglones anidados y descarta evidencia, contexto e identidad enviados por el cliente', async () => {
+    const dto = plainToInstance(GuardarFacturaDto, {
+      version: 1,
+      numero: 'F1',
+      proveedor: 'Proveedor',
+      nitProveedor: '',
+      context: 'ajeno',
+      creadoPor: 99,
+      renglones: [
+        {
+          tipo: 'MEDICAMENTO',
+          descripcion: 'Producto',
+          codigoDeclarado: '0001-01',
+          registroSanitario: '',
+          excluido: false,
+          original: 'falso',
+        },
+      ],
+    });
+    expect(await validate(dto, { whitelist: true })).toHaveLength(0);
+    expect(dto).not.toHaveProperty('context');
+    expect(dto.renglones[0]).not.toHaveProperty('original');
+    dto.renglones[0].tipo = 'INVALIDO' as any;
+    expect((await validate(dto, { whitelist: true })).length).toBeGreaterThan(0);
+  });
   it.each([
     { nombre: '' },
     { nombre: '  ' },

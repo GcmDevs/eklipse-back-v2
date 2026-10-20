@@ -9,6 +9,40 @@ const row = {
   estadocum: 'Inactivo',
 };
 describe('Cliente Socrata', () => {
+  it('mapea dispositivos sin inventar estado CUM', async () => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(
+        new Response(
+          JSON.stringify([
+            {
+              expediente: '20220067',
+              prodcuto: 'GUANTES',
+              registro_sanitario: 'INVIMA 2022DM-0024892',
+              estado_registro: 'Vigente',
+              marca: 'null',
+              grupo: 'MEDICO QUIRURGICOS',
+              fecha_vencimiento: '2032-01-01T00:00:00.000',
+            },
+          ])
+        )
+      );
+    const p = await new SocrataClient().pagina(
+      { id: 'dispositivos', nombre: 'Dispositivos', dataset: 'y4qt-w6tk' },
+      'true',
+      0
+    );
+    expect(p.candidatos[0]).toMatchObject({
+      nombre: 'GUANTES',
+      cum: null,
+      estadoCum: null,
+      estadoRegistro: 'Vigente',
+      marca: '',
+    });
+    expect((global.fetch as jest.Mock).mock.calls[0][0].searchParams.get('$order')).toContain(
+      'prodcuto'
+    );
+  });
   const original = global.fetch;
   afterEach(() => {
     global.fetch = original;
