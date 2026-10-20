@@ -1,3 +1,4 @@
+import { resolverOrdenRelacionada } from './orden-relacionada';
 import { Injectable } from '@nestjs/common';
 import { gcmContextFactory } from '@common/domain/types';
 import { CargarFacturaControlGastosPayload } from '@farmacia/control-gastos/application/payloads';
@@ -10,6 +11,18 @@ import { INN_AUTHORITIES } from '@authorities/inventario';
 
 @Injectable()
 export class CargarFacturaControlGastoImpl extends BaseSource {
+  public async previewOrden(contextCode: string, tipo: number, consecutivo: string) {
+    const qr = this.dynamicQR(gcmContextFactory(contextCode as CargarFacturaControlGastosPayload['contextCode']));
+    try {
+      await qr.connect();
+      const orden = await resolverOrdenRelacionada(qr, tipo, consecutivo);
+      if (!orden) throw new Error('Indique el tipo y consecutivo de la orden');
+      return orden;
+    } finally {
+      await qr.release();
+    }
+  }
+
   public async execute(payload: CargarFacturaControlGastosPayload) {
     const ctx = gcmContextFactory(payload.contextCode);
 
@@ -54,6 +67,9 @@ export class CargarFacturaControlGastoImpl extends BaseSource {
       if (controlGasto.estadoCode === ESTADOS_CONTROL_GASTO.FINALIZADO.getCode()) {
         throw new Error('El control de gastos ya fue conciliado');
       }
+      const ordenRelacionada = await resolverOrdenRelacionada(qr, payload.ordenRelacionadaTipoCode, payload.ordenRelacionadaConsecutivo);
+      if (ordenRelacionada) controlGasto.ordenRelacionadaId = ordenRelacionada.id;
+
       const anteriorFechaFactura = controlGasto.fechaUltimaFactura;
       const anteriorEstadoCode = controlGasto.estadoCode;
 

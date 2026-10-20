@@ -13,9 +13,6 @@ import { deleteFile } from '@common/presentation/helpers';
 import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { AREA } from '@farmacia/control-gastos/domain/types';
 import { Repository } from 'typeorm';
-import { DocumentoOrm } from '@orm/inn/documentos';
-import { TIPOS_DOCUMENTO } from '@ctypes/inn/documentos';
-import { consecutivosServices } from '@common/application/services';
 
 @Injectable()
 export class CreateControlGastoImpl extends BaseSource {
@@ -32,44 +29,6 @@ export class CreateControlGastoImpl extends BaseSource {
       const controlGastoRp = qr.manager.getRepository(ControlGastoOrm);
       const detalleControlGastoRp = qr.manager.getRepository(DetalleControlGastoOrm);
       const historialRp = qr.manager.getRepository(ControlGastoHistorialOrm);
-
-      const tieneConsecutivo = !!body.ordenRelacionadaConsecutivo?.trim();
-      const tieneTipo = body.ordenRelacionadaTipoCode != null;
-      if (tieneConsecutivo !== tieneTipo) {
-        throw new Error('Debe indicar el tipo y el consecutivo de la orden relacionada');
-      }
-      if (
-        tieneTipo &&
-        ![
-          TIPOS_DOCUMENTO.ORDEN_COMPRA.getCode(),
-          TIPOS_DOCUMENTO.ORDEN_SERVICIO.getCode(),
-        ].includes(body.ordenRelacionadaTipoCode)
-      ) {
-        throw new Error('El tipo de orden relacionada debe ser compra o servicio');
-      }
-
-      if (body.ordenRelacionadaConsecutivo) {
-        body.ordenRelacionadaConsecutivo = body.ordenRelacionadaConsecutivo.trim();
-        body.ordenRelacionadaConsecutivo = consecutivosServices.autocomplete(
-          body.ordenRelacionadaConsecutivo
-        );
-      }
-
-      let ordenRelacionadaId: number | null = null;
-      if (body.ordenRelacionadaConsecutivo) {
-        const documento = await qr.manager.getRepository(DocumentoOrm).findOne({
-          where: {
-            consecutivo: body.ordenRelacionadaConsecutivo,
-            tipoCode: body.ordenRelacionadaTipoCode,
-          },
-        });
-        if (!documento) {
-          throw new Error(
-            'No existe una orden del tipo seleccionado con este consecutivo en el contexto seleccionado'
-          );
-        }
-        ordenRelacionadaId = documento.id;
-      }
 
       const isMaos = body.area === AREA.MAOS.getCode();
       const now = new Date();
@@ -141,9 +100,6 @@ export class CreateControlGastoImpl extends BaseSource {
 
         await historialRp.save(historial);
       }
-      controlGastoStored.ordenRelacionadaId = ordenRelacionadaId;
-      await controlGastoRp.save(controlGastoStored);
-
       let detalleControlGastoStored = [];
       if (body.trasladoProductoId || !isMaos) {
         const detalleControlGasto: DetalleControlGastoOrm[] = detalleOrigenIds.map(itemId => {

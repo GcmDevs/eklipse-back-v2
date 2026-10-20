@@ -18,15 +18,6 @@ import {
 } from 'class-validator';
 
 export class CreateControlGastosPayload {
-  @IsOptional()
-  @IsIn([0, 19])
-  ordenRelacionadaTipoCode?: 0 | 19;
-
-  @IsOptional()
-  @IsString()
-  @MaxLength(50)
-  ordenRelacionadaConsecutivo?: string;
-
   @IsNumber()
   @ValidateIf(or => or.area !== AREA.MAOS.getCode())
   @IsOptional()
@@ -96,6 +87,16 @@ export class GenerateReporteControlGastosPayload {
 }
 
 export class CargarFacturaControlGastosPayload {
+  @IsOptional()
+  @IsIn([0, 19])
+  ordenRelacionadaTipoCode?: 0 | 19;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  ordenRelacionadaConsecutivo?: string;
+
+
   @IsNumber()
   @IsOptional()
   suministroPacienteId: number;
