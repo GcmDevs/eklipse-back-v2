@@ -1,0 +1,38 @@
+import { ArgumentsHost, Catch } from '@nestjs/common';
+import { BaseExceptionFilter, HttpAdapterHost } from '@nestjs/core';
+import { QueryFailedError } from 'typeorm';
+
+@Catch(QueryFailedError)
+export class InvimaDatabaseFilter extends BaseExceptionFilter {
+  constructor(private readonly adapterHost: HttpAdapterHost) {
+    super(adapterHost.httpAdapter);
+  }
+
+  catch(exception: QueryFailedError, host: ArgumentsHost): void {
+    const driver = exception.driverError as Error & {
+      number?: number;
+      originalError?: { info?: { number?: number } };
+    };
+    const number = driver.number ?? driver.originalError?.info?.number;
+    if (
+      number !== 208 ||
+      !/\bEKINNIV(?:PRODUCTO|VERIFICACION|CONFIRMACION)\b/i.test(driver.message)
+    ) {
+      super.catch(exception, host);
+      return;
+    }
+
+    // Missing installation is different from a successfully queried empty list.
+    this.adapterHost.httpAdapter.reply(
+      host.switchToHttp().getResponse(),
+      {
+        statusCode: 503,
+        error: 'Servicio no disponible',
+        code: 'INVIMA_MIGRACION_PENDIENTE',
+        message:
+          'Las tablas de INVIMA no existen en la base de datos activa del backend. Revise la conexión y aplique la migración 20261020_invima.sql en esa base. Si cambió el archivo .env, reinicie el backend.',
+      },
+      503
+    );
+  }
+}
