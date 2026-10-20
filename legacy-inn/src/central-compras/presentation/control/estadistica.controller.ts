@@ -147,7 +147,7 @@ export class EstadisticaController extends BaseSource {
           data: result,
           existenciasPorAlmacen: [],
         });
-      } catch (error) {
+      } catch (error: any) {
         throw new BadRequestException(error.message);
       }
     }

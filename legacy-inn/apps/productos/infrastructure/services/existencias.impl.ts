@@ -10,9 +10,7 @@ export class ExistenciasImpl extends BaseSource {
   public async fetchExistenciaActualAllCentrosByPattern(
     pattern: string
   ): Promise<PDTExistenciaActualGI[]> {
-    const CONTEXTS = GCM_CONTEXTS_VALUES.filter(
-      c => [GCM_CONTEXTS.DEVELOPMENT, GCM_CONTEXTS.EKLIPSE].indexOf(c) < 0
-    );
+    const CONTEXTS = GCM_CONTEXTS_VALUES.filter(c => [GCM_CONTEXTS.EKLIPSE].indexOf(c) < 0);
 
     const productos: PDTExistenciaActualGI[] = [];
 
@@ -60,7 +58,7 @@ export class ExistenciasImpl extends BaseSource {
             }
           }
         });
-      } catch (error) {
+      } catch (error: any) {
         throw new Error(error.message);
       } finally {
         await qr.release();

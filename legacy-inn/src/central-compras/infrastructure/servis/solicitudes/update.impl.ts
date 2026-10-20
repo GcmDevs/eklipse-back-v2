@@ -138,7 +138,7 @@ export class UpdateSolicitudesImpl extends CentralComprasSource {
       await this.qr.commitTransaction();
 
       return solicitudStored;
-    } catch (error) {
+    } catch (error: any) {
       if (transactionStarted) await this.qr.rollbackTransaction();
       payload.detalle.forEach(el => {
         if (el.ftFileName) deleteFile(`${FILE_LOCATIONS.inn.ctc.itemsSolicitud}/${el.ftFileName}`);

@@ -1,4 +1,4 @@
-function enumToString(object: object) {
+export function enumToString(object: object) {
   return Object.keys(object)
     .map(key => object[key])
     .filter(value => typeof value === 'string') as string[];
@@ -18,7 +18,7 @@ function stringArrayForSqlQueries(value: string | string[]): string {
   return data;
 }
 
-export function capitalizeFirstLetter(str: string): string {
+function capitalizeFirstLetter(str: string): string {
   if (str) {
     str = str.toLowerCase();
     return str.charAt(0).toUpperCase() + str.slice(1);

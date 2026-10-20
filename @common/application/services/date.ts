@@ -3,7 +3,7 @@ export interface DateRangeI {
   end: Date;
 }
 
-function getDateRange(start: Date, end: Date, byDay = false): DateRangeI[] {
+export function getDateRange(start: Date, end: Date, byDay = false): DateRangeI[] {
   const startMonth = Number(start.toISOString().split('-')[1]);
   const startYear = Number(start.toISOString().split('-')[0]);
   const endMonth = Number(end.toISOString().split('-')[1]);
@@ -66,7 +66,24 @@ function getDateRangeByDay(start: Date, end: Date): Date[] {
   return dates;
 }
 
+export const isValidDate = (DateStr: string) => {
+  const date = new Date(DateStr);
+  return !isNaN(date.getTime());
+};
+
+export const generateBetweenDates = (start: Date | string, end: Date | string) => {
+  let startIsValid = true;
+  let endIsValid = true;
+  if (typeof start === 'string') startIsValid = isValidDate(start);
+  if (typeof end === 'string') endIsValid = isValidDate(end);
+  if (!startIsValid) throw new Error('start no es una fecha valida');
+  if (!endIsValid) throw new Error('end no es una fecha valida');
+  return { start: new Date(`${start}:00:00:00`), end: new Date(`${end}:23:59:59`) };
+};
+
 export const dateUtilities = {
   getDateRange,
   getDateRangeByDay,
+  isValidDate,
+  generateBetweenDates,
 };

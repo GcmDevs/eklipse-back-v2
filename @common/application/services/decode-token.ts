@@ -1,24 +1,20 @@
+import { jwtDecode } from 'jwt-decode';
+import { RSAServices } from './rsa';
 import {
   GCM_CONTEXTS,
   GcmContextCode,
-  GcmContextType,
-  USU_EXTS,
-  UsuExtCode,
-  UsuExtType,
   gcmContextFactory,
-  usuExtTypeFactory,
+  GcmContextType,
 } from '../../domain/types';
-import { jwtDecode } from 'jwt-decode';
-import { RSAServices } from './rsa';
+
+export type TablePathAuthType = 'GENUSUARIO' | 'EKINNOFERPROVEEDOR';
 
 export interface IAuthToken {
   jti: string;
   sub: GcmContextCode;
   dcm: string;
   fnm: string;
-  dim: boolean;
-  tue: UsuExtCode;
-  rst: boolean;
+  tbl: TablePathAuthType;
   iat?: number;
   exp?: number;
 }
@@ -29,10 +25,8 @@ export interface ITokenDecoded {
     document: string;
     fullName: string;
   };
-  isDim: boolean;
-  tipoUsuExt: UsuExtType;
-  passWasReset: boolean;
   context: GcmContextType;
+  tablePath: TablePathAuthType;
   createdAt: Date;
   expiredAt: Date;
 }
@@ -44,17 +38,24 @@ const _tokenDateToDate = (date: number): Date => {
 
 const decodeToken = (token: string): ITokenDecoded => {
   try {
-    const tkDcd: IAuthToken = jwtDecode(token);
+    const tkDecoded: IAuthToken = jwtDecode(token);
 
     const tkFt: ITokenDecoded = {
-      user: { id: RSAServices.decryptId(tkDcd.jti), document: tkDcd.dcm, fullName: tkDcd.fnm },
-      isDim: tkDcd.dim === undefined ? true : tkDcd.dim,
-      tipoUsuExt: tkDcd.tue === undefined ? USU_EXTS.GENUSUARIO : usuExtTypeFactory(tkDcd.tue),
-      passWasReset: tkDcd.rst,
-      context: gcmContextFactory(tkDcd.sub),
-      createdAt: _tokenDateToDate(tkDcd.iat),
-      expiredAt: _tokenDateToDate(tkDcd.exp),
+      user: {
+        id: 0,
+        document: '',
+        fullName: '',
+      },
+      tablePath: tkDecoded.tbl as any,
+      context: GCM_CONTEXTS.ALTACENTRO,
+      createdAt: _tokenDateToDate(tkDecoded.iat),
+      expiredAt: _tokenDateToDate(tkDecoded.exp),
     };
+
+    tkFt.context = gcmContextFactory(tkDecoded.sub);
+    tkFt.user.id = RSAServices.decryptId(tkDecoded.jti);
+    tkFt.user.document = tkDecoded.dcm;
+    tkFt.user.fullName = tkDecoded.fnm;
 
     return tkFt;
   } catch (error: any) {
@@ -62,4 +63,6 @@ const decodeToken = (token: string): ITokenDecoded => {
   }
 };
 
-export const JWTServices = { decodeToken };
+export const JWTServices = {
+  decodeToken,
+};

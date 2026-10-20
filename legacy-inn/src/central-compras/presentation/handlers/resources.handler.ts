@@ -42,7 +42,7 @@ export class ResourcesHandler extends BaseSource {
       });
 
       return proveedores;
-    } catch (error) {
+    } catch (error: any) {
     } finally {
       if (eklQr) await eklQr.release();
       if (centroQr) await centroQr.release();
@@ -52,7 +52,7 @@ export class ResourcesHandler extends BaseSource {
   async fetchProveedorByPattern(pattern: string): Promise<ProveedorOrm[]> {
     try {
       return await this._fetchProveedorByPattern(pattern);
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     }
   }
@@ -65,7 +65,7 @@ export class ResourcesHandler extends BaseSource {
   ) {
     try {
       return await this._fetchProductosByPattern(tipos, productosExcluded, pattern, context);
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     }
   }
@@ -73,7 +73,7 @@ export class ResourcesHandler extends BaseSource {
   public async fetchDependenciasByPattern(pattern: string) {
     try {
       return await this._fetchDependenciasByPattern(pattern);
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     }
   }
@@ -81,7 +81,7 @@ export class ResourcesHandler extends BaseSource {
   public async fetchAlmacenesByPattern(pattern: string) {
     try {
       return await this._fetchAlmacenesByPattern(pattern);
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     }
   }
@@ -89,7 +89,7 @@ export class ResourcesHandler extends BaseSource {
   public async fetchGrupos() {
     try {
       return await this._fetchGrupos();
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     }
   }
@@ -102,7 +102,7 @@ export class ResourcesHandler extends BaseSource {
           nombreGrupos.length ? `where IGRNOMBRE IN(${stringArrayForSqlQueries(nombreGrupos)})` : ''
         }
         `);
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     }
   }
@@ -117,7 +117,7 @@ export class ResourcesHandler extends BaseSource {
       });
 
       return proveedores;
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     }
   }
@@ -219,7 +219,7 @@ export class ResourcesHandler extends BaseSource {
       const query = await this.conn.query(qr);
 
       return query;
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     }
   }

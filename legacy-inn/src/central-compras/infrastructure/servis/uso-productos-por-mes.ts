@@ -253,7 +253,7 @@ export const getUsoPorMes = async (
           data: result,
           existenciasPorAlmacen: [],
         });
-      } catch (error) {
+      } catch (error: any) {
         throw new BadRequestException(error.message);
       } finally {
         if (qr && closeQr) await qr.release();
@@ -261,7 +261,7 @@ export const getUsoPorMes = async (
     }
 
     return results;
-  } catch (error) {
+  } catch (error: any) {
     throw new Error(error.message);
   } finally {
   }

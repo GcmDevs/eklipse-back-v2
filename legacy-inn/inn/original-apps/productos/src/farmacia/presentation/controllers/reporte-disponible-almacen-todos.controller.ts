@@ -18,9 +18,7 @@ export class ReporteDisponibleTodosController extends ReporteActualController {
   @Get('todos/actual')
   public async getUsoPorMesLocal(@Query('isOncologia') isOncologia: boolean) {
     const contexts = !isOncologia
-      ? GCM_CONTEXTS_VALUES.filter(
-          c => [GCM_CONTEXTS.DEVELOPMENT, GCM_CONTEXTS.EKLIPSE].indexOf(c) < 0
-        )
+      ? GCM_CONTEXTS_VALUES.filter(c => [GCM_CONTEXTS.EKLIPSE].indexOf(c) < 0)
       : [this.auth.context, GCM_CONTEXTS.AMMEDICAL];
 
     const results: { context: string; data: OncoDataI[] }[] = [];
@@ -76,7 +74,7 @@ export class ReporteDisponibleTodosController extends ReporteActualController {
         } else {
           data.map(d => (d.contexto = ctx.getCode()));
         }
-      } catch (error) {
+      } catch (error: any) {
         throw new BadRequestException(error.message);
       } finally {
         await ds.release();

@@ -1,4 +1,4 @@
-import { GCM_CONTEXTS, GcmContextType } from '@common/domain/types';
+import { GCM_CONTEXTS, GcmContextType } from '../../domain/types';
 
 /**
  * Genera consecutivos con formato factura (...000000000..)

@@ -26,3 +26,17 @@ export const generarConsecutivo = (
   const cerosNecesarios = Math.max(longitud - prefijo.length - codigoStr.length, 0);
   return prefijo + codigoStr.padStart(codigoStr.length + cerosNecesarios, '0');
 };
+
+export const stringArrayForSqlQueries = (value: string | string[]): string => {
+  let data = '';
+  if (typeof value === 'string') {
+    data = `'${value}'`;
+  } else {
+    value.forEach((el, i) => {
+      if (!i) data = `'${el}'`;
+      else data = `${data}, '${el}'`;
+    });
+  }
+
+  return data;
+};

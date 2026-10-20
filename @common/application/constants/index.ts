@@ -1,4 +1,11 @@
-export * from './table-names';
+export * from './column-names';
+export * from './contexts';
+export * from './money';
+export * from './ports';
+export * from './pagination';
+export * from './keys';
+
+export const ALL_CENTROS_ID = 99;
 
 export const ADMIN_AUTHORITY = `001001001`;
 

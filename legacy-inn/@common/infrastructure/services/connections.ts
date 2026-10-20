@@ -138,10 +138,6 @@ export const initializeSources = (entities: EntityTarget<unknown>[]) => {
 
   if (!processEnv.DISABLED_DEV) {
     (DEV_DS.options.entities as EntityTarget<unknown>[]).push(...entities);
-
-    DEV_DS.initialize()
-      .then(() => logs(true, GCM_CONTEXTS.DEVELOPMENT.getCode()))
-      .catch(err => logs(false, GCM_CONTEXTS.DEVELOPMENT.getCode(), err));
   }
 
   AGU_DS.initialize()
@@ -175,8 +171,6 @@ export const switchConn = (ctx: GcmContextType) => {
       return AGU_DS;
     case GCM_CONTEXTS.ALTACENTRO:
       return AC_DS;
-    case GCM_CONTEXTS.DEVELOPMENT:
-      return DEV_DS;
     case GCM_CONTEXTS.SANJUAN:
       return SJ_DS;
     case GCM_CONTEXTS.VALLEDUPAR:

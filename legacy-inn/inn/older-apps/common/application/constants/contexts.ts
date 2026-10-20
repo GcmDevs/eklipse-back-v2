@@ -8,7 +8,6 @@ export const CONTEXTS_DESCRIPTION = [
   { value: GcmContexts.AMMEDICAL, option: 'AM Medical' },
   { value: GcmContexts.VALLEDUPAR, option: 'Clinica Valledupar' },
   { value: GcmContexts.AGUACHICA, option: 'Alta Complejidad Aguachica' },
-  { value: GcmContexts.DEVELOPMENT, option: 'Sistemas & Desarrollo' },
 ];
 
 const CONTEXTS = [
@@ -17,7 +16,6 @@ const CONTEXTS = [
   GcmContexts.AGUACHICA,
   GcmContexts.SANJUAN,
   GcmContexts.AMMEDICAL,
-  GcmContexts.DEVELOPMENT,
 ];
 
 /**
@@ -26,9 +24,7 @@ const CONTEXTS = [
  * @param devIncluded Indica si agrega o no el ctx de bbdd de pruebas
  * @returns Contexts[]
  */
-export function allContexts(
-  excludedCtxs: GcmContexts[] = [GcmContexts.DEVELOPMENT, GcmContexts.EKLIPSE]
-): GcmContexts[] {
+export function allContexts(excludedCtxs: GcmContexts[] = [GcmContexts.EKLIPSE]): GcmContexts[] {
   const validCtxs: GcmContexts[] = [];
 
   CONTEXTS.forEach(ctx => {

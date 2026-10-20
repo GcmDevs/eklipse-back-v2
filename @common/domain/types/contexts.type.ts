@@ -47,7 +47,7 @@ const AMMEDICAL = new GcmContextType(4, GcmContexts.AMMEDICAL, 'AMMedical', 'AM'
 const ALTACENTRO = new GcmContextType(1, GcmContexts.ALTACENTRO, 'Centro/Alta complejidad', 'CM/AC', 2);
 const VALLEDUPAR = new GcmContextType(6, GcmContexts.VALLEDUPAR, 'Clinica Valledupar', 'VDP', 5);
 
-export function gcmContextFactory(code: GcmContextCode): GcmContextType {
+export function gcmContextFactory(code: GcmContextCode | GcmContexts ): GcmContextType {
   switch (code) {
     case GcmContexts.SANJUAN: return SANJUAN;
     case GcmContexts.EKLIPSE: return EKLIPSE;

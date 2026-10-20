@@ -51,7 +51,7 @@ export class BaseSource {
       const tablePath = tkDecoded.tablePath;
 
       return { id, user, tablePath, context };
-    } catch (error) {
+    } catch (error: any) {
       throw new UnauthorizedException(error.message);
     }
   }
@@ -68,7 +68,7 @@ export class BaseSource {
     try {
       const response = await fetchAuthsByUser({ id: this.auth.id, ctx: this.auth.context });
       return response.onlyCodes;
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(error.message);
     }
   }
@@ -100,7 +100,7 @@ export class BaseSource {
         userAuthorities.some((authority: string) => requiredAuthorities.includes(authority));
 
       return hasAnyAuthority();
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(error.message);
     }
   }
@@ -118,7 +118,7 @@ export class BaseSource {
         userAuthorities.some((authority: string) => requiredAuthorities.includes(authority));
 
       return hasAnyAuthority();
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(error.message);
     }
   }
@@ -130,7 +130,7 @@ export class BaseSource {
       const user = await userRp.findOne({ where: { document: userDocument } });
       delete user.password;
       return user;
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(error.message);
     }
   }
@@ -168,7 +168,7 @@ export class BaseSource {
           },
         };
       });
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(error.message);
     }
   }

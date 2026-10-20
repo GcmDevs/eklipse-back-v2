@@ -275,7 +275,7 @@ export class CotizacionPrefabricadaCrudSource extends CotizacionPrefabricadaBase
         documento: documentoStored,
         ordenCompra: OCStored,
       };
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(error.message);
     }
   }
@@ -407,7 +407,7 @@ export class CotizacionPrefabricadaCrudSource extends CotizacionPrefabricadaBase
       }
 
       return solicitudStored;
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(error.message);
     }
   }
@@ -422,8 +422,6 @@ export class CotizacionPrefabricadaCrudSource extends CotizacionPrefabricadaBase
         return 1487;
       case GCM_CONTEXTS.SANJUAN:
         return 1308;
-      case GCM_CONTEXTS.DEVELOPMENT:
-        return 1487;
     }
   }
 }
