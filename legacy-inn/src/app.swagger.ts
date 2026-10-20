@@ -1,11 +1,9 @@
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { CentralComprasModule } from './central-compras/module';
 import { DocumentosModule } from './documentos/module';
 
 const config = [
   { name: 'Documentos', url: 'docs/documentos', version: `1.0`, modules: [DocumentosModule] },
-  { name: 'Central de compras', url: 'docs/ctc', version: `1.0`, modules: [CentralComprasModule] },
 ];
 
 export const initSwagger = (app: INestApplication) => {

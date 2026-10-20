@@ -1,7 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { TABLE_NAMES } from '@common/application/constants';
 import { GrupoOrm } from './grupo.orm';
-import { TIPOS } from '@ctypes/inn/central-compras/solicitudes';
 
 @Entity(TABLE_NAMES.inn.afn.productos)
 export class ProductoOrm {
@@ -23,8 +22,6 @@ export class ProductoOrm {
 
   @Column({ name: 'APRCOSPRO', type: 'decimal' })
   precioSugerido: number;
-
-  clase = TIPOS.ACTIVO_FIJO;
 
   nombre: string;
 }

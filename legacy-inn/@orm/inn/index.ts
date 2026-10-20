@@ -5,7 +5,6 @@ import { ORM_DCM_ENTITIES } from './documentos';
 import { ORM_PDT_ENTITIES, ProductoOrm } from './productos';
 import { ORM_FMC_ENTITIES } from './farmacia/control-gastos';
 import { ORM_RECTEC_ENTITIES } from './farmacia/recepcion-tecnica';
-import { ORM_CTC_ENTITIES } from './central-compras';
 import { ORM_INN_CONTEO_ENTITIES } from './inventario';
 import { ORM_OFER_ENTITIES } from './ofertas';
 import { ORM_SUM_PAC_ENTITIES } from './suministro-paciente';
@@ -21,7 +20,6 @@ export const ORM_INN_ENTITIES = [
   ...ORM_DCM_ENTITIES,
   ...ORM_FMC_ENTITIES,
   ...ORM_RECTEC_ENTITIES,
-  ...ORM_CTC_ENTITIES,
   ...ORM_INN_CONTEO_ENTITIES,
   ...ORM_OFER_ENTITIES,
   ...ORM_SUM_PAC_ENTITIES,

@@ -11,7 +11,6 @@ import { ReportsModule } from 'apps/reports/reports.module';
 import * as fs from 'fs';
 import { InnModule } from 'inn/module';
 import { ENTITIES } from './app.entities';
-import { CentralComprasModule } from './central-compras/module';
 import { CloudController } from './cloud.controller';
 import { DocumentosModule } from './documentos/module';
 import { FOLDERS_STRINGS } from './folders';
@@ -24,7 +23,6 @@ import { VehiculosModule } from '@vehiculos/vehiculos.module';
   controllers: [CloudController],
   imports: [
     MaterialesOsteosintesisModule,
-    CentralComprasModule,
     DocumentosModule,
     InnModule,
     ActivosFijosModule,
