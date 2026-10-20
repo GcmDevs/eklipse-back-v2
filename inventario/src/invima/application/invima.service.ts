@@ -75,10 +75,16 @@ export class InvimaService extends BaseSource {
       .getRepository(InvimaProductoOrm)
       .find({ order: { id: 'DESC' } });
     // One joined query avoids loading the (potentially large) complete evidence for the list.
+    const candidatoSql = `CASE WHEN c.id IS NOT NULL THEN c.candidato
+      WHEN v.resultado = 'EXACTA' THEN JSON_QUERY(v.evidencia, '$.seleccionado') END`;
     const ultimas = await this.conn
       .getRepository(InvimaProductoOrm)
       .createQueryBuilder('p')
-      .innerJoin(InvimaVerificacionOrm, 'v', 'v.id = p.ultimaVerificacionId')
+      .innerJoin(
+        InvimaVerificacionOrm,
+        'v',
+        'v.id = p.ultimaVerificacionId AND v.productoId = p.id AND v.versionProducto = p.version'
+      )
       .leftJoin(InvimaConfirmacionOrm, 'c', 'c.verificacionId = v.id')
       .select('p.id', 'productoId')
       .addSelect('v.id', 'id')
@@ -86,6 +92,8 @@ export class InvimaService extends BaseSource {
       .addSelect('v.fecha', 'fecha')
       .addSelect('v.usuarioNombre', 'usuarioNombre')
       .addSelect('c.id', 'confirmacionId')
+      .addSelect(`JSON_VALUE(${candidatoSql}, '$.cum')`, 'cumVerificado')
+      .addSelect(`JSON_VALUE(${candidatoSql}, '$.estadoCum')`, 'estadoCum')
       .getRawMany();
     const byProducto = new Map(ultimas.map(v => [Number(v.productoId), v]));
     return productos.map(p => {
@@ -94,6 +102,8 @@ export class InvimaService extends BaseSource {
         ...p,
         datos: JSON.parse(p.datos),
         resultado: ultima?.confirmacionId ? 'CONFIRMADA' : (ultima?.resultado ?? 'PENDIENTE'),
+        cumVerificado: ultima?.cumVerificado?.trim() || null,
+        estadoCum: ultima?.estadoCum?.trim() || null,
         ultimaVerificacion: ultima ?? null,
       };
     });
@@ -108,7 +118,14 @@ export class InvimaService extends BaseSource {
       fechaCreacion: now,
       fechaActualizacion: now,
     });
-    return { ...p, datos: JSON.parse(p.datos), resultado: 'PENDIENTE', ultimaVerificacion: null };
+    return {
+      ...p,
+      datos: JSON.parse(p.datos),
+      resultado: 'PENDIENTE',
+      ultimaVerificacion: null,
+      cumVerificado: null,
+      estadoCum: null,
+    };
   }
   private datos(input: MedicamentoInput): MedicamentoInput {
     return Object.fromEntries(
@@ -133,7 +150,14 @@ export class InvimaService extends BaseSource {
       p.ultimaVerificacionId = null;
       p.fechaActualizacion = new Date();
       await manager.getRepository(InvimaProductoOrm).save(p);
-      return { ...p, datos: JSON.parse(p.datos), resultado: 'PENDIENTE', ultimaVerificacion: null };
+      return {
+        ...p,
+        datos: JSON.parse(p.datos),
+        resultado: 'PENDIENTE',
+        ultimaVerificacion: null,
+        cumVerificado: null,
+        estadoCum: null,
+      };
     });
   }
   async verificar(productoId: number) {

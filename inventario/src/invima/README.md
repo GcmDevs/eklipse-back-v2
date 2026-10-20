@@ -29,6 +29,7 @@ El script valida metadatos y búsquedas por CUM, registro sanitario y nombre en 
 ## API y persistencia
 
 - GET/POST productos: listar o registrar.
+- El listado incluye cumVerificado y estadoCum, ambos anulables. Se extraen de la coincidencia confirmada o exacta de la última verificación de la versión actual, sin consultar nuevamente a INVIMA ni descargar el historial. Crear o editar devuelve ambos campos en null.
 - PUT productos/:id: editar; exige version actual y deja el producto pendiente.
 - POST productos/:id/verificaciones: consultar y guardar una nueva evidencia.
 - GET productos/:id/verificaciones: historial de versiones, consultas y confirmaciones.

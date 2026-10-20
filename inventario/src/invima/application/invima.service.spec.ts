@@ -54,7 +54,14 @@ function database() {
           builder[key] = () => builder;
         builder.getRawMany = async () =>
           (tables.get(InvimaProductoOrm) ?? [])
-            .filter(p => p.ultimaVerificacionId)
+            .filter(p =>
+              (tables.get(InvimaVerificacionOrm) ?? []).some(
+                v =>
+                  v.id === p.ultimaVerificacionId &&
+                  v.productoId === p.id &&
+                  v.versionProducto === p.version
+              )
+            )
             .map(p => {
               const v = (tables.get(InvimaVerificacionOrm) ?? []).find(
                 v => v.id === p.ultimaVerificacionId
@@ -62,6 +69,11 @@ function database() {
               const c = (tables.get(InvimaConfirmacionOrm) ?? []).find(
                 c => c.verificacionId === v.id
               );
+              const seleccionado = c
+                ? JSON.parse(c.candidato)
+                : v.resultado === 'EXACTA'
+                  ? JSON.parse(v.evidencia).seleccionado
+                  : null;
               return {
                 productoId: p.id,
                 id: v.id,
@@ -69,6 +81,8 @@ function database() {
                 fecha: v.fecha,
                 usuarioNombre: v.usuarioNombre,
                 confirmacionId: c?.id,
+                cumVerificado: seleccionado?.cum ?? null,
+                estadoCum: seleccionado?.estadoCum ?? null,
               };
             });
         return builder;
@@ -78,7 +92,7 @@ function database() {
   const manager = { getRepository };
   return { manager, getRepository, transaction: async (work: any) => work(manager) };
 }
-function setup() {
+function setup(encontrado = candidato) {
   const connection = database();
   const socrata = {
     consultar: jest.fn(async (fuente, criterio, where) => ({
@@ -88,7 +102,7 @@ function setup() {
       consultadaEn: new Date().toISOString(),
       actualizadaEn: 100,
       paginas: [
-        { offset: 0, hayMas: false, candidatos: fuente.id === 'vigentes' ? [candidato] : [] },
+        { offset: 0, hayMas: false, candidatos: fuente.id === 'vigentes' ? [encontrado] : [] },
       ],
     })),
     validarFuente: jest.fn(async () => 100),
@@ -106,6 +120,35 @@ function setup() {
   };
 }
 describe('Flujo de registro, consulta e historial INVIMA', () => {
+  it.each(['Activo', '', 'Otro estado publicado'])(
+    'devuelve el estado CUM exacto guardado: %s',
+    async estadoCum => {
+      const { service, socrata } = setup({ ...candidato, estadoCum });
+      const p = await service.crear({ nombre: 'CARDIK', cum: candidato.cum });
+      expect(p).toMatchObject({ estadoCum: null, cumVerificado: null });
+      await service.verificar(p.id);
+      socrata.consultar.mockClear();
+      expect((await service.listar())[0]).toMatchObject({
+        resultado: 'EXACTA',
+        estadoCum: estadoCum || null,
+        cumVerificado: candidato.cum,
+      });
+      expect(socrata.consultar).not.toHaveBeenCalled();
+    }
+  );
+  it('no muestra el estado de una verificación correspondiente a otra versión', async () => {
+    const { service, connection } = setup();
+    const p = await service.crear({ nombre: 'CARDIK', cum: candidato.cum });
+    const v = await service.verificar(p.id);
+    await connection
+      .getRepository(InvimaProductoOrm)
+      .save({ ...p, datos: JSON.stringify(p.datos), version: 2, ultimaVerificacionId: v.id });
+    expect((await service.listar())[0]).toMatchObject({
+      resultado: 'PENDIENTE',
+      estadoCum: null,
+      cumVerificado: null,
+    });
+  });
   it('registra, consulta por CUM exacto y conserva usuario, fuente y estados', async () => {
     const { service } = setup();
     const p = await service.crear({ nombre: 'CARDIK', cum: '00020048021-00041' });
@@ -116,6 +159,10 @@ describe('Flujo de registro, consulta e historial INVIMA', () => {
     expect(v.evidencia.consultas).toHaveLength(4);
     expect(v.usuarioNombre).toBe('Usuario de prueba');
     expect((await service.listar())[0].resultado).toBe('EXACTA');
+    expect((await service.listar())[0]).toMatchObject({
+      estadoCum: 'Inactivo',
+      cumVerificado: candidato.cum,
+    });
     expect((await service.historial(p.id))[0].entrada.cum).toBe('00020048021-00041');
   });
   it('selecciona candidatos por nombre y confirma sin reescribir evidencia original', async () => {
@@ -123,12 +170,17 @@ describe('Flujo de registro, consulta e historial INVIMA', () => {
     const p = await service.crear({ nombre: 'CARDIK' });
     const v = await service.verificar(p.id);
     expect(v.resultado).toBe('REVISION');
+    expect((await service.listar())[0]).toMatchObject({ estadoCum: null, cumVerificado: null });
     const confirmed = await service.confirmar(p.id, v.id, candidato.clave);
     expect(confirmed.resultado).toBe('CONFIRMADA');
     expect(confirmed.evidencia.seleccionado).toBeNull();
     expect(confirmed.confirmacion.usuarioId).toBe(15);
     expect(confirmed.confirmacion.candidato.cum).toBe(candidato.cum);
     expect((await service.listar())[0].resultado).toBe('CONFIRMADA');
+    expect((await service.listar())[0]).toMatchObject({
+      estadoCum: 'Inactivo',
+      cumVerificado: candidato.cum,
+    });
     await expect(service.confirmar(p.id, v.id, candidato.clave)).rejects.toThrow(
       'ya fue confirmada'
     );
@@ -140,6 +192,12 @@ describe('Flujo de registro, consulta e historial INVIMA', () => {
     const edited = await service.editar(p.id, { nombre: 'Nuevo nombre', version: p.version });
     expect(edited.version).toBe(2);
     expect(edited.ultimaVerificacionId).toBeNull();
+    expect(edited).toMatchObject({ estadoCum: null, cumVerificado: null });
+    expect((await service.listar())[0]).toMatchObject({
+      resultado: 'PENDIENTE',
+      estadoCum: null,
+      cumVerificado: null,
+    });
     expect((await service.historial(p.id))[0].entrada.nombre).toBe('CARDIK');
     await expect(service.confirmar(p.id, v.id, candidato.clave)).rejects.toThrow('versión actual');
     await expect(service.editar(p.id, { nombre: 'Perdido', version: 1 })).rejects.toThrow('cambió');
@@ -174,6 +232,7 @@ describe('Flujo de registro, consulta e historial INVIMA', () => {
     const p = await service.crear({ nombre: 'Ausente', cum: '111-1', registroSanitario: 'OTRO' });
     const v = await service.verificar(p.id);
     expect(v.resultado).toBe('INCOMPLETA');
+    expect((await service.listar())[0]).toMatchObject({ estadoCum: null, cumVerificado: null });
     expect(socrata.consultar).toHaveBeenCalledTimes(12);
     await expect(service.confirmar(p.id, v.id, candidato.clave)).rejects.toThrow('cobertura');
   });
@@ -194,6 +253,10 @@ describe('Flujo de registro, consulta e historial INVIMA', () => {
     await service.candidatos(p.id, v.id, 'vigentes', 20);
     expect(socrata.pagina).toHaveBeenCalledTimes(1);
     expect((await service.confirmar(p.id, v.id, 'b'.repeat(64))).resultado).toBe('CONFIRMADA');
+    expect((await service.listar())[0]).toMatchObject({
+      estadoCum: 'Inactivo',
+      cumVerificado: '20048021-42',
+    });
   });
   it('no mezcla páginas de una fuente actualizada con evidencia histórica', async () => {
     const { service, socrata } = setup();
