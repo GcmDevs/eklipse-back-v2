@@ -5,12 +5,19 @@ import {
   GcmContextCode,
   gcmContextFactory,
   GcmContextType,
+  USU_EXTS,
+  UsuExtCode,
+  UsuExtType,
+  usuExtTypeFactory,
 } from '../../domain/types';
 
 export type TablePathAuthType = 'GENUSUARIO' | 'EKINNOFERPROVEEDOR';
 
 export interface IAuthToken {
   jti: string;
+  rst: boolean;
+  dim: boolean;
+  tue: UsuExtCode;
   sub: GcmContextCode;
   dcm: string;
   fnm: string;
@@ -25,6 +32,9 @@ export interface ITokenDecoded {
     document: string;
     fullName: string;
   };
+  isDim: boolean;
+  tipoUsuExt: UsuExtType;
+  passWasReset: boolean;
   context: GcmContextType;
   tablePath: TablePathAuthType;
   createdAt: Date;
@@ -38,7 +48,7 @@ const _tokenDateToDate = (date: number): Date => {
 
 const decodeToken = (token: string): ITokenDecoded => {
   try {
-    const tkDecoded: IAuthToken = jwtDecode(token);
+    const tkDcd: IAuthToken = jwtDecode(token);
 
     const tkFt: ITokenDecoded = {
       user: {
@@ -46,16 +56,19 @@ const decodeToken = (token: string): ITokenDecoded => {
         document: '',
         fullName: '',
       },
-      tablePath: tkDecoded.tbl as any,
+      isDim: tkDcd.dim === undefined ? true : tkDcd.dim,
+      tipoUsuExt: tkDcd.tue === undefined ? USU_EXTS.GENUSUARIO : usuExtTypeFactory(tkDcd.tue),
+      passWasReset: tkDcd.rst,
       context: GCM_CONTEXTS.ALTACENTRO,
-      createdAt: _tokenDateToDate(tkDecoded.iat),
-      expiredAt: _tokenDateToDate(tkDecoded.exp),
+      tablePath: tkDcd.tbl as any,
+      createdAt: _tokenDateToDate(tkDcd.iat),
+      expiredAt: _tokenDateToDate(tkDcd.exp),
     };
 
-    tkFt.context = gcmContextFactory(tkDecoded.sub);
-    tkFt.user.id = RSAServices.decryptId(tkDecoded.jti);
-    tkFt.user.document = tkDecoded.dcm;
-    tkFt.user.fullName = tkDecoded.fnm;
+    tkFt.context = gcmContextFactory(tkDcd.sub);
+    tkFt.user.id = RSAServices.decryptId(tkDcd.jti);
+    tkFt.user.document = tkDcd.dcm;
+    tkFt.user.fullName = tkDcd.fnm;
 
     return tkFt;
   } catch (error: any) {
@@ -63,6 +76,4 @@ const decodeToken = (token: string): ITokenDecoded => {
   }
 };
 
-export const JWTServices = {
-  decodeToken,
-};
+export const JWTServices = { decodeToken };

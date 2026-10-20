@@ -1,4 +1,4 @@
-import { UserOptions } from 'jspdf-autotable';
+import autoTable, { UserOptions } from 'jspdf-autotable';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import * as fs from 'fs';
@@ -161,16 +161,18 @@ const BE_EPDF_FONT_FAMILIES = {
 };
 
 export async function generateOrdCo(payload: OCPayload) {
-  payload.productos.map(el => {
-    try {
-      if (el.id) {
-        const itemCotizado = payload.productosCotizados.filter(
-          pc => pc.item.productoId === el.id
-        )[0];
-        el.marca = itemCotizado.item.marca || 'N/A';
-      }
-    } catch (error: any) {}
-  });
+  if (payload.productosCotizados.length) {
+    payload.productos.map(el => {
+      try {
+        if (el.id) {
+          const itemCotizado = payload.productosCotizados.filter(
+            pc => pc.item.productoId === el.id
+          )[0];
+          el.marca = itemCotizado.item.marca || 'N/A';
+        }
+      } catch (error: any) {}
+    });
+  }
 
   const doc = new jsPDF('p', 'pt') as jsPDFWithPlugin;
   const maxPageHeight = 811.89;
@@ -429,7 +431,7 @@ export async function generateOrdCo(payload: OCPayload) {
 
   //let tablaProductosHeight = 0;
 
-  doc.autoTable({
+  autoTable(doc, {
     head: [tablas],
     body: tablaProductos,
     didDrawPage: d => {

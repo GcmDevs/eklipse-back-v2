@@ -1,4 +1,4 @@
-import { RequestContext } from '@common/infrastructure/services';
+import { RequestContext } from '../request-context';
 
 export abstract class DomainEventBase {
   abstract readonly descripcion: string;

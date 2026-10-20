@@ -11,7 +11,7 @@ export const ENVIRONMENTS = {
   showDocs,
   isHttps,
   port,
-  apiUrl: production ? `${apiUrlBase}:${port}` : `${apiUrlBase}:${port}`,
+  apiUrl: `${apiUrlBase}:${port}`,
   apiUrlBase,
 };
 
