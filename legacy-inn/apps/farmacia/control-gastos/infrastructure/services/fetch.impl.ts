@@ -39,6 +39,7 @@ export class FetchControlGastoImpl extends BaseSource {
         const controlGastosTemp = await controlGastoRp.find({
           where: { fechaCreacion: Between(fechaInicio, fechaFin) },
           relations: [
+            'ordenRelacionada',
             'creadoPor',
             'detalle',
             'detalle.item',
@@ -102,6 +103,9 @@ export class FetchControlGastoImpl extends BaseSource {
 
       return {
         id: c.id,
+        ordenRelacionada: c.ordenRelacionada
+          ? { id: c.ordenRelacionada.id, consecutivo: c.ordenRelacionada.consecutivo }
+          : null,
         contexto: c.context.getCode(),
         estadoCode: c.estadoCode,
         fechaCreacion: c.fechaCreacion,

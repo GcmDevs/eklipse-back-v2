@@ -7,6 +7,7 @@ import {
   CambioEstadoOrm,
   CotizacionOrm,
   DetalleCuentaxPagarOrm,
+  DocumentoCotizacionOrm,
   SolicitudOrm,
 } from '@inn/lgc/ctc/orm/inn/central-compras';
 import { gcmContextFactory } from '@common/domain/types';
@@ -20,29 +21,47 @@ import { CentroOrm } from '@inn/lgc/ctc/orm/adn';
 import { switchConn } from '@common/infrastructure/services';
 import { DataSource } from 'typeorm';
 import { INN_AUTHORITIES } from '@inn/authorities';
+import { DocumentoOrm } from '../../../@orm/inn/documentos';
+import { UsuarioOrm } from '../../../@orm/gen';
 
 @Injectable()
 export class FilesCotizacionesImpl extends CentralComprasSource {
-  public async generateOrdenCompra(payload: { context: GcmContexts; cotizacionId: number }) {
+  public async generateOrdenCompra(
+    payload: { context: GcmContexts; cotizacionId: number },
+    documentoId?: number
+  ) {
     const { context, cotizacionId } = payload;
 
     const ekConn = switchConn(gcmContextFactory(context));
     const cotizacionRp = ekConn.getRepository(CotizacionOrm);
+    const documentoCotiRp = ekConn.getRepository(DocumentoCotizacionOrm);
+    const documentoRp = ekConn.getRepository(DocumentoOrm);
 
-    const cotizacion = await cotizacionRp.findOne({
-      where: { id: cotizacionId },
-      relations: [
-        'solicitud',
-        'cotDocumento',
-        'cotDocumento.documento',
-        'cotDocumento.documento.creadoPor',
-        'solicitud.cambiosEstado',
-        'solicitud.cambiosEstado.usuario',
-        'cotDocumento',
-        'detalle',
-        'detalle.item',
-      ],
-    });
+    if (documentoId) {
+      const documentoCoti = await documentoCotiRp.findOne({ where: { documentoId } });
+      if (documentoCoti) {
+        payload.cotizacionId = documentoCoti.cotizacionId;
+      }
+    }
+
+    const cotizacion = payload.cotizacionId
+      ? await cotizacionRp.findOne({
+          where: { id: cotizacionId },
+          relations: [
+            'solicitud',
+            'cotDocumento',
+            'cotDocumento.documento',
+            'cotDocumento.documento.creadoPor',
+            'solicitud.cambiosEstado',
+            'solicitud.cambiosEstado.usuario',
+            'cotDocumento',
+            'detalle',
+            'detalle.item',
+          ],
+        })
+      : undefined;
+
+    if (!documentoId && cotizacion) documentoId = cotizacion.cotDocumento.documentoId;
 
     const data = await ekConn.query(`
     select PR.GPRNOMBRE nombreProveedor,
@@ -95,7 +114,7 @@ INNER JOIN GENTERCERP PR ON PR.OID = OCD.GENPROVEE
 INNER JOIN GENTERCER T ON T.OID = PR.GENTERCER
 inner JOIN GENMUNICI MC ON MC.OID = T.DGNMUNICIPIO
 INNER JOIN GENDEPTO DT ON DT.OID = MC.GENDEPTO
-where D.OID =  ${cotizacion.cotDocumento.documentoId}
+where D.OID =  ${documentoId}
 `);
 
     const productos = await ekConn.query(`
@@ -105,7 +124,7 @@ where D.OID =  ${cotizacion.cotDocumento.documentoId}
     d.IMOPORDES porcDescuento, d.IMOPORIVA porcIVA from INNDOCUME i
     inner join INNMORDEN d on i.OID = d.INNCORDEN
     left join INNPRODUC p on d.INNPRODUC = p.OID
-    where i.OID = ${cotizacion.cotDocumento.documentoId}`);
+    where i.OID = ${documentoId}`);
 
     const activosFijos = await ekConn.query(`select p.OID id, isNull(p.APRCODIGO, 'N/A') codigo,
       isNull(p.APRNOMBRE, d.IMODETALLE) nombre,
@@ -114,7 +133,7 @@ where D.OID =  ${cotizacion.cotDocumento.documentoId}
     d.IMOPORDES porcDescuento, d.IMOPORIVA porcIVA from INNDOCUME i
     inner join INNMORDACTNET d on i.OID = d.INNCORDEN
     left join AFNPRODUC p on d.AFNPRODUC = p.OID
-    where i.OID = ${cotizacion.cotDocumento.documentoId}`);
+    where i.OID = ${documentoId}`);
 
     productos.push(...activosFijos);
 
@@ -123,45 +142,69 @@ where D.OID =  ${cotizacion.cotDocumento.documentoId}
         el.cantidad * (el.valorUnitario + (el.valorUnitario / 100) * el.porcentajeIVA);
     });
 
-    const tempVerificacionOC: CambioEstadoOrm[] = cotizacion.solicitud.cambiosEstado.filter(
-      el =>
-        el.entidadRelacionadaId === cotizacion.id &&
-        el.tipoCode === ESTADOS.SOL_ULTIMOS_PASOS.getCode() &&
-        el.keyCode === ESTADOS_ESPECIFICOS.COTI_OC_APROBADA.getCode()
-    );
+    const tempVerificacionOC: CambioEstadoOrm[] = cotizacion
+      ? cotizacion.solicitud.cambiosEstado.filter(
+          el =>
+            el.entidadRelacionadaId === cotizacion.id &&
+            el.tipoCode === ESTADOS.SOL_ULTIMOS_PASOS.getCode() &&
+            el.keyCode === ESTADOS_ESPECIFICOS.COTI_OC_APROBADA.getCode()
+        )
+      : [];
 
-    const tempProgramacionOC: CambioEstadoOrm[] = cotizacion.solicitud.cambiosEstado.filter(
-      el =>
-        el.entidadRelacionadaId === cotizacion.id &&
-        el.tipoCode === ESTADOS.SOL_ULTIMOS_PASOS.getCode() &&
-        el.keyCode === ESTADOS_ESPECIFICOS.COTI_OC_PROGRAMADA.getCode()
-    );
+    const tempProgramacionOC: CambioEstadoOrm[] = cotizacion
+      ? cotizacion.solicitud.cambiosEstado.filter(
+          el =>
+            el.entidadRelacionadaId === cotizacion.id &&
+            el.tipoCode === ESTADOS.SOL_ULTIMOS_PASOS.getCode() &&
+            el.keyCode === ESTADOS_ESPECIFICOS.COTI_OC_PROGRAMADA.getCode()
+        )
+      : [];
 
     const verificacionOC = tempVerificacionOC.length ? tempVerificacionOC[0] : null;
 
     const programacionOC = tempProgramacionOC.length ? tempProgramacionOC[0] : null;
 
-    const aprobado1FromCE = cotizacion.solicitud.cambiosEstado.filter(
-      est => est.tipoCode === ESTADOS.COTI_APROBADA.getCode()
-    )[0];
+    const aprobado1FromCE = cotizacion
+      ? cotizacion.solicitud.cambiosEstado.filter(
+          est => est.tipoCode === ESTADOS.COTI_APROBADA.getCode()
+        )[0]
+      : undefined;
 
-    const aprobado2FromCE = cotizacion.solicitud.cambiosEstado.filter(
-      est => est.tipoCode === ESTADOS.COTI_APROBADA.getCode()
-    )[1];
+    const aprobado2FromCE = cotizacion
+      ? cotizacion.solicitud.cambiosEstado.filter(
+          est => est.tipoCode === ESTADOS.COTI_APROBADA.getCode()
+        )[1]
+      : undefined;
 
-    const aprobado3FromCE =
-      cotizacion.solicitud.cambiosEstado.filter(
-        est => est.tipoCode === ESTADOS.COTI_APROBADA.getCode()
-      ).length === 3
+    const aprobado3FromCE = cotizacion
+      ? cotizacion.solicitud.cambiosEstado.filter(
+          est => est.tipoCode === ESTADOS.COTI_APROBADA.getCode()
+        ).length === 3
         ? cotizacion.solicitud.cambiosEstado.filter(
             est => est.tipoCode === ESTADOS.COTI_APROBADA.getCode()
           )[2]
-        : undefined;
+        : undefined
+      : undefined;
+
+    const creadoPor = new UsuarioOrm();
+
+    if (cotizacion) {
+      creadoPor.cedula = cotizacion.cotDocumento.documento.creadoPor.cedula!;
+      creadoPor.nombreCompleto = cotizacion.cotDocumento.documento.creadoPor.nombreCompleto!;
+    } else {
+      const doc = await documentoRp.findOne({
+        where: { id: documentoId },
+        relations: ['creadoPor'],
+      });
+
+      creadoPor.cedula = doc.creadoPor.cedula!;
+      creadoPor.nombreCompleto = doc.creadoPor.nombreCompleto!;
+    }
 
     const elaborador = {
       subtitle: 'Elaboró',
-      nombre: cotizacion.cotDocumento.documento.creadoPor.nombreCompleto!,
-      documento: cotizacion.cotDocumento.documento.creadoPor.cedula!,
+      nombre: creadoPor.nombreCompleto!,
+      documento: creadoPor.cedula!,
       cargo: 'LIDER DE COMPRAS',
     };
 
@@ -239,12 +282,30 @@ where D.OID =  ${cotizacion.cotDocumento.documentoId}
       cargo: 'GERENTE CORPORATIVO ECONÓMICO',
     };
 
-    const encargados =
-      cotizacion.solicitud.tipoCode !== TIPOS.MEDICAMENTOS.getCode() ||
-      (cotizacion.solicitud.tipoCode === TIPOS.MEDICAMENTOS.getCode() &&
-        cotizacion.cotDocumento.tipoPagoCode === TIPOS_PAGO.ANTICIPO.getCode())
+    const encargados = cotizacion
+      ? cotizacion.solicitud.tipoCode !== TIPOS.MEDICAMENTOS.getCode() ||
+        (cotizacion.solicitud.tipoCode === TIPOS.MEDICAMENTOS.getCode() &&
+          cotizacion.cotDocumento.tipoPagoCode === TIPOS_PAGO.ANTICIPO.getCode())
         ? [elaborador, aprobado1, aprobado2, aprobado3, verificador, programadorPago]
-        : [elaborador, aprobado1, aprobado2];
+        : [elaborador, aprobado1, aprobado2]
+      : [
+          elaborador,
+          {
+            nombre: '',
+            documento: '',
+            cargo: 'VERIFICA COORDINACION DE COMPRAS',
+          },
+          {
+            nombre: '',
+            documento: '',
+            cargo: 'VERIFICA COORDINACION DE COMPRAS',
+          },
+          {
+            nombre: '',
+            documento: '',
+            cargo: 'GERENTE CORPORATIVO ECONÓMICO',
+          },
+        ];
 
     const dataForPDF: OCPayload = {
       clinica: {
@@ -280,7 +341,7 @@ where D.OID =  ${cotizacion.cotDocumento.documentoId}
         nombreCompleto: this.auth.user.fullName,
       },
       encargados,
-      productosCotizados: cotizacion.detalle,
+      productosCotizados: cotizacion ? cotizacion.detalle : [],
     };
 
     return generateOrdCo(dataForPDF);

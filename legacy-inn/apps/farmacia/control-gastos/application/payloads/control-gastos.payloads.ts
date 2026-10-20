@@ -6,6 +6,7 @@ import {
   IsArray,
   IsBoolean,
   IsInt,
+  IsIn,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -86,6 +87,16 @@ export class GenerateReporteControlGastosPayload {
 }
 
 export class CargarFacturaControlGastosPayload {
+  @IsOptional()
+  @IsIn([0, 19])
+  ordenRelacionadaTipoCode?: 0 | 19;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  ordenRelacionadaConsecutivo?: string;
+
+
   @IsNumber()
   @IsOptional()
   suministroPacienteId: number;

@@ -1,24 +1,27 @@
+import { jwtDecode } from 'jwt-decode';
+import { RSAServices } from './rsa';
 import {
   GCM_CONTEXTS,
   GcmContextCode,
+  gcmContextFactory,
   GcmContextType,
   USU_EXTS,
   UsuExtCode,
   UsuExtType,
-  gcmContextFactory,
   usuExtTypeFactory,
 } from '../../domain/types';
-import { jwtDecode } from 'jwt-decode';
-import { RSAServices } from './rsa';
+
+export type TablePathAuthType = 'GENUSUARIO' | 'EKINNOFERPROVEEDOR';
 
 export interface IAuthToken {
   jti: string;
+  rst: boolean;
+  dim: boolean;
+  tue: UsuExtCode;
   sub: GcmContextCode;
   dcm: string;
   fnm: string;
-  dim: boolean;
-  tue: UsuExtCode;
-  rst: boolean;
+  tbl: TablePathAuthType;
   iat?: number;
   exp?: number;
 }
@@ -33,6 +36,7 @@ export interface ITokenDecoded {
   tipoUsuExt: UsuExtType;
   passWasReset: boolean;
   context: GcmContextType;
+  tablePath: TablePathAuthType;
   createdAt: Date;
   expiredAt: Date;
 }
@@ -47,14 +51,24 @@ const decodeToken = (token: string): ITokenDecoded => {
     const tkDcd: IAuthToken = jwtDecode(token);
 
     const tkFt: ITokenDecoded = {
-      user: { id: RSAServices.decryptId(tkDcd.jti), document: tkDcd.dcm, fullName: tkDcd.fnm },
+      user: {
+        id: 0,
+        document: '',
+        fullName: '',
+      },
       isDim: tkDcd.dim === undefined ? true : tkDcd.dim,
       tipoUsuExt: tkDcd.tue === undefined ? USU_EXTS.GENUSUARIO : usuExtTypeFactory(tkDcd.tue),
       passWasReset: tkDcd.rst,
-      context: gcmContextFactory(tkDcd.sub),
+      context: GCM_CONTEXTS.ALTACENTRO,
+      tablePath: tkDcd.tbl as any,
       createdAt: _tokenDateToDate(tkDcd.iat),
       expiredAt: _tokenDateToDate(tkDcd.exp),
     };
+
+    tkFt.context = gcmContextFactory(tkDcd.sub);
+    tkFt.user.id = RSAServices.decryptId(tkDcd.jti);
+    tkFt.user.document = tkDcd.dcm;
+    tkFt.user.fullName = tkDcd.fnm;
 
     return tkFt;
   } catch (error: any) {

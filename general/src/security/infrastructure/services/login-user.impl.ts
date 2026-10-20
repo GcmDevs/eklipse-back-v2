@@ -116,6 +116,7 @@ export class LoginUserImpl {
           dim: isDimUser,
           sub: body.context,
           tue: tipoUsuExtCode,
+          tbl: 'GENUSUARIO',
         };
 
         const docs = ['824001041-1', '824001041-2', '824001041-3'];
@@ -250,6 +251,7 @@ export class LoginUserImpl {
         dim: false,
         sub: body.context,
         tue: USU_EXTS.GENPACIEN.getCode(),
+        tbl: 'GENUSUARIO',
       };
 
       const token = jwt.sign(payload, processEnv.JWT_SECRET_KEY, {

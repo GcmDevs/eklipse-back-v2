@@ -121,7 +121,7 @@ export class CreateControlGastoImpl extends BaseSource {
           itemId: d.itemId,
         })),
       };
-    } catch (error) {
+    } catch (error: any) {
       await qr.rollbackTransaction();
       if (body.documentoFileName) {
         deleteFile(

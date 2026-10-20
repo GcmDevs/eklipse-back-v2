@@ -3,7 +3,7 @@ import { DetalleControlGastoOrm } from './control-gasto.detalle.orm';
 import { EstadoControlGastoCode } from '@ctypes/inn/farmacia/control-gastos';
 import { TABLE_NAMES } from '@common/application/constants';
 import { IngresoOrm, UsuarioOrm } from '@orm/gen';
-import { OrdenDespachoOrm, TrasladoProductoOrm } from '@orm/inn/documentos';
+import { DocumentoOrm, OrdenDespachoOrm, TrasladoProductoOrm } from '@orm/inn/documentos';
 import { GcmContextType } from '@common/domain/types';
 import { AreaCode } from '@farmacia/control-gastos/domain/types';
 import { ControlGastoHistorialOrm } from './historial-control-gasto.orm';
@@ -13,6 +13,13 @@ import { CentroOrm } from '@orm/adn';
 export class ControlGastoOrm {
   @PrimaryGeneratedColumn({ name: 'OID' })
   id: number;
+
+  @Column({ name: 'INNDOCUME', type: 'int', nullable: true })
+  ordenRelacionadaId: number | null;
+
+  @ManyToOne(() => DocumentoOrm, { nullable: true })
+  @JoinColumn({ name: 'INNDOCUME', referencedColumnName: 'id' })
+  ordenRelacionada: DocumentoOrm | null;
 
   @Column({ name: 'ESTADO' })
   estadoCode: EstadoControlGastoCode;

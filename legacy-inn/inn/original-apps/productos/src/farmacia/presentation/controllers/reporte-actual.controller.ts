@@ -4,9 +4,8 @@ import { BadRequestException, Controller, Get, Param, Query } from '@nestjs/comm
 import { Authorities, CommonGuards } from '@common/presentation/decorators';
 import { getDateRange } from '@inn/old/common/application/services';
 import { INN_AUTHORITIES } from '@inn/old/authorities/inventario';
-import { GcmContexts } from '@inn/old/common/application/constants';
 import { BaseSource } from '@common/infrastructure/services';
-import { gcmContextFactory } from '@common/domain/types';
+import { gcmContextFactory, GcmContexts } from '@common/domain/types';
 import { groupByKey } from '@common/application/services';
 import { existenciaActualQuery, salidas } from 'inn/original-apps/uso-productos-por-mes';
 
@@ -257,13 +256,13 @@ export class ReporteActualController extends BaseSource {
             data: result,
             existenciasPorAlmacen,
           });
-        } catch (error) {
+        } catch (error: any) {
           throw new BadRequestException(error.message);
         }
       }
 
       return results;
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     } finally {
       await qr.release();

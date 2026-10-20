@@ -15,7 +15,7 @@ export class ConfigController {
   public async fetchCentros() {
     try {
       return await this._config.fetchCentros();
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     }
   }
@@ -25,7 +25,7 @@ export class ConfigController {
   public async fetchAllCentros() {
     try {
       return await this._config.fetchAllCentros();
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     }
   }
@@ -35,15 +35,13 @@ export class ConfigController {
   public async fetchMyAuthorities() {
     try {
       return await this._config.fetchMyAuthorities();
-    } catch (error) {
+    } catch (error: any) {
       throw new BadRequestException(error.message);
     }
   }
 
   @Get('contexts')
   public async fetchContexts() {
-    return ENVIRONMENTS.production
-      ? CONTEXTS_DESCRIPTION.filter(el => el.value !== GcmContexts.DEVELOPMENT)
-      : CONTEXTS_DESCRIPTION;
+    return CONTEXTS_DESCRIPTION;
   }
 }

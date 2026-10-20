@@ -7,28 +7,29 @@ import {
   CancelarSolicitudImpl,
   FetchComplementoSolicitudImpl,
   FetchResumenSolicitudesImpl,
+  GenerateExcelSolicitudesImpl,
 } from './solicitud-crud';
 
 @Injectable()
 export class SolicitudCrudSource {
   constructor(
+    private _generateExcel: GenerateExcelSolicitudesImpl,
     private _fetchResumen: FetchResumenSolicitudesImpl,
     private _fetchComplemento: FetchComplementoSolicitudImpl,
     private _cancelar: CancelarSolicitudImpl,
     private _create: CreateSolicitudImpl
   ) {}
 
-  public async fetchResumen(
-    start: Date,
-    end: Date,
-    tipos: TipoCode[],
-    codigoSolicitud?: string
-  ) {
+  public async fetchResumen(start: Date, end: Date, tipos: TipoCode[], codigoSolicitud?: string) {
     return await this._fetchResumen.execute(start, end, tipos, codigoSolicitud);
   }
 
   public async fetchComplemento(id: number, contextCode: GcmContextCode) {
     return await this._fetchComplemento.execute(id, contextCode);
+  }
+
+  public async generateExcel(inicio: Date, fin: Date, onlyMedicamentos: boolean) {
+    return await this._generateExcel.execute(inicio, fin, onlyMedicamentos);
   }
 
   public async create(payload: ManageSolicitudDto) {

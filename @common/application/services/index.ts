@@ -7,6 +7,14 @@ export * from './rsa';
 export * from './group-by-key';
 export * from './date';
 export * from './timer';
+export * from './consecutivos';
+export * from './utilities';
+export * from './interfaces';
+export * from './objects';
+export * from './json';
+export * from './collections';
+export * from './slugs';
+export * from './request-context';
 
 export const findImageFromContext = (contexto: GcmContextType, centroId?: number) => {
   return `private/clinicas/${
