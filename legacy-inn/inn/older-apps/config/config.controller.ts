@@ -1,9 +1,8 @@
 import { BadRequestException, Controller, Get } from '@nestjs/common';
 import { ConfigService } from './config.service';
 import { ApiTags } from '@nestjs/swagger';
-import { CONTEXTS_DESCRIPTION, GcmContexts } from '@inn/old/common/application/constants';
+import { CONTEXTS_DESCRIPTION } from '@inn/old/common/application/constants';
 import { CommonGuards } from '@common/presentation/decorators';
-import { ENVIRONMENTS } from 'src/app.environments';
 
 @ApiTags('V1/V2/V3')
 @Controller('v1/config')

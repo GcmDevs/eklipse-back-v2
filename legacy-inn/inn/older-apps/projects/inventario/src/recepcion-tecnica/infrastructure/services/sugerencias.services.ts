@@ -2,7 +2,7 @@ import { TipoSugerenciaTypeCode } from '@inn/old/inn/recepcion-tecnica/domain/ty
 import { CreateSugerenciaDto } from '@inn/old/inn/recepcion-tecnica/presentation/dtos';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { In, Like } from 'typeorm';
-import { GcmContexts } from '@inn/old/common/application/constants';
+import { GcmContexts } from '@common/application/constants';
 import { ProductoOrm, CentroOSRD, SugerenciaOSRD } from '@inn/old/inn/recepcion-tecnica/orm';
 import { BaseSource, switchConn } from '@common/infrastructure/services';
 import { GCM_CONTEXTS, gcmContextFactory } from '@common/domain/types';

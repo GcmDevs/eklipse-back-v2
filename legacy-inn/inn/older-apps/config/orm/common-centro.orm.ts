@@ -1,5 +1,5 @@
 import { GcmContextCode } from '@common/domain/types';
-import { GcmContexts } from '@inn/old/common/application/constants';
+import { GcmContexts } from '@common/application/constants';
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity('ADNCENATE')

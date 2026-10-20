@@ -1,5 +1,4 @@
 import { jwtDecode } from 'jwt-decode';
-import { GcmContexts } from '@inn/old/common/application/constants';
 import { RSAServices } from '@common/application/services';
 import { GCM_CONTEXTS, GcmContextCode } from '@common/domain/types';
 

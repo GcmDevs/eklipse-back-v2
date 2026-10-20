@@ -1,4 +1,4 @@
-import { GcmContexts } from '@inn/old/common/application/constants';
+import { GcmContexts } from '@common/application/constants';
 
 export const addKeyByCtx = (key: number | string, ctx: GcmContexts, centroId = 1) => {
   let finalKey = '';

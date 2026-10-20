@@ -1,7 +1,5 @@
 import { GcmContexts } from '@common/application/constants';
 
-export * from '@common/application/constants/contexts';
-
 export const CONTEXTS_DESCRIPTION = [
   { value: GcmContexts.ALTACENTRO, option: 'Centro/Alta Complejidad' },
   { value: GcmContexts.SANJUAN, option: 'San Juan Bautista' },

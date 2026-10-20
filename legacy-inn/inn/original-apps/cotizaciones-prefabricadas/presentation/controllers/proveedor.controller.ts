@@ -1,7 +1,7 @@
 import { ApiTags } from '@nestjs/swagger';
 import { Controller, Get, Query } from '@nestjs/common';
 import { Authorities, CommonGuards } from '@common/presentation/decorators';
-import { GcmContexts } from '@inn/old/common/application/constants';
+import { GcmContexts } from '@common/application/constants';
 
 @ApiTags('V1 - Central de compras (Cotizaciones prefabricadas)')
 @CommonGuards()

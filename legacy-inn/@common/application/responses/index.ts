@@ -1,6 +1,5 @@
 import { GcmContextCode } from '@common/domain/types';
 import { ApiProperty } from '@nestjs/swagger';
-import { GcmContexts } from '../constants';
 
 export class EntidadBasicaRes {
   @ApiProperty()
