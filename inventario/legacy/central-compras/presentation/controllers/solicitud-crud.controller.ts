@@ -62,6 +62,21 @@ export class SolicitudCompraCrudController {
     }
   }
 
+  @Authorities([INN_AUTHORITIES.CENTRAL_COMPRAS.CODE])
+  @Get('generate-excel')
+  public async fetchExcel(
+    @Query('inicio') inicio: Date,
+    @Query('fin') fin: Date,
+    @Query('onlyMedicamentos') onlyMedicamentos: boolean
+  ) {
+    try {
+      const response = await this._crud.generateExcel(inicio, fin, onlyMedicamentos);
+      return response;
+    } catch (error: any) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
   @ApiOkResponse({ type: Boolean })
   @ApiBody({ type: ManageSolicitudDto })
   @Authorities([INN_AUTHORITIES.CENTRAL_COMPRAS.AGREGAR])

@@ -16,6 +16,7 @@ import {
   SolicitudCrudSource,
 } from './infrastructure/repositories';
 import {
+  GenerateExcelSolicitudesImpl,
   FetchComplementoSolicitudImpl,
   FetchResumenSolicitudesImpl,
   UpdateSolicitudCompraImpl,
@@ -69,6 +70,7 @@ import { FilesCotizacionesImpl } from './infrastructure/services/files';
     SetCrudSource,
     CotizacionPrefabricadaServices,
     FilesCotizacionesImpl,
+    GenerateExcelSolicitudesImpl,
     ReportarOrdenCompraListaParaEntregaImpl,
     ItemsRecomendadosByCotizadorImpl,
     UpdateSolicitudColaboradorImpl,
