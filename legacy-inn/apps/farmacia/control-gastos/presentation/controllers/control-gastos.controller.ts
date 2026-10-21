@@ -18,6 +18,7 @@ import {
   UpdateControlGastoImpl,
 } from '@farmacia/control-gastos/infrastructure/services';
 import {
+  AsociarOrdenControlGastosPayload,
   CargarFacturaControlGastosPayload,
   CreateControlGastosPayload,
   DocumentoVistoControlGastosPayload,
@@ -52,6 +53,16 @@ export class ControlGastosController {
     private _findById: FindByIdControlGastoImpl,
     private _update: UpdateControlGastoImpl
   ) {}
+
+  @Patch('orden-relacionada')
+  @Authorities([INN_AUTHORITIES.FARMACIA.CONTROL_GASTOS_FACTURADOR])
+  async asociarOrden(@Body() body: AsociarOrdenControlGastosPayload) {
+    try {
+      return await this._cargarFactura.asociarOrden(body);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 
   @Get('orden-relacionada')
   @Authorities([INN_AUTHORITIES.FARMACIA.CONTROL_GASTOS_FACTURADOR])

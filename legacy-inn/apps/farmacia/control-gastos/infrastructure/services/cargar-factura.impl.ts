@@ -1,7 +1,8 @@
+import { DocumentoOrm } from '@orm/inn/documentos';
 import { resolverOrdenRelacionada } from './orden-relacionada';
 import { Injectable } from '@nestjs/common';
 import { gcmContextFactory } from '@common/domain/types';
-import { CargarFacturaControlGastosPayload } from '@farmacia/control-gastos/application/payloads';
+import { AsociarOrdenControlGastosPayload, CargarFacturaControlGastosPayload } from '@farmacia/control-gastos/application/payloads';
 import { BaseSource } from '@common/infrastructure/services';
 import { ControlGastoHistorialOrm, ControlGastoOrm } from '@orm/inn/farmacia/control-gastos';
 import { deleteFile } from '@common/presentation/helpers';
@@ -18,6 +19,35 @@ export class CargarFacturaControlGastoImpl extends BaseSource {
       const orden = await resolverOrdenRelacionada(qr, tipo, consecutivo);
       if (!orden) throw new Error('Indique el tipo y consecutivo de la orden');
       return orden;
+    } finally {
+      await qr.release();
+    }
+  }
+
+  public async asociarOrden(payload: AsociarOrdenControlGastosPayload) {
+    if (!Number.isInteger(payload.idControlGasto) || payload.idControlGasto <= 0) {
+      throw new Error('Indique una solicitud valida');
+    }
+    const qr = this.dynamicQR(gcmContextFactory(payload.contextCode));
+    try {
+      await qr.connect();
+      await qr.startTransaction();
+      const rp = qr.manager.getRepository(ControlGastoOrm);
+      const gasto = await rp.findOne({ where: { id: payload.idControlGasto }, lock: { mode: 'pessimistic_write' } });
+      if (!gasto) throw new Error('No existe la solicitud');
+      if ([ESTADOS_CONTROL_GASTO.RECHAZADO.getCode(), ESTADOS_CONTROL_GASTO.FINALIZADO.getCode()].includes(gasto.estadoCode)) {
+        throw new Error('No se puede asociar una orden a una solicitud rechazada o finalizada');
+      }
+      if (gasto.ordenRelacionadaId) throw new Error('La solicitud ya tiene una orden relacionada');
+      const orden = await resolverOrdenRelacionada(qr, payload.ordenRelacionadaTipoCode, payload.ordenRelacionadaConsecutivo);
+      if (!orden) throw new Error('Indique el tipo y consecutivo de la orden');
+      gasto.ordenRelacionadaId = orden.id;
+      await rp.save(gasto);
+      await qr.commitTransaction();
+      return orden;
+    } catch (error) {
+      if (qr.isTransactionActive) await qr.rollbackTransaction();
+      throw error;
     } finally {
       await qr.release();
     }
@@ -67,8 +97,13 @@ export class CargarFacturaControlGastoImpl extends BaseSource {
       if (controlGasto.estadoCode === ESTADOS_CONTROL_GASTO.FINALIZADO.getCode()) {
         throw new Error('El control de gastos ya fue conciliado');
       }
-      const ordenRelacionada = await resolverOrdenRelacionada(qr, payload.ordenRelacionadaTipoCode, payload.ordenRelacionadaConsecutivo);
-      if (ordenRelacionada) controlGasto.ordenRelacionadaId = ordenRelacionada.id;
+      if (!controlGasto.ordenRelacionadaId) {
+        throw new Error('Debe asociar una orden de compra o servicio antes de subir la factura');
+      }
+      const documento = await qr.manager.getRepository(DocumentoOrm).findOne({ where: { id: controlGasto.ordenRelacionadaId } });
+      if (!documento || ![0, 19].includes(documento.tipoCode)) {
+        throw new Error('La orden relacionada no esta disponible para visualizar');
+      }
 
       const anteriorFechaFactura = controlGasto.fechaUltimaFactura;
       const anteriorEstadoCode = controlGasto.estadoCode;
