@@ -108,7 +108,9 @@ export class TrasladoRecursosImpl extends BaseSource {
       if (!onlyActivos) {
         const qb = pacienteRp
           .createQueryBuilder('paciente')
-          .leftJoinAndSelect('paciente.detalleContrato', 'detalleContrato');
+          .leftJoinAndSelect('paciente.detalleContrato', 'detalleContrato')
+          .leftJoinAndSelect('paciente.direccion', 'direccion')
+          .leftJoinAndSelect('paciente.telefono', 'telefono');
         if (!isNumeric) {
           const palabras = value.split(/\s+/).filter(p => p.length > 0);
           if (palabras.length > 0) {
@@ -179,6 +181,9 @@ export class TrasladoRecursosImpl extends BaseSource {
       }
 
       return pacientes.map(pac => {
+        const direccion = Array.isArray(pac.direccion) ? pac.direccion[0] : pac.direccion;
+        const telefono = Array.isArray(pac.telefono) ? pac.telefono[0] : pac.telefono;
+
         return {
           id: pac.id,
           apellidos: (pac.primerApellido ?? '') + ' ' + (pac.segundoApellido ?? ''),
@@ -192,6 +197,13 @@ export class TrasladoRecursosImpl extends BaseSource {
             id: pac.detalleContrato.id,
             codigo: pac.detalleContrato.codigo,
             nombre: pac.detalleContrato.nombre,
+          },
+          estadoCivil: pac.estadoCivilCode,
+          celular: telefono?.telefono ?? '',
+          ubicacion: {
+            direccion: direccion?.direccion ?? '',
+            barrio: '',
+            municipio: '',
           },
         };
       });

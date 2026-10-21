@@ -571,9 +571,14 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
         throw new Error(`Empleado con documento ${authDocument} no encontrado`);
       }
 
-      const todasAsignaciones: TrasladoAsignacionOrm[] = [];
-
-      const todosTraslados: TrasladoAsistencialOrm[] = [];
+      const items = new Map<
+        string,
+        {
+          traslado: TrasladoAsistencialOrm;
+          asignacion: TrasladoAsignacionOrm | null;
+          contexto: GcmContextType;
+        }
+      >();
       const vehiculoIds = new Set<number>();
 
       for (const context of ALL_CONTEXTS_WITH_AUTHORITIES) {
@@ -597,17 +602,40 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
             },
           });
 
-          if (!asignaciones.length) {
-            continue;
-          }
-
           const trasladoIds = this.uniqueNumbers(asignaciones.map(a => a.trasladoId));
+          const trasladosAsignados = trasladoIds.length
+            ? await this.buildTrasladoQuery(trasladoRp)
+                .andWhere({ id: In(trasladoIds) })
+                .andWhere('t.TIPO <> :tipoPrimario', {
+                  tipoPrimario: ASISTENCIA_TIPOS.PRIMARIO.getCode(),
+                })
+                .andWhere({ estadoCode: Not(CANCELADO.getCode()) })
+                .orderBy('t.id', 'DESC')
+                .getMany()
+            : [];
 
-          const traslados = await this.buildTrasladoQuery(trasladoRp)
-            .andWhere({ id: In(trasladoIds) })
-            .andWhere({ estadoCode: Not(CANCELADO.getCode()) })
-            .orderBy('t.id', 'DESC')
-            .getMany();
+          const isCurrentContext = context.getCode() === this.auth.context.getCode();
+          const primariosPropios = isCurrentContext
+            ? await this.buildTrasladoQuery(trasladoRp)
+                .andWhere('t.TIPO = :tipoPrimario', {
+                  tipoPrimario: ASISTENCIA_TIPOS.PRIMARIO.getCode(),
+                })
+                .andWhere('t.GENUSUARIO = :usuarioId', { usuarioId: this.auth.id })
+                .andWhere('t.ESTADO NOT IN (:...estadosCerrados)', {
+                  estadosCerrados: [
+                    ESTADOS_ASISTENCIA.FINALIZADO.getCode(),
+                    ESTADOS_ASISTENCIA.CANCELADO.getCode(),
+                  ],
+                })
+                .orderBy('t.id', 'DESC')
+                .getMany()
+            : [];
+
+          const trasladosMap = new Map<number, TrasladoAsistencialOrm>();
+          [...trasladosAsignados, ...primariosPropios].forEach(traslado =>
+            trasladosMap.set(traslado.id, traslado)
+          );
+          const traslados = [...trasladosMap.values()];
 
           const estanciaRp = qr.manager.getRepository(EstanciaOrm);
 
@@ -629,27 +657,29 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
               })
           );
 
-          todasAsignaciones.push(
-            ...asignaciones.map(a => ({
-              ...a,
-              contexto: context,
-            }))
-          );
+          const asignacionesMap = new Map<number, TrasladoAsignacionOrm>();
+          asignaciones.forEach(asignacion => {
+            if (!asignacionesMap.has(asignacion.trasladoId)) {
+              asignacionesMap.set(asignacion.trasladoId, asignacion);
+            }
+            vehiculoIds.add(asignacion.vehiculoId);
+          });
 
-          todosTraslados.push(
-            ...traslados.map(t => ({
-              ...t,
+          traslados.forEach(traslado => {
+            const key = `${context.getAbbreviation()}-${traslado.id}`;
+            const asignacion = asignacionesMap.get(traslado.id) ?? null;
+            items.set(key, {
+              traslado: Object.assign(traslado, { contexto: context }),
+              asignacion: asignacion ? Object.assign(asignacion, { contexto: context }) : null,
               contexto: context,
-            }))
-          );
-
-          asignaciones.forEach(a => vehiculoIds.add(a.vehiculoId));
+            });
+          });
         } finally {
           await qr.release();
         }
       }
 
-      if (!todasAsignaciones.length) {
+      if (!items.size) {
         return {
           usuario: {
             id: empleado.id,
@@ -660,15 +690,18 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
         };
       }
 
-      const vehiculos = await vehiculoRp.find({
-        where: {
-          id: In([...vehiculoIds]),
-        },
-      });
+      const vehiculos = vehiculoIds.size
+        ? await vehiculoRp.find({ where: { id: In([...vehiculoIds]) } })
+        : [];
 
       const vehiculoMap = new Map(vehiculos.map(v => [v.id, v]));
 
-      const trasladosBase = newDataToTraslados(todosTraslados, vehiculoMap, undefined, true);
+      const trasladosBase = newDataToTraslados(
+        [...items.values()].map(item => item.traslado),
+        vehiculoMap,
+        undefined,
+        true
+      );
 
       const trasladoBaseMap = new Map(
         trasladosBase.map(t => [`${t.contexto.getAbbreviation()}-${t.id}`, t])
@@ -680,29 +713,35 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
           nombre: empleado.nombre,
           cedula: empleado.documento,
         },
-        traslados: todasAsignaciones
-          .map(asignacion => {
-            const trasladoBase = trasladoBaseMap.get(
-              `${asignacion.contexto.getAbbreviation()}-${asignacion.trasladoId}`
-            );
+        traslados: [...items.entries()]
+          .map(([key, item]) => {
+            const trasladoBase = trasladoBaseMap.get(key);
 
             if (!trasladoBase) {
               return null;
             }
 
+            const asignacion = item.asignacion;
+            const tramoActivo = trasladoBase.tramos?.find(tramo => tramo.isActivo);
             return {
               ...trasladoBase,
-              contextoCode: asignacion.contexto.getCode(),
-              tramoId: asignacion.tramoId ?? null,
-              asignacionActual:
-                this.enrichAsignacion(
-                  asignacion,
-                  vehiculoMap,
-                  new Map([[empleado.id, empleado]])
-                ) ?? null,
+              contextoCode: item.contexto.getCode(),
+              tramoId: asignacion?.tramoId ?? tramoActivo?.id ?? null,
+              asignacionActual: asignacion
+                ? (this.enrichAsignacion(
+                    asignacion,
+                    vehiculoMap,
+                    new Map([[empleado.id, empleado]])
+                  ) ?? null)
+                : null,
             };
           })
-          .filter(Boolean),
+          .filter(Boolean)
+          .sort((a, b) => {
+            const fechaA = a?.fechaCreacion ? new Date(a.fechaCreacion).getTime() : 0;
+            const fechaB = b?.fechaCreacion ? new Date(b.fechaCreacion).getTime() : 0;
+            return fechaB - fechaA;
+          }),
       };
     } catch (error: any) {
       throw new BadRequestException(error.message);

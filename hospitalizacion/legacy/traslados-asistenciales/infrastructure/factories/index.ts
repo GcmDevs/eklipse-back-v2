@@ -1,4 +1,5 @@
 import { SIGNO_VITAL_PRIMARIO_VALUES } from '@hpn/lgc/tas/types/gcn/traslados-asistenciales/signo-vital';
+import { edadDesdeNacimiento, fechaNacimientoCalendario } from '../../application/helpers/fecha-nacimiento';
 import {
   DataRes,
   PacienteDataRes,
@@ -462,7 +463,9 @@ export const newDataToPaciente = (data: PacienteTrasladoOrm): PacienteDataRes =>
     tipoCode: data.tipoDocumentoCode,
   };
   paciente.generoCode = data.generoCode;
-  paciente.edad = data.edad;
+  const fechaNacimiento = fechaNacimientoCalendario(data.fechaNacimiento);
+  paciente.fechaNacimiento = fechaNacimiento ? new Date(`${fechaNacimiento}T00:00:00Z`) : null;
+  paciente.edad = edadDesdeNacimiento(data.fechaNacimiento);
   paciente.afiliacionContrato = new DataRes();
   paciente.afiliacionContrato.id = 0;
   paciente.afiliacionContrato.nombre = data.eps;

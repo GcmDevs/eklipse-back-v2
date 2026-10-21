@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { TABLE_NAMES } from '@common/application/constants';
 import { BaseSource } from '@common/infrastructure/services';
 import {
@@ -16,26 +16,34 @@ import {
   TrasladoNotaOrm,
   ProductoOrm,
   MedicamentoPrevioOrm,
+  TrasladoAccidenteOrm,
+  TrasladoVehiculoInvolucradoOrm,
 } from '@hpn/lgc/tas/orm/gcn';
 import {
   EstadoAsistenciaTypeCode,
   ASISTENCIA_TIPOS,
   ESTADOS_ASISTENCIA,
   MotivoFallidoTypeCode,
-  CONDICIONES_CLINICAS_VALUES,
-  condicionClinicaTypeFactory,
   CONDICIONES_CLINICAS_CODES,
+  ACCIDENTE_TRANSITO,
+  MOTIVO_TRASLADO_PRIM_VALUES,
+  AREA_RECOGIDA,
+  OTRO,
 } from '@hpn/lgc/tas/types/gcn/traslados-asistenciales';
 import {
   AsignarTrasladoDto,
+  CreatePrimarioSegmentadoDto,
   CreateTrasladoPrimarioDto,
   CreateTrasladoSecundarioDto,
   EntregaMovilDto,
+  FinalizarPrimarioSegmentadoDto,
   MedicamentoDto,
   NotaDto,
   ProcedimientoItemDto,
   ReasignarTrasladoDto,
   SignosVitalesFlowDto,
+  UpdatePrimarioUbicacionDto,
+  VehiculoInvolucradoDto,
 } from '@hpn/lgc/tas/presentation/dtos';
 import {
   EstadoPacienteCode,
@@ -45,19 +53,40 @@ import { TipoEmpleadoType, TIPOS_EMPLEADO, TIPOS_TRASLADO } from '@hpn/lgc/tas/t
 import { ALL_CONTEXTS_WITH_AUTHORITIES, GCM_CONTEXTS } from '@common/domain/types';
 import { In, Not, QueryRunner, Repository, SelectQueryBuilder } from 'typeorm';
 import { UsuarioOrm } from '@hpn/lgc/tas/orm/old/general';
+import { SeccionPendienteFinalizacion } from '../../application/responses/pri-seg';
+import { TrasladoValidator } from '../../application/validators';
+import { esFechaNacimientoValida } from '../../application/helpers/fecha-nacimiento';
 
 const TIPO_RECORRIDO_REDONDO = TIPOS_TRASLADO.REDONDO.getCode();
 
 @Injectable()
 export class RecursosCompartidosSource extends BaseSource {
+  protected readonly validator = new TrasladoValidator();
+
+  protected async inTransaction<T>(operation: () => Promise<T>): Promise<T> {
+    let started = false;
+    try {
+      await this.qr.connect();
+      await this.qr.startTransaction();
+      started = true;
+      const result = await operation();
+      await this.qr.commitTransaction();
+      return result;
+    } catch (error: any) {
+      if (started && this.qr.isTransactionActive) await this.qr.rollbackTransaction();
+      if (error instanceof HttpException) throw error;
+      throw new BadRequestException(error.message);
+    } finally {
+      if (!this.qr.isReleased) await this.qr.release();
+    }
+  }
+
   public getRealtimeContextCode() {
     return this.auth.context.getCode();
   }
 
   public ensureFlujoSecundario(traslado: TrasladoAsistencialOrm): void {
-    if (traslado?.tipoCode === ASISTENCIA_TIPOS.PRIMARIO.getCode()) {
-      throw new Error('Los traslados primarios no permiten esta accion del flujo secundario');
-    }
+    this.validator.ensureFlujoSecundario(traslado);
   }
 
   public async findUsuarioByContexto(usuarioIds: number[], numericCode?: number) {
@@ -82,7 +111,10 @@ export class RecursosCompartidosSource extends BaseSource {
 
   public async pacienteConTrasladoActivo(body: {
     pacienteId?: number;
-    pacienteTemporal?: CreateTrasladoPrimarioDto['pacienteTemporal'];
+    pacienteTemporal?: Pick<
+      CreateTrasladoPrimarioDto['pacienteTemporal'],
+      'numeroDocumento' | 'tipoDocumentoCode'
+    >;
   }) {
     const pacienteTrasladoRp = this.conn.getRepository(PacienteTrasladoOrm);
     const trasladoRp = this.conn.getRepository(TrasladoAsistencialOrm);
@@ -131,31 +163,7 @@ export class RecursosCompartidosSource extends BaseSource {
   }
 
   public signosVitalesCompletos(body: EntregaMovilDto) {
-    const signosVitales = body?.signosVitales;
-
-    if (!signosVitales) {
-      throw new Error('No se pueden entregar pacientes sin signos vitales registrados');
-    }
-
-    const requiredNumericFields: Array<keyof typeof signosVitales> = [
-      'fc',
-      'fr',
-      'sato2',
-      'fcf',
-      'glasgow',
-    ];
-
-    if (typeof signosVitales.ta !== 'string' || !signosVitales.ta.trim()) {
-      throw new Error('El campo ta de signosVitales es obligatorio');
-    }
-
-    for (const field of requiredNumericFields) {
-      const value = signosVitales[field];
-
-      if (value === null || value === undefined || Number.isNaN(value)) {
-        throw new Error(`El campo ${String(field)} de signosVitales es obligatorio`);
-      }
-    }
+    this.validator.signosVitalesCompletos(body);
   }
 
   public async createPacienteExistente(
@@ -220,12 +228,12 @@ export class RecursosCompartidosSource extends BaseSource {
         apellido: body.pacienteTemporal.apellido,
         tipoDocumentoCode: body.pacienteTemporal.tipoDocumentoCode,
         numeroDocumento,
-        edad: body.pacienteTemporal.edad,
+        fechaNacimiento: body.pacienteTemporal.fechaNacimiento,
         generoCode: body.pacienteTemporal.generoCode,
         grupoSanguineoCode: body.pacienteTemporal.grupoSanguineoCode,
         eps: body.pacienteTemporal.eps,
         arl: body.pacienteTemporal.arl,
-        soat: body.pacienteTemporal.soat,
+        /* soat: body.pacienteTemporal.soat, */
       })
     );
   }
@@ -585,222 +593,16 @@ export class RecursosCompartidosSource extends BaseSource {
     return empleadoRp.save(newEnt);
   }
 
-  public ensureTrasladoPrimario(body: CreateTrasladoPrimarioDto) {
-    const hasPacienteId = !!body.pacienteId;
-    const hasPacienteTemporal = !!body.pacienteTemporal;
-
-    const condicionesClinicas = body.tiposCondicionClinicaCodes ?? [];
-    const tieneCondicionClinica = condicionesClinicas.length > 0;
-
-    if (body.tiposCondicionClinicaCodes && !tieneCondicionClinica) {
-      throw new Error('tiposCondicionClinicaCodes debe tener al menos una condición clínica');
-    }
-
-    if (new Set(condicionesClinicas).size !== condicionesClinicas.length) {
-      throw new Error('tiposCondicionClinicaCodes no puede contener códigos repetidos');
-    }
-
-    if (tieneCondicionClinica) {
-      if (typeof body.prenotificaAlSitio !== 'boolean') {
-        throw new Error('prenotificaAlSitio es obligatorio cuando existe una condición clínica');
-      }
-
-      if (condicionesClinicas.some(codigo => !CONDICIONES_CLINICAS_CODES.includes(codigo))) {
-        throw new Error('tiposCondicionClinicaCodes debe corresponder al catálogo vigente');
-      }
-
-      const fechaVistoBien = body.fechaHoraVistoBienPaciente
-        ? new Date(body.fechaHoraVistoBienPaciente)
-        : null;
-      if (!fechaVistoBien || Number.isNaN(fechaVistoBien.getTime())) {
-        throw new Error(
-          'fechaHoraVistoBienPaciente es obligatoria cuando existe una condición clínica'
-        );
-      }
-      if (fechaVistoBien.getTime() > Date.now()) {
-        throw new Error('fechaHoraVistoBienPaciente no puede ser futura');
-      }
-
-      if (!Array.isArray(body.medicamentosPrevios) || !body.medicamentosPrevios.length) {
-        throw new Error(
-          'El traslado primario debe tener al menos un medicamento previo cuando existe una condición clínica'
-        );
-      }
-
-      body.medicamentosPrevios.forEach((medicamento, index) => {
-        const hasMedicamentoId =
-          Number.isInteger(medicamento?.medicamentoId) && medicamento.medicamentoId > 0;
-        const hasDescripcion = !!medicamento?.descripcion?.trim();
-
-        if (!hasMedicamentoId && !hasDescripcion) {
-          throw new Error(
-            `El medicamento previo ${index + 1} debe tener medicamentoId, descripcion o ambos`
-          );
-        }
-      });
-    }
-
-    if (!body.notas.length) {
-      throw new Error('El traslado debe tener al menos una nota');
-    }
-
-    if (!hasPacienteId && !hasPacienteTemporal) {
-      throw new Error('Debe enviar pacienteId o pacienteTemporal');
-    }
-
-    if (hasPacienteId && hasPacienteTemporal) {
-      throw new Error('Debe enviar pacienteId o pacienteTemporal, pero no ambos');
-    }
-
-    if (hasPacienteTemporal) {
-      this.ensurePacienteTemporal(body.pacienteTemporal);
-    }
-
-    if (body.kmInicial === null || body.kmInicial === undefined || body.kmInicial < 0) {
-      throw new Error('kmInicial debe ser mayor o igual a cero');
-    }
-
-    if (body.kmFinal === null || body.kmFinal === undefined || body.kmFinal < 0) {
-      throw new Error('kmFinal debe ser mayor o igual a cero');
-    }
-
-    if (body.kmFinal <= body.kmInicial) {
-      throw new Error('kmFinal debe ser mayor que kmInicial');
-    }
-
-    if (!body.bodyMapImageName?.trim()) {
-      throw new Error('bodyMapImageName es obligatorio');
-    }
-
-    if (!body.recibidoPorFirmaImg?.trim()) {
-      throw new Error('recibidoPorFirmaImg es obligatorio');
-    }
-
-    if (!body.recibidoPorNombre?.trim()) {
-      throw new Error('recibidoPorNombre es obligatorio');
-    }
-
-    if (!body.recibidoPorDocumento?.trim()) {
-      throw new Error('recibidoPorDocumento es obligatorio');
-    }
-
-    const operationalDates = [
-      body.solicitadoEl,
-      body.despachoHora,
-      body.llegadaEscenaHora,
-      body.salidaEscenaHora,
-      body.llegadaInstitucionHora,
-      body.recepcionInstitucionHora,
-    ];
-
-    const toSafeDate = (value?: string): Date | null => {
-      if (!value) return null;
-      const date = new Date(value);
-      return Number.isNaN(date.getTime()) ? null : date;
-    };
-
-    for (const value of operationalDates) {
-      const date = new Date(value);
-      if (!value || Number.isNaN(date.getTime())) {
-        throw new Error('Los tiempos operacionales deben ser fechas validas');
-      }
-      if (date.getTime() > Date.now()) {
-        throw new Error('Los tiempos operacionales no pueden ser futuros');
-      }
-    }
-
-    const despachoHora = toSafeDate(body.despachoHora);
-    const solicitadoEl = toSafeDate(body.solicitadoEl);
-    const llegadaEscena = toSafeDate(body.llegadaEscenaHora);
-    const salidaEscena = toSafeDate(body.salidaEscenaHora);
-    const llegadaInstitucion = toSafeDate(body.llegadaInstitucionHora);
-    const recepcionInstitucion = toSafeDate(body.recepcionInstitucionHora);
-
-    if (llegadaEscena && despachoHora && llegadaEscena.getTime() < despachoHora.getTime()) {
-      throw new Error('La llegada a escena no puede ser anterior a la hora de despacho');
-    }
-
-    if (llegadaEscena && solicitadoEl && llegadaEscena.getTime() < solicitadoEl.getTime()) {
-      throw new Error('La llegada a escena no puede ser anterior a la hora de solicitud');
-    }
-
-    if (llegadaEscena && salidaEscena && salidaEscena.getTime() < llegadaEscena.getTime()) {
-      throw new Error('La salida de escena no puede ser anterior a la llegada a escena');
-    }
-
-    if (
-      salidaEscena &&
-      llegadaInstitucion &&
-      llegadaInstitucion.getTime() < salidaEscena.getTime()
-    ) {
-      throw new Error('La llegada a la institución no puede ser anterior a la salida de escena');
-    }
-
-    if (
-      llegadaInstitucion &&
-      recepcionInstitucion &&
-      recepcionInstitucion.getTime() < llegadaInstitucion.getTime()
-    ) {
-      throw new Error(
-        'La recepción en la institución no puede ser anterior a la llegada del paciente'
-      );
-    }
-
-    for (const item of [
-      ...(body.procedimientos ?? []),
-      ...(body.medicamentos ?? []),
-      ...(body.notas ?? []),
-    ]) {
-      const date = new Date(item.fechaHoraRegistro);
-      if (!item.fechaHoraRegistro || Number.isNaN(date.getTime())) {
-        throw new Error('fechaHoraRegistro es obligatoria y debe ser una fecha valida');
-      }
-      if (date.getTime() > Date.now()) {
-        throw new Error('fechaHoraRegistro no puede ser futura');
-      }
-      if (
-        salidaEscena &&
-        recepcionInstitucion &&
-        (date.getTime() < salidaEscena.getTime() || date.getTime() > recepcionInstitucion.getTime())
-      ) {
-        throw new Error(
-          'La fecha y hora del registro debe estar entre la salida de escena y la recepción por la institución'
-        );
-      }
-    }
-
-    if (!body.signosVitales || !toSafeDate(body.signosVitales.fechaRegistro)) {
-      throw new Error(
-        'La fechaRegistro de signos vitales es obligatoria y debe ser una fecha valida'
-      );
-    }
-
-    const svFechaRegistro = toSafeDate(body.signosVitales.fechaRegistro);
-
-    if (svFechaRegistro && svFechaRegistro.getTime() > Date.now()) {
-      throw new Error('La fechaRegistro de signos vitales no puede ser futura');
-    }
-
-    if (salidaEscena && svFechaRegistro && svFechaRegistro.getTime() < salidaEscena.getTime()) {
-      throw new Error(
-        'La fechaRegistro de signos vitales no puede ser anterior a la hora de salida de escena'
-      );
-    }
-
-    if (!body.vehiculoId) {
-      throw new Error('vehiculoId es obligatorio para la asignacion inicial');
-    }
-
-    if (!body.conductor?.nombre?.trim() || !body.conductor?.documento?.trim()) {
-      throw new Error('conductor es obligatorio para la asignacion inicial');
-    }
-
-    if (!body.auxiliar?.nombre?.trim() || !body.auxiliar?.documento?.trim()) {
-      throw new Error('auxiliar es obligatorio para la asignacion inicial');
-    }
+  public ensureTrasladoPrimario(body: CreateTrasladoPrimarioDto): void {
+    this.validator.ensureTrasladoPrimario(body);
   }
 
-  public ensurePacienteTemporal(pacienteTemporal: CreateTrasladoPrimarioDto['pacienteTemporal']) {
+  public ensurePacienteTemporal(
+    pacienteTemporal: Omit<CreateTrasladoPrimarioDto['pacienteTemporal'], 'soat'> & {
+      soat?: string;
+    },
+    exigirSoat = true
+  ) {
     if (!pacienteTemporal) {
       throw new Error('Debe enviar la informacion del paciente temporal');
     }
@@ -821,8 +623,8 @@ export class RecursosCompartidosSource extends BaseSource {
       throw new Error('El numeroDocumento del paciente temporal es obligatorio');
     }
 
-    if (pacienteTemporal.edad === null || pacienteTemporal.edad === undefined) {
-      throw new Error('La edad del paciente temporal es obligatoria');
+    if (!esFechaNacimientoValida(pacienteTemporal.fechaNacimiento)) {
+      throw new Error('La fecha de nacimiento debe ser válida, no futura y no superar los 150 años');
     }
 
     if (pacienteTemporal.generoCode === null || pacienteTemporal.generoCode === undefined) {
@@ -844,7 +646,7 @@ export class RecursosCompartidosSource extends BaseSource {
       throw new Error('La arl del paciente temporal es obligatoria');
     }
 
-    if (!pacienteTemporal.soat?.trim()) {
+    if (exigirSoat && !pacienteTemporal.soat?.trim()) {
       throw new Error('El soat del paciente temporal es obligatorio');
     }
   }
@@ -866,7 +668,7 @@ export class RecursosCompartidosSource extends BaseSource {
     const fechaRegistro = signo.fechaRegistro ? new Date(signo.fechaRegistro) : new Date();
 
     const signosRp = qr.manager.getRepository(TrasladoSignosVitalesOrm);
-    await signosRp.save(
+    return signosRp.save(
       signosRp.create({
         trasladoId,
         tramoId,
@@ -978,30 +780,34 @@ export class RecursosCompartidosSource extends BaseSource {
     qr?: QueryRunner,
     asignacionId?: number
   ) {
-    if (!procedimientos?.length) return;
+    if (!procedimientos?.length) return [];
 
     qr = qr ?? this.qr;
 
     const procedimientoRp = qr.manager.getRepository(ProcedimientoOrm);
 
+    const created: ProcedimientoOrm[] = [];
     for (const procedimiento of procedimientos) {
       const fechaRegistro = procedimiento.fechaHoraRegistro
         ? new Date(procedimiento.fechaHoraRegistro)
         : new Date();
-      await procedimientoRp.save(
-        procedimientoRp.create({
-          trasladoId,
-          tramoId,
-          usuarioId: this.auth.id,
-          procedimientoId: procedimiento.isTemporal ? null : procedimiento.id,
-          ekprocedimientoId: procedimiento.isTemporal ? procedimiento.id : null,
-          fechaCreacion: new Date(),
-          fechaRegistro: fechaRegistro,
-          centroProcesamiento: this.auth.context.getNumericCode(),
-          asignacionId,
-        })
+      created.push(
+        await procedimientoRp.save(
+          procedimientoRp.create({
+            trasladoId,
+            tramoId,
+            usuarioId: this.auth.id,
+            procedimientoId: procedimiento.isTemporal ? null : procedimiento.id,
+            ekprocedimientoId: procedimiento.isTemporal ? procedimiento.id : null,
+            fechaCreacion: new Date(),
+            fechaRegistro: fechaRegistro,
+            centroProcesamiento: this.auth.context.getNumericCode(),
+            asignacionId,
+          })
+        )
       );
     }
+    return created;
   }
 
   public async createMedicamentos(
@@ -1011,30 +817,34 @@ export class RecursosCompartidosSource extends BaseSource {
     qr?: QueryRunner,
     asignacionId?: number
   ) {
-    if (!medicamentos?.length) return;
+    if (!medicamentos?.length) return [];
 
     qr = qr ?? this.qr;
 
     const medicamentoRp = qr.manager.getRepository(MedicamentoOrm);
+    const created: MedicamentoOrm[] = [];
     for (const medicamento of medicamentos) {
       const fechaRegistro = medicamento.fechaHoraRegistro
         ? new Date(medicamento.fechaHoraRegistro)
         : new Date();
-      await medicamentoRp.save(
-        medicamentoRp.create({
-          trasladoId,
-          usuarioId: this.auth.id,
-          tramoId,
-          asignacionId,
-          medicamentoId: medicamento.id,
-          dosis: medicamento.dosis,
-          via: medicamento.via,
-          fechaCreacion: new Date(),
-          fechaRegistro: fechaRegistro,
-          centroProcesamiento: this.auth.context.getNumericCode(),
-        })
+      created.push(
+        await medicamentoRp.save(
+          medicamentoRp.create({
+            trasladoId,
+            usuarioId: this.auth.id,
+            tramoId,
+            asignacionId,
+            medicamentoId: medicamento.id,
+            dosis: medicamento.dosis,
+            via: medicamento.via,
+            fechaCreacion: new Date(),
+            fechaRegistro: fechaRegistro,
+            centroProcesamiento: this.auth.context.getNumericCode(),
+          })
+        )
       );
     }
+    return created;
   }
 
   public async createNotas(
@@ -1044,27 +854,31 @@ export class RecursosCompartidosSource extends BaseSource {
     qr?: QueryRunner,
     asignacionId?: number
   ) {
-    if (!notas?.length) return;
+    if (!notas?.length) return [];
 
     qr = qr ?? this.qr;
 
     const notaRp = qr.manager.getRepository(TrasladoNotaOrm);
 
+    const created: TrasladoNotaOrm[] = [];
     for (const nota of notas) {
       const fechaRegistro = nota.fechaHoraRegistro ? new Date(nota.fechaHoraRegistro) : new Date();
-      await notaRp.save(
-        notaRp.create({
-          trasladoId,
-          tramoId,
-          asignacionId,
-          usuarioId: this.auth.id,
-          fecha: new Date(),
-          nota: nota.nota,
-          fechaRegistro: fechaRegistro,
-          centroProcesamiento: this.auth.context.getNumericCode(),
-        })
+      created.push(
+        await notaRp.save(
+          notaRp.create({
+            trasladoId,
+            tramoId,
+            asignacionId,
+            usuarioId: this.auth.id,
+            fecha: new Date(),
+            nota: nota.nota,
+            fechaRegistro: fechaRegistro,
+            centroProcesamiento: this.auth.context.getNumericCode(),
+          })
+        )
       );
     }
+    return created;
   }
 
   /* Falta agregar el centro que lo hace */
@@ -1220,4 +1034,750 @@ export class RecursosCompartidosSource extends BaseSource {
       )
     );
   }
+
+  public validateOperationalDates(body: {
+    solicitadoEl: string;
+    despachoHora: string;
+    llegadaEscenaHora: string;
+    salidaEscenaHora: string;
+  }): void {
+    const solicitado = new Date(body.solicitadoEl);
+    const despacho = new Date(body.despachoHora);
+    const llegada = new Date(body.llegadaEscenaHora);
+    const salida = new Date(body.salidaEscenaHora);
+    const dates = [solicitado, despacho, llegada, salida];
+
+    if (dates.some(date => Number.isNaN(date.getTime()))) {
+      throw new Error('Los tiempos operacionales deben ser fechas validas');
+    }
+    if (dates.some(date => date.getTime() > Date.now())) {
+      throw new Error('Los tiempos operacionales no pueden ser futuros');
+    }
+    if (despacho < solicitado || llegada < despacho || salida < llegada) {
+      throw new Error('Los tiempos operacionales no conservan el orden esperado');
+    }
+  }
+
+  public async resolvePaciente(
+    body: Pick<CreatePrimarioSegmentadoDto, 'pacienteId' | 'pacienteTemporal'>
+  ): Promise<{ pacienteId: number | null; ekPacienteId: number | null }> {
+    const hasPacienteId = !!body.pacienteId;
+    const hasTemporal = !!body.pacienteTemporal;
+    if (hasPacienteId === hasTemporal) {
+      throw new Error('Debe enviar pacienteId o pacienteTemporal, pero no ambos');
+    }
+
+    if (body.pacienteId) {
+      await this.verifyEntityExist(TABLE_NAMES.gen.pct.pacientes, body.pacienteId);
+      return { pacienteId: body.pacienteId, ekPacienteId: null };
+    }
+
+    this.ensurePacienteTemporal(body.pacienteTemporal, false);
+    const pacienteRp = this.qr.manager.getRepository(PacienteTrasladoOrm);
+    const numeroDocumento = body.pacienteTemporal.numeroDocumento.trim();
+    const existente = await pacienteRp.findOne({
+      where: { numeroDocumento, tipoDocumentoCode: body.pacienteTemporal.tipoDocumentoCode },
+    });
+    const datos = {
+      ...body.pacienteTemporal,
+      numeroDocumento,
+      estadoCivilCode: body.pacienteTemporal.estadoCivilCode,
+      direccion: body.pacienteTemporal.direccion.trim(),
+      barrio: body.pacienteTemporal.barrio.trim(),
+      celular: body.pacienteTemporal.celular.trim(),
+    };
+    // Reutiliza el paciente por documento y actualiza sus datos, sin crear duplicados ni borrar SOAT.
+    const paciente = await pacienteRp.save(pacienteRp.create({ ...existente, ...datos }));
+    return { pacienteId: null, ekPacienteId: paciente.id };
+  }
+
+  public async getPrimarioPropioOrFail(
+    trasladoId: number,
+    withLock = false
+  ): Promise<TrasladoAsistencialOrm> {
+    const traslado = await this.qr.manager.getRepository(TrasladoAsistencialOrm).findOne({
+      where: {
+        id: trasladoId,
+        tipoCode: ASISTENCIA_TIPOS.PRIMARIO.getCode(),
+        usuarioId: this.auth.id,
+        isDeleted: false,
+      },
+      ...(withLock ? { lock: { mode: 'pessimistic_write' as const } } : {}),
+    });
+
+    if (!traslado) {
+      throw new Error(`No existe traslado primario con id ${trasladoId}`);
+    }
+    return traslado;
+  }
+
+  public async getPrimarioEditableOrFail(trasladoId: number): Promise<TrasladoAsistencialOrm> {
+    const traslado = await this.getPrimarioPropioOrFail(trasladoId, true);
+    this.ensureEditable(traslado);
+    return traslado;
+  }
+
+  public async getTramoPrincipalOrFail(trasladoId: number): Promise<TrasladoTramoOrm> {
+    const tramo = await this.qr.manager
+      .getRepository(TrasladoTramoOrm)
+      .findOne({ where: { trasladoId, orden: 1 } });
+
+    if (!tramo) {
+      throw new Error(`No existe el tramo principal del traslado ${trasladoId}`);
+    }
+    return tramo;
+  }
+
+  public ensureEditable(traslado: TrasladoAsistencialOrm): void {
+    this.validator.ensureEditable(traslado);
+  }
+
+  public ensureAccident(traslado: TrasladoAsistencialOrm): void {
+    this.validator.ensureAccident(traslado);
+  }
+
+  public validateFechaRegistro(value: string, descripcion: string, fechaMinima?: Date): void {
+    this.validator.validateFechaRegistro(value, descripcion, fechaMinima);
+  }
+
+  public async getOrCreateAccident(trasladoId: number): Promise<TrasladoAccidenteOrm> {
+    const repository = this.qr.manager.getRepository(TrasladoAccidenteOrm);
+    const current = await repository.findOne({ where: { trasladoId } });
+    return current ?? repository.save(repository.create({ trasladoId, fechaCreacion: new Date() }));
+  }
+
+  public validateFechaClinicaSegmentado(
+    value: string,
+    descripcion: string,
+    tramo: TrasladoTramoOrm
+  ): void {
+    this.validator.validateFechaClinicaSegmentado(value, descripcion, tramo);
+  }
+
+  public isMissing(value: unknown): boolean {
+    return this.validator.isMissing(value);
+  }
+
+  public isValidDate(value: unknown): value is Date | string {
+    return this.validator.isValidDate(value);
+  }
+
+  public isNumberInRange(value: unknown, minimum: number, maximum: number): boolean {
+    return this.validator.isNumberInRange(value, minimum, maximum);
+  }
+
+  public addPending(
+    pendientes: SeccionPendienteFinalizacion[],
+    seccion: string,
+    campo: string,
+    mensaje: string
+  ): void {
+    this.validator.addPending(pendientes, seccion, campo, mensaje);
+  }
+
+  public async validarSeccionesParaFinalizar(
+    traslado: TrasladoAsistencialOrm,
+    tramo: TrasladoTramoOrm,
+    body: FinalizarPrimarioSegmentadoDto,
+    signatureName?: string
+  ): Promise<SeccionPendienteFinalizacion[]> {
+    const pendientes: SeccionPendienteFinalizacion[] = [];
+    const trasladoId = traslado.id;
+    const [
+      signos,
+      notas,
+      medicamentosPrevios,
+      asignacionActiva,
+      accidente,
+      procedimientos,
+      medicamentos,
+    ] = await Promise.all([
+      this.qr.manager
+        .getRepository(TrasladoSignosVitalesOrm)
+        .find({ where: { trasladoId }, select: ['id', 'fechaRegistro'] }),
+      this.qr.manager
+        .getRepository(TrasladoNotaOrm)
+        .find({ where: { trasladoId }, select: ['id', 'fechaRegistro'] }),
+      this.qr.manager.getRepository(MedicamentoPrevioOrm).count({ where: { trasladoId } }),
+      this.qr.manager.getRepository(TrasladoAsignacionOrm).findOne({
+        where: { trasladoId, isActiva: true },
+        order: { fechaAsignacion: 'DESC', id: 'DESC' },
+      }),
+      this.qr.manager.getRepository(TrasladoAccidenteOrm).findOne({
+        where: { trasladoId },
+        relations: ['vehiculos'],
+      }),
+      this.qr.manager
+        .getRepository(ProcedimientoOrm)
+        .find({ where: { trasladoId }, select: ['id', 'fechaRegistro'] }),
+      this.qr.manager
+        .getRepository(MedicamentoOrm)
+        .find({ where: { trasladoId }, select: ['id', 'fechaRegistro'] }),
+    ]);
+
+    if (!traslado.centroId) {
+      this.addPending(pendientes, 'paciente', 'centroId', 'Falta el centro');
+    }
+    if (traslado.ekPacienteId && !traslado.pacienteId) {
+      const pacienteManual = await this.qr.manager
+        .getRepository(PacienteTrasladoOrm)
+        .findOne({ where: { id: traslado.ekPacienteId } });
+      if (![0, 1, 2, 3, 4, 5].includes(pacienteManual?.estadoCivilCode)) {
+        this.addPending(
+          pendientes,
+          'paciente',
+          'estadoCivilCode',
+          'Falta seleccionar el estado civil'
+        );
+      }
+      for (const [campo, mensaje] of [
+        ['direccion', 'Falta la dirección del paciente'],
+        ['barrio', 'Falta el barrio del paciente'],
+        ['celular', 'Falta el celular del paciente'],
+      ] as const) {
+        if (this.isMissing(pacienteManual?.[campo]))
+          this.addPending(pendientes, 'paciente', campo, mensaje);
+      }
+    }
+    if (!traslado.cupsCode) {
+      this.addPending(pendientes, 'paciente', 'cupsCode', 'Falta el CUPS');
+    }
+    const tienePaciente = !!traslado.pacienteId;
+    const tienePacienteTemporal = !!traslado.ekPacienteId;
+    if (tienePaciente === tienePacienteTemporal) {
+      this.addPending(
+        pendientes,
+        'paciente',
+        'paciente',
+        tienePaciente
+          ? 'El traslado no puede tener paciente normal y temporal al mismo tiempo'
+          : 'Falta el paciente'
+      );
+    }
+    const motivoValido = MOTIVO_TRASLADO_PRIM_VALUES.some(
+      motivo => motivo.getCode() === traslado.tipoRemisionCode
+    );
+    if (!motivoValido) {
+      this.addPending(pendientes, 'paciente', 'tipoRemisionCode', 'Falta un motivo valido');
+    }
+    if (traslado.tipoRemisionCode === OTRO.getCode() && this.isMissing(traslado.otroTipoRemision)) {
+      this.addPending(pendientes, 'paciente', 'otroTipoRemision', 'Falta describir el otro motivo');
+    }
+
+    const tiemposOperativos = [
+      ['horaSolicitud', tramo.horaSolicitud],
+      ['horaDespacho', tramo.horaDespacho],
+      ['horaLlegadaEscena', tramo.horaLlegadaEscena],
+      ['horaSalidaEscena', tramo.horaSalidaEscena],
+    ] as const;
+    tiemposOperativos.forEach(([campo, value]) => {
+      if (!this.isValidDate(value)) {
+        this.addPending(pendientes, 'paciente', campo, `Falta una fecha valida para ${campo}`);
+      }
+    });
+    if (tiemposOperativos.every(([, value]) => this.isValidDate(value))) {
+      const [solicitud, despacho, llegadaEscena, salidaEscena] = tiemposOperativos.map(
+        ([, value]) => new Date(value).getTime()
+      );
+      if (
+        [solicitud, despacho, llegadaEscena, salidaEscena].some(value => value > Date.now()) ||
+        despacho < solicitud ||
+        llegadaEscena < despacho ||
+        salidaEscena < llegadaEscena
+      ) {
+        this.addPending(
+          pendientes,
+          'paciente',
+          'tiemposOperativos',
+          'Los tiempos operativos son futuros o no conservan el orden esperado'
+        );
+      }
+    }
+
+    if (!tramo.origenId && !tramo.ekOrigenId) {
+      this.addPending(pendientes, 'ubicacion', 'origen', 'Falta el lugar de recogida');
+    }
+    if (!tramo.destinoId && !tramo.ekDestinoId) {
+      this.addPending(pendientes, 'ubicacion', 'destino', 'Falta el lugar de destino');
+    }
+
+    if (!traslado.diagnosticoId) {
+      this.addPending(pendientes, 'diagnostico', 'diagnosticoId', 'Falta el diagnostico principal');
+    }
+    if (this.isMissing(traslado.hallazgos)) {
+      this.addPending(pendientes, 'diagnostico', 'hallazgos', 'Faltan los hallazgos clinicos');
+    }
+    if (
+      typeof traslado.triageCode !== 'number' ||
+      traslado.triageCode < 1 ||
+      traslado.triageCode > 5
+    ) {
+      this.addPending(pendientes, 'diagnostico', 'triageCode', 'Falta un TRIAGE valido');
+    }
+    if (this.isMissing(traslado.triageImg)) {
+      this.addPending(pendientes, 'diagnostico', 'triageImg', 'Falta el mapa corporal');
+    }
+
+    if (!signos.length) {
+      this.addPending(
+        pendientes,
+        'atencion',
+        'signosVitales',
+        'Falta al menos un registro de signos vitales'
+      );
+    }
+    if (!notas.length) {
+      this.addPending(pendientes, 'atencion', 'notas', 'Falta al menos una nota clinica');
+    }
+
+    if (!this.isMissing(traslado.condicionClinica)) {
+      const condiciones = traslado.condicionClinica
+        .split(',')
+        .map(value => Number(value.trim()))
+        .filter(value => !Number.isNaN(value));
+      if (
+        !condiciones.length ||
+        condiciones.some(codigo => !CONDICIONES_CLINICAS_CODES.includes(codigo as any))
+      ) {
+        this.addPending(
+          pendientes,
+          'condicion',
+          'condicionClinica',
+          'Las condiciones clinicas no son validas'
+        );
+      }
+      if (
+        !this.isValidDate(traslado.fechaHoraVistoBien) ||
+        new Date(traslado.fechaHoraVistoBien).getTime() > Date.now() ||
+        (this.isValidDate(tramo.horaSolicitud) &&
+          new Date(traslado.fechaHoraVistoBien) < new Date(tramo.horaSolicitud))
+      ) {
+        this.addPending(
+          pendientes,
+          'condicion',
+          'fechaHoraVistoBien',
+          'Falta una fecha valida de ultima vez visto bien'
+        );
+      }
+      if (typeof traslado.prenotificaAlSitio !== 'boolean') {
+        this.addPending(
+          pendientes,
+          'condicion',
+          'prenotificaAlSitio',
+          'Falta indicar la prenotificacion'
+        );
+      }
+      if (!medicamentosPrevios) {
+        this.addPending(
+          pendientes,
+          'condicion',
+          'medicamentosPrevios',
+          'Falta al menos un medicamento previo'
+        );
+      }
+    }
+
+    if (!asignacionActiva) {
+      this.addPending(pendientes, 'tripulacion', 'asignacionActiva', 'Falta una asignacion activa');
+    } else {
+      if (!asignacionActiva.vehiculoId) {
+        this.addPending(pendientes, 'tripulacion', 'vehiculoId', 'Falta la ambulancia');
+      }
+      if (!asignacionActiva.conductorId) {
+        this.addPending(pendientes, 'tripulacion', 'conductorId', 'Falta el conductor');
+      }
+      if (!asignacionActiva.auxiliarId) {
+        this.addPending(pendientes, 'tripulacion', 'auxiliarId', 'Falta el auxiliar');
+      }
+    }
+
+    if (traslado.tipoRemisionCode === ACCIDENTE_TRANSITO.getCode()) {
+      if (!accidente || this.isMissing(accidente.area)) {
+        this.addPending(pendientes, 'ubicacion', 'area', 'Falta seleccionar el area');
+      }
+      if (!accidente || !this.isNumberInRange(accidente.latitudOrigen, -90, 90)) {
+        this.addPending(pendientes, 'ubicacion', 'latitudOrigen', 'Falta una latitud valida');
+      }
+      if (!accidente || !this.isNumberInRange(accidente.longitudOrigen, -180, 180)) {
+        this.addPending(pendientes, 'ubicacion', 'longitudOrigen', 'Falta una longitud valida');
+      }
+      if (!accidente || this.isMissing(accidente.barrioOrigen)) {
+        this.addPending(pendientes, 'ubicacion', 'barrioOrigen', 'Falta el barrio del origen');
+      }
+      if (!accidente || this.isMissing(accidente.referenciaOrigen)) {
+        this.addPending(
+          pendientes,
+          'ubicacion',
+          'referenciaOrigen',
+          'Falta la referencia adicional'
+        );
+      }
+      if (accidente?.area === AREA_RECOGIDA.RURAL.getCode()) {
+        if (this.isMissing(accidente.veredaOrigen)) {
+          this.addPending(
+            pendientes,
+            'ubicacion',
+            'veredaOrigen',
+            'Falta el corregimiento o vereda'
+          );
+        }
+        if (this.isMissing(accidente.viaOrigen)) {
+          this.addPending(pendientes, 'ubicacion', 'viaOrigen', 'Falta la via o tramo');
+        }
+        if (this.isMissing(accidente.kilometroOrigen)) {
+          this.addPending(
+            pendientes,
+            'ubicacion',
+            'kilometroOrigen',
+            'Falta el kilometro o referencia vial'
+          );
+        }
+      }
+
+      if (!accidente || this.isMissing(accidente.codigoCrue)) {
+        this.addPending(pendientes, 'escena', 'codigoCrue', 'Falta el codigo CRUE');
+      }
+      if (!accidente || this.isMissing(accidente.entidadDespacho)) {
+        this.addPending(pendientes, 'escena', 'entidadDespacho', 'Falta la entidad que despacho');
+      }
+      if (!accidente || typeof accidente.escenaSegura !== 'boolean') {
+        this.addPending(
+          pendientes,
+          'escena',
+          'escenaSegura',
+          'Falta indicar si la escena es segura'
+        );
+      }
+      if (!accidente?.mecanismoCode) {
+        this.addPending(pendientes, 'escena', 'mecanismoCode', 'Falta el tipo de mecanismo');
+      }
+      if (!accidente || this.isMissing(accidente.quejaPrincipal)) {
+        this.addPending(pendientes, 'escena', 'quejaPrincipal', 'Falta la queja principal');
+      }
+
+      if (!traslado.servicioRequeridoId) {
+        this.addPending(
+          pendientes,
+          'entrega',
+          'servicioRequeridoId',
+          'Falta el servicio requerido'
+        );
+      }
+      if (!accidente || this.isMissing(accidente.relato)) {
+        this.addPending(
+          pendientes,
+          'entrega',
+          'relato',
+          'Falta el relato de la entrega del paciente'
+        );
+      }
+      if (typeof accidente?.pertenenciasEntregadas !== 'boolean') {
+        this.addPending(
+          pendientes,
+          'entrega',
+          'pertenenciasEntregadas',
+          'Falta indicar si se entregaron pertenencias'
+        );
+      }
+      if (!accidente || typeof accidente.custodia !== 'boolean') {
+        this.addPending(pendientes, 'entrega', 'custodia', 'Falta indicar la cadena de custodia');
+      }
+      if (
+        !accidente ||
+        !['paciente', 'familiar'].includes(accidente.consentimientoOtorgadoPor?.trim())
+      ) {
+        this.addPending(
+          pendientes,
+          'entrega',
+          'consentimientoOtorgadoPor',
+          'Falta indicar quien otorga el consentimiento'
+        );
+      }
+
+      (accidente?.vehiculos ?? []).forEach((vehiculo, index) => {
+        const prefix = `vehiculos[${index}]`;
+        if (typeof vehiculo.fuga !== 'boolean') {
+          this.addPending(pendientes, 'vehiculos', `${prefix}.fuga`, 'Falta indicar la fuga');
+        }
+        if (typeof vehiculo.noIdentificado !== 'boolean') {
+          this.addPending(
+            pendientes,
+            'vehiculos',
+            `${prefix}.noIdentificado`,
+            'Falta indicar si el vehiculo esta identificado'
+          );
+        }
+        if (this.isMissing(vehiculo.tipo)) {
+          this.addPending(pendientes, 'vehiculos', `${prefix}.tipo`, 'Falta el tipo de vehiculo');
+        }
+        if (vehiculo.noIdentificado === false && this.isMissing(vehiculo.placa)) {
+          this.addPending(
+            pendientes,
+            'vehiculos',
+            `${prefix}.placa`,
+            'Falta la placa o marcar el vehiculo como no identificado'
+          );
+        }
+      });
+
+      (tramo.archivos ?? []).forEach((archivo, index) => {
+        const prefix = `evidencias[${index}]`;
+        if (this.isMissing(archivo.nombre)) {
+          this.addPending(
+            pendientes,
+            'evidencias',
+            `${prefix}.nombre`,
+            'Falta el nombre de la evidencia'
+          );
+        }
+        if (this.isMissing(archivo.ruta)) {
+          this.addPending(
+            pendientes,
+            'evidencias',
+            `${prefix}.ruta`,
+            'Falta la ruta de la evidencia'
+          );
+        }
+        if (!archivo.categoria || !['sitio', 'vehiculo'].includes(archivo.categoria)) {
+          this.addPending(
+            pendientes,
+            'evidencias',
+            `${prefix}.categoria`,
+            'La categoria de la evidencia no es valida'
+          );
+        }
+      });
+    }
+
+    const llegada = new Date(body.llegadaInstitucionHora);
+    const recepcion = new Date(body.recepcionInstitucionHora);
+    const gruposClinicos = [
+      ['signosVitales', 'signos vitales', signos],
+      ['notas', 'nota clínica', notas],
+      ['procedimientos', 'procedimiento', procedimientos],
+      ['medicamentos', 'medicamento', medicamentos],
+    ] as const;
+    for (const [campo, nombre, registros] of gruposClinicos) {
+      for (const registro of registros) {
+        const fecha = new Date(registro.fechaRegistro);
+        if (
+          !this.isValidDate(registro.fechaRegistro) ||
+          fecha.getTime() > Date.now() ||
+          (this.isValidDate(tramo.horaSalidaEscena) && fecha < new Date(tramo.horaSalidaEscena)) ||
+          (this.isValidDate(body.recepcionInstitucionHora) && fecha > recepcion)
+        ) {
+          this.addPending(
+            pendientes,
+            'atencion',
+            campo,
+            `El registro de ${nombre} #${registro.id} tiene una fecha inválida o fuera del rango entre salida de escena y recepción institucional`
+          );
+        }
+      }
+    }
+    if (!this.isValidDate(body.llegadaInstitucionHora)) {
+      this.addPending(
+        pendientes,
+        'finalizacion',
+        'llegadaInstitucionHora',
+        'Falta una hora valida de llegada a la institucion'
+      );
+    }
+    if (!this.isValidDate(body.recepcionInstitucionHora)) {
+      this.addPending(
+        pendientes,
+        'finalizacion',
+        'recepcionInstitucionHora',
+        'Falta una hora valida de recepcion institucional'
+      );
+    }
+    if (
+      this.isValidDate(body.llegadaInstitucionHora) &&
+      this.isValidDate(body.recepcionInstitucionHora) &&
+      (llegada.getTime() > Date.now() ||
+        recepcion.getTime() > Date.now() ||
+        (this.isValidDate(tramo.horaSalidaEscena) && llegada < tramo.horaSalidaEscena) ||
+        recepcion < llegada)
+    ) {
+      this.addPending(
+        pendientes,
+        'finalizacion',
+        'tiemposFinales',
+        'Las fechas de llegada y recepcion son futuras o no conservan el orden esperado'
+      );
+    }
+    if (typeof body.kmInicial !== 'number' || body.kmInicial < 0) {
+      this.addPending(
+        pendientes,
+        'finalizacion',
+        'kmInicial',
+        'Falta un kilometraje inicial valido'
+      );
+    }
+    if (typeof body.kmFinal !== 'number' || body.kmFinal < 0) {
+      this.addPending(pendientes, 'finalizacion', 'kmFinal', 'Falta un kilometraje final valido');
+    } else if (typeof body.kmInicial === 'number' && body.kmFinal <= body.kmInicial) {
+      this.addPending(
+        pendientes,
+        'finalizacion',
+        'kmFinal',
+        'El kilometraje final debe ser mayor que el inicial'
+      );
+    }
+    if (
+      ![ESTADOS_PACIENTE.VIVO.getCode(), ESTADOS_PACIENTE.MUERTO.getCode()].includes(
+        body.estadoPacienteCode
+      )
+    ) {
+      this.addPending(
+        pendientes,
+        'finalizacion',
+        'estadoPacienteCode',
+        'Falta un estado valido del paciente'
+      );
+    }
+    if (this.isMissing(body.recibidoPorNombre)) {
+      this.addPending(
+        pendientes,
+        'finalizacion',
+        'recibidoPorNombre',
+        'Falta el nombre del funcionario receptor'
+      );
+    }
+    if (this.isMissing(body.recibidoPorDocumento)) {
+      this.addPending(
+        pendientes,
+        'finalizacion',
+        'recibidoPorDocumento',
+        'Falta el documento del funcionario receptor'
+      );
+    }
+    if (this.isMissing(signatureName ?? body.recibidoPorFirmaImg)) {
+      this.addPending(
+        pendientes,
+        'finalizacion',
+        'recibidoPorFirmaImg',
+        'Falta la firma del funcionario receptor'
+      );
+    }
+
+    return pendientes;
+  }
+
+  public async getAccidenteOrFail(trasladoId: number): Promise<TrasladoAccidenteOrm> {
+    const accidente = await this.qr.manager
+      .getRepository(TrasladoAccidenteOrm)
+      .findOne({ where: { trasladoId } });
+    if (!accidente) {
+      throw new Error(`El traslado ${trasladoId} no tiene informacion de accidente`);
+    }
+    return accidente;
+  }
+
+  public async getVehiculoOrFail(accidenteId: number, vehiculoId: number) {
+    const vehiculo = await this.qr.manager
+      .getRepository(TrasladoVehiculoInvolucradoOrm)
+      .findOne({ where: { id: vehiculoId, accidenteId } });
+    if (!vehiculo) {
+      throw new Error(`El vehiculo involucrado ${vehiculoId} no pertenece al traslado`);
+    }
+    return vehiculo;
+  }
+
+  public validateVehiculo(body: VehiculoInvolucradoDto): void {
+    this.validator.validateVehiculo(body);
+  }
+
+  public async getTripulanteAutenticado(
+    ekQr: any
+  ): Promise<{ empleado: EkEmpleadoOrm; rol: 'MEDICO' | 'AUXILIAR' }> {
+    const documento = this.getAuthDocument();
+    if (!documento) {
+      throw new Error('No fue posible identificar el documento del usuario autenticado');
+    }
+
+    const empleado = await ekQr.manager.getRepository(EkEmpleadoOrm).findOne({
+      where: { documento },
+    });
+    if (!empleado) {
+      throw new Error(
+        `El usuario autenticado con documento ${documento} no esta registrado en HPNGTCENTIDAD`
+      );
+    }
+
+    if (empleado.tipoCode === TIPOS_EMPLEADO.MEDICO.getCode()) {
+      return { empleado, rol: 'MEDICO' };
+    }
+    if (empleado.tipoCode === TIPOS_EMPLEADO.AUXILIAR.getCode()) {
+      return { empleado, rol: 'AUXILIAR' };
+    }
+
+    throw new Error(
+      'El usuario autenticado debe estar registrado como medico o auxiliar para gestionar un traslado primario'
+    );
+  }
+
+  public async fetchTripulanteAutenticado() {
+    const ekQr = this.dynamicQR(GCM_CONTEXTS.EKLIPSE);
+    await ekQr.connect();
+    try {
+      const { empleado, rol } = await this.getTripulanteAutenticado(ekQr);
+      return {
+        habilitado: true,
+        id: empleado.id,
+        nombre: empleado.nombre,
+        documento: empleado.documento,
+        tipoCode: empleado.tipoCode,
+        rol,
+      };
+    } finally {
+      await ekQr.release();
+    }
+  }
+
+
+    public async resolveUbicacionSegmentada(
+      body: UpdatePrimarioUbicacionDto['origen'],
+      tramo: TrasladoTramoOrm,
+      tipo: 'origen' | 'destino'
+    ): Promise<{ origenId: number | null; ekOrigenId: number | null }> {
+      const ubicacionId = tipo === 'origen' ? tramo.ekOrigenId : tramo.ekDestinoId;
+      if (body.id > 0 || !ubicacionId) return this.resolveUbicacion(body);
+  
+      // El ID procede del tramo autorizado, nunca del formulario enviado por el usuario.
+      const ubicacionRp = this.qr.manager.getRepository(UbicacionOrm);
+      const ubicacion = await ubicacionRp.findOneOrFail({
+        where: { id: ubicacionId },
+        lock: { mode: 'pessimistic_write' },
+      });
+      const datos = {
+        nombre: body.nombre,
+        direccion: body.direccion,
+        departamentoId: +body.departamentoId,
+        municipioId: +body.municipioId,
+      };
+      const cambio =
+        ubicacion.nombre !== datos.nombre ||
+        ubicacion.direccion !== datos.direccion ||
+        ubicacion.departamentoId !== datos.departamentoId ||
+        ubicacion.municipioId !== datos.municipioId;
+      if (cambio) {
+        const otroExtremoId = tipo === 'origen' ? tramo.ekDestinoId : tramo.ekOrigenId;
+        const compartida =
+          otroExtremoId === ubicacionId ||
+          (await this.qr.manager.getRepository(TrasladoTramoOrm).exist({
+            where: [
+              { ekOrigenId: ubicacionId, id: Not(tramo.id) },
+              { ekDestinoId: ubicacionId, id: Not(tramo.id) },
+            ],
+          }));
+        if (compartida) {
+          throw new Error(
+            `La ubicación manual de ${tipo} está compartida con otro tramo o extremo. No se puede modificar sin afectar esa información.`
+          );
+        }
+        await ubicacionRp.save(Object.assign(ubicacion, datos));
+      }
+      return { origenId: null, ekOrigenId: ubicacionId };
+    }
 }

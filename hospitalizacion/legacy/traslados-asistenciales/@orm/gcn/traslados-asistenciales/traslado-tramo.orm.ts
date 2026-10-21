@@ -8,6 +8,7 @@ import { ProcedimientoOrm } from './procedimiento.orm';
 import { MedicamentoOrm } from './medicamento.orm';
 import { EntidadOrm } from '../entidad.orm';
 import { TipoTrasladoItemTypeCode } from '@hpn/lgc/tas/types/gcn';
+import { FilesTrasladoDataRes } from '@hpn/lgc/tas/application/responses';
 
 @Entity('EKHPNTRASLTRAMO')
 export class TrasladoTramoOrm {
@@ -127,8 +128,8 @@ export class TrasladoTramoOrm {
   @Column({ name: 'HORARECEPCIONINST', type: 'datetime', nullable: true })
   horaRecepcionInst?: Date;
 
-  /*   @Column({ name: 'EVIDENCIAS', type: 'simple-json', nullable: true })
-  archivos?: FilesTrasladoDataRes[]; */
+  @Column({ name: 'EVIDENCIAS', type: 'simple-json', nullable: true })
+  archivos?: FilesTrasladoDataRes[];
   /*  */
   @Column({ name: 'ISACTIVO', nullable: true })
   isActivo?: boolean;

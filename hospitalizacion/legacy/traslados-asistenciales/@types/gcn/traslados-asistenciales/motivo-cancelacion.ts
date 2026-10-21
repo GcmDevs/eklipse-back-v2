@@ -1,4 +1,20 @@
-export type MotivoFallidoTypeCode = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12;
+export type MotivoFallidoTypeCode =
+  | 1
+  | 2
+  | 3
+  | 4
+  | 5
+  | 6
+  | 7
+  | 8
+  | 9
+  | 10
+  | 11
+  | 12
+  | 13
+  | 14
+  | 15
+  | 16;
 
 export class MotivoFallidoType {
   constructor(
@@ -48,6 +64,20 @@ export const FALLIDO_EQUIPOS_DANADOS = new MotivoFallidoType(
   'Fallido por equipos médicos dañados'
 );
 
+export const FALLIDO_ESTUDIO_REALIZADO = new MotivoFallidoType(
+  13,
+  'Fallido, ya se le realizó el estudio'
+);
+
+export const CANCELADO_MAL_CARGADO = new MotivoFallidoType(
+  14,
+  'Cancelado por traslado mal cargado'
+);
+
+export const CANCELADO_DUPLICADO = new MotivoFallidoType(15, 'Cancelado por traslado duplicado');
+
+export const CANCELADO_OTRO_MOTIVO = new MotivoFallidoType(16, 'Otro motivo de cancelación');
+
 export function motivoFallidoTypeFactory(code: MotivoFallidoTypeCode): MotivoFallidoType {
   switch (code) {
     case 1:
@@ -74,6 +104,14 @@ export function motivoFallidoTypeFactory(code: MotivoFallidoTypeCode): MotivoFal
       return FALLIDO_SIN_MEDICO;
     case 12:
       return FALLIDO_EQUIPOS_DANADOS;
+    case 13:
+      return FALLIDO_ESTUDIO_REALIZADO;
+    case 14:
+      return CANCELADO_MAL_CARGADO;
+    case 15:
+      return CANCELADO_DUPLICADO;
+    case 16:
+      return CANCELADO_OTRO_MOTIVO;
     default:
       throw new Error(`MotivoFallidoType no soportado: ${code}`);
   }
@@ -92,6 +130,10 @@ export const MOTIVOS_FALLIDO_VALUES: MotivoFallidoType[] = [
   FALLIDO_DOC_INCOMPLETA,
   FALLIDO_SIN_MEDICO,
   FALLIDO_EQUIPOS_DANADOS,
+  FALLIDO_ESTUDIO_REALIZADO,
+  CANCELADO_MAL_CARGADO,
+  CANCELADO_DUPLICADO,
+  CANCELADO_OTRO_MOTIVO,
 ];
 
 export const MOTIVOS_FALLIDO = {
@@ -107,4 +149,8 @@ export const MOTIVOS_FALLIDO = {
   FALLIDO_DOC_INCOMPLETA,
   FALLIDO_SIN_MEDICO,
   FALLIDO_EQUIPOS_DANADOS,
+  FALLIDO_ESTUDIO_REALIZADO,
+  CANCELADO_MAL_CARGADO,
+  CANCELADO_DUPLICADO,
+  CANCELADO_OTRO_MOTIVO,
 };

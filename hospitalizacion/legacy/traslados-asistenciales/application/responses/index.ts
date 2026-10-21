@@ -204,6 +204,10 @@ export class TrasladoAsistencialDetalleDataRes extends TrasladoAsistencialDataRe
 export class FilesTrasladoDataRes {
   nombre: string;
   descripcion: string;
+  categoria?: 'sitio' | 'vehiculo';
+  ruta?: string;
+  tipo?: string;
+  tamano?: number;
 }
 
 export class TramosRes {

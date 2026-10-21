@@ -6,6 +6,7 @@ import {
   TrasladoMovilController,
   TrasladoRecursosController,
   TrasladoRevisionCentralController,
+  PrimarioSegmentadoController,
 } from './presentation/controllers';
 import {
   TrasladoCrudSource,
@@ -13,6 +14,9 @@ import {
   TrasladoRecursosImpl,
   TrasladoRevisionCentralImpl,
   SeguimientoTrasladoImpl,
+  PrimarioSegmentadoImpl,
+  RegistrosClinicosImpl,
+  VehiculosInvolucradosImpl,
 } from './infrastructure/repositories';
 import { RecursosCompartidosSource, DescargarPdfService } from './infrastructure/services';
 import { SeguimientoTrasladoController } from './presentation/controllers/seguimiento.controller';
@@ -27,6 +31,7 @@ import { TrasladosRealtimeGateway } from './presentation/gateways/traslados-real
     TrasladoMonitoreoController,
     TrasladoRevisionCentralController,
     SeguimientoTrasladoController,
+    PrimarioSegmentadoController,
   ],
   providers: [
     TrasladoRecursosImpl,
@@ -37,6 +42,9 @@ import { TrasladosRealtimeGateway } from './presentation/gateways/traslados-real
     RecursosCompartidosSource,
     DescargarPdfService,
     TrasladosRealtimeGateway,
+    PrimarioSegmentadoImpl,
+    RegistrosClinicosImpl,
+    VehiculosInvolucradosImpl,
   ],
 })
 export class LgcTasModule {}
