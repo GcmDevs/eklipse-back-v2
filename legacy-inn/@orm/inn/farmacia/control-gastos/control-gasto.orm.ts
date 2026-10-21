@@ -17,8 +17,7 @@ export class ControlGastoOrm {
   @Column({ name: 'INNDOCUME', type: 'int', nullable: true })
   ordenRelacionadaId: number | null;
 
-  @ManyToOne(() => DocumentoOrm, { nullable: true })
-  @JoinColumn({ name: 'INNDOCUME', referencedColumnName: 'id' })
+  // Documento almacenado en AMMEDICAL; se carga de forma explicita, sin join local.
   ordenRelacionada: DocumentoOrm | null;
 
   @Column({ name: 'ESTADO' })

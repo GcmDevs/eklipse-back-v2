@@ -1,5 +1,4 @@
-import { DocumentoOrm } from '@orm/inn/documentos';
-import { resolverOrdenRelacionada } from './orden-relacionada';
+import { documentosOrdenRelacionada, resolverOrdenRelacionada } from './orden-relacionada';
 import { Injectable } from '@nestjs/common';
 import { gcmContextFactory } from '@common/domain/types';
 import { AsociarOrdenControlGastosPayload, CargarFacturaControlGastosPayload } from '@farmacia/control-gastos/application/payloads';
@@ -12,16 +11,10 @@ import { INN_AUTHORITIES } from '@authorities/inventario';
 
 @Injectable()
 export class CargarFacturaControlGastoImpl extends BaseSource {
-  public async previewOrden(contextCode: string, tipo: number, consecutivo: string) {
-    const qr = this.dynamicQR(gcmContextFactory(contextCode as CargarFacturaControlGastosPayload['contextCode']));
-    try {
-      await qr.connect();
-      const orden = await resolverOrdenRelacionada(qr, tipo, consecutivo);
-      if (!orden) throw new Error('Indique el tipo y consecutivo de la orden');
-      return orden;
-    } finally {
-      await qr.release();
-    }
+  public async previewOrden(_contextCode: string, tipo: number, consecutivo: string) {
+    const orden = await resolverOrdenRelacionada(tipo, consecutivo);
+    if (!orden) throw new Error('Indique el tipo y consecutivo de la orden');
+    return orden;
   }
 
   public async asociarOrden(payload: AsociarOrdenControlGastosPayload) {
@@ -39,7 +32,7 @@ export class CargarFacturaControlGastoImpl extends BaseSource {
         throw new Error('No se puede asociar una orden a una solicitud rechazada o finalizada');
       }
       if (gasto.ordenRelacionadaId) throw new Error('La solicitud ya tiene una orden relacionada');
-      const orden = await resolverOrdenRelacionada(qr, payload.ordenRelacionadaTipoCode, payload.ordenRelacionadaConsecutivo);
+      const orden = await resolverOrdenRelacionada(payload.ordenRelacionadaTipoCode, payload.ordenRelacionadaConsecutivo);
       if (!orden) throw new Error('Indique el tipo y consecutivo de la orden');
       gasto.ordenRelacionadaId = orden.id;
       await rp.save(gasto);
@@ -100,7 +93,7 @@ export class CargarFacturaControlGastoImpl extends BaseSource {
       if (!controlGasto.ordenRelacionadaId) {
         throw new Error('Debe asociar una orden de compra o servicio antes de subir la factura');
       }
-      const documento = await qr.manager.getRepository(DocumentoOrm).findOne({ where: { id: controlGasto.ordenRelacionadaId } });
+      const documento = await documentosOrdenRelacionada().findOne({ where: { id: controlGasto.ordenRelacionadaId } });
       if (!documento || ![0, 19].includes(documento.tipoCode)) {
         throw new Error('La orden relacionada no esta disponible para visualizar');
       }
