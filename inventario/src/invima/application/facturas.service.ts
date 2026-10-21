@@ -144,12 +144,25 @@ export class FacturasInvimaService extends BaseSource {
       query.where('(f.numero LIKE :q OR f.proveedor LIKE :q OR f.nitProveedor LIKE :q)', {
         q: `%${input.q}%`,
       });
+    const estados = await query
+      .clone()
+      .select('f.estado', 'estado')
+      .addSelect('COUNT(*)', 'total')
+      .groupBy('f.estado')
+      .getRawMany();
+    const resumen = {
+      total: estados.reduce((sum, row) => sum + Number(row.total), 0),
+      borradores: Number(estados.find(row => row.estado === 'BORRADOR')?.total || 0),
+      revisadas: Number(estados.find(row => row.estado === 'REVISADA')?.total || 0),
+    };
+    if (input.estado) query.andWhere('f.estado = :estado', { estado: input.estado });
     const [facturas, total] = await query
       .orderBy('f.id', 'DESC')
       .skip((input.pagina - 1) * input.limite)
       .take(input.limite)
       .getManyAndCount();
-    if (!facturas.length) return { datos: [], total, pagina: input.pagina, limite: input.limite };
+    if (!facturas.length)
+      return { datos: [], total, resumen, pagina: input.pagina, limite: input.limite };
     const counts = this.conn
       .getRepository(InvimaFacturaItemOrm)
       .createQueryBuilder('i')
@@ -215,6 +228,7 @@ export class FacturasInvimaService extends BaseSource {
         };
       }),
       total,
+      resumen,
       pagina: input.pagina,
       limite: input.limite,
     };

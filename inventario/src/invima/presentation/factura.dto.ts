@@ -42,6 +42,7 @@ export class ListarFacturasDto {
   @Type(() => Number) @IsInt() @Min(1) pagina = 1;
   @Type(() => Number) @IsInt() @Min(1) @Max(100) limite = 20;
   @IsOptional() @Transform(trim) @IsString() @MaxLength(240) q?: string;
+  @IsOptional() @IsIn(['BORRADOR', 'REVISADA']) estado?: 'BORRADOR' | 'REVISADA';
 }
 export class EliminarFacturaDto {
   @Type(() => Number) @IsInt() @Min(1) version: number;

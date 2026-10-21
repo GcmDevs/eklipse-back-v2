@@ -112,6 +112,39 @@ const input = (f: any): GuardarFacturaDto => ({
   })),
 });
 describe('Facturas INVIMA, persistencia y revisión', () => {
+  it('filtra el estado antes de paginar y mantiene el resumen de todos los resultados de la búsqueda', async () => {
+    const { service, connection } = setup();
+    const summary: any = {};
+    for (const name of ['select', 'addSelect', 'groupBy']) summary[name] = jest.fn(() => summary);
+    summary.getRawMany = jest.fn(async () => [
+      { estado: 'BORRADOR', total: '21' },
+      { estado: 'REVISADA', total: '4' },
+    ]);
+    const query: any = {};
+    for (const name of ['where', 'andWhere', 'orderBy', 'skip', 'take'])
+      query[name] = jest.fn(() => query);
+    query.clone = jest.fn(() => summary);
+    query.getManyAndCount = jest.fn(async () => [[], 0]);
+    const getRepository = connection.getRepository;
+    connection.getRepository = (type: any) =>
+      type === InvimaFacturaOrm ? { createQueryBuilder: () => query } : getRepository(type);
+    const result = await service.listar({
+      pagina: 2,
+      limite: 20,
+      q: 'Proveedor',
+      estado: 'BORRADOR',
+    });
+    expect(query.where).toHaveBeenCalledWith(expect.any(String), { q: '%Proveedor%' });
+    expect(query.andWhere).toHaveBeenCalledWith('f.estado = :estado', { estado: 'BORRADOR' });
+    expect(query.skip).toHaveBeenCalledWith(20);
+    expect(query.take).toHaveBeenCalledWith(20);
+    expect(result).toMatchObject({
+      datos: [],
+      total: 0,
+      resumen: { total: 25, borradores: 21, revisadas: 4 },
+      pagina: 2,
+    });
+  });
   it('guarda borrador y evidencia sin PDF; crea productos distintos al revisar aunque repitan CUM', async () => {
     const { service, file, connection } = setup();
     const draft = await service.subir(file);

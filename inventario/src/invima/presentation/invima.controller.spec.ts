@@ -8,7 +8,7 @@ import { AuthoritiesGuard } from '@common/infrastructure/guards/authorities.guar
 import { fetchAuthsByUser } from '@common/infrastructure/services';
 import { InvimaController } from './invima.controller';
 import { FacturasInvimaController } from './facturas.controller';
-import { EliminarFacturaDto, GuardarFacturaDto } from './factura.dto';
+import { EliminarFacturaDto, GuardarFacturaDto, ListarFacturasDto } from './factura.dto';
 import { ConfirmarCandidatoDto, GuardarMedicamentoDto, PaginaCandidatoDto } from './invima.dto';
 
 jest.mock('@common/application/services', () => ({
@@ -90,6 +90,17 @@ describe('Permisos de las interfaces INVIMA', () => {
   );
 });
 describe('Validación de entrada INVIMA', () => {
+  it('solo permite los estados publicados para filtrar facturas', async () => {
+    expect(await validate(plainToInstance(ListarFacturasDto, { estado: 'BORRADOR' }))).toHaveLength(
+      0
+    );
+    expect(await validate(plainToInstance(ListarFacturasDto, { estado: 'REVISADA' }))).toHaveLength(
+      0
+    );
+    expect(
+      (await validate(plainToInstance(ListarFacturasDto, { estado: 'OTRO' }))).length
+    ).toBeGreaterThan(0);
+  });
   it('exige una versión positiva para eliminar borradores', async () => {
     for (const version of [undefined, 0, -1, 'abc'])
       expect(
