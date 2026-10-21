@@ -3,6 +3,9 @@ import {
   CriterioInvima,
   MedicamentoInput,
   ResultadoInvima,
+  esMedicamento,
+  FuenteInvima,
+  GRUPOS_REGISTROS,
 } from './invima.models';
 
 export const normalizarTexto = (value: string) =>
@@ -22,23 +25,39 @@ export function separarCum(value: string): [string, string] | null {
 }
 // SoQL literals escape quotes by doubling them. URLSearchParams performs URL encoding once.
 const literal = (value: string) => `'${value.replace(/'/g, "''")}'`;
-export function construirFiltro(input: MedicamentoInput, criterio: CriterioInvima): string {
-  const dispositivo = input.tipo === 'DISPOSITIVO';
+export function construirFiltro(
+  input: MedicamentoInput,
+  criterio: CriterioInvima,
+  fuente?: FuenteInvima
+): string {
+  const dispositivo = fuente ? fuente.id === 'dispositivos' : input.tipo === 'DISPOSITIVO';
+  const grupo =
+    fuente?.id === 'registros'
+      ? fuente.grupo
+      : !fuente && input.tipo
+        ? GRUPOS_REGISTROS[input.tipo]
+        : undefined;
+  const registros = fuente?.id === 'registros' || !!grupo;
+  if (registros && !grupo) throw new Error('La fuente de registros requiere un grupo.');
   if (criterio === 'CUM') {
+    if (!esMedicamento(input.tipo) || registros || dispositivo)
+      throw new Error('Esta categoría no se consulta por CUM.');
     const parts = separarCum(input.cum ?? '');
     if (!parts) throw new Error('El CUM debe tener formato expediente-consecutivo.');
     return `expedientecum = ${parts[0]} AND consecutivocum = ${parts[1]}`;
   }
   if (criterio === 'REGISTRO') {
-    return `replace(replace(upper(${dispositivo ? 'registro_sanitario' : 'registrosanitario'}), 'INVIMA', ''), ' ', '') = ${literal(normalizarRegistro(input.registroSanitario!))}`;
+    const filtro = `replace(replace(upper(${registros ? 'rsynso' : dispositivo ? 'registro_sanitario' : 'registrosanitario'}), 'INVIMA', ''), ' ', '') = ${literal(normalizarRegistro(input.registroSanitario!))}`;
+    return grupo ? `grupo = ${literal(grupo)} AND (${filtro})` : filtro;
   }
   // contains treats %, _ and quotes as text rather than LIKE wildcards.
-  return [...new Set(input.nombre.trim().split(/\s+/))]
+  const filtro = [...new Set(input.nombre.trim().split(/\s+/))]
     .map(
       word =>
         `contains(unaccent(upper(${dispositivo ? 'prodcuto' : 'producto'})), unaccent(upper(${literal(word)})))`
     )
     .join(' AND ');
+  return grupo ? `grupo = ${literal(grupo)} AND (${filtro})` : filtro;
 }
 export function evaluarCoincidencias(
   input: MedicamentoInput,
@@ -54,7 +73,7 @@ export function evaluarCoincidencias(
         ? 'No se encontró el registro sanitario indicado; las alternativas requieren revisión.'
         : 'No fue posible confirmar el registro sanitario indicado con cobertura completa.'
     );
-  if (input.tipo !== 'DISPOSITIVO' && input.cum && (criterio !== 'CUM' || !candidatos.length))
+  if (esMedicamento(input.tipo) && input.cum && (criterio !== 'CUM' || !candidatos.length))
     advertencias.push(
       'No se encontró el CUM indicado; los resultados alternativos requieren revisión.'
     );
@@ -80,7 +99,7 @@ export function evaluarCoincidencias(
   );
   const exacta =
     completa &&
-    input.tipo !== 'DISPOSITIVO' &&
+    esMedicamento(input.tipo) &&
     exhaustiva &&
     criterio === 'CUM' &&
     identidades.size === 1 &&

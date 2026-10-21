@@ -15,12 +15,13 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { RenglonFactura } from '../domain/factura.models';
+import { TIPOS_PRODUCTO_INVIMA } from '../domain/invima.models';
 const trim = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value);
 
 export class RenglonFacturaDto implements RenglonFactura {
   @IsOptional() @IsInt() @Min(1) id?: number;
   @IsOptional() @IsInt() @Min(1) productoVersion?: number;
-  @IsIn(['MEDICAMENTO', 'DISPOSITIVO', 'SIN_CLASIFICAR']) tipo: RenglonFactura['tipo'];
+  @IsIn(TIPOS_PRODUCTO_INVIMA) tipo: RenglonFactura['tipo'];
   @Transform(trim) @IsString() @MaxLength(240) descripcion: string;
   @Transform(trim) @IsString() @MaxLength(120) codigoDeclarado: string;
   @Transform(trim) @IsString() @MaxLength(100) registroSanitario: string;

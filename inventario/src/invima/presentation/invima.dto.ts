@@ -10,13 +10,14 @@ import {
   Min,
   MinLength,
 } from 'class-validator';
-import { MedicamentoInput } from '../domain/invima.models';
+import { MedicamentoInput, TIPOS_PRODUCTO_INVIMA } from '../domain/invima.models';
 
 const trim = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value);
 export class GuardarMedicamentoDto implements MedicamentoInput {
   @IsOptional()
-  @IsIn(['MEDICAMENTO', 'DISPOSITIVO', 'SIN_CLASIFICAR'])
+  @IsIn(TIPOS_PRODUCTO_INVIMA)
   tipo?: MedicamentoInput['tipo'];
+  @Transform(trim) @IsOptional() @IsString() @MaxLength(120) codigoDeclarado?: string;
   @Transform(trim) @IsString() @MinLength(1) @MaxLength(240) nombre: string;
   @Transform(trim)
   @IsOptional()
@@ -34,7 +35,7 @@ export class GuardarMedicamentoDto implements MedicamentoInput {
   @IsOptional() @IsInt() @Min(1) version?: number;
 }
 export class PaginaCandidatoDto {
-  @IsIn(['vigentes', 'vencidos', 'renovacion', 'otros', 'dispositivos']) fuenteId: string;
+  @IsIn(['vigentes', 'vencidos', 'renovacion', 'otros', 'dispositivos', 'registros']) fuenteId: string;
   @Type(() => Number) @IsInt() @Min(0) @Max(100000) offset: number = 0;
 }
 export class ConfirmarCandidatoDto {

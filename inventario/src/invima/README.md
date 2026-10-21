@@ -24,7 +24,7 @@ Para consultas reales (solo lectura), PowerShell:
     $env:TS_NODE_PROJECT='inventario/tsconfig.json'
     node -r ts-node/register inventario/scripts/verificar-fuentes-invima.ts
 
-El script valida metadatos y búsquedas por CUM, registro sanitario y nombre en las cuatro fuentes de medicamentos, y por registro/nombre en la fuente de dispositivos. Su salida no incluye el app token.
+El script valida metadatos y búsquedas por CUM, registro sanitario y nombre en las cuatro fuentes de medicamentos, y por registro/nombre en dispositivos y las 14 categorías RS/NSO. Ejecuta como máximo dos comprobaciones simultáneas y su salida no incluye el app token. El argumento --registros limita la comprobación a las categorías RS/NSO.
 
 ## Facturas PDF
 
@@ -61,13 +61,23 @@ Los números que una factura de dispositivos rotula CUM quedan en codigoDeclarad
 
 - GET/POST productos: listar o registrar.
 - El listado incluye cumVerificado y estadoCum, ambos anulables. Se extraen de la coincidencia confirmada o exacta de la última verificación de la versión actual, sin consultar nuevamente a INVIMA ni descargar el historial. Crear o editar devuelve ambos campos en null.
-- PUT productos/:id: editar; exige version actual y deja el producto pendiente.
+- PUT productos/:id: editar; exige version actual y deja solo ese producto pendiente, conservando el historial. Los productos de facturas revisadas se pueden editar individualmente: codigoDeclarado (opcional, texto de hasta 120 caracteres) corrige el código del renglón. La transacción bloquea primero la factura, sincroniza el renglón y producto e incrementa la versión y auditoría de la factura. Rechaza renglones excluidos y versiones de producto desactualizadas. No modifica el texto original del PDF. Una revisión completa posterior conserva laboratorio, concentración, forma y presentación añadidos desde la edición individual.
 - POST productos/:id/verificaciones: consultar y guardar una nueva evidencia.
 - GET productos/:id/verificaciones: historial de versiones, consultas y confirmaciones.
 - GET productos/:id/verificaciones/:verificacionId/candidatos?fuenteId=vigentes&offset=20: siguiente página de 20 candidatos.
 - POST productos/:id/verificaciones/:verificacionId/confirmacion con clave: confirmar un candidato ya guardado como evidencia.
 
 Cada consulta conserva datos ingresados, páginas consultadas, errores, versión del producto y fecha de actualización de las fuentes. Las confirmaciones son registros separados; no sobrescriben el resultado original. Una fuente fallida implica resultado INCOMPLETA y bloquea la confirmación hasta repetir la consulta.
+
+El selector incluye 15 categorías de productos verificables, más DISPOSITIVO (general, compatible con los datos anteriores) y SIN_CLASIFICAR. Medicamentos mantiene únicamente las cuatro fuentes CUM; las otras 14 categorías consultan RS/NSO. Los tipos se guardan en el JSON existente; no requieren migración SQL ni reclasificación de productos guardados.
+
+## Registros sanitarios y NSO por categoría
+
+INVIMA_DATASET_REGISTROS_GENERALES configura la fuente registros (por defecto ui32-p9f2). Incluye alimentos, aseo y limpieza, bebidas alcohólicas, biológicos, cosméticos, fitoterapéuticos, homeopáticos, médico quirúrgicos, medicamentos oficinales, odontológicos, plaguicidas, reactivo diagnóstico, reactivos in vitro y suplementos dietarios. GRUPOS_REGISTROS conserva los valores exactos oficiales, incluidos MED. OFICINALES y REACTIVOS  IN VITRO (dos espacios). OPERACIONES y Radiofármacos no se ofrecen. DISPOSITIVO sigue usando y4qt-w6tk; las evidencias anteriores de médico quirúrgicos conservan esa fuente y su paginación.
+
+Toda consulta RS/NSO exige el grupo guardado en la fuente y lo aplica también al paginar, aunque el filtro recibido internamente sea true. Se busca por rsynso y después por producto. El adaptador recupera titular, estadoregistro, grupo, expediente y fechas originales; cum y estadoCum son null y no se inventan presentación ni forma farmacéutica. Los metadatos y la lista de grupos publicados se validan y cachean cinco minutos: un grupo ausente, esquema incompatible o respuesta de otro grupo genera consulta incompleta. No se consulta esa categoría en los CUM ni se amplía a otros grupos cuando no hay resultados.
+
+Los candidatos RS/NSO necesitan confirmación manual, aun si hay uno solo por registro. Su fuente y grupo quedan en el historial; el endpoint de candidatos admite fuenteId=registros. El estado CUM de alimentos, dispositivos y médico quirúrgicos es «No aplica»; las demás categorías RS/NSO muestran «No disponible en esta fuente». El estado del registro se toma del candidato exacto o confirmado, sin deducir vigencia a partir de fechas. Una búsqueda sin resultados solo describe la cobertura de la fuente y el grupo consultados.
 
 El CUM exacto solo se asocia automáticamente con cobertura completa y sin contradicciones. Los registros sanitarios y nombres generan candidatos para revisar. Las filas repetidas por ingredientes o roles se deduplican en la consulta SoQL usando los campos de identidad/presentación. La concentración de las fuentes CUM no se interpreta como una concentración clínica comparable.
 

@@ -4,7 +4,7 @@ import {
   InvimaProductoOrm,
   InvimaVerificacionOrm,
 } from '@inn/orm/inn/invima';
-import { CandidatoInvima } from '../domain/invima.models';
+import { CandidatoInvima, GRUPOS_REGISTROS, TipoProductoInvima } from '../domain/invima.models';
 import { SocrataClient } from '../infrastructure/socrata.client';
 
 jest.mock('@common/infrastructure/services', () => ({
@@ -120,42 +120,168 @@ function setup(encontrado = candidato) {
   };
 }
 describe('Flujo de registro, consulta e historial INVIMA', () => {
-  it('consulta dispositivos por registro en su fuente y exige confirmación manual', async () => {
-    const { service, socrata } = setup();
-    socrata.consultar.mockImplementation(async (fuente, criterio, where) => ({
-      fuente,
-      criterio,
-      where,
-      consultadaEn: new Date().toISOString(),
-      actualizadaEn: 100,
-      paginas: [
-        {
-          offset: 0,
-          hayMas: false,
-          candidatos: [{ ...candidato, fuenteId: 'dispositivos', cum: null, estadoCum: null }],
-        },
-      ],
-    }));
-    const p = await service.crear({
-      tipo: 'DISPOSITIVO',
-      nombre: 'GUANTES',
-      registroSanitario: candidato.registroSanitario,
-    });
-    const v = await service.verificar(p.id);
-    expect(v.resultado).toBe('REVISION');
-    expect(v.evidencia.seleccionado).toBeNull();
-    expect(socrata.consultar).toHaveBeenCalledTimes(1);
-    expect(socrata.consultar.mock.calls[0][0].id).toBe('dispositivos');
-    expect(socrata.consultar.mock.calls[0][2]).toContain('registro_sanitario');
-    const confirmed = await service.confirmar(p.id, v.id, candidato.clave);
-    expect(confirmed.confirmacion.candidato.estadoCum).toBeNull();
-  });
+  it.each(['DISPOSITIVO', 'MEDICO_QUIRURGICOS'] as const)(
+    'consulta %s por registro en su fuente y exige confirmación manual',
+    async tipo => {
+      const { service, socrata } = setup();
+      socrata.consultar.mockImplementation(async (fuente, criterio, where) => ({
+        fuente,
+        criterio,
+        where,
+        consultadaEn: new Date().toISOString(),
+        actualizadaEn: 100,
+        paginas: [
+          {
+            offset: 0,
+            hayMas: false,
+            candidatos: [
+              {
+                ...candidato,
+                fuenteId: fuente.id,
+                grupo: fuente.grupo,
+                cum: null,
+                estadoCum: null,
+              },
+            ],
+          },
+        ],
+      }));
+      const p = await service.crear({
+        tipo,
+        nombre: 'GUANTES',
+        registroSanitario: candidato.registroSanitario,
+      });
+      const v = await service.verificar(p.id);
+      expect(v.resultado).toBe('REVISION');
+      expect(v.evidencia.seleccionado).toBeNull();
+      expect(socrata.consultar).toHaveBeenCalledTimes(1);
+      expect(socrata.consultar.mock.calls[0][0].id).toBe(
+        tipo === 'DISPOSITIVO' ? 'dispositivos' : 'registros'
+      );
+      expect(socrata.consultar.mock.calls[0][2]).toContain(
+        tipo === 'DISPOSITIVO' ? 'registro_sanitario' : 'rsynso'
+      );
+      const confirmed = await service.confirmar(p.id, v.id, candidato.clave);
+      expect(confirmed.confirmacion.candidato.estadoCum).toBeNull();
+    }
+  );
   it('no consulta fuentes para un producto sin clasificar', async () => {
     const { service, socrata } = setup();
     const p = await service.crear({ tipo: 'SIN_CLASIFICAR', nombre: 'Producto' });
     await expect(service.verificar(p.id)).rejects.toMatchObject({ status: 400 });
     expect(socrata.consultar).not.toHaveBeenCalled();
   });
+  it.each([false, true])(
+    'RS/NSO distingue una búsqueda vacía de un fallo de fuente (%s)',
+    async fallo => {
+      const { service, socrata } = setup();
+      socrata.consultar.mockImplementation(async (fuente, criterio, where) => ({
+        fuente,
+        criterio,
+        where,
+        consultadaEn: '',
+        actualizadaEn: 100,
+        paginas: [{ offset: 0, hayMas: false, candidatos: [] }],
+        ...(fallo ? { error: 'HTTP 503' } : {}),
+      }));
+      const p = await service.crear({
+        tipo: 'ALIMENTOS',
+        nombre: 'Alimento',
+        registroSanitario: 'RSA-123',
+      });
+      const v = await service.verificar(p.id);
+      expect(v.resultado).toBe(fallo ? 'INCOMPLETA' : 'SIN_COINCIDENCIAS');
+      expect(socrata.consultar.mock.calls.map(c => c[1])).toEqual(['REGISTRO', 'NOMBRE']);
+      expect(socrata.consultar.mock.calls.every(c => c[0].grupo === 'ALIMENTOS')).toBe(true);
+    }
+  );
+  it('pagina RS/NSO con el grupo guardado y confirma un candidato de la segunda página', async () => {
+    const { service, socrata } = setup();
+    socrata.consultar.mockImplementation(async (fuente, criterio, where) => ({
+      fuente,
+      criterio,
+      where,
+      consultadaEn: '',
+      actualizadaEn: 100,
+      paginas: [
+        {
+          offset: 0,
+          hayMas: true,
+          candidatos: [
+            { ...candidato, fuenteId: 'registros', grupo: 'ALIMENTOS', cum: null, estadoCum: null },
+          ],
+        },
+      ],
+    }));
+    socrata.pagina.mockImplementation(async () => ({
+      offset: 20,
+      hayMas: false,
+      candidatos: [
+        {
+          ...candidato,
+          clave: 'b'.repeat(64),
+          fuenteId: 'registros',
+          grupo: 'ALIMENTOS',
+          cum: null,
+          estadoCum: null,
+        },
+      ],
+    }));
+    const p = await service.crear({ tipo: 'ALIMENTOS', nombre: 'Alimento' });
+    const v = await service.verificar(p.id);
+    await service.candidatos(p.id, v.id, 'registros', 20);
+    expect(socrata.validarFuente).toHaveBeenCalledWith(
+      expect.objectContaining({ id: 'registros', grupo: 'ALIMENTOS' }),
+      true
+    );
+    const confirmed = await service.confirmar(p.id, v.id, 'b'.repeat(64));
+    expect(confirmed.confirmacion.candidato.grupo).toBe('ALIMENTOS');
+  });
+  it.each(Object.keys(GRUPOS_REGISTROS) as TipoProductoInvima[])(
+    'verifica %s solo en su grupo, guarda candidatos y confirma manualmente',
+    async tipo => {
+      const { service, socrata } = setup();
+      socrata.consultar.mockImplementation(async (fuente, criterio, where) => ({
+        fuente,
+        criterio,
+        where,
+        consultadaEn: new Date().toISOString(),
+        actualizadaEn: 100,
+        paginas: [
+          {
+            offset: 0,
+            hayMas: false,
+            candidatos: [
+              {
+                ...candidato,
+                fuenteId: 'registros',
+                grupo: fuente.grupo,
+                cum: null,
+                estadoCum: null,
+              },
+            ],
+          },
+        ],
+      }));
+      const p = await service.crear({
+        tipo,
+        nombre: 'Producto',
+        cum: '000123-01',
+        registroSanitario: candidato.registroSanitario,
+      });
+      const v = await service.verificar(p.id);
+      expect(v.resultado).toBe('REVISION');
+      expect(v.evidencia.seleccionado).toBeNull();
+      expect(socrata.consultar).toHaveBeenCalledTimes(1);
+      const [fuente, criterio, where] = socrata.consultar.mock.calls[0];
+      expect(fuente).toMatchObject({ id: 'registros', grupo: GRUPOS_REGISTROS[tipo] });
+      expect(criterio).toBe('REGISTRO');
+      expect(where).toContain(`grupo = '${GRUPOS_REGISTROS[tipo]}'`);
+      const confirmed = await service.confirmar(p.id, v.id, candidato.clave);
+      expect(confirmed.confirmacion.candidato.grupo).toBe(GRUPOS_REGISTROS[tipo]);
+      expect((await service.historial(p.id))[0].entrada.tipo).toBe(tipo);
+    }
+  );
   it.each(['Activo', '', 'Otro estado publicado'])(
     'devuelve el estado CUM exacto guardado: %s',
     async estadoCum => {

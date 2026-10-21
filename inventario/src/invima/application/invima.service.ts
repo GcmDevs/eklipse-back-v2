@@ -14,9 +14,16 @@ import {
   InvimaProductoOrm,
   InvimaVerificacionOrm,
   InvimaFacturaItemOrm,
+  InvimaFacturaOrm,
 } from '@inn/orm/inn/invima';
 import { construirFiltro, evaluarCoincidencias } from '../domain/comparacion';
-import { CriterioInvima, EvidenciaInvima, MedicamentoInput } from '../domain/invima.models';
+import {
+  CriterioInvima,
+  EvidenciaInvima,
+  MedicamentoInput,
+  esMedicamento,
+} from '../domain/invima.models';
+import { cumCompleto, RenglonFactura } from '../domain/factura.models';
 import { fuentesInvima, SocrataClient, TAMANO_PAGINA } from '../infrastructure/socrata.client';
 
 @Injectable()
@@ -161,21 +168,55 @@ export class InvimaService extends BaseSource {
   }
   async editar(
     id: number,
-    input: MedicamentoInput & { version?: number },
+    input: MedicamentoInput & { version?: number; codigoDeclarado?: string },
     transactionManager?: EntityManager
   ) {
-    if (
-      !transactionManager &&
-      (await this.conn.getRepository(InvimaFacturaItemOrm).findOneBy({ productoId: id }))
-    )
-      throw new BadRequestException(
-        'Edite este producto desde su factura para conservar la revisión.'
-      );
+    const linked = !transactionManager
+      ? await this.conn.getRepository(InvimaFacturaItemOrm).findOneBy({ productoId: id })
+      : null;
     const work = async (manager: EntityManager) => {
+      // Invoice edits and full review saves always lock the parent before its products.
+      const factura = linked
+        ? await manager.getRepository(InvimaFacturaOrm).findOne({
+            where: { id: linked.facturaId },
+            lock: { mode: 'pessimistic_write' },
+          })
+        : null;
+      const item = linked
+        ? await manager
+            .getRepository(InvimaFacturaItemOrm)
+            .findOneBy({ id: linked.id, productoId: id })
+        : null;
+      if (linked && (!factura || factura.estado !== 'REVISADA' || !item || item.excluido))
+        throw new ConflictException(
+          'El renglón ya no está disponible para editar. Recargue la factura.'
+        );
       const p = await this.producto(id, manager, true);
       if (input.version !== p.version)
         throw new ConflictException('El medicamento cambió. Actualice el listado antes de editar.');
-      p.datos = JSON.stringify(this.datos(input));
+      const datos = this.datos(input);
+      let codigoDeclarado: string | undefined;
+      if (item && factura) {
+        const anterior = JSON.parse(item.datos) as RenglonFactura;
+        codigoDeclarado =
+          input.codigoDeclarado?.trim() ??
+          (datos.tipo === 'MEDICAMENTO' ? datos.cum || '' : anterior.codigoDeclarado);
+        datos.cum =
+          datos.tipo === 'MEDICAMENTO' && cumCompleto(codigoDeclarado) ? codigoDeclarado : '';
+        item.datos = JSON.stringify({
+          ...anterior,
+          tipo: datos.tipo,
+          descripcion: datos.nombre,
+          codigoDeclarado,
+          registroSanitario: datos.registroSanitario,
+        });
+        await manager.getRepository(InvimaFacturaItemOrm).save(item);
+        factura.version++;
+        factura.actualizadoPor = Number(this.auth.id);
+        factura.fechaActualizacion = new Date();
+        await manager.getRepository(InvimaFacturaOrm).save(factura);
+      }
+      p.datos = JSON.stringify(datos);
       p.version++;
       p.ultimaVerificacionId = null;
       p.fechaActualizacion = new Date();
@@ -188,6 +229,7 @@ export class InvimaService extends BaseSource {
         cumVerificado: null,
         estadoCum: null,
         estadoRegistro: null,
+        ...(item ? { codigoDeclarado } : {}),
       };
     };
     return transactionManager ? work(transactionManager) : this.conn.transaction(work);
@@ -200,7 +242,7 @@ export class InvimaService extends BaseSource {
     const item = await this.conn.getRepository(InvimaFacturaItemOrm).findOneBy({ productoId });
     if (item?.excluido) throw new BadRequestException('El renglón está excluido de la factura.');
     const criterios: CriterioInvima[] = [
-      ...(entrada.cum && entrada.tipo !== 'DISPOSITIVO' ? ['CUM' as const] : []),
+      ...(entrada.cum && esMedicamento(entrada.tipo) ? ['CUM' as const] : []),
       ...(entrada.registroSanitario ? ['REGISTRO' as const] : []),
       'NOMBRE',
     ];
@@ -208,9 +250,10 @@ export class InvimaService extends BaseSource {
     let ultima: Awaited<ReturnType<SocrataClient['consultar']>>[] = [];
     let criterio: CriterioInvima = 'NOMBRE';
     for (criterio of criterios) {
-      const where = construirFiltro(entrada, criterio);
       ultima = await Promise.all(
-        fuentesInvima(entrada.tipo).map(f => this.socrata.consultar(f, criterio, where))
+        fuentesInvima(entrada.tipo).map(f =>
+          this.socrata.consultar(f, criterio, construirFiltro(entrada, criterio, f))
+        )
       );
       evidencia.consultas.push(...ultima);
       if (ultima.some(c => c.paginas.some(page => page.candidatos.length))) break;

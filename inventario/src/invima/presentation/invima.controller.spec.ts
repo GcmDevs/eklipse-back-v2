@@ -10,6 +10,7 @@ import { InvimaController } from './invima.controller';
 import { FacturasInvimaController } from './facturas.controller';
 import { EliminarFacturaDto, GuardarFacturaDto, ListarFacturasDto } from './factura.dto';
 import { ConfirmarCandidatoDto, GuardarMedicamentoDto, PaginaCandidatoDto } from './invima.dto';
+import { TIPOS_PRODUCTO_INVIMA } from '../domain/invima.models';
 
 jest.mock('@common/application/services', () => ({
   JWTServices: { decodeToken: () => ({ passWasReset: false }) },
@@ -90,6 +91,35 @@ describe('Permisos de las interfaces INVIMA', () => {
   );
 });
 describe('Validación de entrada INVIMA', () => {
+  it.each(TIPOS_PRODUCTO_INVIMA)(
+    'acepta %s en productos y renglones, conservando códigos declarados como texto',
+    async tipo => {
+      const producto = plainToInstance(GuardarMedicamentoDto, {
+        tipo,
+        nombre: 'Producto',
+        codigoDeclarado: '0000042',
+        version: 1,
+      });
+      expect(await validate(producto, { whitelist: true })).toHaveLength(0);
+      expect(producto.codigoDeclarado).toBe('0000042');
+      const factura = plainToInstance(GuardarFacturaDto, {
+        version: 1,
+        numero: 'F-1',
+        proveedor: 'Proveedor',
+        nitProveedor: '',
+        renglones: [
+          {
+            tipo,
+            descripcion: 'Producto',
+            codigoDeclarado: '0000042',
+            registroSanitario: '',
+            excluido: false,
+          },
+        ],
+      });
+      expect(await validate(factura, { whitelist: true })).toHaveLength(0);
+    }
+  );
   it('solo permite los estados publicados para filtrar facturas', async () => {
     expect(await validate(plainToInstance(ListarFacturasDto, { estado: 'BORRADOR' }))).toHaveLength(
       0

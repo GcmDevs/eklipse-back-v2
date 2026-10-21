@@ -1,7 +1,13 @@
 import { FacturasInvimaService } from './facturas.service';
 import { InvimaService } from './invima.service';
-import { InvimaFacturaItemOrm, InvimaFacturaOrm, InvimaProductoOrm } from '@inn/orm/inn/invima';
+import {
+  InvimaFacturaItemOrm,
+  InvimaFacturaOrm,
+  InvimaProductoOrm,
+  InvimaVerificacionOrm,
+} from '@inn/orm/inn/invima';
 import { GuardarFacturaDto } from '../presentation/factura.dto';
+import { GRUPOS_REGISTROS, TipoProductoInvima } from '../domain/invima.models';
 
 jest.mock('@common/infrastructure/services', () => ({
   BaseSource: class {
@@ -93,7 +99,7 @@ function setup() {
   const pdf: any = { extraer: jest.fn(async () => parsed) };
   const service = new FacturasInvimaService(request, pdf, invima);
   const file: any = { buffer: Buffer.from('pdf-de-prueba'), originalname: 'factura.pdf' };
-  return { service, pdf, connection, file };
+  return { service, invima, pdf, connection, file };
 }
 const input = (f: any): GuardarFacturaDto => ({
   version: f.version,
@@ -112,6 +118,130 @@ const input = (f: any): GuardarFacturaDto => ({
   })),
 });
 describe('Facturas INVIMA, persistencia y revisión', () => {
+  it('guarda y recarga todas las categorías en renglones distintos sin reinterpretar los códigos como CUM', async () => {
+    const { service, file } = setup();
+    const draft = await service.subir(file);
+    const edit = input(draft);
+    for (const tipo of Object.keys(GRUPOS_REGISTROS) as TipoProductoInvima[])
+      edit.renglones.push({
+        tipo,
+        descripcion: 'Producto ' + tipo,
+        codigoDeclarado: '0000123',
+        registroSanitario: 'RS-123',
+        excluido: false,
+      });
+    const saved = await service.guardar(draft.id, edit);
+    const reloaded = await service.detalle(saved.id);
+    for (const tipo of Object.keys(GRUPOS_REGISTROS)) {
+      const row = reloaded.renglones.find(r => r.tipo === tipo);
+      expect(row.codigoDeclarado).toBe('0000123');
+      expect(row.producto.datos).toMatchObject({ tipo, cum: '' });
+    }
+    expect(new Set(reloaded.renglones.map(r => r.producto.id)).size).toBe(
+      reloaded.renglones.length
+    );
+  });
+  it('edita un producto revisado, sincroniza el renglón y conserva historial, originales y otros productos', async () => {
+    const { service, invima, file, connection } = setup();
+    const draft = await service.subir(file);
+    const f = await service.guardar(draft.id, input(draft));
+    const p = f.renglones[0].producto;
+    const verification = await connection.getRepository(InvimaVerificacionOrm).save({
+      productoId: p.id,
+      versionProducto: 1,
+      entrada: JSON.stringify(p.datos),
+      resultado: 'EXACTA',
+      evidencia: JSON.stringify({ consultas: [], seleccionado: null, advertencias: [] }),
+    });
+    const updated = await invima.editar(p.id, {
+      ...p.datos,
+      version: 1,
+      nombre: 'GUANTES CORREGIDOS',
+      tipo: 'MEDICO_QUIRURGICOS',
+      codigoDeclarado: '0000042',
+      laboratorio: 'Laboratorio corregido',
+    });
+    expect(updated).toMatchObject({
+      version: 2,
+      resultado: 'PENDIENTE',
+      estadoCum: null,
+      codigoDeclarado: '0000042',
+    });
+    const reloaded = await service.detalle(f.id);
+    expect(reloaded.version).toBe(f.version + 1);
+    expect(reloaded.renglones[0]).toMatchObject({
+      tipo: 'MEDICO_QUIRURGICOS',
+      descripcion: 'GUANTES CORREGIDOS',
+      codigoDeclarado: '0000042',
+    });
+    expect(reloaded.renglones[0].producto.datos).toMatchObject({
+      tipo: 'MEDICO_QUIRURGICOS',
+      cum: '',
+    });
+    expect(reloaded.renglones[0].original).toEqual(f.renglones[0].original);
+    expect(reloaded.renglones[1].producto.version).toBe(1);
+    expect((await invima.historial(p.id))[0].id).toBe(verification.id);
+    await expect(service.guardar(f.id, input(f))).rejects.toMatchObject({ status: 409 });
+    await expect(invima.editar(p.id, { ...p.datos, version: 1 })).rejects.toMatchObject({
+      status: 409,
+    });
+    expect((await service.detalle(f.id)).version).toBe(reloaded.version);
+    // Saving the review later must not erase the individually edited metadata or reset it again.
+    const reviewed = await service.guardar(f.id, input(reloaded));
+    expect(reviewed.renglones[0].producto.version).toBe(2);
+    expect(reviewed.renglones[0].producto.datos.laboratorio).toBe('Laboratorio corregido');
+  });
+  it('revierte factura, renglón y producto si falla el guardado individual', async () => {
+    const { service, invima, file, connection } = setup();
+    const draft = await service.subir(file);
+    const f = await service.guardar(draft.id, input(draft));
+    const p = f.renglones[0].producto;
+    const original = connection.getRepository;
+    connection.getRepository = (type: any) => {
+      const repository = original(type);
+      return type === InvimaProductoOrm
+        ? {
+            ...repository,
+            save: async () => {
+              throw new Error('Fallo de escritura');
+            },
+          }
+        : repository;
+    };
+    connection.manager.getRepository = connection.getRepository;
+    await expect(invima.editar(p.id, { ...p.datos, version: 1, nombre: 'Cambio' })).rejects.toThrow(
+      'Fallo de escritura'
+    );
+    expect(await service.detalle(f.id)).toEqual(f);
+  });
+  it('rechaza editar un producto excluido o perteneciente a otro contexto', async () => {
+    const { service, invima, file } = setup();
+    const draft = await service.subir(file);
+    const f = await service.guardar(draft.id, input(draft));
+    const edit = input(f);
+    edit.renglones[0].excluido = true;
+    await service.guardar(f.id, edit);
+    const p = f.renglones[0].producto;
+    await expect(invima.editar(p.id, { ...p.datos, version: 1 })).rejects.toMatchObject({
+      status: 409,
+    });
+    await expect(setup().invima.editar(p.id, { ...p.datos, version: 1 })).rejects.toMatchObject({
+      status: 404,
+    });
+  });
+  it('conserva los dos tipos nuevos al guardar y recargar la revisión', async () => {
+    const { service, file } = setup();
+    const draft = await service.subir(file);
+    const edit = input(draft);
+    edit.renglones[0].tipo = 'ALIMENTOS';
+    edit.renglones[1].tipo = 'MEDICO_QUIRURGICOS';
+    const saved = await service.guardar(draft.id, edit);
+    expect(saved.renglones.map(r => r.producto.datos.tipo)).toEqual([
+      'ALIMENTOS',
+      'MEDICO_QUIRURGICOS',
+    ]);
+    expect(saved.renglones.every(r => r.producto.datos.cum === '')).toBe(true);
+  });
   it('filtra el estado antes de paginar y mantiene el resumen de todos los resultados de la búsqueda', async () => {
     const { service, connection } = setup();
     const summary: any = {};

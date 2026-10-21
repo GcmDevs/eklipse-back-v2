@@ -7,6 +7,7 @@ import {
   FuenteInvima,
   PaginaCandidatos,
   TipoProductoInvima,
+  GRUPOS_REGISTROS,
 } from '../domain/invima.models';
 
 export const TAMANO_PAGINA = 20;
@@ -36,8 +37,35 @@ const CAMPOS_DISPOSITIVOS = [
   'presentacion_comercial',
   'titular',
 ];
-const camposFuente = (f: FuenteInvima) => (f.id === 'dispositivos' ? CAMPOS_DISPOSITIVOS : CAMPOS);
+const CAMPOS_REGISTROS = [
+  'expediente',
+  'producto',
+  'rsynso',
+  'estadoregistro',
+  'titular',
+  'grupo',
+  'fechaexpedicion',
+  'fechavencimiento',
+];
+const camposFuente = (f: FuenteInvima) =>
+  f.id === 'registros' ? CAMPOS_REGISTROS : f.id === 'dispositivos' ? CAMPOS_DISPOSITIVOS : CAMPOS;
+const literal = (value: string) => `'${value.replace(/'/g, "''")}'`;
+function grupoFuente(fuente: FuenteInvima): string {
+  if (!fuente.grupo || !Object.values(GRUPOS_REGISTROS).includes(fuente.grupo))
+    throw new Error('La fuente de registros requiere un grupo de producto permitido.');
+  return fuente.grupo;
+}
 export function fuentesInvima(tipo?: TipoProductoInvima): FuenteInvima[] {
+  if (tipo === 'SIN_CLASIFICAR') return [];
+  if (tipo && GRUPOS_REGISTROS[tipo])
+    return [
+      {
+        id: 'registros',
+        nombre: 'Registros sanitarios y NSO',
+        dataset: process.env.INVIMA_DATASET_REGISTROS_GENERALES || 'ui32-p9f2',
+        grupo: GRUPOS_REGISTROS[tipo],
+      },
+    ];
   if (tipo === 'DISPOSITIVO')
     return [
       {
@@ -72,7 +100,10 @@ export function fuentesInvima(tipo?: TipoProductoInvima): FuenteInvima[] {
 
 @Injectable()
 export class SocrataClient {
-  private readonly metadata = new Map<string, { expires: number; updated: number }>();
+  private readonly metadata = new Map<
+    string,
+    { expires: number; updated: number; grupos?: string[] }
+  >();
 
   private async json(url: URL): Promise<any> {
     for (let intento = 0; intento < 2; intento++) {
@@ -113,7 +144,12 @@ export class SocrataClient {
       throw new Error('Identificador de fuente inválido.');
     const cacheKey = fuente.id + ':' + fuente.dataset;
     const cached = this.metadata.get(cacheKey);
-    if (!fresh && cached && cached.expires > Date.now()) return cached.updated;
+    const grupo = fuente.id === 'registros' ? grupoFuente(fuente) : undefined;
+    if (!fresh && cached && cached.expires > Date.now()) {
+      if (grupo && !cached.grupos?.includes(grupo))
+        throw new Error('El grupo no está publicado en esta fuente.');
+      return cached.updated;
+    }
     const meta = await this.json(
       new URL(`https://www.datos.gov.co/api/views/${fuente.dataset}.json`)
     );
@@ -125,16 +161,37 @@ export class SocrataClient {
     const updated = Number(meta.rowsUpdatedAt);
     if (!Number.isFinite(updated))
       throw new Error('La fuente no informa su fecha de actualización.');
-    this.metadata.set(cacheKey, { updated, expires: Date.now() + 300000 });
+    let grupos: string[] | undefined;
+    if (grupo) {
+      const url = new URL(`https://www.datos.gov.co/resource/${fuente.dataset}.json`);
+      url.search = new URLSearchParams({
+        $select: 'grupo',
+        $group: 'grupo',
+        $order: 'grupo',
+        $limit: '200',
+      }).toString();
+      const rows = await this.json(url);
+      if (!Array.isArray(rows) || rows.some(r => typeof r?.grupo !== 'string'))
+        throw new Error('La fuente no informa sus grupos de producto.');
+      grupos = rows.map(r => r.grupo);
+    }
+    this.metadata.set(cacheKey, { updated, grupos, expires: Date.now() + 300000 });
+    if (grupo && !grupos?.includes(grupo))
+      throw new Error('El grupo no está publicado en esta fuente.');
     return updated;
   }
 
   async pagina(fuente: FuenteInvima, where: string, offset: number): Promise<PaginaCandidatos> {
+    if (!/^[a-z0-9]{4}-[a-z0-9]{4}$/.test(fuente.dataset))
+      throw new Error('Identificador de fuente inválido.');
     const url = new URL(`https://www.datos.gov.co/resource/${fuente.dataset}.json`);
     const campos = camposFuente(fuente);
     url.search = new URLSearchParams({
       $select: `distinct ${campos.join(',')}`,
-      $where: where,
+      $where:
+        fuente.id === 'registros'
+          ? `grupo = ${literal(grupoFuente(fuente))} AND (${where})`
+          : where,
       $order: campos.join(','),
       $limit: String(TAMANO_PAGINA + 1),
       $offset: String(offset),
@@ -145,15 +202,20 @@ export class SocrataClient {
       rows.some(
         r =>
           !r ||
-          (fuente.id === 'dispositivos'
-            ? typeof r.prodcuto !== 'string' ||
-              typeof r.registro_sanitario !== 'string' ||
-              typeof r.estado_registro !== 'string'
-            : typeof r.producto !== 'string' ||
-              typeof r.registrosanitario !== 'string' ||
+          (fuente.id === 'registros'
+            ? typeof r.producto !== 'string' ||
+              typeof r.rsynso !== 'string' ||
               typeof r.estadoregistro !== 'string' ||
-              !/^\d+$/.test(r.expedientecum ?? '') ||
-              !/^\d+$/.test(r.consecutivocum ?? ''))
+              r.grupo !== fuente.grupo
+            : fuente.id === 'dispositivos'
+              ? typeof r.prodcuto !== 'string' ||
+                typeof r.registro_sanitario !== 'string' ||
+                typeof r.estado_registro !== 'string'
+              : typeof r.producto !== 'string' ||
+                typeof r.registrosanitario !== 'string' ||
+                typeof r.estadoregistro !== 'string' ||
+                !/^\d+$/.test(r.expedientecum ?? '') ||
+                !/^\d+$/.test(r.consecutivocum ?? ''))
       )
     )
       throw new Error('La fuente devolvió registros con estructura inesperada.');
@@ -189,6 +251,7 @@ export class SocrataClient {
   private candidato(fuente: FuenteInvima, row: Record<string, string>): CandidatoInvima {
     const raw = Object.fromEntries(camposFuente(fuente).map(c => [c, row[c] ?? '']));
     const dispositivo = fuente.id === 'dispositivos';
+    const registros = fuente.id === 'registros';
     return {
       clave: createHash('sha256')
         .update(fuente.dataset + JSON.stringify(raw))
@@ -196,14 +259,21 @@ export class SocrataClient {
       fuenteId: fuente.id,
       dataset: fuente.dataset,
       url: `https://www.datos.gov.co/d/${fuente.dataset}`,
-      cum: dispositivo ? null : `${row.expedientecum}-${row.consecutivocum}`,
+      cum: dispositivo || registros ? null : `${row.expedientecum}-${row.consecutivocum}`,
       nombre: dispositivo ? row.prodcuto : row.producto,
       titular: row.titular ?? '',
-      registroSanitario: dispositivo ? row.registro_sanitario : row.registrosanitario,
-      presentacion: (dispositivo ? row.presentacion_comercial : row.descripcioncomercial) ?? '',
-      formaFarmaceutica: row.formafarmaceutica ?? '',
+      registroSanitario: registros
+        ? row.rsynso
+        : dispositivo
+          ? row.registro_sanitario
+          : row.registrosanitario,
+      presentacion: registros
+        ? ''
+        : ((dispositivo ? row.presentacion_comercial : row.descripcioncomercial) ?? ''),
+      formaFarmaceutica: registros ? '' : (row.formafarmaceutica ?? ''),
       estadoRegistro: dispositivo ? row.estado_registro : row.estadoregistro,
-      estadoCum: dispositivo ? null : (row.estadocum ?? ''),
+      estadoCum: dispositivo || registros ? null : (row.estadocum ?? ''),
+      ...(registros ? { grupo: row.grupo, expediente: row.expediente ?? '' } : {}),
       ...(dispositivo ? { grupo: row.grupo, marca: row.marca === 'null' ? '' : row.marca } : {}),
       fechaExpedicion: row.fechaexpedicion ?? '',
       fechaVencimiento: (dispositivo ? row.fecha_vencimiento : row.fechavencimiento) ?? '',

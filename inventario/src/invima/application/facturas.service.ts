@@ -299,12 +299,20 @@ export class FacturasInvimaService extends BaseSource {
             if (!p || p.version !== incoming.productoVersion)
               throw new ConflictException('Un producto cambió. Recargue la factura.');
             const stored = JSON.parse(p.datos);
-            if (
-              Object.entries(entrada).some(
-                ([k, v]) => (stored[k] ?? (k === 'tipo' ? 'MEDICAMENTO' : '')) !== v
-              )
-            )
-              await this.invima.editar(p.id, { ...entrada, version: p.version }, manager);
+            const storedRow = JSON.parse(item.datos) as RenglonFactura;
+            if (Object.entries(datos).some(([k, v]) => storedRow[k] !== v))
+              await this.invima.editar(
+                p.id,
+                {
+                  ...stored,
+                  tipo: entrada.tipo,
+                  nombre: entrada.nombre,
+                  cum: entrada.cum,
+                  registroSanitario: entrada.registroSanitario,
+                  version: p.version,
+                },
+                manager
+              );
           } else item.productoId = (await this.invima.crear(entrada, manager)).id;
         }
         item.datos = JSON.stringify(datos);
