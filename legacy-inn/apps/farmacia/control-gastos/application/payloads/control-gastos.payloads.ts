@@ -86,15 +86,24 @@ export class GenerateReporteControlGastosPayload {
   detalle: ItemReporteControlGastosPayload[];
 }
 
-export class CargarFacturaControlGastosPayload {
-  @IsOptional()
-  @IsIn([0, 19])
-  ordenRelacionadaTipoCode?: 0 | 19;
+export class AsociarOrdenControlGastosPayload {
+  @IsInt()
+  @Min(1)
+  idControlGasto: number;
 
-  @IsOptional()
   @IsString()
+  contextCode: GcmContextCode;
+
+  @IsIn([0, 19])
+  ordenRelacionadaTipoCode: 0 | 19;
+
+  @IsString()
+  @IsNotEmpty()
   @MaxLength(50)
-  ordenRelacionadaConsecutivo?: string;
+  ordenRelacionadaConsecutivo: string;
+}
+
+export class CargarFacturaControlGastosPayload {
 
 
   @IsNumber()
