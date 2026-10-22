@@ -9,8 +9,16 @@ import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { createHash } from 'node:crypto';
 import { basename } from 'node:path';
+import { In } from 'typeorm';
 import { BaseSource } from '@common/infrastructure/services';
-import { InvimaFacturaItemOrm, InvimaFacturaOrm, InvimaProductoOrm } from '@inn/orm/inn/invima';
+import {
+  InvimaFacturaItemOrm,
+  InvimaFacturaOrm,
+  InvimaProductoOrm,
+  InvimaVerificacionOrm,
+  InvimaConfirmacionOrm,
+  ObservacionInvimaOrm,
+} from '@inn/orm/inn/invima';
 import {
   advertenciasRenglon,
   cumCompleto,
@@ -19,7 +27,11 @@ import {
 } from '../domain/factura.models';
 import { MedicamentoInput } from '../domain/invima.models';
 import { PdfExtractorService } from '../infrastructure/pdf-extractor.service';
-import { GuardarFacturaDto, ListarFacturasDto } from '../presentation/factura.dto';
+import {
+  GuardarFacturaDto,
+  ListarFacturasDto,
+  ObservacionFacturaDto,
+} from '../presentation/factura.dto';
 import { InvimaService } from './invima.service';
 
 @Injectable()
@@ -37,8 +49,124 @@ export class FacturasInvimaService extends BaseSource {
       where: { id },
       ...(lock ? { lock: { mode: 'pessimistic_write' as const } } : {}),
     });
-    if (!factura) throw new NotFoundException('Factura no encontrada en este contexto.');
+    if (!factura || factura.fechaEliminacion)
+      throw new NotFoundException('Factura no encontrada en este contexto.');
     return factura;
+  }
+  private observacion(row: ObservacionInvimaOrm) {
+    return {
+      texto: row.observacion || '',
+      version: row.observacionVersion || 0,
+      usuarioNombre: row.observacionUsuarioNombre || null,
+      fecha: row.observacionFecha || null,
+    };
+  }
+  async guardarObservacion(id: number, input: ObservacionFacturaDto) {
+    return this.conn.transaction(async manager => {
+      const factura = await this.factura(id, manager, true);
+      if (factura.estado !== 'REVISADA')
+        throw new BadRequestException('Guarde la revisión antes de escribir observaciones.');
+      const row = input.renglonId
+        ? await manager
+            .getRepository(InvimaFacturaItemOrm)
+            .findOneBy({ id: input.renglonId, facturaId: id })
+        : factura;
+      if (!row || ('excluido' in row && (row.excluido || !row.productoId)))
+        throw new NotFoundException('Producto no incluido en esta factura.');
+      const actual = this.observacion(row);
+      // A lost HTTP response can be retried without creating a false conflict.
+      if (actual.texto === input.texto) return actual;
+      if (actual.version !== input.version)
+        throw new ConflictException({
+          message: 'Otra persona cambió esta observación. Elija el texto que desea conservar.',
+          actual,
+        });
+      row.observacion = input.texto;
+      row.observacionVersion = actual.version + 1;
+      row.observacionFecha = new Date();
+      row.observacionUsuarioId = Number(this.auth.id);
+      const user = this.auth.user as any;
+      row.observacionUsuarioNombre = String(
+        user.fullName || user.nombreCompleto || user.name || this.auth.id
+      ).slice(0, 240);
+      if (input.renglonId) await manager.getRepository(InvimaFacturaItemOrm).save(row);
+      else await manager.getRepository(InvimaFacturaOrm).save(row);
+      return this.observacion(row);
+    });
+  }
+  async informe(id: number) {
+    // Parent lock makes notes, products and current verification one consistent snapshot.
+    return this.conn.transaction(async manager => {
+      const factura = await this.factura(id, manager, true);
+      if (factura.estado !== 'REVISADA')
+        throw new BadRequestException('Guarde la revisión antes de generar el PDF.');
+      const rows = await manager
+        .getRepository(InvimaFacturaItemOrm)
+        .find({ where: { facturaId: id, excluido: false }, order: { orden: 'ASC' } });
+      const ids = rows.flatMap(r => (r.productoId ? [r.productoId] : []));
+      const productos = ids.length
+        ? await manager.getRepository(InvimaProductoOrm).find({ where: { id: In(ids) } })
+        : [];
+      const verificationIds = productos.flatMap(p =>
+        p.ultimaVerificacionId ? [p.ultimaVerificacionId] : []
+      );
+      const verificaciones = verificationIds.length
+        ? await manager
+            .getRepository(InvimaVerificacionOrm)
+            .find({ where: { id: In(verificationIds) } })
+        : [];
+      const confirmaciones = verificationIds.length
+        ? await manager
+            .getRepository(InvimaConfirmacionOrm)
+            .find({ where: { verificacionId: In(verificationIds) } })
+        : [];
+      return {
+        numero: factura.numero,
+        proveedor: factura.proveedor,
+        nitProveedor: factura.nitProveedor,
+        fecha: factura.fecha,
+        observacion: this.observacion(factura),
+        generadoEn: new Date(),
+        productos: rows.map(row => {
+          const p = productos.find(p => p.id === row.productoId);
+          const v =
+            p &&
+            verificaciones.find(
+              v =>
+                v.id === p.ultimaVerificacionId &&
+                v.productoId === p.id &&
+                v.versionProducto === p.version
+            );
+          const c = v && confirmaciones.find(c => c.verificacionId === v.id);
+          const evidencia = v ? JSON.parse(v.evidencia) : null;
+          return {
+            orden: row.orden,
+            datos: JSON.parse(row.datos),
+            observacion: this.observacion(row),
+            resultado: c ? 'CONFIRMADA' : v?.resultado || 'PENDIENTE',
+            candidato: c
+              ? JSON.parse(c.candidato)
+              : v?.resultado === 'EXACTA'
+                ? evidencia?.seleccionado
+                : null,
+            verificacion: v
+              ? {
+                  fecha: v.fecha,
+                  usuarioNombre: v.usuarioNombre,
+                  confirmadoPor: c?.usuarioNombre,
+                  confirmadoEn: c?.fecha,
+                  fuentes: evidencia?.consultas?.map(q => ({
+                    nombre: q.fuente.nombre,
+                    dataset: q.fuente.dataset,
+                    error: q.error,
+                  })),
+                  advertencias: evidencia?.advertencias,
+                }
+              : null,
+          };
+        }),
+      };
+    });
   }
   async subir(file: Express.Multer.File) {
     if (!file?.buffer) throw new BadRequestException('Seleccione una factura PDF.');
@@ -70,6 +198,8 @@ export class FacturasInvimaService extends BaseSource {
           actualizadoPor: Number(this.auth.id),
           fechaCreacion: now,
           fechaActualizacion: now,
+          fechaEliminacion: null,
+          eliminadoPor: null,
         });
         const rows = parsed.renglones.map((r, index) => ({
           facturaId: factura.id,
@@ -123,6 +253,7 @@ export class FacturasInvimaService extends BaseSource {
     );
     return {
       ...factura,
+      observacion: this.observacion(factura),
       advertencias: JSON.parse(factura.advertencias),
       renglones: rows.map(r => {
         const datos = JSON.parse(r.datos) as RenglonFactura;
@@ -130,6 +261,7 @@ export class FacturasInvimaService extends BaseSource {
           id: r.id,
           orden: r.orden,
           excluido: r.excluido,
+          observacion: this.observacion(r),
           ...datos,
           original: JSON.parse(r.original) as RenglonExtraido,
           advertencias: advertenciasRenglon(datos),
@@ -236,22 +368,14 @@ export class FacturasInvimaService extends BaseSource {
   async eliminar(id: number, version: number): Promise<void> {
     await this.conn.transaction(async manager => {
       const factura = await this.factura(id, manager, true);
-      if (factura.estado !== 'BORRADOR')
-        throw new ConflictException('Solo se pueden eliminar facturas en borrador.');
       if (factura.version !== version)
         throw new ConflictException('La factura cambió. Actualice el listado antes de eliminar.');
-      const items = manager.getRepository(InvimaFacturaItemOrm);
-      const renglones = await items.find({ where: { facturaId: id } });
-      if (renglones.some(r => r.productoId !== null))
-        throw new ConflictException('La factura tiene productos asociados y no se puede eliminar.');
-      await items.delete({ facturaId: id });
-      const deleted = await manager.getRepository(InvimaFacturaOrm).delete({
-        id,
-        version,
-        estado: 'BORRADOR',
-      });
-      if (deleted.affected !== 1)
-        throw new ConflictException('La factura cambió. Actualice el listado antes de eliminar.');
+      factura.fechaEliminacion = new Date();
+      factura.eliminadoPor = Number(this.auth.id);
+      factura.fechaActualizacion = factura.fechaEliminacion;
+      factura.actualizadoPor = Number(this.auth.id);
+      factura.version++;
+      await manager.getRepository(InvimaFacturaOrm).save(factura);
     });
   }
   async guardar(id: number, input: GuardarFacturaDto) {

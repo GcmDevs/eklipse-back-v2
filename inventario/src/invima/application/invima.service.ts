@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
-import { EntityManager, In } from 'typeorm';
+import { EntityManager } from 'typeorm';
 import { BaseSource } from '@common/infrastructure/services';
 import {
   InvimaConfirmacionOrm,
@@ -45,6 +45,16 @@ export class InvimaService extends BaseSource {
     };
   }
   private async producto(id: number, manager = this.conn.manager, lock = false) {
+    const item = await manager.getRepository(InvimaFacturaItemOrm).findOneBy({ productoId: id });
+    if (item) {
+      // Lock the parent before the product, as review, editing and deletion do.
+      const factura = await manager.getRepository(InvimaFacturaOrm).findOne({
+        where: { id: item.facturaId },
+        ...(lock ? { lock: { mode: 'pessimistic_write' as const } } : {}),
+      });
+      if (!factura || factura.fechaEliminacion)
+        throw new NotFoundException('Producto no encontrado en este contexto.');
+    }
     const producto = await manager.getRepository(InvimaProductoOrm).findOne({
       where: { id },
       ...(lock ? { lock: { mode: 'pessimistic_write' as const } } : {}),
@@ -82,16 +92,17 @@ export class InvimaService extends BaseSource {
   async listar(ids?: number[], sinFactura = false) {
     if (ids && !ids.length) return [];
     const repository = this.conn.getRepository(InvimaProductoOrm);
-    const productos = sinFactura
-      ? await repository
-          .createQueryBuilder('p')
-          .where('NOT EXISTS (SELECT 1 FROM EKINNIVFACTURAITEM i WHERE i.PRODUCTOID = p.OID)')
-          .orderBy('p.id', 'DESC')
-          .getMany()
-      : await repository.find({
-          ...(ids ? { where: { id: In(ids) } } : {}),
-          order: { id: 'DESC' },
-        });
+    const visibles = repository
+      .createQueryBuilder('p')
+      .where(
+        'NOT EXISTS (SELECT 1 FROM EKINNIVFACTURAITEM i INNER JOIN EKINNIVFACTURA f ON f.OID = i.FACTURAID WHERE i.PRODUCTOID = p.OID AND f.FECHAELIMINA IS NOT NULL)'
+      );
+    if (sinFactura)
+      visibles.andWhere(
+        'NOT EXISTS (SELECT 1 FROM EKINNIVFACTURAITEM i WHERE i.PRODUCTOID = p.OID)'
+      );
+    if (ids) visibles.andWhere('p.id IN (:...ids)', { ids });
+    const productos = await visibles.orderBy('p.id', 'DESC').getMany();
     // One joined query avoids loading the (potentially large) complete evidence for the list.
     const candidatoSql = `CASE WHEN c.id IS NOT NULL THEN c.candidato
       WHEN v.resultado = 'EXACTA' THEN JSON_QUERY(v.evidencia, '$.seleccionado') END`;
@@ -187,7 +198,9 @@ export class InvimaService extends BaseSource {
             .getRepository(InvimaFacturaItemOrm)
             .findOneBy({ id: linked.id, productoId: id })
         : null;
-      if (linked && (!factura || factura.estado !== 'REVISADA' || !item || item.excluido))
+      if (linked && (!factura || factura.fechaEliminacion))
+        throw new NotFoundException('Factura no encontrada en este contexto.');
+      if (linked && (factura.estado !== 'REVISADA' || !item || item.excluido))
         throw new ConflictException(
           'El renglón ya no está disponible para editar. Recargue la factura.'
         );
@@ -294,6 +307,7 @@ export class InvimaService extends BaseSource {
     return Promise.all(verificaciones.map(v => this.detalle(v)));
   }
   async candidatos(productoId: number, id: number, fuenteId: string, offset: number) {
+    await this.producto(productoId);
     const v = await this.verificacion(productoId, id);
     const evidencia = JSON.parse(v.evidencia) as EvidenciaInvima;
     const consulta = [...evidencia.consultas].reverse().find(c => c.fuente.id === fuenteId);
@@ -313,6 +327,7 @@ export class InvimaService extends BaseSource {
       );
     const page = await this.socrata.pagina(consulta.fuente, consulta.where, offset);
     await this.conn.transaction(async manager => {
+      await this.producto(productoId, manager, true);
       const locked = await this.verificacion(productoId, id, manager, true);
       const current = JSON.parse(locked.evidencia) as EvidenciaInvima;
       const target = [...current.consultas].reverse().find(c => c.fuente.id === fuenteId)!;

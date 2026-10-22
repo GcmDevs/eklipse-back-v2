@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, DeleteDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity('EKINNIVPRODUCTO')
 export class InvimaProductoOrm {
@@ -36,8 +36,18 @@ export class InvimaConfirmacionOrm {
   @Column({ name: 'FECHA', type: 'datetime2' }) fecha: Date;
 }
 
+export abstract class ObservacionInvimaOrm {
+  @Column({ name: 'OBSERVACION', type: 'nvarchar', length: 'MAX', default: '' })
+  observacion: string;
+  @Column({ name: 'OBSVERSION', type: 'int', default: 0 }) observacionVersion: number;
+  @Column({ name: 'OBSUSUARIO', type: 'int', nullable: true }) observacionUsuarioId: number | null;
+  @Column({ name: 'OBSNOMBRE', type: 'nvarchar', length: 240, nullable: true })
+  observacionUsuarioNombre: string | null;
+  @Column({ name: 'OBSFECHA', type: 'datetime2', nullable: true }) observacionFecha: Date | null;
+}
+
 @Entity('EKINNIVFACTURA')
-export class InvimaFacturaOrm {
+export class InvimaFacturaOrm extends ObservacionInvimaOrm {
   @PrimaryGeneratedColumn({ name: 'OID' }) id: number;
   @Column({ name: 'NUMERO', type: 'nvarchar', length: 100 }) numero: string;
   @Column({ name: 'PROVEEDOR', type: 'nvarchar', length: 240 }) proveedor: string;
@@ -55,10 +65,13 @@ export class InvimaFacturaOrm {
   @Column({ name: 'ACTUALIZADOPOR', type: 'int' }) actualizadoPor: number;
   @Column({ name: 'FECHACREA', type: 'datetime2' }) fechaCreacion: Date;
   @Column({ name: 'FECHAACT', type: 'datetime2' }) fechaActualizacion: Date;
+  @DeleteDateColumn({ name: 'FECHAELIMINA', type: 'datetime2', nullable: true })
+  fechaEliminacion: Date | null;
+  @Column({ name: 'ELIMINADOPOR', type: 'int', nullable: true }) eliminadoPor: number | null;
 }
 
 @Entity('EKINNIVFACTURAITEM')
-export class InvimaFacturaItemOrm {
+export class InvimaFacturaItemOrm extends ObservacionInvimaOrm {
   @PrimaryGeneratedColumn({ name: 'OID' }) id: number;
   @Column({ name: 'FACTURAID', type: 'int' }) facturaId: number;
   @Column({ name: 'PRODUCTOID', type: 'int', nullable: true }) productoId: number | null;

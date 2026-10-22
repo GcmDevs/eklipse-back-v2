@@ -3,6 +3,8 @@ import {
   InvimaConfirmacionOrm,
   InvimaProductoOrm,
   InvimaVerificacionOrm,
+  InvimaFacturaItemOrm,
+  InvimaFacturaOrm,
 } from '@inn/orm/inn/invima';
 import { CandidatoInvima, GRUPOS_REGISTROS, TipoProductoInvima } from '../domain/invima.models';
 import { SocrataClient } from '../infrastructure/socrata.client';
@@ -50,8 +52,34 @@ function database() {
       },
       createQueryBuilder: () => {
         const builder: any = {};
-        for (const key of ['innerJoin', 'leftJoin', 'select', 'addSelect'])
+        let sinFactura = false;
+        let ids: number[] | undefined;
+        for (const key of ['innerJoin', 'leftJoin', 'select', 'addSelect', 'orderBy'])
           builder[key] = () => builder;
+        for (const key of ['where', 'andWhere'])
+          builder[key] = (sql: string, params?: any) => {
+            if (sql.includes('NOT EXISTS (SELECT 1 FROM EKINNIVFACTURAITEM i WHERE'))
+              sinFactura = true;
+            if (params?.ids) ids = params.ids;
+            return builder;
+          };
+        builder.getMany = async () =>
+          copy(
+            rows
+              .filter(r => {
+                const item = (tables.get(InvimaFacturaItemOrm) || []).find(
+                  i => i.productoId === r.id
+                );
+                const factura =
+                  item && (tables.get(InvimaFacturaOrm) || []).find(f => f.id === item.facturaId);
+                return (
+                  (!ids || ids.includes(r.id)) &&
+                  (!sinFactura || !item) &&
+                  !factura?.fechaEliminacion
+                );
+              })
+              .sort((a, b) => b.id - a.id)
+          );
         builder.getRawMany = async () =>
           (tables.get(InvimaProductoOrm) ?? [])
             .filter(p =>

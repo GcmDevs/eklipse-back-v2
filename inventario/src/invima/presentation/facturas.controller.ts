@@ -3,12 +3,15 @@ import {
   Controller,
   Delete,
   Get,
+  Header,
   HttpCode,
   Param,
+  Patch,
   ParseIntPipe,
   Post,
   Put,
   Query,
+  StreamableFile,
   UploadedFile,
   UseFilters,
   UseInterceptors,
@@ -21,7 +24,13 @@ import { ADMIN_AUTHORITY } from '@common/application/constants';
 import { INN_AUTHORITIES } from '@inn/authorities';
 import { FacturasInvimaService } from '../application/facturas.service';
 import { limitePdfBytes } from '../infrastructure/pdf-extractor.service';
-import { EliminarFacturaDto, GuardarFacturaDto, ListarFacturasDto } from './factura.dto';
+import {
+  EliminarFacturaDto,
+  GuardarFacturaDto,
+  ListarFacturasDto,
+  ObservacionFacturaDto,
+} from './factura.dto';
+import { InformeInvimaPdfService } from '../infrastructure/informe-pdf.service';
 import { InvimaDatabaseFilter } from './invima-database.filter';
 
 @ApiTags('Facturas INVIMA')
@@ -29,7 +38,24 @@ import { InvimaDatabaseFilter } from './invima-database.filter';
 @UseFilters(InvimaDatabaseFilter)
 @Controller('v4/inn/invima/facturas')
 export class FacturasInvimaController {
-  constructor(private readonly service: FacturasInvimaService) {}
+  constructor(
+    private readonly service: FacturasInvimaService,
+    private readonly pdf: InformeInvimaPdfService
+  ) {}
+  @Authorities([ADMIN_AUTHORITY, INN_AUTHORITIES.PRODUCTOS.VERIFICACION_INVIMA])
+  @Patch(':id/observaciones')
+  observacion(@Param('id', ParseIntPipe) id: number, @Body() input: ObservacionFacturaDto) {
+    return this.service.guardarObservacion(id, input);
+  }
+  @Authorities([ADMIN_AUTHORITY, INN_AUTHORITIES.PRODUCTOS.VERIFICACION_INVIMA])
+  @Get(':id/informe.pdf')
+  @Header('Cache-Control', 'private, no-store')
+  async informe(@Param('id', ParseIntPipe) id: number) {
+    return new StreamableFile(await this.pdf.generar(await this.service.informe(id)), {
+      type: 'application/pdf',
+      disposition: `attachment; filename="verificacion-invima-${id}.pdf"`,
+    });
+  }
   @Authorities([ADMIN_AUTHORITY, INN_AUTHORITIES.PRODUCTOS.VERIFICACION_INVIMA])
   @Post()
   @ApiConsumes('multipart/form-data')

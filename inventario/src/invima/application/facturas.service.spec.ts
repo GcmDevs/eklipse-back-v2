@@ -5,6 +5,7 @@ import {
   InvimaFacturaOrm,
   InvimaProductoOrm,
   InvimaVerificacionOrm,
+  InvimaConfirmacionOrm,
 } from '@inn/orm/inn/invima';
 import { GuardarFacturaDto } from '../presentation/factura.dto';
 import { GRUPOS_REGISTROS, TipoProductoInvima } from '../domain/invima.models';
@@ -25,6 +26,7 @@ function setup() {
   const getRepository = (type: any): any => {
     if (!tables.has(type)) tables.set(type, []);
     const rows = tables.get(type)!;
+    const activo = (r: any) => type !== InvimaFacturaOrm || !r.fechaEliminacion;
     const match = (r: any, where: any) =>
       Object.entries(where || {}).every(([k, v]: [string, any]) =>
         v?._type === 'in' ? v._value.includes(r[k]) : r[k] === v
@@ -39,9 +41,11 @@ function setup() {
     return {
       create: copy,
       save,
-      findOne: async ({ where }: any) => copy(rows.find(r => match(r, where)) || null),
-      findOneBy: async (where: any) => copy(rows.find(r => match(r, where)) || null),
-      find: async ({ where }: any = {}) => copy(rows.filter(r => match(r, where))),
+      findOne: async ({ where, withDeleted }: any) =>
+        copy(rows.find(r => (withDeleted || activo(r)) && match(r, where)) || null),
+      findOneBy: async (where: any) => copy(rows.find(r => activo(r) && match(r, where)) || null),
+      find: async ({ where, withDeleted }: any = {}) =>
+        copy(rows.filter(r => (withDeleted || activo(r)) && match(r, where))),
       delete: jest.fn(async (where: any) => {
         let affected = 0;
         for (let i = rows.length - 1; i >= 0; i--)
@@ -53,8 +57,29 @@ function setup() {
       }),
       createQueryBuilder: () => {
         const q: any = {};
-        for (const k of ['innerJoin', 'leftJoin', 'select', 'addSelect', 'andWhere'])
-          q[k] = () => q;
+        let sinFactura = false;
+        let ids: number[] | undefined;
+        for (const k of ['innerJoin', 'leftJoin', 'select', 'addSelect', 'orderBy']) q[k] = () => q;
+        for (const k of ['where', 'andWhere'])
+          q[k] = (sql: string, params?: any) => {
+            if (sql.includes('NOT EXISTS (SELECT 1 FROM EKINNIVFACTURAITEM i WHERE'))
+              sinFactura = true;
+            if (params?.ids) ids = params.ids;
+            return q;
+          };
+        q.getMany = async () =>
+          copy(
+            rows.filter(r => {
+              const item = (tables.get(InvimaFacturaItemOrm) || []).find(
+                i => i.productoId === r.id
+              );
+              const factura =
+                item && (tables.get(InvimaFacturaOrm) || []).find(f => f.id === item.facturaId);
+              return (
+                (!ids || ids.includes(r.id)) && (!sinFactura || !item) && !factura?.fechaEliminacion
+              );
+            })
+          );
         q.getRawMany = async () => [];
         return q;
       },
@@ -116,6 +141,141 @@ const input = (f: any): GuardarFacturaDto => ({
     registroSanitario: r.registroSanitario,
     excluido: r.excluido,
   })),
+});
+describe('Observaciones e informe de facturas revisadas', () => {
+  it('rechaza observaciones e informe antes de guardar la revisión', async () => {
+    const { service, file } = setup();
+    const f = await service.subir(file);
+    await expect(service.guardarObservacion(f.id, { texto: 'nota', version: 0 })).rejects.toThrow(
+      'Guarde la revisión'
+    );
+    await expect(service.informe(f.id)).rejects.toThrow('Guarde la revisión');
+  });
+  it('guarda notas independientes con auditoría sin alterar producto, revisión ni historial', async () => {
+    const { service, file } = setup();
+    const draft = await service.subir(file);
+    const f = await service.guardar(draft.id, input(draft));
+    const general = await service.guardarObservacion(f.id, {
+      texto: 'General\nSegunda línea',
+      version: 0,
+    });
+    const row = await service.guardarObservacion(f.id, {
+      texto: 'Revisar lote',
+      version: 0,
+      renglonId: f.renglones[0].id,
+    });
+    expect(general).toMatchObject({
+      texto: 'General\nSegunda línea',
+      version: 1,
+      usuarioNombre: 'Revisor',
+    });
+    expect(row.version).toBe(1);
+    expect(Number.isFinite(general.fecha.getTime())).toBe(true);
+    const reload = await service.detalle(f.id);
+    expect(reload.version).toBe(f.version);
+    expect(reload.renglones[0].producto.version).toBe(f.renglones[0].producto.version);
+    expect(reload.renglones[0].observacion.texto).toBe('Revisar lote');
+    expect(reload.renglones[1].observacion.version).toBe(0);
+    const edit = input(reload);
+    edit.renglones[0].descripcion = 'Producto corregido';
+    const updated = await service.guardar(f.id, edit);
+    expect(updated.observacion.texto).toBe(general.texto);
+    expect(updated.renglones[0].observacion.texto).toBe(row.texto);
+    const report = await service.informe(f.id);
+    expect(report.productos[0]).toMatchObject({
+      resultado: 'PENDIENTE',
+      observacion: { texto: 'Revisar lote' },
+      candidato: null,
+    });
+    expect(report.observacion.texto).toBe(general.texto);
+  });
+  it('permite limpiar notas y reintentar respuestas perdidas, detecta conflictos sin sobrescribir', async () => {
+    const { service, file } = setup();
+    const d = await service.subir(file);
+    const f = await service.guardar(d.id, input(d));
+    const a = await service.guardarObservacion(f.id, { texto: 'uno', version: 0 });
+    expect(await service.guardarObservacion(f.id, { texto: 'uno', version: 0 })).toEqual(a);
+    try {
+      await service.guardarObservacion(f.id, { texto: 'otro', version: 0 });
+      throw new Error('Debió fallar');
+    } catch (e) {
+      expect(e.getStatus()).toBe(409);
+      expect(e.getResponse().actual).toMatchObject({ texto: 'uno', version: 1 });
+    }
+    const clear = await service.guardarObservacion(f.id, { texto: '', version: 1 });
+    expect(clear).toMatchObject({ texto: '', version: 2 });
+  });
+  it('no permite anotar renglones de otra factura, excluidos, eliminados ni de otro contexto', async () => {
+    const { service, file } = setup();
+    const d = await service.subir(file);
+    const f = await service.guardar(d.id, input(d));
+    await expect(
+      service.guardarObservacion(f.id, { texto: 'x', version: 0, renglonId: 999 })
+    ).rejects.toThrow('Producto no incluido');
+    const edit = input(f);
+    edit.renglones[0].excluido = true;
+    const updated = await service.guardar(f.id, edit);
+    await expect(
+      service.guardarObservacion(f.id, { texto: 'x', version: 0, renglonId: f.renglones[0].id })
+    ).rejects.toThrow('Producto no incluido');
+    expect((await service.informe(f.id)).productos).toHaveLength(1);
+    const other = setup();
+    await expect(other.service.informe(f.id)).rejects.toThrow('Factura no encontrada');
+    await service.eliminar(f.id, updated.version);
+    await expect(service.guardarObservacion(f.id, { texto: 'x', version: 0 })).rejects.toThrow(
+      'Factura no encontrada'
+    );
+    await expect(service.informe(f.id)).rejects.toThrow('Factura no encontrada');
+  });
+  it('el informe usa únicamente la verificación vigente y el candidato confirmado', async () => {
+    const { service, file, connection } = setup();
+    const d = await service.subir(file);
+    const f = await service.guardar(d.id, input(d));
+    const repo = connection.getRepository(InvimaProductoOrm);
+    const p = await repo.findOneBy({ id: f.renglones[0].producto.id });
+    const candidate = {
+      nombre: 'Encontrado',
+      cum: '000123-01',
+      estadoCum: 'Inactivo',
+      estadoRegistro: 'Vigente',
+    };
+    const v = await connection
+      .getRepository(InvimaVerificacionOrm)
+      .save({
+        productoId: p.id,
+        versionProducto: p.version,
+        resultado: 'REVISION',
+        fecha: new Date(),
+        evidencia: JSON.stringify({
+          consultas: [],
+          advertencias: ['Discrepancia'],
+          seleccionado: null,
+        }),
+      });
+    await connection
+      .getRepository(InvimaConfirmacionOrm)
+      .save({
+        verificacionId: v.id,
+        candidato: JSON.stringify(candidate),
+        usuarioNombre: 'Confirmador',
+        fecha: new Date(),
+      });
+    p.ultimaVerificacionId = v.id;
+    await repo.save(p);
+    const report = await service.informe(f.id);
+    expect(report.productos[0]).toMatchObject({
+      resultado: 'CONFIRMADA',
+      candidato: candidate,
+      verificacion: { confirmadoPor: 'Confirmador', advertencias: ['Discrepancia'] },
+    });
+    p.version++;
+    await repo.save(p);
+    expect((await service.informe(f.id)).productos[0]).toMatchObject({
+      resultado: 'PENDIENTE',
+      candidato: null,
+      verificacion: null,
+    });
+  });
 });
 describe('Facturas INVIMA, persistencia y revisión', () => {
   it('guarda y recarga todas las categorías en renglones distintos sin reinterpretar los códigos como CUM', async () => {
@@ -346,20 +506,74 @@ describe('Facturas INVIMA, persistencia y revisión', () => {
     await expect(b.service.detalle(factura.id)).rejects.toMatchObject({ status: 404 });
     expect(await b.connection.getRepository(InvimaFacturaItemOrm).find()).toEqual([]);
   });
-  it('elimina solo el borrador y sus renglones y permite volver a cargar el mismo PDF', async () => {
-    const { service, file, connection, pdf } = setup();
-    const draft = await service.subir(file);
-    const otro = await service.subir({ ...file, buffer: Buffer.from('otro-pdf') });
-    await service.eliminar(draft.id, draft.version);
-    await expect(service.detalle(draft.id)).rejects.toMatchObject({ status: 404 });
-    expect(
-      await connection.getRepository(InvimaFacturaItemOrm).find({ where: { facturaId: draft.id } })
-    ).toEqual([]);
-    expect((await service.detalle(otro.id)).renglones).toHaveLength(2);
-    expect((await service.subir(file)).estado).toBe('BORRADOR');
-    expect(pdf.extraer).toHaveBeenCalledTimes(3);
-  });
-  it('rechaza eliminar una factura revisada o con versión obsoleta sin modificarla', async () => {
+  it.each(['BORRADOR', 'REVISADA'])(
+    'oculta %s con auditoría, conserva sus datos y permite volver a cargar el mismo PDF',
+    async estado => {
+      const { service, invima, file, connection, pdf } = setup();
+      const draft = await service.subir(file);
+      const factura = estado === 'REVISADA' ? await service.guardar(draft.id, input(draft)) : draft;
+      const otro = await service.subir({ ...file, buffer: Buffer.from('otro-pdf') });
+      const items = await connection
+        .getRepository(InvimaFacturaItemOrm)
+        .find({ where: { facturaId: factura.id } });
+      if (estado === 'REVISADA') {
+        const producto = factura.renglones[0].producto;
+        await connection.getRepository(InvimaVerificacionOrm).save({
+          productoId: producto.id,
+          versionProducto: 1,
+          entrada: JSON.stringify(producto.datos),
+          evidencia: JSON.stringify({ consultas: [], seleccionado: null }),
+          resultado: 'REVISION',
+        });
+        await connection
+          .getRepository(InvimaConfirmacionOrm)
+          .save({ verificacionId: 1, candidato: '{}' });
+      }
+      await service.eliminar(factura.id, factura.version);
+      await expect(service.detalle(factura.id)).rejects.toMatchObject({ status: 404 });
+      await expect(service.guardar(factura.id, input(factura))).rejects.toMatchObject({
+        status: 404,
+      });
+      await expect(service.eliminar(factura.id, factura.version)).rejects.toMatchObject({
+        status: 404,
+      });
+      expect(
+        await connection
+          .getRepository(InvimaFacturaItemOrm)
+          .find({ where: { facturaId: factura.id } })
+      ).toEqual(items);
+      const eliminado = await connection
+        .getRepository(InvimaFacturaOrm)
+        .findOne({ where: { id: factura.id }, withDeleted: true });
+      expect(eliminado).toMatchObject({
+        estado,
+        eliminadoPor: 12,
+        version: factura.version + 1,
+      });
+      expect(Number.isFinite(eliminado.fechaEliminacion.getTime())).toBe(true);
+      expect(await invima.listar()).toEqual([]);
+      expect(await invima.listar(undefined, true)).toEqual([]);
+      if (estado === 'REVISADA') {
+        const p = factura.renglones[0].producto;
+        expect(await connection.getRepository(InvimaProductoOrm).find()).toHaveLength(2);
+        expect(await connection.getRepository(InvimaVerificacionOrm).find()).toHaveLength(1);
+        expect(await connection.getRepository(InvimaConfirmacionOrm).find()).toHaveLength(1);
+        await expect(invima.editar(p.id, { ...p.datos, version: 1 })).rejects.toMatchObject({
+          status: 404,
+        });
+        await expect(invima.verificar(p.id)).rejects.toMatchObject({ status: 404 });
+        await expect(invima.historial(p.id)).rejects.toMatchObject({ status: 404 });
+        await expect(invima.candidatos(p.id, 1, 'vigentes', 0)).rejects.toMatchObject({
+          status: 404,
+        });
+        await expect(invima.confirmar(p.id, 1, 'x')).rejects.toMatchObject({ status: 404 });
+      }
+      expect((await service.detalle(otro.id)).renglones).toHaveLength(2);
+      expect((await service.subir(file)).id).not.toBe(factura.id);
+      expect(pdf.extraer).toHaveBeenCalledTimes(3);
+    }
+  );
+  it('rechaza versiones obsoletas en borradores y revisadas sin modificar sus datos', async () => {
     const { service, file } = setup();
     const draft = await service.subir(file);
     await expect(service.eliminar(draft.id, draft.version + 1)).rejects.toMatchObject({
@@ -367,41 +581,52 @@ describe('Facturas INVIMA, persistencia y revisión', () => {
     });
     expect((await service.detalle(draft.id)).renglones).toHaveLength(2);
     const revisada = await service.guardar(draft.id, input(draft));
-    await expect(service.eliminar(revisada.id, revisada.version)).rejects.toMatchObject({
+    await expect(service.eliminar(revisada.id, draft.version)).rejects.toMatchObject({
       status: 409,
     });
     expect((await service.detalle(revisada.id)).renglones[0].producto.id).toBe(
       revisada.renglones[0].producto.id
     );
   });
-  it('no elimina facturas ajenas al contexto ni borradores con productos asociados', async () => {
+  it('no elimina facturas ajenas al contexto', async () => {
     const a = setup(),
       b = setup();
     const draft = await a.service.subir(a.file);
     await expect(b.service.eliminar(draft.id, draft.version)).rejects.toMatchObject({
       status: 404,
     });
-    const repo = a.connection.getRepository(InvimaFacturaItemOrm);
-    const item = (await repo.find({ where: { facturaId: draft.id } }))[0];
-    await repo.save({ ...item, productoId: 99 });
-    await expect(a.service.eliminar(draft.id, draft.version)).rejects.toMatchObject({
-      status: 409,
-    });
-    expect(await repo.find({ where: { facturaId: draft.id } })).toHaveLength(2);
+    expect((await a.service.detalle(draft.id)).renglones).toHaveLength(2);
   });
-  it('revierte el borrado de renglones si falla el borrado final de la factura', async () => {
+  it('conserva factura y renglones si falla el marcado de eliminación', async () => {
     const { service, file, connection } = setup();
     const draft = await service.subir(file);
     const getRepository = connection.manager.getRepository;
     connection.manager.getRepository = (type: any) => {
       const repo = getRepository(type);
       if (type === InvimaFacturaOrm)
-        repo.delete = async () => {
+        repo.save = async () => {
           throw new Error('Fallo SQL');
         };
       return repo;
     };
     await expect(service.eliminar(draft.id, draft.version)).rejects.toThrow('Fallo SQL');
     expect((await service.detalle(draft.id)).renglones).toHaveLength(2);
+  });
+  it('una verificación en curso no guarda resultados después de eliminar su factura', async () => {
+    const { service, invima, file, connection } = setup();
+    const draft = await service.subir(file);
+    const factura = await service.guardar(draft.id, input(draft));
+    (invima as any).socrata = {
+      consultar: async (fuente: any, criterio: any, where: any) => {
+        if (!(await connection.getRepository(InvimaFacturaOrm).findOneBy({ id: factura.id })))
+          return { fuente, criterio, where, paginas: [] };
+        await service.eliminar(factura.id, factura.version);
+        return { fuente, criterio, where, paginas: [] };
+      },
+    };
+    await expect(invima.verificar(factura.renglones[0].producto.id)).rejects.toMatchObject({
+      status: 404,
+    });
+    expect(await connection.getRepository(InvimaVerificacionOrm).find()).toEqual([]);
   });
 });

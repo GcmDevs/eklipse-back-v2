@@ -6,6 +6,7 @@ import { InvimaDatabaseFilter } from './presentation/invima-database.filter';
 import { FacturasInvimaService } from './application/facturas.service';
 import { FacturasInvimaController } from './presentation/facturas.controller';
 import { PdfExtractorService } from './infrastructure/pdf-extractor.service';
+import { InformeInvimaPdfService } from './infrastructure/informe-pdf.service';
 
 @Module({
   controllers: [InvimaController, FacturasInvimaController],
@@ -15,6 +16,7 @@ import { PdfExtractorService } from './infrastructure/pdf-extractor.service';
     InvimaDatabaseFilter,
     FacturasInvimaService,
     PdfExtractorService,
+    InformeInvimaPdfService,
   ],
 })
 export class InvimaModule {}

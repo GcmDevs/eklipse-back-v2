@@ -48,3 +48,9 @@ export class ListarFacturasDto {
 export class EliminarFacturaDto {
   @Type(() => Number) @IsInt() @Min(1) version: number;
 }
+
+export class ObservacionFacturaDto {
+  @IsInt() @Min(0) version: number;
+  @IsOptional() @IsInt() @Min(1) renglonId?: number;
+  @IsString() @MaxLength(4000) texto: string;
+}

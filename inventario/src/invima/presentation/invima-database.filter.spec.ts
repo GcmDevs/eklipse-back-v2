@@ -6,6 +6,50 @@ import { InvimaDatabaseFilter } from './invima-database.filter';
 describe('Diagnóstico de instalación INVIMA', () => {
   const response = {};
   const host = { switchToHttp: () => ({ getResponse: () => response }) } as ArgumentsHost;
+  it.each(['OBSERVACION', 'OBSVERSION', 'OBSUSUARIO', 'OBSNOMBRE', 'OBSFECHA'])(
+    'identifica la migración de observaciones pendiente: %s',
+    columna => {
+      const reply = jest.fn();
+      const adapterHost = { httpAdapter: { reply } } as unknown as HttpAdapterHost;
+      new InvimaDatabaseFilter(adapterHost).catch(
+        new QueryFailedError(
+          'SELECT ...',
+          [],
+          Object.assign(new Error(`Invalid column name '${columna}'.`), { number: 207 })
+        ),
+        host
+      );
+      expect(reply).toHaveBeenCalledWith(
+        response,
+        expect.objectContaining({
+          message: expect.stringContaining('20261022_invima_observaciones.sql'),
+        }),
+        503
+      );
+    }
+  );
+  it.each(['FECHAELIMINA', 'ELIMINADOPOR'])(
+    'identifica la migración de borrado lógico pendiente: %s',
+    columna => {
+      const reply = jest.fn();
+      const adapterHost = { httpAdapter: { reply } } as unknown as HttpAdapterHost;
+      new InvimaDatabaseFilter(adapterHost).catch(
+        new QueryFailedError(
+          'SELECT ...',
+          [],
+          Object.assign(new Error(`Invalid column name '${columna}'.`), { number: 207 })
+        ),
+        host
+      );
+      expect(reply).toHaveBeenCalledWith(
+        response,
+        expect.objectContaining({
+          message: expect.stringContaining('20261021_invima_facturas_soft_delete.sql'),
+        }),
+        503
+      );
+    }
+  );
 
   it.each(['EKINNIVPRODUCTO', 'EKINNIVVERIFICACION', 'EKINNIVCONFIRMACION'])(
     'explica la ausencia de %s sin devolver un listado vacío',

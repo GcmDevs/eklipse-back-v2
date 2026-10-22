@@ -8,7 +8,12 @@ import { AuthoritiesGuard } from '@common/infrastructure/guards/authorities.guar
 import { fetchAuthsByUser } from '@common/infrastructure/services';
 import { InvimaController } from './invima.controller';
 import { FacturasInvimaController } from './facturas.controller';
-import { EliminarFacturaDto, GuardarFacturaDto, ListarFacturasDto } from './factura.dto';
+import {
+  EliminarFacturaDto,
+  GuardarFacturaDto,
+  ListarFacturasDto,
+  ObservacionFacturaDto,
+} from './factura.dto';
 import { ConfirmarCandidatoDto, GuardarMedicamentoDto, PaginaCandidatoDto } from './invima.dto';
 import { TIPOS_PRODUCTO_INVIMA } from '../domain/invima.models';
 
@@ -24,7 +29,7 @@ jest.mock('@common/infrastructure/guards', () => ({
     .AuthoritiesGuard,
 }));
 describe('Permisos de las interfaces INVIMA', () => {
-  it.each(['subir', 'listar', 'detalle', 'guardar', 'eliminar'])(
+  it.each(['subir', 'listar', 'detalle', 'guardar', 'eliminar', 'observacion', 'informe'])(
     'protege el endpoint de facturas %s',
     async method => {
       const handler = FacturasInvimaController.prototype[method];
@@ -91,6 +96,28 @@ describe('Permisos de las interfaces INVIMA', () => {
   );
 });
 describe('Validación de entrada INVIMA', () => {
+  it('valida longitud, versión y pertenencia del renglón y descarta identidad en observaciones', async () => {
+    for (const invalid of [
+      { texto: 'x'.repeat(4001), version: 0 },
+      { texto: 'nota', version: -1 },
+      { texto: 'nota', version: 0, renglonId: 0 },
+      { texto: null, version: 0 },
+    ])
+      expect(
+        (await validate(plainToInstance(ObservacionFacturaDto, invalid))).length
+      ).toBeGreaterThan(0);
+    const valid = plainToInstance(ObservacionFacturaDto, {
+      texto: '\nNota & detalle\n',
+      version: 0,
+      renglonId: 2,
+      usuarioNombre: 'Impostor',
+      context: 'otro',
+    });
+    expect(await validate(valid, { whitelist: true })).toHaveLength(0);
+    expect(valid.texto).toBe('\nNota & detalle\n');
+    expect(valid).not.toHaveProperty('usuarioNombre');
+    expect(valid).not.toHaveProperty('context');
+  });
   it.each(TIPOS_PRODUCTO_INVIMA)(
     'acepta %s en productos y renglones, conservando códigos declarados como texto',
     async tipo => {
