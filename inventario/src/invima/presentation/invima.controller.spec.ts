@@ -29,7 +29,7 @@ jest.mock('@common/infrastructure/guards', () => ({
     .AuthoritiesGuard,
 }));
 describe('Permisos de las interfaces INVIMA', () => {
-  it.each(['subir', 'listar', 'detalle', 'guardar', 'eliminar', 'observacion', 'informe'])(
+  it.each(['subir', 'subirPedido', 'listar', 'detalle', 'guardar', 'eliminar', 'observacion', 'informe'])(
     'protege el endpoint de facturas %s',
     async method => {
       const handler = FacturasInvimaController.prototype[method];

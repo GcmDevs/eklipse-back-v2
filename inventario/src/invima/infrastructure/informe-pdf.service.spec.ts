@@ -78,6 +78,46 @@ describe('Informe PDF INVIMA', () => {
     expect(html).toContain('&amp; nota');
     expect(html).toContain('white-space:pre-wrap');
   });
+  it('identifica los pedidos y su cliente sin presentarlos como facturas de proveedor', () => {
+    const f = { ...fixture(), tipoDocumento: 'PEDIDO', cliente: 'Disfarma', proveedor: '' };
+    const html = htmlInformeInvima(f);
+    expect(html).toContain('Pedido <strong>F-1</strong>');
+    expect(html).toContain('Cliente: Disfarma');
+    expect(html).toContain('Fecha de pedido');
+    expect(html).not.toContain('Factura <strong>');
+  });
+  it('usa tabla con encabezados repetibles, comparte fuentes y conserva notas largas sin repetir vacíos', () => {
+    const f = fixture();
+    const source = { nombre: 'CUM vigentes', dataset: 'i7cb-raxc' };
+    f.productos = Array.from({ length: 2 }, (_, i) => ({
+      orden: i + 1,
+      datos: {
+        tipo: 'MEDICAMENTO',
+        descripcion: 'Producto ' + i,
+        codigoDeclarado: '0001-0' + i,
+        registroSanitario: '',
+      },
+      resultado: 'INCOMPLETA',
+      observacion: { texto: i ? 'Nota extensa\n'.repeat(180) + 'FIN_NOTA' : '', fecha: null },
+      candidato: null,
+      verificacion: {
+        fecha: new Date(),
+        usuarioNombre: 'Revisor',
+        fuentes: [{ ...source, error: i ? 'Fallo' : undefined }],
+        advertencias: ['Discrepancia conservada'],
+      },
+    }));
+    const html = htmlInformeInvima(f);
+    expect(html).toContain('<thead>');
+    expect(html).toContain('display:table-header-group');
+    expect(html.match(/CUM vigentes \(i7cb-raxc\)/g)).toHaveLength(1);
+    expect(html.match(/Sin observaciones\./g) || []).toHaveLength(0);
+    expect(html).toContain('FIN_NOTA');
+    expect(html).toContain('product-long');
+    expect(html).toContain('consulta fallida');
+    expect(html).toContain('(Vacío)');
+    expect(html).toContain('Discrepancia conservada');
+  });
   it('separa estado CUM del registro y no convierte candidatos pendientes en coincidencias', () => {
     const f = fixture();
     f.productos = [

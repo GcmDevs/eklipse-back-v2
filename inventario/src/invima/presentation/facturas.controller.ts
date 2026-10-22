@@ -24,6 +24,7 @@ import { ADMIN_AUTHORITY } from '@common/application/constants';
 import { INN_AUTHORITIES } from '@inn/authorities';
 import { FacturasInvimaService } from '../application/facturas.service';
 import { limitePdfBytes } from '../infrastructure/pdf-extractor.service';
+import { limiteExcelBytes } from '../infrastructure/pedido-excel.service';
 import {
   EliminarFacturaDto,
   GuardarFacturaDto,
@@ -42,6 +43,25 @@ export class FacturasInvimaController {
     private readonly service: FacturasInvimaService,
     private readonly pdf: InformeInvimaPdfService
   ) {}
+  @Authorities([ADMIN_AUTHORITY, INN_AUTHORITIES.PRODUCTOS.VERIFICACION_INVIMA])
+  @Post('pedidos/excel')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['archivo'],
+      properties: { archivo: { type: 'string', format: 'binary' } },
+    },
+  })
+  @UseInterceptors(
+    FileInterceptor('archivo', {
+      storage: memoryStorage(),
+      limits: { fileSize: limiteExcelBytes(), files: 1, fields: 0 },
+    })
+  )
+  subirPedido(@UploadedFile() archivo: Express.Multer.File) {
+    return this.service.subir(archivo, true);
+  }
   @Authorities([ADMIN_AUTHORITY, INN_AUTHORITIES.PRODUCTOS.VERIFICACION_INVIMA])
   @Patch(':id/observaciones')
   observacion(@Param('id', ParseIntPipe) id: number, @Body() input: ObservacionFacturaDto) {

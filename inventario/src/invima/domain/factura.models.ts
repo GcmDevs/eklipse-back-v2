@@ -8,11 +8,15 @@ export interface RenglonFactura {
   registroSanitario: string;
 }
 export interface RenglonExtraido extends RenglonFactura {
+  hoja?: string;
+  fila?: number;
   paginas: number[];
   fragmento: string;
   advertencias: string[];
 }
 export interface FacturaExtraida {
+  tipoDocumento?: 'FACTURA' | 'PEDIDO';
+  cliente?: string;
   formato: string;
   extractorVersion: string;
   proveedor: string;

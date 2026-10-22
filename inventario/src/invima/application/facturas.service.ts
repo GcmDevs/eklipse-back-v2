@@ -27,6 +27,7 @@ import {
 } from '../domain/factura.models';
 import { MedicamentoInput } from '../domain/invima.models';
 import { PdfExtractorService } from '../infrastructure/pdf-extractor.service';
+import { PedidoExcelService } from '../infrastructure/pedido-excel.service';
 import {
   GuardarFacturaDto,
   ListarFacturasDto,
@@ -39,7 +40,8 @@ export class FacturasInvimaService extends BaseSource {
   constructor(
     @Inject(REQUEST) request: Request,
     private readonly pdf: PdfExtractorService,
-    private readonly invima: InvimaService
+    private readonly invima: InvimaService,
+    private readonly excel: PedidoExcelService
   ) {
     super(request);
   }
@@ -122,6 +124,8 @@ export class FacturasInvimaService extends BaseSource {
         : [];
       return {
         numero: factura.numero,
+        tipoDocumento: factura.tipoDocumento || 'FACTURA',
+        cliente: factura.cliente || '',
         proveedor: factura.proveedor,
         nitProveedor: factura.nitProveedor,
         fecha: factura.fecha,
@@ -168,21 +172,28 @@ export class FacturasInvimaService extends BaseSource {
       };
     });
   }
-  async subir(file: Express.Multer.File) {
-    if (!file?.buffer) throw new BadRequestException('Seleccione una factura PDF.');
+  async subir(file: Express.Multer.File, pedido = false) {
+    if (!file?.buffer)
+      throw new BadRequestException(
+        pedido ? 'Seleccione un pedido Excel.' : 'Seleccione una factura PDF.'
+      );
+    if (pedido && !/\.xlsx$/i.test(file.originalname || ''))
+      throw new BadRequestException('El pedido debe ser un archivo .xlsx.');
     const archivoHash = createHash('sha256').update(file.buffer).digest('hex');
     const duplicate = await this.conn.getRepository(InvimaFacturaOrm).findOneBy({ archivoHash });
     if (duplicate)
       throw new ConflictException({
-        message: 'Este PDF ya fue cargado. Abra la factura existente.',
+        message: 'Este archivo ya fue cargado. Abra el documento existente.',
         facturaId: duplicate.id,
       });
-    const parsed = await this.pdf.extraer(file.buffer);
+    const parsed = await (pedido ? this.excel.extraer(file.buffer) : this.pdf.extraer(file.buffer));
     try {
       const id = await this.conn.transaction(async manager => {
         const now = new Date();
         const factura = await manager.getRepository(InvimaFacturaOrm).save({
           numero: parsed.numero,
+          tipoDocumento: parsed.tipoDocumento || 'FACTURA',
+          cliente: parsed.cliente || '',
           proveedor: parsed.proveedor,
           nitProveedor: parsed.nitProveedor,
           fecha: parsed.fecha,
@@ -216,7 +227,7 @@ export class FacturasInvimaService extends BaseSource {
       return this.detalle(id);
     } catch (error) {
       if ([2601, 2627].includes(error?.driverError?.number))
-        throw new ConflictException('Este PDF ya fue cargado. Actualice el listado.');
+        throw new ConflictException('Este archivo ya fue cargado. Actualice el listado.');
       throw error;
     }
   }
@@ -253,18 +264,27 @@ export class FacturasInvimaService extends BaseSource {
     );
     return {
       ...factura,
+      tipoDocumento: factura.tipoDocumento || 'FACTURA',
+      cliente: factura.cliente || '',
       observacion: this.observacion(factura),
       advertencias: JSON.parse(factura.advertencias),
       renglones: rows.map(r => {
         const datos = JSON.parse(r.datos) as RenglonFactura;
+        const original = JSON.parse(r.original) as RenglonExtraido;
+        const originalesDinamicas = advertenciasRenglon(original);
         return {
           id: r.id,
           orden: r.orden,
           excluido: r.excluido,
           observacion: this.observacion(r),
           ...datos,
-          original: JSON.parse(r.original) as RenglonExtraido,
-          advertencias: advertenciasRenglon(datos),
+          original,
+          advertencias: [
+            ...new Set([
+              ...advertenciasRenglon(datos),
+              ...(original.advertencias || []).filter(a => !originalesDinamicas.includes(a)),
+            ]),
+          ],
           producto: productos.get(r.productoId) || null,
         };
       }),
@@ -273,9 +293,12 @@ export class FacturasInvimaService extends BaseSource {
   async listar(input: ListarFacturasDto) {
     const query = this.conn.getRepository(InvimaFacturaOrm).createQueryBuilder('f');
     if (input.q)
-      query.where('(f.numero LIKE :q OR f.proveedor LIKE :q OR f.nitProveedor LIKE :q)', {
-        q: `%${input.q}%`,
-      });
+      query.where(
+        '(f.numero LIKE :q OR f.proveedor LIKE :q OR f.cliente LIKE :q OR f.nitProveedor LIKE :q)',
+        {
+          q: `%${input.q}%`,
+        }
+      );
     const estados = await query
       .clone()
       .select('f.estado', 'estado')
@@ -350,6 +373,8 @@ export class FacturasInvimaService extends BaseSource {
         return {
           id: f.id,
           numero: f.numero,
+          tipoDocumento: f.tipoDocumento || 'FACTURA',
+          cliente: f.cliente || '',
           proveedor: f.proveedor,
           nitProveedor: f.nitProveedor,
           fecha: f.fecha,
@@ -383,6 +408,12 @@ export class FacturasInvimaService extends BaseSource {
       const factura = await this.factura(id, manager, true);
       if (factura.version !== input.version)
         throw new ConflictException('La factura cambió. Recargue antes de guardar.');
+      if (factura.tipoDocumento === 'PEDIDO' ? !input.cliente?.trim() : !input.proveedor.trim())
+        throw new BadRequestException(
+          factura.tipoDocumento === 'PEDIDO'
+            ? 'Complete el cliente del pedido.'
+            : 'Complete el proveedor de la factura.'
+        );
       if (input.fecha && !/^\d{4}-\d{2}-\d{2}$/.test(input.fecha))
         throw new BadRequestException('La fecha debe tener formato AAAA-MM-DD.');
       const repository = manager.getRepository(InvimaFacturaItemOrm);
@@ -445,6 +476,7 @@ export class FacturasInvimaService extends BaseSource {
       }
       factura.numero = input.numero;
       factura.proveedor = input.proveedor;
+      factura.cliente = factura.tipoDocumento === 'PEDIDO' ? input.cliente.trim() : '';
       factura.nitProveedor = input.nitProveedor;
       factura.fecha = input.fecha || null;
       factura.version++;

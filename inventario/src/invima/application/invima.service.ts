@@ -123,6 +123,11 @@ export class InvimaService extends BaseSource {
       .addSelect('c.id', 'confirmacionId')
       .addSelect(`JSON_VALUE(${candidatoSql}, '$.cum')`, 'cumVerificado')
       .addSelect(`JSON_VALUE(${candidatoSql}, '$.estadoCum')`, 'estadoCum')
+      .addSelect(
+        `JSON_VALUE(${candidatoSql}, '$.registroSanitario')`,
+        'registroSanitarioVerificado'
+      )
+      .addSelect(`JSON_VALUE(${candidatoSql}, '$.titular')`, 'titularInvima')
       .addSelect(`JSON_VALUE(${candidatoSql}, '$.estadoRegistro')`, 'estadoRegistro');
     if (ids || sinFactura) {
       if (!productos.length) return [];
@@ -139,6 +144,8 @@ export class InvimaService extends BaseSource {
         cumVerificado: ultima?.cumVerificado?.trim() || null,
         estadoCum: ultima?.estadoCum?.trim() || null,
         estadoRegistro: ultima?.estadoRegistro?.trim() || null,
+        registroSanitarioVerificado: ultima?.registroSanitarioVerificado?.trim() || null,
+        titularInvima: ultima?.titularInvima?.trim() || null,
         ultimaVerificacion: ultima ?? null,
       };
     });
@@ -161,6 +168,8 @@ export class InvimaService extends BaseSource {
       cumVerificado: null,
       estadoCum: null,
       estadoRegistro: null,
+      registroSanitarioVerificado: null,
+      titularInvima: null,
     };
   }
   private datos(input: MedicamentoInput): MedicamentoInput {
@@ -242,6 +251,8 @@ export class InvimaService extends BaseSource {
         cumVerificado: null,
         estadoCum: null,
         estadoRegistro: null,
+        registroSanitarioVerificado: null,
+        titularInvima: null,
         ...(item ? { codigoDeclarado } : {}),
       };
     };

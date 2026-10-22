@@ -16,7 +16,7 @@ export class InvimaDatabaseFilter extends BaseExceptionFilter {
     const number = driver.number ?? driver.originalError?.info?.number;
     const faltanColumnas =
       number === 207 &&
-      /\b(?:FECHAELIMINA|ELIMINADOPOR|OBSERVACION|OBSVERSION|OBSUSUARIO|OBSNOMBRE|OBSFECHA)\b/i.test(
+      /\b(?:FECHAELIMINA|ELIMINADOPOR|OBSERVACION|OBSVERSION|OBSUSUARIO|OBSNOMBRE|OBSFECHA|TIPODOCUMENTO|CLIENTE)\b/i.test(
         driver.message
       );
     const faltanTablas =
@@ -35,12 +35,14 @@ export class InvimaDatabaseFilter extends BaseExceptionFilter {
         error: 'Servicio no disponible',
         code: 'INVIMA_MIGRACION_PENDIENTE',
         message:
-          faltanColumnas &&
-          /\b(?:OBSERVACION|OBSVERSION|OBSUSUARIO|OBSNOMBRE|OBSFECHA)\b/i.test(driver.message)
-            ? 'Faltan columnas de observaciones INVIMA. Aplique la migración 20261022_invima_observaciones.sql en la base activa.'
-            : faltanColumnas
-              ? 'Faltan columnas de borrado lógico de facturas INVIMA en la base activa. Aplique la migración 20261021_invima_facturas_soft_delete.sql en ese contexto.'
-              : 'Faltan tablas de INVIMA en la base activa. Revise la conexión y aplique las migraciones 20261020_invima.sql y 20261020_invima_facturas.sql en esa base. Si cambió .env, reinicie el backend.',
+          faltanColumnas && /\b(?:TIPODOCUMENTO|CLIENTE)\b/i.test(driver.message)
+            ? 'Faltan columnas de pedidos INVIMA. Aplique la migración 20261022_invima_completa.sql en la base activa.'
+            : faltanColumnas &&
+                /\b(?:OBSERVACION|OBSVERSION|OBSUSUARIO|OBSNOMBRE|OBSFECHA)\b/i.test(driver.message)
+              ? 'Faltan columnas de observaciones INVIMA. Aplique la migración 20261022_invima_completa.sql en la base activa.'
+              : faltanColumnas
+                ? 'Faltan columnas de borrado lógico de facturas INVIMA en la base activa. Aplique la migración 20261022_invima_completa.sql en ese contexto.'
+                : 'Faltan tablas de INVIMA en la base activa. Revise la conexión y aplique la migración 20261022_invima_completa.sql en esa base. Si cambió .env, reinicie el backend.',
       },
       503
     );

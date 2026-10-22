@@ -48,6 +48,8 @@ export abstract class ObservacionInvimaOrm {
 
 @Entity('EKINNIVFACTURA')
 export class InvimaFacturaOrm extends ObservacionInvimaOrm {
+  @Column({ name: 'TIPODOCUMENTO', length: 20, default: 'FACTURA' }) tipoDocumento: string;
+  @Column({ name: 'CLIENTE', type: 'nvarchar', length: 240, default: '' }) cliente: string;
   @PrimaryGeneratedColumn({ name: 'OID' }) id: number;
   @Column({ name: 'NUMERO', type: 'nvarchar', length: 100 }) numero: string;
   @Column({ name: 'PROVEEDOR', type: 'nvarchar', length: 240 }) proveedor: string;

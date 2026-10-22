@@ -30,7 +30,8 @@ export class RenglonFacturaDto implements RenglonFactura {
 export class GuardarFacturaDto {
   @IsInt() @Min(1) version: number;
   @Transform(trim) @IsString() @MinLength(1) @MaxLength(100) numero: string;
-  @Transform(trim) @IsString() @MinLength(1) @MaxLength(240) proveedor: string;
+  @Transform(trim) @IsString() @MaxLength(240) proveedor: string;
+  @IsOptional() @Transform(trim) @IsString() @MaxLength(240) cliente?: string;
   @Transform(trim) @IsString() @MaxLength(30) nitProveedor: string;
   @IsOptional() @IsDateString({ strict: true }) fecha?: string | null;
   @IsArray()

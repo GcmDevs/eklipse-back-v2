@@ -4,7 +4,7 @@ Ruta de Eklipse: /inn/invima. Backend: /v4/inn/invima. Los productos pertenecen 
 
 ## Activación
 
-1. Ejecutar, en orden, inventario/database/migrations/20261020_invima.sql, 20261020_invima_facturas.sql, 20261021_invima_facturas_soft_delete.sql y 20261022_invima_observaciones.sql en cada base de contexto que habilite el módulo (SQL Server 2016 o superior por ISJSON). Aplicar la última antes de desplegar el backend que la utiliza. Las migraciones no se ejecutan al iniciar el servidor.
+1. Ejecutar únicamente `inventario/database/migrations/20261022_invima_completa.sql` en cada base de contexto que habilite el módulo (SQL Server 2016 o superior por ISJSON). Ejecutar el archivo completo antes de desplegar el backend. Incluye productos, verificaciones, confirmaciones, documentos y renglones, borrado lógico, observaciones, pedidos Excel, índices y permiso. Sirve para instalación nueva o actualización de las migraciones anteriores; puede repetirse sin duplicar registros ni borrar información. Las migraciones no se ejecutan al iniciar el servidor.
 2. Asignar el permiso 006005002, «Verificación INVIMA», mediante la administración de permisos existente. La migración registra el permiso sin concederlo; si el código ya pertenece a otra función, aborta. Quien tenga el permiso activo ADMINISTRADOR (001001001), directamente o por su rol, puede usar todos los endpoints sin necesitar 006005002.
 3. Configurar, si se requiere, INVIMA_APP_TOKEN en el entorno del proceso del backend.
 4. Validar las fuentes con el script de comprobación antes de habilitar el acceso del equipo.
@@ -18,6 +18,12 @@ Desde la raíz del backend:
 
     node node_modules/jest/bin/jest.js --config inventario/package.json --runInBand --testPathPatterns invima
     node node_modules/typescript/bin/tsc -p inventario/tsconfig.app.json --noEmit --incremental false
+
+Comprobación de la migración consolidada en SQL Server (requiere la conexión AC configurada y permisos para crear esquemas/tablas):
+
+    node inventario/scripts/verificar-migracion-invima.cjs
+
+La comprobación usa esquemas de prueba únicos dentro de transacciones que se revierten. Valida instalación nueva, actualización desde la estructura anterior, ejecuciones repetidas, datos e historial, observaciones, pedidos, unicidad por documentos activos y colisiones del permiso. No aplica la migración a las tablas reales del módulo ni conserva los esquemas de prueba.
 
 Para consultas reales (solo lectura), PowerShell:
 
@@ -52,6 +58,22 @@ Para validar localmente los originales (solo lectura de archivos, sin guardar fa
 
 Este script verifica las doce muestras disponibles (120 renglones), número y fecha de factura, asociaciones de descripción/CUM, ceros iniciales, separación de IUM, registros MB, dispositivos y continuidad de página. Los cinco formatos nuevos aportan 6 renglones de Delta, 3 de Vantive, 30 de Baxter, 13 de Cruz Verde y 2 de B. Braun. Las pruebas automatizadas utilizan documentos sintéticos; los PDF originales no forman parte del repositorio.
 
+## Pedidos Excel del cliente Disfarma
+
+La acción **Cargar pedido Excel** acepta `.xlsx` del formato suministrado. `POST facturas/pedidos/excel` recibe el multipart `archivo`, usando administrador o permiso 006005002. El documento conserva `tipoDocumento=PEDIDO` y `cliente=Disfarma`, separado de `proveedor`, que inicialmente queda vacío. El cliente y el número son obligatorios al guardar la revisión; el proveedor es opcional para pedidos. Las facturas anteriores siguen siendo FACTURA y continúan exigiendo proveedor. El tipo de documento se decide al importar y no se cambia desde la revisión.
+
+El listado distingue Pedido/Factura y busca también por cliente. El detalle y el informe PDF utilizan las etiquetas de pedido. Se reutilizan revisión, edición individual, verificación, candidatos, historial, observaciones automáticas y borrado lógico. Los originales Excel no se almacenan. Se conservan hoja, fila, fragmento de valores y advertencias de extracción; no se interpretan códigos internos ni el contenido alfanumérico de «Fecha Vence» como fechas de vencimiento. El encabezado «Elaborado por» no se convierte en proveedor o cliente.
+
+El lector usa ExcelJS ya instalado, en un proceso terminable con 256 MB de heap, hasta dos lecturas simultáneas, 10 MB y 30 s. `INVIMA_EXCEL_MAX_BYTES`, `INVIMA_EXCEL_MAX_ROWS` (500) e `INVIMA_EXCEL_TIMEOUT_MS` permiten reducir límites. Se limita a cinco hojas, 2000 filas por hoja y 50 columnas. Se exige una única hoja de detalle reconocible para evitar omisiones. Las fórmulas no se ejecutan ni se usan sus resultados para identificadores o descripciones; quedan para corrección manual. Las celdas combinadas de encabezados y totales se leen una sola vez.
+
+Cada renglón de producto se conserva aunque la cantidad sea cero o el CUM se repita. Los repetidos se señalan para revisión; no se deduplican ni se verifican automáticamente al importar. Los identificadores se conservan como texto, incluidos ceros, N.A. y espacios originales. Las longitudes excesivas se rechazan sin truncar datos.
+
+Comprobación de la muestra original, desde `inventario` (lectura sin guardar documentos en la base):
+
+    node -r ts-node/register -r tsconfig-paths/register scripts/verificar-pedido-disfarma.ts <ruta.xlsx>
+
+Para el pedido 1081272 comprueba 46 renglones (filas 6–51), 44 CUM distintos, los tres renglones de CUM repetido, asociaciones de descripción y CUM del primero y último, fecha 2026-10-19 y separación cliente/proveedor. Genera solamente el JSON de QA en `ignored/invima-qa/pedido-extraido.json` (desde la raíz del backend). La prueba federada de frontend puede consumirlo mediante `INVIMA_DISFARMA_FIXTURE` y el archivo mediante `INVIMA_DISFARMA_SAMPLE`. Las pruebas de SQL Server se ejecutaron dentro de una transacción revertida.
+
 ## Dispositivos y reactivos
 
 INVIMA_DATASET_DISPOSITIVOS configura la quinta fuente (por defecto y4qt-w6tk). Su campo de nombre se llama prodcuto en la API. Se consultan registro_sanitario y después nombre, con deduplicación de roles, paginación estable, metadatos, plazo y reintento del cliente común. El registro puede tener varias marcas o presentaciones: la asociación siempre necesita confirmación manual.
@@ -62,6 +84,7 @@ Los números que una factura de dispositivos rotula CUM quedan en codigoDeclarad
 
 - GET/POST productos: listar o registrar.
 - El listado incluye cumVerificado y estadoCum, ambos anulables. Se extraen de la coincidencia confirmada o exacta de la última verificación de la versión actual, sin consultar nuevamente a INVIMA ni descargar el historial. Crear o editar devuelve ambos campos en null.
+- El listado también proyecta `registroSanitarioVerificado` y `titularInvima`, anulables, desde el mismo candidato exacto o confirmado. La tabla muestra el registro ingresado (o «(Vacío)»), el publicado y su comparación. Ignora únicamente mayúsculas, espacios y el prefijo INVIMA al comparar; mantiene visibles los textos originales y cualquier diferencia en años/dígitos. El titular publicado se etiqueta «Titular INVIMA», separado del laboratorio ingresado: no se interpreta como fabricante. Los candidatos sin confirmar no se asocian en el listado. Editar deja ambos campos en null y conserva el historial. No requiere migración ni consultas adicionales a INVIMA.
 - PUT productos/:id: editar; exige version actual y deja solo ese producto pendiente, conservando el historial. Los productos de facturas revisadas se pueden editar individualmente: codigoDeclarado (opcional, texto de hasta 120 caracteres) corrige el código del renglón. La transacción bloquea primero la factura, sincroniza el renglón y producto e incrementa la versión y auditoría de la factura. Rechaza renglones excluidos y versiones de producto desactualizadas. No modifica el texto original del PDF. Una revisión completa posterior conserva laboratorio, concentración, forma y presentación añadidos desde la edición individual.
 - POST productos/:id/verificaciones: consultar y guardar una nueva evidencia.
 - GET productos/:id/verificaciones: historial de versiones, consultas y confirmaciones.
@@ -88,7 +111,7 @@ Los formatos de fecha de las fuentes se conservan como texto, incluido el año 3
 
 ### Observaciones e informe PDF
 
-Aplicar `inventario/database/migrations/20261022_invima_observaciones.sql` en cada contexto antes de actualizar el backend. Añade texto, versión independiente y auditoría de observaciones a facturas y renglones, sin modificar productos ni verificaciones anteriores. Las notas se conservan al editar productos, revisar de nuevo, excluir renglones o eliminar lógicamente una factura.
+Aplicar `inventario/database/migrations/20261022_invima_completa.sql` en cada contexto antes de actualizar el backend. Incluye texto, versión independiente y auditoría de observaciones a facturas y renglones, sin modificar productos ni verificaciones anteriores. Las notas se conservan al editar productos, revisar de nuevo, excluir renglones o eliminar lógicamente una factura.
 
 Después de guardar la revisión, el detalle permite una observación general y una por producto incluido (hasta 4000 caracteres cada una). El cliente guarda tras 700 ms sin escritura y al salir del campo, serializa cambios de un mismo campo y reintenta fallos transitorios hasta tres intentos. Muestra el estado del guardado; conserva el borrador local ante fallos. La navegación y la descarga esperan los cambios pendientes. Cerrar o recargar el navegador con cambios sin confirmar muestra la advertencia nativa. Un conflicto con otra persona permite elegir explícitamente el texto que se conservará.
 
@@ -98,6 +121,8 @@ Después de guardar la revisión, el detalle permite una observación general y 
 El informe usa Puppeteer ya incluido en el proyecto. El servidor necesita el Chromium instalado por Puppeteer; `INVIMA_PDF_BROWSER_PATH` permite señalar un ejecutable compatible en el despliegue. No requiere cambiar `.env` en desarrollo cuando el navegador predeterminado ya está instalado. El HTML escapa todos los datos, deshabilita JavaScript y bloquea peticiones de recursos externos. Admite dos informes simultáneos por proceso; los adicionales reciben 503. La preparación del navegador tiene un límite de 15 s y la impresión 30 s, con cierre de recursos incluso ante fallos. Un error al generar el PDF no borra las notas.
 
 Informe sintético de aceptación (sin acceso a bases de datos), desde `inventario`:
+
+El PDF utiliza una tabla compacta en A4 vertical con encabezados repetidos por página. Agrupa producto/titular, códigos CUM, registros ingresados/encontrados y resultado; mantiene separados los estados CUM y del registro. Los datos publicados, auditoría y observaciones aparecen debajo de cada fila. No imprime bloques vacíos de observación por producto; la nota general permanece al inicio. Las fuentes se enumeran una sola vez al final y cada producto referencia los números consultados, indicando los fallos. Las observaciones extensas fluyen entre páginas sin truncarse. El diseño conserva el tamaño del texto principal y reduce espacios, márgenes y etiquetas repetidas.
 
     node -r ts-node/register -r tsconfig-paths/register scripts/verificar-informe-invima.ts
 
@@ -113,4 +138,4 @@ Si se modifica el archivo .env, reiniciar el proceso de Inventario: dotenv se ej
 
 Si cambian las conexiones, reiniciar también General (autenticación, puerto 8101) y volver a iniciar sesión. Los dos procesos deben consultar la misma base para autenticar al usuario y resolver sus permisos. El alias admin del frontend en desarrollo no concede permisos en el backend.
 
-La ausencia de cualquiera de las tres tablas devuelve HTTP 503 con código INVIMA_MIGRACION_PENDIENTE y un mensaje de configuración. No se interpreta como una lista vacía ni se crean tablas automáticamente. Otros errores SQL conservan el tratamiento habitual del backend.
+La ausencia de cualquiera de las cinco tablas o de las columnas de pedidos, observaciones o borrado lógico devuelve HTTP 503 con código INVIMA_MIGRACION_PENDIENTE e indica la migración única `20261022_invima_completa.sql`. No se interpreta como una lista vacía ni se crean tablas automáticamente. Otros errores SQL conservan el tratamiento habitual del backend.

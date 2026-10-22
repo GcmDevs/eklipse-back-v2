@@ -111,6 +111,9 @@ function database() {
                 confirmacionId: c?.id,
                 cumVerificado: seleccionado?.cum ?? null,
                 estadoCum: seleccionado?.estadoCum ?? null,
+                estadoRegistro: seleccionado?.estadoRegistro ?? null,
+                registroSanitarioVerificado: seleccionado?.registroSanitario ?? null,
+                titularInvima: seleccionado?.titular ?? null,
               };
             });
         return builder;
@@ -148,6 +151,41 @@ function setup(encontrado = candidato) {
   };
 }
 describe('Flujo de registro, consulta e historial INVIMA', () => {
+  it.each([false, true])(
+    'proyecta registro y titular solo desde la coincidencia vigente y los limpia al editar (%s)',
+    async exacta => {
+      const { service, socrata } = setup();
+      const p = await service.crear({
+        nombre: 'CARDIK',
+        ...(exacta ? { cum: candidato.cum } : {}),
+        laboratorio: 'Laboratorio ingresado',
+      });
+      const v = await service.verificar(p.id);
+      if (!exacta) {
+        expect((await service.listar())[0]).toMatchObject({
+          registroSanitarioVerificado: null,
+          titularInvima: null,
+        });
+        await service.confirmar(p.id, v.id, candidato.clave);
+      }
+      socrata.consultar.mockClear();
+      const saved = (await service.listar())[0];
+      expect(saved).toMatchObject({
+        registroSanitarioVerificado: candidato.registroSanitario,
+        titularInvima: candidato.titular,
+        datos: { laboratorio: 'Laboratorio ingresado' },
+      });
+      expect(socrata.consultar).not.toHaveBeenCalled();
+      expect(await service.editar(p.id, { nombre: 'Corregido', version: p.version })).toMatchObject(
+        { registroSanitarioVerificado: null, titularInvima: null }
+      );
+      expect((await service.listar())[0]).toMatchObject({
+        registroSanitarioVerificado: null,
+        titularInvima: null,
+      });
+      expect(await service.historial(p.id)).toHaveLength(1);
+    }
+  );
   it.each(['DISPOSITIVO', 'MEDICO_QUIRURGICOS'] as const)(
     'consulta %s por registro en su fuente y exige confirmación manual',
     async tipo => {
@@ -352,6 +390,8 @@ describe('Flujo de registro, consulta e historial INVIMA', () => {
     expect((await service.listar())[0]).toMatchObject({
       estadoCum: 'Inactivo',
       cumVerificado: candidato.cum,
+      registroSanitarioVerificado: candidato.registroSanitario,
+      titularInvima: candidato.titular,
     });
     expect((await service.historial(p.id))[0].entrada.cum).toBe('00020048021-00041');
   });

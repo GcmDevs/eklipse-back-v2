@@ -122,14 +122,25 @@ function setup() {
     })),
   };
   const pdf: any = { extraer: jest.fn(async () => parsed) };
-  const service = new FacturasInvimaService(request, pdf, invima);
+  const excel: any = {
+    extraer: jest.fn(async () => ({
+      ...parsed,
+      tipoDocumento: 'PEDIDO',
+      cliente: 'Disfarma',
+      proveedor: '',
+      formato: 'DISFARMA_EXCEL',
+      paginas: 0,
+    })),
+  };
+  const service = new FacturasInvimaService(request, pdf, invima, excel);
   const file: any = { buffer: Buffer.from('pdf-de-prueba'), originalname: 'factura.pdf' };
-  return { service, invima, pdf, connection, file };
+  return { service, invima, pdf, excel, connection, file };
 }
 const input = (f: any): GuardarFacturaDto => ({
   version: f.version,
   numero: f.numero,
   proveedor: f.proveedor,
+  cliente: f.cliente,
   nitProveedor: f.nitProveedor,
   fecha: f.fecha,
   renglones: f.renglones.map((r: any) => ({
@@ -141,6 +152,68 @@ const input = (f: any): GuardarFacturaDto => ({
     registroSanitario: r.registroSanitario,
     excluido: r.excluido,
   })),
+});
+describe('Pedidos Excel y facturas comparten revisión sin confundir cliente y proveedor', () => {
+  it('guarda pedido, cliente, observaciones e informe sin inventar proveedor', async () => {
+    const { service, file, excel, pdf } = setup();
+    file.originalname = 'pedido.xlsx';
+    const d = await service.subir(file, true);
+    expect(excel.extraer).toHaveBeenCalledTimes(1);
+    expect(pdf.extraer).not.toHaveBeenCalled();
+    expect(d).toMatchObject({
+      tipoDocumento: 'PEDIDO',
+      cliente: 'Disfarma',
+      proveedor: '',
+      estado: 'BORRADOR',
+    });
+    const invalid = input(d);
+    invalid.cliente = '';
+    await expect(service.guardar(d.id, invalid)).rejects.toThrow('cliente');
+    const f = await service.guardar(d.id, input(d));
+    await service.guardarObservacion(f.id, { texto: 'Nota de pedido', version: 0 });
+    const report = await service.informe(f.id);
+    expect(report).toMatchObject({
+      tipoDocumento: 'PEDIDO',
+      cliente: 'Disfarma',
+      proveedor: '',
+      observacion: { texto: 'Nota de pedido' },
+    });
+    expect(report.productos).toHaveLength(2);
+    const edit = input(f);
+    edit.cliente = 'Disfarma corregido';
+    const reload = await service.guardar(f.id, edit);
+    expect(reload.cliente).toBe('Disfarma corregido');
+  });
+  it('continúa exigiendo proveedor a facturas y no admite cambiar el tipo desde la revisión', async () => {
+    const { service, file } = setup();
+    const f = await service.subir(file);
+    const invalid = input(f);
+    invalid.proveedor = '';
+    invalid.cliente = 'Disfarma';
+    await expect(service.guardar(f.id, invalid)).rejects.toThrow('proveedor');
+    const saved = await service.guardar(f.id, {
+      ...input(f),
+      cliente: 'No es cliente',
+      tipoDocumento: 'PEDIDO',
+    } as any);
+    expect(saved).toMatchObject({ tipoDocumento: 'FACTURA', cliente: '', proveedor: 'Proveedor' });
+  });
+  it('rechaza archivos con extensión incorrecta y conserva advertencias de extracción tras revisar', async () => {
+    const { service, file, excel } = setup();
+    await expect(service.subir(file, true)).rejects.toThrow('.xlsx');
+    file.originalname = 'pedido.xlsx';
+    const value = await excel.extraer();
+    value.renglones[0].advertencias = [
+      'CUM repetido en el pedido. Se conserva este renglón para revisión.',
+    ];
+    excel.extraer.mockResolvedValue(value);
+    const f = await service.subir(file, true);
+    expect(f.renglones[0].advertencias.join(' ')).toContain('CUM repetido');
+    await service.eliminar(f.id, f.version);
+    const again = await service.subir(file, true);
+    expect(again.tipoDocumento).toBe('PEDIDO');
+    expect(again.id).not.toBe(f.id);
+  });
 });
 describe('Observaciones e informe de facturas revisadas', () => {
   it('rechaza observaciones e informe antes de guardar la revisión', async () => {
@@ -239,27 +312,23 @@ describe('Observaciones e informe de facturas revisadas', () => {
       estadoCum: 'Inactivo',
       estadoRegistro: 'Vigente',
     };
-    const v = await connection
-      .getRepository(InvimaVerificacionOrm)
-      .save({
-        productoId: p.id,
-        versionProducto: p.version,
-        resultado: 'REVISION',
-        fecha: new Date(),
-        evidencia: JSON.stringify({
-          consultas: [],
-          advertencias: ['Discrepancia'],
-          seleccionado: null,
-        }),
-      });
-    await connection
-      .getRepository(InvimaConfirmacionOrm)
-      .save({
-        verificacionId: v.id,
-        candidato: JSON.stringify(candidate),
-        usuarioNombre: 'Confirmador',
-        fecha: new Date(),
-      });
+    const v = await connection.getRepository(InvimaVerificacionOrm).save({
+      productoId: p.id,
+      versionProducto: p.version,
+      resultado: 'REVISION',
+      fecha: new Date(),
+      evidencia: JSON.stringify({
+        consultas: [],
+        advertencias: ['Discrepancia'],
+        seleccionado: null,
+      }),
+    });
+    await connection.getRepository(InvimaConfirmacionOrm).save({
+      verificacionId: v.id,
+      candidato: JSON.stringify(candidate),
+      usuarioNombre: 'Confirmador',
+      fecha: new Date(),
+    });
     p.ultimaVerificacionId = v.id;
     await repo.save(p);
     const report = await service.informe(f.id);
