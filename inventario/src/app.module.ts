@@ -12,6 +12,7 @@ import * as fs from 'fs';
 import { FOLDERS_STRINGS } from './folders';
 import { CloudController } from './cloud.controller';
 import { RondasHabitacionesModule } from './rondas-habitaciones/rondas-habitaciones.module';
+import { InvimaModule } from './invima/invima.module';
 
 @Module({
   controllers: [CloudController],
@@ -24,6 +25,7 @@ import { RondasHabitacionesModule } from './rondas-habitaciones/rondas-habitacio
     CentralMezclasModule,
     SolicitudPedidoModule,
     RondasHabitacionesModule,
+    InvimaModule,
   ],
 })
 export class AppModule implements OnModuleInit {
