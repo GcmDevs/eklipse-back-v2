@@ -9,6 +9,7 @@ import { MAOSModule } from './maos/module';
 import { CentralMezclasModule } from './central-mezclas/module';
 import { SolicitudPedidoModule } from './solicitud-pedido/solicitud-pedido.module';
 import { RondasHabitacionesModule } from './rondas-habitaciones/rondas-habitaciones.module';
+import { InvimaModule } from './invima/invima.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { RondasHabitacionesModule } from './rondas-habitaciones/rondas-habitacio
     CentralMezclasModule,
     SolicitudPedidoModule,
     RondasHabitacionesModule,
+    InvimaModule,
   ],
 })
 export class AppModule implements OnModuleInit {
