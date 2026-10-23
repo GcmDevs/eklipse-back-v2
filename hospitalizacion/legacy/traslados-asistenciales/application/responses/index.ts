@@ -11,6 +11,7 @@ import {
 import { TipoDocumentoCode } from '@hpn/lgc/tas/types/gen';
 import {
   MedicamentoOrm,
+  TrasladoAccidenteOrm,
   TrasladoEstadoHistorialOrm,
   TrasladoRevisionCentralOrm,
 } from '@hpn/lgc/tas/orm/gcn';
@@ -47,6 +48,12 @@ export class UbicacionDataRes {
 }
 
 export class PacienteDataRes {
+  datosPersonales?: {
+    estadoCivilCode?: number;
+    direccion?: string;
+    barrio?: string;
+    celular?: string;
+  };
   id: number;
   ingreso: {
     consecutivo: string;
@@ -117,6 +124,10 @@ export class SignoVitalItemDataRes {
 }
 
 export class SignosVitalesDetalleDataRes {
+  momentoCode?: number | null;
+  tramoId?: number;
+  asignacionId?: number;
+  fechaRegistro?: Date;
   id: number;
   usuario: {
     nombre: string;
@@ -138,6 +149,12 @@ export class SignosVitalesDetalleDataRes {
 }
 
 export class ProcedimientoDataRes {
+  registroId?: number;
+  tramoId?: number;
+  asignacionId?: number;
+  fechaCreacion?: Date;
+  fechaRegistro?: Date;
+  usuario?: { id: number; nombre: string; documento: string };
   id: number;
   nombre: string;
   codigo: string;
@@ -145,6 +162,10 @@ export class ProcedimientoDataRes {
 }
 
 export class TramoDetalleDataRes {
+  archivos?: FilesTrasladoDataRes[];
+  tipoTrasladoCode?: number;
+  horasEsperaMinutos?: number;
+  tiempoUtilizadoMinutos?: number;
   id: number;
   orden: number;
   tipoTramoCode: number;
@@ -179,6 +200,19 @@ export class TramoDetalleDataRes {
 }
 
 export class TrasladoAsistencialDetalleDataRes extends TrasladoAsistencialDataRes {
+  accidente?: Omit<TrasladoAccidenteOrm, 'traslado' | 'vehiculos'> & {
+    areaCode?: number;
+    climaCode?: number;
+    vehiculos: Array<Record<string, unknown>>;
+  };
+  asignacionActiva?: any;
+  tramoActualId?: number;
+  registrosSinTramo?: {
+    signosVitales: SignosVitalesDetalleDataRes[];
+    notas: any[];
+    procedimientos: ProcedimientoDataRes[];
+    medicamentos: MedicamentoOrm[];
+  };
   condicionesClinicas: Array<{ code: CondicionClinicaCode }>;
   medicamentosPrevios: Array<{
     id: number;
@@ -197,7 +231,11 @@ export class TrasladoAsistencialDetalleDataRes extends TrasladoAsistencialDataRe
   asignaciones: any[];
   tramos: TramoDetalleDataRes[];
   estadosHistorial: TrasladoEstadoHistorialOrm[];
-  revisionesCentral: TrasladoRevisionCentralOrm[];
+  revisionesCentral: Array<
+    Omit<TrasladoRevisionCentralOrm, 'traslado' | 'usuarioCentral'> & {
+      usuarioCentral: TrasladoAsistencialDataRes['usuario'];
+    }
+  >;
   [key: string]: any;
 }
 
