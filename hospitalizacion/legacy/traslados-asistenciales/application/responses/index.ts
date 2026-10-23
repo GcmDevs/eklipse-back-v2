@@ -82,6 +82,7 @@ export class PacienteDataRes {
 }
 
 export class TrasladoAsistencialDataRes {
+  tieneAccidente: boolean;
   codigo: string;
   contexto: GcmContextType;
   id: number;

@@ -248,4 +248,21 @@ export class TrasladoController {
       throw new BadRequestException(error.message);
     }
   }
+  @ApiOperation({ summary: 'Descargar el PDF de víctima de accidente de un primario finalizado' })
+  @Authorities([HPN_AUTHORITIES.GESTION_CLINICA.GESTION_TRASLADO])
+  @Get(':trasladoId/descargar-pdf-accidente')
+  public async descargarPdfAccidente(
+    @Param('trasladoId') trasladoId: number,
+    @Query('contextoCode') contextoCode?: GcmContextCode
+  ) {
+    try {
+      const traslado = await this._source.fetchTrasladoById(+trasladoId, contextoCode);
+      return await this._pdfService.generarPdfAccidente(
+        traslado,
+        contextoCode ?? this._source.getRealtimeContextCode()
+      );
+    } catch (error: any) {
+      throw new BadRequestException(error.message);
+    }
+  }
 }

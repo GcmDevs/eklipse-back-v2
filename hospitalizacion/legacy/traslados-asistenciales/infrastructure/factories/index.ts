@@ -266,6 +266,7 @@ export const newDataToTraslados = (
       traslado.fechaHoraProgramada = item.fechaProgramada;
     }
     traslado.tipoRemisionCode = item.tipoRemisionCode;
+    traslado.tieneAccidente = item.accidente?.id != null;
 
     if (item.otroTipoRemision) {
       traslado.otroTipoRemision = item.otroTipoRemision;
@@ -301,6 +302,7 @@ export const newDataToTrasladoDetalle = (
 
   const traslado = new TrasladoAsistencialDetalleDataRes();
   Object.assign(traslado, item);
+  traslado.tieneAccidente = item.accidente?.id != null;
 
   if (item.paciente) {
     traslado.paciente = newDataToPacienteBase(item.paciente);

@@ -928,6 +928,8 @@ export class RecursosCompartidosSource extends BaseSource {
         .createQueryBuilder('t')
 
         .leftJoinAndSelect('t.usuario', 'usuario')
+        .leftJoin('t.accidente', 'accidenteDisponibilidad')
+        .addSelect('accidenteDisponibilidad.id')
 
         .leftJoinAndSelect('t.paciente', 'paciente')
         .leftJoinAndSelect('paciente.detalleContrato', 'detalleContrato')
