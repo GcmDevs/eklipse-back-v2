@@ -1,5 +1,13 @@
 import { TABLE_NAMES } from '@common/application/constants';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { PacienteOrm, UsuarioOrm } from '@hpn/lgc/tas/orm/gen';
 import { TrasladoTramoOrm } from './traslado-tramo.orm';
 import { TrasladoAsignacionOrm } from './traslado-asignacion.orm';
@@ -22,6 +30,7 @@ import { DiagnosticoOrm } from '@hpn/lgc/tas/orm/temp';
 import { ServicioOrm } from '../servicio-destino.orm';
 import { GcmContextType } from '@common/domain/types';
 import { MedicamentoPrevioOrm } from './medicamento-previo.orm';
+import { TrasladoAccidenteOrm } from './traslado-accidente.orm';
 
 @Entity(TABLE_NAMES.hpn.trasladosAsistenciales.index)
 export class TrasladoAsistencialOrm {
@@ -118,6 +127,9 @@ export class TrasladoAsistencialOrm {
   @Column({ name: 'TRIAGEIMG', nullable: true })
   triageImg: string;
 
+  @Column({ name: 'TRIAGECODE', type: 'tinyint', nullable: true })
+  triageCode?: number;
+
   @Column({ name: 'PRENOTIFICASITIO', nullable: true })
   prenotificaAlSitio: boolean;
 
@@ -162,6 +174,9 @@ export class TrasladoAsistencialOrm {
 
   @OneToMany(() => MedicamentoPrevioOrm, medicamento => medicamento.traslado)
   medicamentosPrevios: MedicamentoPrevioOrm[];
+
+  @OneToOne(() => TrasladoAccidenteOrm, accidente => accidente.traslado)
+  accidente?: TrasladoAccidenteOrm;
 
   @OneToMany(() => TrasladoRevisionCentralOrm, revision => revision.traslado)
   revisionesCentral: TrasladoRevisionCentralOrm[];
