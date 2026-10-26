@@ -13,6 +13,8 @@ import { TrasladoRevisionCentralOrm } from './traslado-revision-central.orm';
 import { TrasladoSignosVitalesOrm } from './traslado-signos-vitales.orm';
 import { TrasladoTramoOrm } from './traslado-tramo.orm';
 import { UbicacionOrm } from './ubicacion.orm';
+import { TrasladoAccidenteOrm } from './traslado-accidente.orm';
+import { TrasladoVehiculoInvolucradoOrm } from './traslado-vehiculo-involucrado.orm';
 
 export * from './traslado-asistencial.orm';
 export * from './traslado-evolucion.orm';
@@ -29,6 +31,8 @@ export * from './paciente.orm';
 export * from './ubicacion.orm';
 export * from './productos.orm';
 export * from './procedimiento-temp.orm';
+export * from './traslado-accidente.orm';
+export * from './traslado-vehiculo-involucrado.orm';
 
 export const LGC_TAS_TRASLADO_ENTITIES = [
   TrasladoAsistencialOrm,
@@ -46,4 +50,6 @@ export const LGC_TAS_TRASLADO_ENTITIES = [
   UbicacionOrm,
   ProductoOrm,
   ProcedimientoTempOrm,
+  TrasladoAccidenteOrm,
+  TrasladoVehiculoInvolucradoOrm,
 ];

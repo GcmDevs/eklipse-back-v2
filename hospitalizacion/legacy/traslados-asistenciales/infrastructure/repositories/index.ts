@@ -3,3 +3,4 @@ export * from './traslado.crud.source';
 export * from './evolucion.impl';
 export * from './revision-central.impl';
 export * from './seguimiento.impl';
+export * from './primario-seg';

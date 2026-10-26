@@ -427,7 +427,7 @@ function computeFirmaRows(total: number): number[] {
 }
 
 /** Dibuja un bloque de firma (imagen + línea + nombre + cargo) en una posición específica */
-function drawFirmaBlock(
+export function drawFirmaBlock(
   doc: jsPDF,
   bufferObj: { buffer: any; ext: string } | null,
   nombreLabel: string,

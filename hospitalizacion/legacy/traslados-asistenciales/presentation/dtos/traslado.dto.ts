@@ -24,7 +24,9 @@ import {
   IsOptional,
   IsString,
   ValidateNested,
+  ValidateBy,
 } from 'class-validator';
+import { esFechaNacimientoValida } from '../../application/helpers/fecha-nacimiento';
 import { GcmContextCode } from '@common/domain/types';
 import { SignosVitalesFlowDto } from './signos.dto';
 
@@ -101,8 +103,15 @@ export class PacienteTemporalDto {
   @IsNumber()
   generoCode: TipoSexoTypeCode;
 
-  @IsNumber()
-  edad: number;
+  @IsString()
+  @ValidateBy({
+    name: 'fechaNacimiento',
+    validator: {
+      validate: value => esFechaNacimientoValida(value),
+      defaultMessage: () => 'La fecha de nacimiento debe ser YYYY-MM-DD, no futura y no superar los 150 años',
+    },
+  })
+  fechaNacimiento: string;
 
   @IsString()
   eps: string;
@@ -114,6 +123,7 @@ export class PacienteTemporalDto {
   grupoSanguineoCode: GrupoSanguineoTypeCode;
 
   @IsString()
+  @IsOptional()
   soat: string;
 }
 

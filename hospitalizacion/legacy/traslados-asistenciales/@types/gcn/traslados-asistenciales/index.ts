@@ -8,3 +8,6 @@ export * from './estado-asistencia';
 export * from './motivo-cancelacion';
 export * from './cups';
 export * from './evento-neurologico';
+export * from './clima';
+export * from './area-recogida';
+export * from './tipo-vehiculo-involucrado';

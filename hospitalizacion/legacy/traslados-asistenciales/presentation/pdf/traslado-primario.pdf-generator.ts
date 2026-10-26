@@ -92,7 +92,7 @@ function getLocalImageBuffer(
 }
 
 /** Obtiene el buffer de una firma a partir de la cédula del usuario buscando en private/gen/trasl */
-function getFirmaBufferFromCedula(
+export function getFirmaBufferFromCedula(
   cedula?: string,
   ruta?: string
 ): { buffer: any; ext: string } | null {
