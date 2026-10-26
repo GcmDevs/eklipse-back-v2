@@ -75,6 +75,7 @@ export const TBNMS__INN__ = {
       controlGastos: 'EKINNFMCCGT',
       detalle: 'EKINNFMCCGTITEM',
       controlGastosHistorial: 'EKINNFMCCGTHIST',
+      controlGastosArchivos: 'EKINNFMCCGTARCHI',
     },
     /** LEGALIZACION DE FACTURAS */
     ldf: {

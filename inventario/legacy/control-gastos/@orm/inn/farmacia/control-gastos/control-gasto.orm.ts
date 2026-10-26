@@ -11,6 +11,7 @@ import { GcmContextType } from '@common/domain/types';
 import { AreaCode } from '@inn/lgc/cgt/types/inn/farmacia/control-gastos/area.type';
 import { ControlGastoHistorialOrm } from '@inn/lgc/cgt/orm/inn/farmacia/control-gastos/historial-control-gasto.orm';
 import { CentroOrm } from '@inn/lgc/cgt/orm/adn/centro.orm';
+import { ControlGastoArchivoOrm } from './archivo-control-gasto.orm';
 
 @Entity(TABLE_NAMES.inn.fmc.cgt.controlGastos)
 export class ControlGastoOrm {
@@ -92,6 +93,9 @@ export class ControlGastoOrm {
 
   @OneToMany(() => ControlGastoHistorialOrm, historial => historial.controlGasto)
   historial: ControlGastoHistorialOrm[];
+
+  @OneToMany(() => ControlGastoArchivoOrm, archivo => archivo.controlGasto)
+  archivos: ControlGastoArchivoOrm[];
 
   context: GcmContextType;
 
