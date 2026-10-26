@@ -106,6 +106,100 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     return { id, destino };
   }
 
+  it('envía al ejecutor la omisión de prefactura para ingresos Facturados', async () => {
+    await writeFile(
+      join(carpeta, 'src/worker.ts'),
+      `
+      const fs = require('node:fs/promises'); const path = require('node:path');
+      const folder = process.argv[process.argv.indexOf('--carpeta') + 1];
+      fs.writeFile(path.join(folder, 'execution.json'), JSON.stringify({ status: 'complete', message: process.argv.includes('--sin-prefactura') ? 'Sin prefactura' : 'Prefactura obligatoria', files: [], updatedAt: new Date().toISOString() }));
+    `
+    );
+    const job = await servicio.crear('123', '20', propietario, undefined, true);
+    expect((await esperar(job.id, 'complete')).mensaje).toBe('Sin prefactura');
+  });
+
+  it('el supervisor acepta la salida sin prefactura y libera el ejecutor para otra generación', async () => {
+    await writeFile(
+      join(carpeta, 'src/worker.ts'),
+      `
+      const fs = require('node:fs/promises'); const path = require('node:path');
+      const folder = process.argv[process.argv.indexOf('--carpeta') + 1];
+      fs.writeFile(path.join(folder, 'execution.json'), JSON.stringify({ status: 'prefactura-unavailable', message: 'Este ingreso no tiene una prefactura disponible', updatedAt: new Date().toISOString(), files: [] }));
+    `
+    );
+    const job = await servicio.crear('123', '20', propietario);
+    await esperar(job.id, 'prefactura-unavailable');
+    for (let i = 0; i < 100 && (servicio as any).child; i++)
+      await new Promise(resolve => setTimeout(resolve, 50));
+    const result = await servicio.consultar(job.id, propietario);
+    expect(result.estado).toBe('prefactura-unavailable');
+    expect(result.fallo).toBeUndefined();
+    expect((servicio as any).child).toBeUndefined();
+    const next = await servicio.crear('123', '20', propietario);
+    expect(next.id).not.toBe(job.id);
+    await esperar(next.id, 'prefactura-unavailable');
+  });
+
+  it('conserva el aviso sin prefactura y no permite reanudarlo como falla', async () => {
+    const job = await guardado({ estado: 'prefactura-unavailable', archivos: [] });
+    const path = join(job.destino, 'execution.json');
+    const state = JSON.parse(await readFile(path, 'utf8'));
+    await writeFile(
+      path,
+      JSON.stringify({ ...state, message: 'Este ingreso no tiene una prefactura disponible' })
+    );
+    const result = await servicio.consultar(job.id, propietario);
+    expect(result.estado).toBe('prefactura-unavailable');
+    expect(result.mensaje).toBe('Este ingreso no tiene una prefactura disponible');
+    expect(result.reanudable).toBe(false);
+    expect(result.fallo).toBeUndefined();
+    expect((await servicio.listar('001234', ['20'], propietario))[0].estado).toBe(
+      'prefactura-unavailable'
+    );
+    await expect(servicio.reanudar(job.id, propietario)).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it('mantiene archivos anteriores y expone el aviso posterior sin prefactura', async () => {
+    const old = await guardado({ fecha: '2026-10-09T12:00:00Z' });
+    const latest = await guardado({
+      estado: 'prefactura-unavailable',
+      archivos: [],
+      fecha: '2026-10-26T12:00:00Z',
+    });
+    const result = (await servicio.listar('001234', ['20'], propietario))[0];
+    expect(result.id).toBe(old.id);
+    expect(result.archivos).toHaveLength(1);
+    expect(result.pendiente?.id).toBe(latest.id);
+    expect(result.pendiente?.estado).toBe('prefactura-unavailable');
+  });
+
+  it('ofrece vista previa, descarga individual y ZIP con tipo prefactura', async () => {
+    const job = await guardado({
+      archivos: ['prefactura.pdf', 'historia.pdf', 'notas-enfermeria.pdf'],
+    });
+    const path = join(job.destino, 'execution.json');
+    const state = JSON.parse(await readFile(path, 'utf8'));
+    state.files[0].kind = 'prefactura';
+    state.files[2].kind = 'enfermeria';
+    await writeFile(path, JSON.stringify(state));
+    expect((await servicio.consultar(job.id, propietario)).archivos[0].tipo).toBe('prefactura');
+    expect((await servicio.archivo(job.id, '0', propietario)).nombre).toBe('prefactura.pdf');
+    const result = await servicio.archivos(job.id, propietario);
+    const chunks: Buffer[] = [];
+    for await (const chunk of result.contenido) chunks.push(Buffer.from(chunk));
+    const zip = await JSZip.loadAsync(Buffer.concat(chunks));
+    expect(await zip.file('001234/20/prefactura/1-prefactura.pdf')!.async('string')).toContain(
+      '%PDF'
+    );
+    expect(
+      await zip.file('001234/20/historias-clinicas/2-historia.pdf')!.async('string')
+    ).toContain('%PDF');
+    expect(
+      await zip.file('001234/20/enfermeria/3-notas-enfermeria.pdf')!.async('string')
+    ).toContain('%PDF');
+  });
+
   it('expone todas las fallas pendientes mientras el ejecutor continúa trabajando', async () => {
     const job = await guardado({ estado: 'running' });
     const ruta = join(job.destino, 'execution.json');
@@ -155,10 +249,10 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     for await (const bloque of resultado.contenido) bloques.push(Buffer.from(bloque));
     const zip = await JSZip.loadAsync(Buffer.concat(bloques));
     const archivos = Object.values(zip.files).filter(archivo => !archivo.dir);
-    expect(resultado.nombre).toBe('reportes-ingreso-20.zip');
+    expect(resultado.nombre).toBe('reportes-paciente-001234-ingreso-20.zip');
     expect(archivos.map(archivo => archivo.name)).toEqual([
-      'historias-clinicas/1-grupo-001.pdf',
-      'historias-clinicas/2-grupo-002.pdf',
+      '001234/20/historias-clinicas/1-grupo-001.pdf',
+      '001234/20/historias-clinicas/2-grupo-002.pdf',
     ]);
     expect(await archivos[0].async('string')).toContain('%PDF');
     await expect(
@@ -220,8 +314,8 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
         .filter(archivo => !archivo.dir)
         .map(archivo => archivo.name)
     ).toEqual([
-      'historias-clinicas/3-historia-unificada.pdf',
-      'enfermeria/5-enfermeria-unificada.pdf',
+      '001234/20/historias-clinicas/3-historia-unificada.pdf',
+      '001234/20/enfermeria/5-enfermeria-unificada.pdf',
     ]);
   });
 

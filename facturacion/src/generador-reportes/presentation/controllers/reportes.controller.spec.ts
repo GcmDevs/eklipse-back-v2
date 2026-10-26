@@ -96,11 +96,15 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({})
       .expect(201);
-    expect(reanudar).toHaveBeenCalledWith('job-test', {
-      usuario: 7,
-      contexto: 'ALTACENTRO',
-      esDinamica: true,
-    });
+    expect(reanudar).toHaveBeenCalledWith(
+      'job-test',
+      {
+        usuario: 7,
+        contexto: 'ALTACENTRO',
+        esDinamica: true,
+      },
+      false
+    );
     consultar.mockResolvedValue({
       paciente: { documento: '001234' },
       ingresos: [{ consecutivo: 21 }],
@@ -193,6 +197,35 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
     expect(consultar).not.toHaveBeenCalled();
   });
 
+  it.each(['Facturado', ' FACTURADO '])(
+    'genera y reanuda sin prefactura cuando el ingreso es %s',
+    async estado => {
+      consultar.mockResolvedValue({
+        paciente: { documento: '001234' },
+        ingresos: [{ consecutivo: 20, estado }],
+      });
+      consultarEjecucion.mockResolvedValue({
+        id: 'job-test',
+        documento: '001234',
+        ingreso: '20',
+        estado: 'failed',
+      });
+      for (const ruta of [
+        '/v1/generador-reportes/ejecuciones',
+        '/v1/generador-reportes/ejecuciones/job-test/reanudar',
+      ]) {
+        await request(app.getHttpServer())
+          .post(ruta)
+          .set('Authorization', `Bearer ${token}`)
+          .send({ documento: '001234', ingreso: '20' })
+          .expect(201);
+      }
+      const propietario = { usuario: 7, contexto: 'ALTACENTRO', esDinamica: true };
+      expect(crear).toHaveBeenCalledWith('001234', '20', propietario, undefined, true);
+      expect(reanudar).toHaveBeenCalledWith('job-test', propietario, true);
+    }
+  );
+
   it('genera solo para un ingreso del paciente y conserva la cédula como texto', async () => {
     consultar.mockResolvedValue({
       paciente: { documento: '001234' },
@@ -203,11 +236,17 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({ documento: ' 001234 ', ingreso: '20' })
       .expect(201, { id: 'job-test', estado: 'starting' });
-    expect(crear).toHaveBeenCalledWith('001234', '20', {
-      usuario: 7,
-      contexto: 'ALTACENTRO',
-      esDinamica: true,
-    });
+    expect(crear).toHaveBeenCalledWith(
+      '001234',
+      '20',
+      {
+        usuario: 7,
+        contexto: 'ALTACENTRO',
+        esDinamica: true,
+      },
+      undefined,
+      false
+    );
   });
 
   it('la búsqueda asocia reportes guardados al ingreso correspondiente sin generar otra ejecución', async () => {

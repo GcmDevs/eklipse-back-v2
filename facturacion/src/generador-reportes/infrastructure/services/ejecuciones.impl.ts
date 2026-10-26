@@ -39,7 +39,7 @@ interface ArchivoWorker {
   bytes: number;
   group: number;
   totalGroups: number;
-  kind: 'historias-clinicas' | 'enfermeria';
+  kind: 'historias-clinicas' | 'enfermeria' | 'prefactura';
   unified?: boolean;
   pages?: number;
   superseded?: boolean;
@@ -56,7 +56,7 @@ interface EstadoWorker {
     details: string;
   };
   failures?: EstadoWorker['failure'][];
-  status: 'starting' | 'running' | 'complete' | 'failed';
+  status: 'starting' | 'running' | 'complete' | 'failed' | 'prefactura-unavailable';
   message: string;
   updatedAt: string;
   files: ArchivoWorker[];
@@ -192,18 +192,19 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
     return ruta;
   }
 
-  async reanudar(id: string, propietario: PropietarioReportes) {
+  async reanudar(id: string, propietario: PropietarioReportes, omitirPrefactura = false) {
     const { job, estado } = await this.leer(id, propietario);
     if (estado.status !== 'failed')
       throw new ConflictException('Solo puedes reanudar una ejecución que se haya detenido.');
-    return this.crear(job.documento, job.ingreso, propietario, id);
+    return this.crear(job.documento, job.ingreso, propietario, id, omitirPrefactura);
   }
 
   async crear(
     documento: string,
     ingreso: string,
     propietario: PropietarioReportes,
-    reanudarId?: string
+    reanudarId?: string,
+    omitirPrefactura = false
   ) {
     if (!/^\d{1,20}$/.test(documento) || !/^\d{1,20}$/.test(ingreso)) {
       throw new BadRequestException('Revisa la cédula y el ingreso.');
@@ -258,6 +259,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
           '--carpeta',
           destino,
           ...(anterior ? ['--reanudar'] : []),
+          ...(omitirPrefactura ? ['--sin-prefactura'] : []),
         ],
         {
           cwd: carpeta,
@@ -306,7 +308,10 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
             } catch {
               /* No arrancó. */
             }
-            if (!estado || !['complete', 'failed'].includes(estado.status)) {
+            if (
+              !estado ||
+              !['complete', 'failed', 'prefactura-unavailable'].includes(estado.status)
+            ) {
               const message = errorArranque
                 ? `No se pudo iniciar el ejecutor de reportes (${errorArranque}).`
                 : agotado
@@ -575,7 +580,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
           };
       }
       if (
-        reporte.estado === 'failed' &&
+        ['failed', 'prefactura-unavailable'].includes(reporte.estado) &&
         (!pendientes.has(job.ingreso) || pendientes.get(job.ingreso).createdAt < reporte.createdAt)
       )
         pendientes.set(job.ingreso, reporte);
@@ -636,8 +641,16 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
       }
       const entrada = createReadStream(ruta);
       entradas.push(entrada);
-      const tipo = archivo.kind === 'enfermeria' ? 'enfermeria' : 'historias-clinicas';
-      zip.file(`${tipo}/${indice + 1}-${basename(archivo.name)}`, entrada);
+      const tipo =
+        archivo.kind === 'prefactura'
+          ? 'prefactura'
+          : archivo.kind === 'enfermeria'
+            ? 'enfermeria'
+            : 'historias-clinicas';
+      zip.file(
+        `${job.documento}/${job.ingreso}/${tipo}/${indice + 1}-${basename(archivo.name)}`,
+        entrada
+      );
       disponibles++;
     }
     if (!disponibles) throw new NotFoundException('No hay PDF disponibles para descargar.');
@@ -651,7 +664,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
     pipeline(origen, contenido, liberar);
     return {
       contenido,
-      nombre: `reportes-ingreso-${job.ingreso}.zip`,
+      nombre: `reportes-paciente-${job.documento}-ingreso-${job.ingreso}.zip`,
     };
   }
 

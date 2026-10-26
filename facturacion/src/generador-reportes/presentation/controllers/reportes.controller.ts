@@ -58,6 +58,10 @@ export class GeneradorReportesController {
     };
   }
 
+  private omitirPrefactura(estado?: string): boolean {
+    return estado?.trim().toLowerCase() === 'facturado';
+  }
+
   private propietario(request: Request): PropietarioReportes {
     const token = JWTServices.decodeToken(request.headers.authorization.split(' ')[1]);
     return { usuario: token.user.id, contexto: token.context.getCode(), esDinamica: token.isDim };
@@ -74,10 +78,15 @@ export class GeneradorReportesController {
     ) {
       throw new BadRequestException('El ingreso seleccionado no pertenece al paciente consultado.');
     }
+    const omitirPrefactura = this.omitirPrefactura(
+      consulta.ingresos.find(ingreso => String(ingreso.consecutivo) === datos.ingreso)?.estado
+    );
     return this.ejecuciones.crear(
       consulta.paciente.documento,
       datos.ingreso,
-      this.propietario(request)
+      this.propietario(request),
+      undefined,
+      omitirPrefactura
     );
   }
 
@@ -103,7 +112,10 @@ export class GeneradorReportesController {
         'El ingreso ya no está disponible para el paciente consultado.'
       );
     }
-    return this.ejecuciones.reanudar(id, propietario);
+    const omitirPrefactura = this.omitirPrefactura(
+      consulta.ingresos.find(ingreso => String(ingreso.consecutivo) === ejecucion.ingreso)?.estado
+    );
+    return this.ejecuciones.reanudar(id, propietario, omitirPrefactura);
   }
 
   @Get('ejecuciones/:id/archivos/:archivo')

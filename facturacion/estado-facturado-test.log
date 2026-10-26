@@ -1,0 +1,5 @@
+Test Suites: 1 passed, 1 total
+Tests:       24 passed, 24 total
+Snapshots:   0 total
+Time:        5.643 s
+Ran all test suites within paths "facturacion/src/generador-reportes/presentation/controllers/reportes.controller.spec.ts".

@@ -2,7 +2,7 @@ export interface ArchivoReporte {
   id: string;
   nombre: string;
   bytes: number;
-  tipo: 'historias-clinicas' | 'enfermeria';
+  tipo: 'historias-clinicas' | 'enfermeria' | 'prefactura';
   grupo: number;
   totalGrupos: number;
   unificado?: boolean;
@@ -10,7 +10,13 @@ export interface ArchivoReporte {
 }
 
 export interface ProgresoReportes {
-  etapa: 'preparacion' | 'historias-clinicas' | 'enfermeria' | 'finalizacion' | 'completo';
+  etapa:
+    | 'preparacion'
+    | 'historias-clinicas'
+    | 'enfermeria'
+    | 'prefactura'
+    | 'finalizacion'
+    | 'completo';
   completados: number;
   total: number | null;
   grupoActual: number | null;
@@ -35,7 +41,7 @@ export interface EjecucionReportes {
   ingreso: string;
   createdAt: string;
   updatedAt: string;
-  estado: 'starting' | 'running' | 'complete' | 'failed';
+  estado: 'starting' | 'running' | 'complete' | 'failed' | 'prefactura-unavailable';
   mensaje: string;
   archivos: ArchivoReporte[];
   progreso?: ProgresoReportes;
