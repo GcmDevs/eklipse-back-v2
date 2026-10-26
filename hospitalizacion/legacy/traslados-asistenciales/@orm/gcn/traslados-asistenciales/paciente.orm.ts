@@ -1,5 +1,4 @@
 import { TipoDocumentoCode } from '@hpn/lgc/tas/types/gen';
-import { PacienteDataRes } from '@hpn/lgc/tas/application/responses';
 import { PacienteOrm } from '@hpn/lgc/tas/orm/gen';
 import { Entity, PrimaryGeneratedColumn, Column, JoinColumn, ManyToOne } from 'typeorm';
 
@@ -27,8 +26,8 @@ export class PacienteTrasladoOrm {
   @Column({ name: 'NUMERODOCUMENTO', nullable: true })
   numeroDocumento?: string;
 
-  @Column({ name: 'EDAD', nullable: true })
-  edad?: number;
+  @Column({ name: 'FECHANACIMIENTO', type: 'date', nullable: true })
+  fechaNacimiento?: Date;
 
   @Column({ name: 'GENERO', nullable: true })
   generoCode?: number;
@@ -44,4 +43,16 @@ export class PacienteTrasladoOrm {
 
   @Column({ name: 'SOAT', nullable: true })
   soat?: string;
+
+  @Column({ name: 'ESTADOCIVIL', type: 'int', nullable: true })
+  estadoCivilCode: number;
+
+  @Column({ name: 'DIRECCION', type: 'nvarchar', length: 250, nullable: true })
+  direccion: string;
+
+  @Column({ name: 'BARRIO', type: 'nvarchar', length: 150, nullable: true })
+  barrio: string;
+
+  @Column({ name: 'CELULAR', type: 'nvarchar', length: 30, nullable: true })
+  celular: string;
 }

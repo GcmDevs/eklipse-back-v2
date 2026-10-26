@@ -1,5 +1,9 @@
 import { SIGNO_VITAL_PRIMARIO_VALUES } from '@hpn/lgc/tas/types/gcn/traslados-asistenciales/signo-vital';
 import {
+  edadDesdeNacimiento,
+  fechaNacimientoCalendario,
+} from '../../application/helpers/fecha-nacimiento';
+import {
   DataRes,
   PacienteDataRes,
   ProcedimientoDataRes,
@@ -34,6 +38,9 @@ import { GcmContextType } from '@common/domain/types';
 import {
   CondicionClinicaCode,
   CONDICIONES_CLINICAS_CODES,
+  AREAS_RECOGIDA_VALUES,
+  recuperarClimaSegmentado,
+  recuperarTipoVehiculoSegmentado,
 } from '@hpn/lgc/tas/types/gcn/traslados-asistenciales';
 
 const getAsignacionActual = (asignaciones?: TrasladoAsignacionOrm[]): TrasladoAsignacionOrm => {
@@ -152,6 +159,10 @@ const newDataToSignosVitalesDetalle = (
 
     data.push({
       id: item.id,
+      momentoCode: item.momentoCode ?? null,
+      tramoId: item.tramoId,
+      asignacionId: item.asignacionId,
+      fechaRegistro: item.fechaRegistro,
       usuario: item.usuario
         ? {
             nombre: item.usuario.nombreCompleto,
@@ -174,6 +185,8 @@ const newDataToNota = (nota: TrasladoNotaOrm, authorMap?: Map<string, any>) => {
 
   return {
     id: nota.id,
+    tramoId: nota.tramoId,
+    asignacionId: nota.asignacionId,
     fecha: nota.fecha,
     fechaRegistro: nota.fechaRegistro,
     nota: nota.nota,
@@ -253,6 +266,7 @@ export const newDataToTraslados = (
       traslado.fechaHoraProgramada = item.fechaProgramada;
     }
     traslado.tipoRemisionCode = item.tipoRemisionCode;
+    traslado.tieneAccidente = item.accidente?.id != null;
 
     if (item.otroTipoRemision) {
       traslado.otroTipoRemision = item.otroTipoRemision;
@@ -288,6 +302,7 @@ export const newDataToTrasladoDetalle = (
 
   const traslado = new TrasladoAsistencialDetalleDataRes();
   Object.assign(traslado, item);
+  traslado.tieneAccidente = item.accidente?.id != null;
 
   if (item.paciente) {
     traslado.paciente = newDataToPacienteBase(item.paciente);
@@ -295,22 +310,26 @@ export const newDataToTrasladoDetalle = (
     traslado.paciente = newDataToPaciente(item.ekPaciente);
   }
 
+  const tramosOrdenados = [...(item.tramos ?? [])].sort((a, b) => a.orden - b.orden || a.id - b.id);
   const tramoActual =
-    item.tramos.find(tramo => tramo.isActivo) ?? item.tramos[item.tramos.length > 1 ? 1 : 0];
+    tramosOrdenados.find(tramo => tramo.isActivo) ?? tramosOrdenados[tramosOrdenados.length - 1];
+  traslado.tramoActualId = tramoActual?.id ?? null;
+  traslado.diagnosticoSecundario = item.diagSecundario ?? null;
+  traslado.tipoTrasladoCode = tramoActual?.tipoTrasladoCode ?? null;
 
-  if (tramoActual.origen) {
+  if (tramoActual?.origen) {
     traslado.origen = DNnewDataToUbicacion(tramoActual.origen);
-  } else if (tramoActual.ekOrigen) {
+  } else if (tramoActual?.ekOrigen) {
     traslado.origen = EKnewDataToUbicacion(tramoActual.ekOrigen);
   }
 
-  if (tramoActual.destino) {
+  if (tramoActual?.destino) {
     traslado.destino = DNnewDataToUbicacion(tramoActual.destino);
-  } else if (tramoActual.ekDestino) {
+  } else if (tramoActual?.ekDestino) {
     traslado.destino = EKnewDataToUbicacion(tramoActual.ekDestino);
   }
 
-  if (item.servicioRequeridoId) {
+  if (item.servicioRequerido) {
     traslado.servicioRequerido = {
       id: item.servicioRequerido.id,
       nombre: item.servicioRequerido.nombre,
@@ -329,12 +348,12 @@ export const newDataToTrasladoDetalle = (
     empleadoMap
   );
   traslado.tramos =
-    item.tramos?.map(tramo => newDataToTramo(tramo, authorMap, procedimientoTempMap)) ?? [];
+    tramosOrdenados.map(tramo => newDataToTramo(tramo, authorMap, procedimientoTempMap)) ?? [];
 
   // Retrocompatibilidad y resumen: popular campos desde el último tramo relevante
   const ultimoTramoConDatos = [...(item.tramos ?? [])]
     .sort((a, b) => b.orden - a.orden)
-    .find(t => t.kmFinal || t.recibidoPorNombre || t.firmaImg);
+    .find(t => t.kmFinal != null || t.recibidoPorNombre || t.firmaImg);
 
   if (ultimoTramoConDatos) {
     traslado.kmFinal = ultimoTramoConDatos.kmFinal;
@@ -374,6 +393,48 @@ export const newDataToTrasladoDetalle = (
   traslado.prenotificaAlSitio = item.prenotificaAlSitio ?? null;
   traslado.fechaHoraVistoBienPaciente = item.fechaHoraVistoBien ?? null;
 
+  traslado.asignacionActiva = newDataToAsignacionDetalle(
+    item.asignaciones?.find(asignacion => asignacion.isActiva) ?? null,
+    vehiculoMap,
+    empleadoMap
+  );
+  traslado.registrosSinTramo = {
+    signosVitales: newDataToSignosVitalesDetalle(item.signosVitales),
+    notas: newDataToNotas(item.notas, authorMap),
+    procedimientos: (item.procedimientos ?? []).map(proc =>
+      mapProcedimientoToDataRes(proc, procedimientoTempMap)
+    ),
+    medicamentos: (item.medicamentos ?? []).map(med => ({
+      ...med,
+      usuario: newDataToUsuario(med.usuario),
+    })) as any,
+  };
+  traslado.fechaHoraProgramada = item.fechaProgramada ?? null;
+  traslado.revisionesCentral = (item.revisionesCentral ?? []).map(revision => ({
+    ...revision,
+    usuarioCentral: newDataToUsuario(revision.usuarioCentral),
+  })) as any;
+  traslado.accidente = null;
+  if (item.accidente) {
+    const { traslado: _traslado, vehiculos, area, clima, ...accidente } = item.accidente;
+    const areaTexto = String(area ?? '').trim();
+    traslado.accidente = {
+      ...accidente,
+      areaCode:
+        AREAS_RECOGIDA_VALUES.find(
+          opcion =>
+            String(opcion.getCode()) === areaTexto ||
+            opcion.getForHumans().toUpperCase() === areaTexto.toUpperCase()
+        )?.getCode() ?? null,
+      climaCode: recuperarClimaSegmentado(clima),
+      vehiculos: (vehiculos ?? []).map(
+        ({ accidente: _accidente, usuario: _usuario, tipo, ...vehiculo }) => ({
+          ...vehiculo,
+          tipoCode: recuperarTipoVehiculoSegmentado(tipo, vehiculo.id),
+        })
+      ),
+    };
+  }
   return traslado;
 };
 
@@ -381,10 +442,19 @@ const mapProcedimientoToDataRes = (
   proc: ProcedimientoOrm,
   procedimientoTempMap?: Map<number, ProcedimientoTempOrm>
 ): ProcedimientoDataRes => {
+  const registro = {
+    registroId: proc.id,
+    tramoId: proc.tramoId,
+    asignacionId: proc.asignacionId,
+    fechaCreacion: proc.fechaCreacion,
+    fechaRegistro: proc.fechaRegistro,
+    usuario: newDataToUsuario(proc['usuario']),
+  };
   if (proc.ekprocedimientoId && procedimientoTempMap) {
     const procTemp = procedimientoTempMap.get(proc.ekprocedimientoId);
     if (procTemp) {
       return {
+        ...registro,
         id: procTemp.id,
         nombre: procTemp.nombre,
         codigo: procTemp.codigo,
@@ -394,6 +464,7 @@ const mapProcedimientoToDataRes = (
   }
 
   return {
+    ...registro,
     id: proc.procedimiento?.id ?? 0,
     nombre: proc.procedimiento?.nombre ?? '',
     codigo: proc.procedimiento?.codigoCups ?? '',
@@ -411,6 +482,10 @@ const newDataToTramo = (
   return {
     id: tramo.id,
     orden: tramo.orden,
+    tipoTrasladoCode: tramo.tipoTrasladoCode,
+    archivos: tramo.archivos ?? [],
+    horasEsperaMinutos: tramo.horasEspera ?? null,
+    tiempoUtilizadoMinutos: tramo.tiempoUtilizado ?? null,
     tipoTramoCode: tramo.tipoTramoCode,
     estadoCode: tramo.estadoCode,
     horaSalida: tramo.horaInicioRecorrido,
@@ -446,7 +521,10 @@ const newDataToTramo = (
     procedimientos: (tramo.procedimientos ?? []).map(proc =>
       mapProcedimientoToDataRes(proc, procedimientoTempMap)
     ),
-    medicamentos: tramo.medicamentos ?? [],
+    medicamentos: (tramo.medicamentos ?? []).map(med => ({
+      ...med,
+      usuario: newDataToUsuario(med.usuario),
+    })) as any,
   };
 };
 
@@ -462,11 +540,19 @@ export const newDataToPaciente = (data: PacienteTrasladoOrm): PacienteDataRes =>
     tipoCode: data.tipoDocumentoCode,
   };
   paciente.generoCode = data.generoCode;
-  paciente.edad = data.edad;
+  const fechaNacimiento = fechaNacimientoCalendario(data.fechaNacimiento);
+  paciente.fechaNacimiento = fechaNacimiento ? new Date(`${fechaNacimiento}T00:00:00Z`) : null;
+  paciente.edad = edadDesdeNacimiento(data.fechaNacimiento);
   paciente.afiliacionContrato = new DataRes();
   paciente.afiliacionContrato.id = 0;
   paciente.afiliacionContrato.nombre = data.eps;
   paciente.afiliacionContrato.codigo = 'N/A';
+  paciente.datosPersonales = {
+    estadoCivilCode: data.estadoCivilCode,
+    direccion: data.direccion,
+    barrio: data.barrio,
+    celular: data.celular,
+  };
   paciente.soat = data.soat ?? 'N/A';
   paciente.arl = data.arl ? { id: 0, codigo: 'N/A', nombre: data.arl } : null;
   return paciente;
@@ -526,7 +612,7 @@ export const newDataToPacienteBase = (data: PacienteOrm): PacienteDataRes => {
   paciente.apellidos = (data.primerApellido ?? '') + ' ' + (data.segundoApellido ?? '');
   paciente.fechaNacimiento = data.fechaNacimiento;
 
-  let edad = 0;
+  let edad: number | null = null;
   if (data.fechaNacimiento) {
     const hoy = new Date();
     const nac = new Date(data.fechaNacimiento);
@@ -542,9 +628,16 @@ export const newDataToPacienteBase = (data: PacienteOrm): PacienteDataRes => {
 
   paciente.generoCode = data.generoCode;
   paciente.afiliacionContrato = new DataRes();
-  paciente.afiliacionContrato.id = data.detalleContrato.id;
-  paciente.afiliacionContrato.nombre = data.detalleContrato.nombre;
-  paciente.afiliacionContrato.codigo = data.detalleContrato.codigo;
+  paciente.afiliacionContrato.id = data.detalleContrato?.id ?? 0;
+  paciente.afiliacionContrato.nombre = data.detalleContrato?.nombre ?? '';
+  paciente.afiliacionContrato.codigo = data.detalleContrato?.codigo ?? '';
+  const direccion = Array.isArray(data.direccion) ? data.direccion[0] : data.direccion;
+  const telefono = Array.isArray(data.telefono) ? data.telefono[0] : data.telefono;
+  paciente.datosPersonales = {
+    estadoCivilCode: data.estadoCivilCode,
+    direccion: direccion?.direccion ?? '',
+    celular: telefono?.telefono ?? '',
+  };
   paciente.soat = '';
   paciente.arl = null;
   paciente.documento = {
@@ -570,6 +663,7 @@ export const newDataToPacienteBase = (data: PacienteOrm): PacienteDataRes => {
 };
 
 export const DNnewDataToUbicacion = (data: EntidadOrm): UbicacionDataRes => {
+  if (!data?.tercero?.municipio?.departamento) return null;
   const ubicacion = new UbicacionDataRes();
 
   const dpto = data.tercero.municipio.departamento;
@@ -594,6 +688,7 @@ export const DNnewDataToUbicacion = (data: EntidadOrm): UbicacionDataRes => {
   return ubicacion;
 };
 export const EKnewDataToUbicacion = (data: UbicacionOrm): UbicacionDataRes => {
+  if (!data) return null;
   const ubicacion = new UbicacionDataRes();
 
   ubicacion.ekid = data.id;
@@ -615,6 +710,7 @@ export const EKnewDataToUbicacion = (data: UbicacionOrm): UbicacionDataRes => {
 };
 
 function formatearMinutos(minutos: number): string {
+  if (minutos == null) return null;
   const horas = Math.floor(minutos / 60);
   const mins = minutos % 60;
 

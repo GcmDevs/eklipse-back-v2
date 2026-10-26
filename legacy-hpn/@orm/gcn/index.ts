@@ -42,6 +42,11 @@ import {
   UbicacionOrm as TrasladoUbicacionOrm,
 } from './traslados-asistenciales';
 import { ORM_GCN_BOLETA_QUIRURGICA_ENTITIES } from './boleta-quirurgica';
+import {
+  HojaEspecialidadOrm,
+  HojaEspecialidadVersionOrm,
+} from './entrega-turno/hoja-especialidad.orm';
+export * from './entrega-turno/hoja-especialidad.orm';
 
 export * from './check.orm';
 export * from './solicitud-traslado.orm';
@@ -83,6 +88,8 @@ export * from './boleta-quirurgica';
 export * from './traslados-asistenciales/procedimiento-temp.orm';
 
 export const ORM_GEN_GESTION_CLINICA_ENTITIES = [
+  HojaEspecialidadOrm,
+  HojaEspecialidadVersionOrm,
   GestionOrm,
   CheckOrm,
   GTCObservacionOrm,

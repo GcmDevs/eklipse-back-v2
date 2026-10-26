@@ -22,6 +22,7 @@ export interface SolicitudProductoOtraSedeReferencia extends SolicitudProductoOt
 
 interface ProductoObjetivoOtraSede {
   codigo: string;
+  codigoAgrupamiento?: string | null;
   cantidadPendiente: number;
   estadoDespachoCode: number;
   solicitadoEnOtrasSedes: boolean;
@@ -67,7 +68,7 @@ export const agregarReferenciasProductosEnOtrasSedes = (
         return;
       }
 
-      const codigo = normalizarCodigo(producto.codigo);
+      const codigo = normalizarCodigo(producto.codigoAgrupamiento || producto.codigo);
       const solicitudesOtrasSedes = (solicitudesPorProducto.get(codigo) ?? [])
         .filter(referencia => referencia.sedeKey !== sedeKey)
         .map(({ codigo: _codigo, sedeKey: _sedeKey, ...referencia }) => referencia);

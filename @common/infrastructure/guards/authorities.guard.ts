@@ -20,12 +20,12 @@ export class AuthoritiesGuard implements CanActivate {
 
     let userAuthorities: string[] = [];
 
-    authorities.push(ADMIN_AUTHORITY);
+    const requiredAuthorities = [...authorities, ADMIN_AUTHORITY];
     const res = await fetchAuthsByUser({ tk });
     userAuthorities = res.onlyCodes;
 
     const hasAnyAuthority = () =>
-      userAuthorities.some((authority: string) => authorities.includes(authority));
+      userAuthorities.some((authority: string) => requiredAuthorities.includes(authority));
 
     return hasAnyAuthority();
   }

@@ -31,6 +31,27 @@ export class CotizacionFilesController {
   }
 
   @ApiOkResponse({ type: GenerateFileRes })
+  @Authorities([
+    INN_AUTHORITIES.FARMACIA.CONTROL_GASTOS_FACTURADOR,
+    INN_AUTHORITIES.FARMACIA.CONTROL_GASTOS_SOLICITANTE,
+  ])
+  @Get('orden-compra-by-documento/:contextCode/:ocId')
+  public async generateOrdenCompraByOID(
+    @Param('contextCode') contextCode: GcmContexts,
+    @Param('ocId') ocId: number
+  ) {
+    try {
+      const url = await this._files.generateOrdenCompra(
+        { context: contextCode, cotizacionId: undefined },
+        +ocId
+      );
+      return { url };
+    } catch (error: any) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @ApiOkResponse({ type: GenerateFileRes })
   @Authorities([INN_AUTHORITIES.CENTRAL_COMPRAS.CODE])
   @Get('cuenta-pagar/:contextCode/:cxpId')
   public async generateCxP(

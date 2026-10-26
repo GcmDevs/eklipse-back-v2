@@ -26,7 +26,6 @@ import { TABLE_NAMES } from '@common/application/constants';
 import { GrupoProductoOrm } from './grupo.orm';
 import { EstanteOrm } from './estantes';
 import { ExistenciaOrm } from './existencia.orm';
-import { ItemCotizadoOrm, SetOrm } from '../central-compras';
 import { FabricanteOrm } from './fabricante.orm';
 
 export interface ExistenciaActualI {
@@ -111,9 +110,6 @@ export class ProductoOrm {
   @OneToMany(() => ExistenciaOrm, existencia => existencia.producto)
   existencias: ExistenciaOrm[];
 
-  @OneToMany(() => ItemCotizadoOrm, detalle => detalle.producto)
-  ofertas: ItemCotizadoOrm[];
-
   clase: ClaseProductoType;
   tipo: TipoProductoType;
   riesgo: RiesgoProductoType;
@@ -132,9 +128,6 @@ export class ProductoOrm {
       delete this.riesgoSanitarioCode;
     }
   }
-
-  @ManyToMany(() => SetOrm, set => set.productos)
-  sets: SetOrm[];
 
   existenciaActual?: ExistenciaActualI;
   codigoAgrupamiento?: string;

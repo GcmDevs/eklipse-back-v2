@@ -1,4 +1,4 @@
-import { TimerServices } from '@common/application/services/timer';
+import { TimerServices } from '@common/application/services';
 import { UnidadTiempo } from '@equipos/domain/enums';
 
 export function truncateReportText(value: string, maxLength: number): string {

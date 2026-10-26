@@ -14,9 +14,12 @@ import {
   TemporalesImpl,
 } from './infrastructure/repositories';
 import { RegistroClinicoController } from './presentation/controllers/registro-clinico.controller';
+import { HojasEspecialidadController } from './presentation/controllers/hojas-especialidad.controller';
+import { HojasEspecialidadImpl } from './infrastructure/repositories/hojas-especialidad';
 
 @Module({
   controllers: [
+    HojasEspecialidadController,
     RecursosController,
     TurnoController,
     RegistroClinicoController,
@@ -24,6 +27,7 @@ import { RegistroClinicoController } from './presentation/controllers/registro-c
     PreAltaController,
   ],
   providers: [
+    HojasEspecialidadImpl,
     RecursosImpl,
     TurnoSource,
     RegistroClinicoImpl,

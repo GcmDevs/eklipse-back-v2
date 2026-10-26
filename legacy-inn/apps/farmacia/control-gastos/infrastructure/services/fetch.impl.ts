@@ -1,4 +1,5 @@
-import { Between } from 'typeorm';
+import { Between, In } from 'typeorm';
+import { documentosOrdenRelacionada } from './orden-relacionada';
 import { Injectable } from '@nestjs/common';
 import { GCM_CONTEXTS } from '@common/domain/types';
 import { BaseSource } from '@common/infrastructure/services';
@@ -88,6 +89,15 @@ export class FetchControlGastoImpl extends BaseSource {
       }
     }
 
+    const ordenIds = [...new Set(controlGastos.map(gasto => gasto.ordenRelacionadaId).filter((id): id is number => id != null))];
+    const ordenes = ordenIds.length
+      ? await documentosOrdenRelacionada().find({ where: { id: In(ordenIds), tipoCode: In([0, 19]) }, select: { id: true, consecutivo: true } })
+      : [];
+    const ordenesPorId = new Map(ordenes.map(orden => [orden.id, orden]));
+    for (const gasto of controlGastos) {
+      gasto.ordenRelacionada = ordenesPorId.get(gasto.ordenRelacionadaId) ?? null;
+    }
+
     const baseUrl = `${ENVIRONMENTS.apiUrl}/${FILE_LOCATIONS.inn.fmc.controlGastos.facturas}`;
     const baseUrl2 = `${ENVIRONMENTS.apiUrl}/${FILE_LOCATIONS.inn.fmc.controlGastos.documentoAdjunto}`;
 
@@ -102,6 +112,9 @@ export class FetchControlGastoImpl extends BaseSource {
 
       return {
         id: c.id,
+        ordenRelacionada: c.ordenRelacionada
+          ? { id: c.ordenRelacionada.id, consecutivo: c.ordenRelacionada.consecutivo }
+          : null,
         contexto: c.context.getCode(),
         estadoCode: c.estadoCode,
         fechaCreacion: c.fechaCreacion,

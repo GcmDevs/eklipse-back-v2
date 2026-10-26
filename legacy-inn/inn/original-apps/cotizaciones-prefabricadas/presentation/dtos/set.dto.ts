@@ -1,7 +1,7 @@
 import { Type } from 'class-transformer';
 import { IsArray, IsNumber, IsString, MaxLength, ValidateNested } from 'class-validator';
 import { ProductoDto } from './producto.dto';
-import { GcmContexts } from '@inn/old/common/application/constants';
+import { GcmContexts } from '@common/application/constants';
 
 export class DetalleDto {
   @IsNumber()

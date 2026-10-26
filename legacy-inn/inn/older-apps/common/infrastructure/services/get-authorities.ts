@@ -1,4 +1,3 @@
-import { GcmContexts } from '@inn/old/common/application/constants';
 import { uniq } from 'lodash';
 import { AuthorityOrm, UserOrm } from '../orm';
 import { BadRequestException } from '@nestjs/common';

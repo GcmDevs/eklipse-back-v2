@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Between, IsNull, Not } from 'typeorm';
+import { Between, In, IsNull, Not } from 'typeorm';
 
 import { GCM_CONTEXTS, GcmContextType } from '@common/domain/types';
 import { BaseSource } from '@common/infrastructure/services';
@@ -25,11 +25,65 @@ import {
   SolicitudProductoOtraSedeReferencia,
   SolicitudProductoOtraSedeResponse,
 } from './otras-sedes';
+import { UsuarioOrm } from '@inn/orm/gen';
+import { cargarReferenciasDespacho, ReferenciaDespachoResponse } from './catalogo-referencias';
 
 @Injectable()
 export class FetchSolicitudPedidosImpl extends BaseSource {
   @Inject(ExistenciasDinamicaImpl)
   private readonly _existenciasDinamica: ExistenciasDinamicaImpl;
+
+  public async findUsuariosAM(ids: number[]): Promise<Map<number, UsuarioOrm>> {
+    const mapa = new Map<number, UsuarioOrm>();
+    const idsValidos = [...new Set(ids)].filter(id => Number.isInteger(id) && id > 0);
+    if (!idsValidos.length) return mapa;
+
+    const ctx = GCM_CONTEXTS.AMMEDICAL;
+    const qr = this.dynamicQR(ctx);
+    try {
+      await qr.connect();
+      const batchSize = 1000;
+      for (let i = 0; i < idsValidos.length; i += batchSize) {
+        const batch = idsValidos.slice(i, i + batchSize);
+        const usuarios = await qr.manager.getRepository(UsuarioOrm).find({
+          where: { id: In(batch) },
+        });
+        usuarios.forEach(u => mapa.set(u.id, u));
+      }
+      return mapa;
+    } catch (error: any) {
+      throw new Error(`Error consultando usuarios en AMMedical: ${error.message}`);
+    } finally {
+      await qr.release();
+    }
+  }
+
+  public async findUsuarioAM(id: number): Promise<UsuarioOrm | null> {
+    const mapa = await this.findUsuariosAM([id]);
+    return mapa.get(id) ?? null;
+  }
+
+  public async resolverUsuariosDespacho(solicitudes: SolicitudPedidoOrm[]): Promise<void> {
+    const idsPendientes = new Set<number>();
+    for (const solicitud of solicitudes) {
+      for (const producto of solicitud.productos ?? []) {
+        for (const despacho of producto.despachos ?? []) {
+          if (despacho.usuarioId) {
+            idsPendientes.add(despacho.usuarioId);
+          }
+        }
+      }
+    }
+    if (!idsPendientes.size) return;
+    const usuarios = await this.findUsuariosAM([...idsPendientes]);
+    for (const solicitud of solicitudes) {
+      for (const producto of solicitud.productos ?? []) {
+        for (const despacho of producto.despachos ?? []) {
+          despacho.usuario = usuarios.get(despacho.usuarioId) ?? null;
+        }
+      }
+    }
+  }
 
   public async execute(fechaInicio: Date, fechaFin: Date) {
     const showAllContext = await this.hasAnyAuthority([
@@ -45,66 +99,51 @@ export class FetchSolicitudPedidosImpl extends BaseSource {
         ]
       : [this.auth.context];
 
-    const response: ReturnType<typeof transformToResponse> = [];
+    const resultadosPorContexto = await Promise.all(
+      ctxs.map(async el => {
+        const qr = this.dynamicQR(el);
+        try {
+          await qr.connect();
+          const solicitudPedidoRp = qr.manager.getRepository(SolicitudPedidoOrm);
 
-    for (let index = 0; index < ctxs.length; index++) {
-      const el = ctxs[index];
-      const qr = this.dynamicQR(el);
+          const SolicitudPedidos = await solicitudPedidoRp.find({
+            where: {
+              fechaCreacion: Between(fechaInicio, fechaFin),
+              sedeId: Not(IsNull()),
+            },
+            relations: [
+              'creadoPor',
+              'sede',
+              'productos',
+              'productos.producto',
+              'productos.agrupamiento',
+              'productos.despachos',
+              'productos.despachos.productoDespachado',
+              'productos.usuarioRechazo',
+            ],
+            order: { fechaCreacion: 'DESC' },
+          });
 
-      try {
-        await qr.connect();
+          return { SolicitudPedidos, context: el };
+        } catch (error: any) {
+          throw new Error(`Error consultando ${el.getCode()}: ${error.message}`);
+        } finally {
+          await qr.release();
+        }
+      })
+    );
 
-        const solicitudPedidoRp = qr.manager.getRepository(SolicitudPedidoOrm);
-
-        const SolicitudPedidos = await solicitudPedidoRp.find({
-          where: {
-            fechaCreacion: Between(fechaInicio, fechaFin),
-            sedeId: Not(IsNull()),
-          },
-          relations: [
-            'creadoPor',
-            'historial',
-            'historial.usuario',
-            'sede',
-            'historial.sede',
-            'productos',
-            'productos.producto',
-            'productos.despachos',
-            'productos.despachos.usuario',
-            'productos.usuarioRechazo',
-            'productos.cierresSobrepedido',
-            'productos.cierresSobrepedido.solicitudNueva',
-            'productos.cierresSobrepedido.usuario',
-            'cierresSobrepedido',
-            'cierresSobrepedido.solicitudNueva',
-            'cierresSobrepedido.usuario',
-            'origenesSobrepedido',
-            'origenesSobrepedido.solicitudAnterior',
-            'origenesSobrepedido.usuario',
-          ],
-          order: { fechaCreacion: 'DESC', historial: { fechaCambio: 'DESC' } },
-        });
-
-        response.push(...transformToResponse(SolicitudPedidos, el));
-      } catch (error: any) {
-        throw new Error(`Error consultando ${el.getCode()}: ${error.message}`);
-      } finally {
-        await qr.release();
-      }
+    // Resolver en un único batch optimizado los usuarios de despacho de todas las sedes
+    const todasLasSolicitudesOrm: SolicitudPedidoOrm[] = [];
+    for (const { SolicitudPedidos } of resultadosPorContexto) {
+      todasLasSolicitudesOrm.push(...SolicitudPedidos);
     }
+    await this.resolverUsuariosDespacho(todasLasSolicitudesOrm);
 
-    const codigosProductos = [
-      ...new Set(
-        response.flatMap(solicitud =>
-          solicitud.productos.map(producto => normalizarCodigoProducto(producto.codigo))
-        )
-      ),
-    ].filter(Boolean);
-    const existenciasAmmedical =
-      await this._existenciasDinamica.obtenerPorCodigos(codigosProductos);
-
-    agregarExistenciasAmmedical(response, existenciasAmmedical);
-    agregarSolicitudesEnOtrasSedes(response);
+    const response: ReturnType<typeof transformToResponse> = [];
+    for (const { SolicitudPedidos, context } of resultadosPorContexto) {
+      response.push(...transformToResponse(SolicitudPedidos, context));
+    }
 
     return response.sort(
       (primeraSolicitud, segundaSolicitud) =>
@@ -120,6 +159,21 @@ export const agregarExistenciasAmmedical = (
 ): void => {
   solicitudes.forEach(solicitud => {
     solicitud.productos.forEach(producto => {
+      if (producto.agrupamientoId) {
+        producto.referencias.forEach(referencia => {
+          const stock = existencias.get(normalizarCodigoProducto(referencia.codigo));
+          referencia.existenciaDinamica = stock?.cantidad ?? 0;
+          referencia.productoEncontrado = stock?.productoEncontrado ?? false;
+        });
+        producto.existenciaAmmedical = producto.referencias.reduce(
+          (total, referencia) => total + referencia.existenciaDinamica,
+          0
+        );
+        producto.productoExisteEnAmmedical = producto.referencias.some(
+          referencia => referencia.productoEncontrado
+        );
+        return;
+      }
       const existencia = existencias.get(normalizarCodigoProducto(producto.codigo));
       producto.existenciaAmmedical = existencia?.cantidad ?? 0;
       producto.productoExisteEnAmmedical = existencia?.productoEncontrado ?? false;
@@ -145,7 +199,7 @@ export const agregarSolicitudesEnOtrasSedes = (
         return;
       }
 
-      const codigo = normalizarCodigoProducto(producto.codigo);
+      const codigo = normalizarCodigoProducto(producto.codigoAgrupamiento || producto.codigo);
       if (!codigo) return;
 
       referencias.push({
@@ -199,8 +253,27 @@ export const transformToResponse = (data: SolicitudPedidoOrm[], context: GcmCont
       return {
         id: detalle.id,
         productoId: detalle.productoId,
-        codigo: detalle.producto.codigo,
-        descripcion: detalle.producto.descripcionLarga,
+        agrupamientoId: detalle.agrupamientoId ?? null,
+        codigoAgrupamiento:
+          detalle.agrupamiento?.codigo?.trim() ||
+          detalle.producto.agrupamiento?.codigo?.trim() ||
+          null,
+        referencias: [] as ReferenciaDespachoResponse[],
+        codigo: detalle.agrupamiento?.codigo?.trim() || detalle.producto.codigo,
+        descripcion:
+          detalle.agrupamiento?.nombre?.trim() ||
+          detalle.agrupamiento?.codigo?.trim() ||
+          detalle.producto.descripcionLarga?.trim() ||
+          detalle.producto.descripcionCorta?.trim() ||
+          detalle.producto.codigo?.trim() ||
+          '',
+        codigoSub: detalle.producto.codigoSub == null ? null : Number(detalle.producto.codigoSub),
+        tipo:
+          Number(detalle.producto.tipoCode) === 1
+            ? 'SUMINISTRO'
+            : Number(detalle.producto.tipoCode) === 2
+              ? 'MEDICAMENTO'
+              : null,
         prioridadCode: detalle.estadoCode,
         prioridad: estadoProductosTypeFactory(detalle.estadoCode).getForHumans(),
         cantidadSolicitada,
@@ -246,18 +319,32 @@ export const transformToResponse = (data: SolicitudPedidoOrm[], context: GcmCont
             (primerDespacho, segundoDespacho) =>
               segundoDespacho.fechaCreacion.getTime() - primerDespacho.fechaCreacion.getTime()
           )
-          .map(movimiento => ({
-            id: movimiento.id,
-            cantidadEnviada: Number(movimiento.cantidad),
-            cantidadAcumulada: Number(movimiento.cantidadAcumulada),
-            estadoDespachoCode: movimiento.estadoDespachoCode,
-            estadoDespacho: estadoDespachoProductoTypeFactory(
-              movimiento.estadoDespachoCode
-            ).getForHumans(),
-            observacion: movimiento.observacion ?? null,
-            fechaCreacion: movimiento.fechaCreacion,
-            usuario: movimiento.usuario,
-          })),
+          .map(movimiento => {
+            // Solo los movimientos heredados sin ID corresponden al hijo original.
+            const referencia =
+              movimiento.productoDespachadoId == null
+                ? detalle.producto
+                : movimiento.productoDespachado;
+            return {
+              id: movimiento.id,
+              productoDespachadoId: movimiento.productoDespachadoId ?? detalle.productoId,
+              codigoDespachado: referencia?.codigo?.trim() || '',
+              descripcionDespachada:
+                referencia?.descripcionLarga?.trim() ||
+                referencia?.descripcionCorta?.trim() ||
+                referencia?.codigo?.trim() ||
+                '',
+              cantidadEnviada: Number(movimiento.cantidad),
+              cantidadAcumulada: Number(movimiento.cantidadAcumulada),
+              estadoDespachoCode: movimiento.estadoDespachoCode,
+              estadoDespacho: estadoDespachoProductoTypeFactory(
+                movimiento.estadoDespachoCode
+              ).getForHumans(),
+              observacion: movimiento.observacion ?? null,
+              fechaCreacion: movimiento.fechaCreacion,
+              usuario: movimiento.usuario,
+            };
+          }),
       };
     });
     const tieneRechazos = productos.some(
@@ -307,7 +394,7 @@ export const transformToResponse = (data: SolicitudPedidoOrm[], context: GcmCont
       },
       sede: item.sede,
       creadoPor: item.creadoPor,
-      historial: item.historial,
+      historial: item.historial ?? [],
       tieneProductosSolicitadosEnOtrasSedes: false,
       productos,
     };

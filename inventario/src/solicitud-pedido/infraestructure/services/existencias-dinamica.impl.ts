@@ -29,17 +29,18 @@ export class ExistenciasDinamicaImpl extends BaseSource {
       const cantidadPorLote = 1000;
       for (let inicio = 0; inicio < codigosNormalizados.length; inicio += cantidadPorLote) {
         const codigosLote = codigosNormalizados.slice(inicio, inicio + cantidadPorLote);
-        const productos = await qr.manager.getRepository(ProductoExistenciaOrm).find({
-          where: { codigo: In(codigosLote) },
-          relations: { existencias: true },
-        });
+        const rows = await qr.manager
+          .createQueryBuilder(ProductoExistenciaOrm, 'p')
+          .select('p.codigo', 'codigo')
+          .addSelect('COALESCE(SUM(e.cantidad), 0)', 'cantidad')
+          .leftJoin('p.existencias', 'e')
+          .where('p.codigo IN (:...codigosLote)', { codigosLote })
+          .groupBy('p.codigo')
+          .getRawMany<{ codigo: string; cantidad: string | number }>();
 
-        productos.forEach(producto => {
-          const codigo = normalizarCodigoProducto(producto.codigo);
-          const cantidad = (producto.existencias ?? []).reduce(
-            (total, existencia) => total + Number(existencia.cantidad ?? 0),
-            0
-          );
+        rows.forEach(row => {
+          const codigo = normalizarCodigoProducto(row.codigo);
+          const cantidad = Math.max(0, Number(row.cantidad) || 0);
           const existenciaActual = existencias.get(codigo);
 
           existencias.set(codigo, {
@@ -48,10 +49,6 @@ export class ExistenciasDinamicaImpl extends BaseSource {
           });
         });
       }
-
-      existencias.forEach(existencia => {
-        existencia.cantidad = Math.max(0, existencia.cantidad);
-      });
 
       return existencias;
     } catch (error: any) {

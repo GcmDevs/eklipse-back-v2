@@ -246,7 +246,7 @@ export class ItdBillingImpl extends BaseSource {
 
   public async markAsUnreceived(payload: DietaNoRecibidaDto) {
     const date = new Date(`${payload.date}`).getTime();
-    const now = new Date(`${getDateToString(new Date())}:00:00`).getTime();
+    const now = getDateToString(new Date()).getTime();
     const diff = now - date;
     const days = 3;
     if (diff > 86400000 * days) {

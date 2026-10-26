@@ -7,6 +7,7 @@ import {
   IsBoolean,
   IsIn,
   IsInt,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
@@ -29,10 +30,11 @@ export class CreateSolicitudPedidoPayload {
   @Type(() => CreateSolicitudPedidoProductoPayload)
   productos: CreateSolicitudPedidoProductoPayload[];
 
-  @IsOptional()
-  @IsString()
-  @MaxLength(1000)
-  observacion?: string;
+  @IsString({ message: 'La observación debe ser un texto' })
+  @IsNotEmpty({ message: 'La observación es obligatoria' })
+  @MinLength(10, { message: 'La observación debe contener al menos 10 caracteres' })
+  @MaxLength(1000, { message: 'La observación no puede exceder los 1000 caracteres' })
+  observacion: string;
 
   @IsOptional()
   @IsBoolean()
@@ -72,6 +74,11 @@ export class CreateSolicitudPedidoProductoPayload {
 }
 
 export class ActualizarDespachoProductoPayload {
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  productoDespachadoId?: number;
+
   @IsInt()
   @Min(1)
   solicitudPedidoProductoId: number;
@@ -155,3 +162,59 @@ export class ReporteSolicitudPedidoQuery {
   @Min(1)
   sedeId: number;
 }
+
+export class ProductoBorradorPayload {
+  @IsInt()
+  @Min(1)
+  productoId: number;
+
+  @IsString()
+  codigo: string;
+
+  @IsString()
+  descripcion: string;
+
+  @IsIn([1, 2, 3])
+  estadoCode: 1 | 2 | 3;
+
+  @IsOptional()
+  @IsNumber()
+  cantidad: number | null;
+}
+
+export class GuardarBorradorSolicitudPedidoPayload {
+  @IsString()
+  @MinLength(1)
+  contextCode: GcmContextCode;
+
+  @IsInt()
+  @Min(1)
+  sedeId: number;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ProductoBorradorPayload)
+  productos: ProductoBorradorPayload[];
+
+  @IsOptional()
+  @IsBoolean()
+  porAgrupamiento?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  observacion?: string;
+}
+
+export class BorradorSolicitudPedidoQuery {
+  @IsString()
+  @MinLength(1)
+  contextCode: GcmContextCode;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  sedeId?: number;
+}
+

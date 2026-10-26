@@ -6,9 +6,9 @@
   "private": true,
   "license": "MIT",
   "scripts": {
-    "build": "nest build",
+    "build": "node api.js && nest build",
     "format": "prettier --write \"**/*.ts\" \"**/*.js\" \"**/*.json\"",
-    "start": "nest start",
+    "start": "node api.js && nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main"
@@ -41,6 +41,7 @@
     "nanoid": "^5.1.11",
     "node-rsa": "^1.1.1",
     "openai": "^6.49.0",
+    "pdf-parse": "2.4.5",
     "puppeteer": "^24.36.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",

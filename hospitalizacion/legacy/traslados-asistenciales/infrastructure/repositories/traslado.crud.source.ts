@@ -13,6 +13,8 @@ import {
   VehiculoOrm,
   EkEmpleadoOrm,
   TrasladoRevisionCentralOrm,
+  TrasladoAccidenteOrm,
+  TrasladoVehiculoInvolucradoOrm,
   ProcedimientoTempOrm,
 } from '@hpn/lgc/tas/orm/gcn';
 import {
@@ -218,7 +220,7 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
   }
 
   public async fetchTrasladoById(trasladoId: number, contextoCode?: GcmContextCode): Promise<any> {
-    const contexto = gcmContextFactory(contextoCode);
+    const contexto = contextoCode ? gcmContextFactory(contextoCode) : this.auth.context;
     const connLocal = contextoCode ? this.dynamicConn(contexto) : this.conn;
 
     const trasladoRp = connLocal.getRepository(TrasladoAsistencialOrm);
@@ -230,6 +232,8 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
       const traslado = await this.buildTrasladoDetailBaseQuery(trasladoRp)
         .leftJoinAndSelect('t.diagnostico', 'diagnostico')
         .leftJoinAndSelect('t.diagSecundario', 'diagSecundario')
+        .leftJoinAndSelect('paciente.direccion', 'direccionDetalle')
+        .leftJoinAndSelect('paciente.telefono', 'telefonoDetalle')
         .andWhere({ id: trasladoId })
         .getOne();
 
@@ -237,7 +241,17 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
         throw new Error(`No existe traslado con id ${trasladoId}o se encuentra eliminado`);
       }
 
-      const tramoIds = traslado.tramos?.map(tramo => tramo.id) ?? [];
+      traslado.accidente = await connLocal.getRepository(TrasladoAccidenteOrm).findOne({
+        where: { trasladoId },
+      });
+      if (traslado.accidente) {
+        traslado.accidente.vehiculos = await connLocal
+          .getRepository(TrasladoVehiculoInvolucradoOrm)
+          .find({
+            where: { accidenteId: traslado.accidente.id },
+            order: { id: 'ASC' },
+          });
+      }
       const asignacionRp = connLocal.getRepository(TrasladoAsignacionOrm);
       const historialRp = connLocal.getRepository(TrasladoEstadoHistorialOrm);
       const signosVitalesRp = connLocal.getRepository(TrasladoSignosVitalesOrm);
@@ -258,34 +272,27 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
       ] = await Promise.all([
         asignacionRp.find({ where: { trasladoId } }),
         historialRp.find({ where: { trasladoId } }),
-        tramoIds.length
-          ? signosVitalesRp
-              .createQueryBuilder('signosVitales')
-              .leftJoinAndSelect('signosVitales.usuario', 'usuarioSignosVitales')
-              .where('signosVitales.TRAMO IN (:...tramoIds)', { tramoIds })
-              .getMany()
-          : Promise.resolve([]),
-        tramoIds.length
-          ? notasRp
-              .createQueryBuilder('notas')
-              .leftJoinAndSelect('notas.usuario', 'usuarioNotas')
-              .where('notas.TRAMO IN (:...tramoIds)', { tramoIds })
-              .getMany()
-          : Promise.resolve([]),
-        tramoIds.length
-          ? procedimientosRp
-              .createQueryBuilder('procedimientos')
-              .leftJoinAndSelect('procedimientos.procedimiento', 'procedimiento')
-              .where('procedimientos.TRAMO IN (:...tramoIds)', { tramoIds })
-              .getMany()
-          : Promise.resolve([]),
-        tramoIds.length
-          ? medicamentosRp
-              .createQueryBuilder('medicamentos')
-              .leftJoinAndSelect('medicamentos.medicamento', 'medicamento')
-              .where('medicamentos.TRAMO IN (:...tramoIds)', { tramoIds })
-              .getMany()
-          : Promise.resolve([]),
+        signosVitalesRp
+          .createQueryBuilder('signosVitales')
+          .leftJoinAndSelect('signosVitales.usuario', 'usuarioSignosVitales')
+          .where('signosVitales.trasladoId = :trasladoId', { trasladoId })
+          .getMany(),
+        notasRp
+          .createQueryBuilder('notas')
+          .leftJoinAndSelect('notas.usuario', 'usuarioNotas')
+          .where('notas.trasladoId = :trasladoId', { trasladoId })
+          .getMany(),
+        procedimientosRp
+          .createQueryBuilder('procedimientos')
+          .leftJoinAndSelect('procedimientos.procedimiento', 'procedimiento')
+          .where('procedimientos.trasladoId = :trasladoId', { trasladoId })
+          .getMany(),
+        medicamentosRp
+          .createQueryBuilder('medicamentos')
+          .leftJoinAndSelect('medicamentos.medicamento', 'medicamento')
+          .leftJoinAndSelect('medicamentos.usuario', 'usuarioMedicamentos')
+          .where('medicamentos.trasladoId = :trasladoId', { trasladoId })
+          .getMany(),
         medicamentosPreviosRp
           .createQueryBuilder('medicamentoPrevio')
           .leftJoinAndSelect('medicamentoPrevio.medicamento', 'productoMedicamentoPrevio')
@@ -315,8 +322,12 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
       traslado.estadosHistorial = estadosHistorial;
       traslado.revisionesCentral = revisionesCentral;
       traslado.medicamentosPrevios = medicamentosPrevios;
+      traslado.signosVitales = signosVitales.filter(item => !tramosById.has(item.tramoId));
+      traslado.notas = notas.filter(item => !tramosById.has(item.tramoId));
+      traslado.procedimientos = procedimientos.filter(item => !tramosById.has(item.tramoId));
+      traslado.medicamentos = medicamentos.filter(item => !tramosById.has(item.tramoId));
 
-      if (traslado.pacienteId) {
+      if (traslado.pacienteId && traslado.paciente) {
         const estanciaRp = connLocal.getRepository(EstanciaOrm);
 
         const estancia = await estanciaRp.findOne({
@@ -341,66 +352,78 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
 
       const userIdsByContexto = new Map<number, number[]>();
 
+      const registrosConAutor = [...signosVitales, ...notas, ...procedimientos, ...medicamentos];
+      for (const registro of registrosConAutor) {
+        const ctx = registro.centroProcesamiento || contexto.getNumericCode();
+        const ids = userIdsByContexto.get(ctx) ?? [];
+        ids.push(registro.usuarioId);
+        userIdsByContexto.set(ctx, ids);
+      }
+      for (const revision of revisionesCentral) {
+        const ctx = revision.centroProcesamiento || contexto.getNumericCode();
+        const ids = userIdsByContexto.get(ctx) ?? [];
+        ids.push(revision.usuarioCentralId);
+        userIdsByContexto.set(ctx, ids);
+      }
+
       for (const h of traslado.estadosHistorial ?? []) {
-        const ctx = h.centroProcesamiento;
+        const ctx = h.centroProcesamiento || contexto.getNumericCode();
         if (!userIdsByContexto.has(ctx)) userIdsByContexto.set(ctx, []);
         userIdsByContexto.get(ctx).push(h.usuarioId);
       }
 
       for (const a of traslado.asignaciones ?? []) {
-        const ctx = a.centroProcesamiento;
+        const ctx = a.centroProcesamiento || contexto.getNumericCode();
         if (!userIdsByContexto.has(ctx)) userIdsByContexto.set(ctx, []);
         userIdsByContexto.get(ctx).push(a.asignadoPorId);
-      }
-
-      for (const tramo of traslado.tramos ?? []) {
-        for (const nota of tramo.notas ?? []) {
-          if (!nota.centroProcesamiento) continue;
-          const ctx = nota.centroProcesamiento;
-          if (!userIdsByContexto.has(ctx)) userIdsByContexto.set(ctx, []);
-          userIdsByContexto.get(ctx).push(nota.usuarioId);
-        }
-        for (const sv of tramo.signosVitales ?? []) {
-          if (!sv.centroProcesamiento) continue;
-          const ctx = sv.centroProcesamiento;
-          if (!userIdsByContexto.has(ctx)) userIdsByContexto.set(ctx, []);
-          userIdsByContexto.get(ctx).push(sv.usuarioId);
-        }
       }
 
       const usuariosPorContexto = new Map<number, Map<number, UsuarioOrm>>();
 
       await Promise.all(
         Array.from(userIdsByContexto.entries()).map(async ([contexto, ids]) => {
-          const usuarios = await this.findUsuarioByContexto(ids, contexto);
+          const ctx = ALL_CONTEXTS_WITH_AUTHORITIES.find(
+            item => item.getNumericCode() === contexto
+          );
+          const usuarios = ctx
+            ? await this.dynamicConn(ctx)
+                .getRepository(UsuarioOrm)
+                .find({
+                  where: { id: In(this.uniqueNumbers(ids)) },
+                })
+            : [];
           usuariosPorContexto.set(contexto, new Map(usuarios.map(u => [u.id, u])));
         })
       );
 
       traslado.estadosHistorial?.forEach(h => {
-        h.usuario = usuariosPorContexto.get(h.centroProcesamiento)?.get(h.usuarioId) ?? null;
+        h.usuario =
+          usuariosPorContexto
+            .get(h.centroProcesamiento || contexto.getNumericCode())
+            ?.get(h.usuarioId) ?? null;
       });
+
+      for (const registro of registrosConAutor) {
+        registro['usuario'] =
+          usuariosPorContexto
+            .get(registro.centroProcesamiento || contexto.getNumericCode())
+            ?.get(registro.usuarioId) ?? null;
+      }
+      for (const revision of revisionesCentral) {
+        revision.usuarioCentral =
+          usuariosPorContexto
+            .get(revision.centroProcesamiento || contexto.getNumericCode())
+            ?.get(revision.usuarioCentralId) ?? null;
+      }
 
       traslado.asignaciones?.forEach(a => {
         a.asignadoPor =
-          usuariosPorContexto.get(a.centroProcesamiento)?.get(a.asignadoPorId) ?? null;
+          usuariosPorContexto
+            .get(a.centroProcesamiento || contexto.getNumericCode())
+            ?.get(a.asignadoPorId) ?? null;
       });
 
-      traslado.tramos?.forEach(tramo => {
-        tramo.notas?.forEach(nota => {
-          if (nota.centroProcesamiento) {
-            nota.usuario =
-              usuariosPorContexto.get(nota.centroProcesamiento)?.get(nota.usuarioId) ?? null;
-          }
-        });
-        tramo.signosVitales?.forEach(sv => {
-          if (sv.centroProcesamiento) {
-            sv.usuario = usuariosPorContexto.get(sv.centroProcesamiento)?.get(sv.usuarioId) ?? null;
-          }
-        });
-      });
-
-      /* traslado.tramos = traslado.tramos?.sort((a, b) => a.orden - b.orden || a.id - b.id); */
+      traslado.tramos = (traslado.tramos ?? []).sort((a, b) => a.orden - b.orden || a.id - b.id);
 
       traslado.asignaciones = traslado.asignaciones?.sort((a, b) => b.id - a.id);
 
@@ -423,12 +446,7 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
         );
 
         const ekProcedimientoIds = this.uniqueNumbers(
-          traslado.tramos?.flatMap(
-            tramo =>
-              tramo.procedimientos
-                ?.filter(proc => proc.ekprocedimientoId)
-                .map(proc => proc.ekprocedimientoId) ?? []
-          ) ?? []
+          procedimientos.filter(proc => proc.ekprocedimientoId).map(proc => proc.ekprocedimientoId)
         );
 
         const autorDocumentos = this.uniqueStrings(
@@ -571,9 +589,14 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
         throw new Error(`Empleado con documento ${authDocument} no encontrado`);
       }
 
-      const todasAsignaciones: TrasladoAsignacionOrm[] = [];
-
-      const todosTraslados: TrasladoAsistencialOrm[] = [];
+      const items = new Map<
+        string,
+        {
+          traslado: TrasladoAsistencialOrm;
+          asignacion: TrasladoAsignacionOrm | null;
+          contexto: GcmContextType;
+        }
+      >();
       const vehiculoIds = new Set<number>();
 
       for (const context of ALL_CONTEXTS_WITH_AUTHORITIES) {
@@ -597,17 +620,40 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
             },
           });
 
-          if (!asignaciones.length) {
-            continue;
-          }
-
           const trasladoIds = this.uniqueNumbers(asignaciones.map(a => a.trasladoId));
+          const trasladosAsignados = trasladoIds.length
+            ? await this.buildTrasladoQuery(trasladoRp)
+                .andWhere({ id: In(trasladoIds) })
+                .andWhere('t.TIPO <> :tipoPrimario', {
+                  tipoPrimario: ASISTENCIA_TIPOS.PRIMARIO.getCode(),
+                })
+                .andWhere({ estadoCode: Not(CANCELADO.getCode()) })
+                .orderBy('t.id', 'DESC')
+                .getMany()
+            : [];
 
-          const traslados = await this.buildTrasladoQuery(trasladoRp)
-            .andWhere({ id: In(trasladoIds) })
-            .andWhere({ estadoCode: Not(CANCELADO.getCode()) })
-            .orderBy('t.id', 'DESC')
-            .getMany();
+          const isCurrentContext = context.getCode() === this.auth.context.getCode();
+          const primariosPropios = isCurrentContext
+            ? await this.buildTrasladoQuery(trasladoRp)
+                .andWhere('t.TIPO = :tipoPrimario', {
+                  tipoPrimario: ASISTENCIA_TIPOS.PRIMARIO.getCode(),
+                })
+                .andWhere('t.GENUSUARIO = :usuarioId', { usuarioId: this.auth.id })
+                .andWhere('t.ESTADO NOT IN (:...estadosCerrados)', {
+                  estadosCerrados: [
+                    ESTADOS_ASISTENCIA.FINALIZADO.getCode(),
+                    ESTADOS_ASISTENCIA.CANCELADO.getCode(),
+                  ],
+                })
+                .orderBy('t.id', 'DESC')
+                .getMany()
+            : [];
+
+          const trasladosMap = new Map<number, TrasladoAsistencialOrm>();
+          [...trasladosAsignados, ...primariosPropios].forEach(traslado =>
+            trasladosMap.set(traslado.id, traslado)
+          );
+          const traslados = [...trasladosMap.values()];
 
           const estanciaRp = qr.manager.getRepository(EstanciaOrm);
 
@@ -629,27 +675,29 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
               })
           );
 
-          todasAsignaciones.push(
-            ...asignaciones.map(a => ({
-              ...a,
-              contexto: context,
-            }))
-          );
+          const asignacionesMap = new Map<number, TrasladoAsignacionOrm>();
+          asignaciones.forEach(asignacion => {
+            if (!asignacionesMap.has(asignacion.trasladoId)) {
+              asignacionesMap.set(asignacion.trasladoId, asignacion);
+            }
+            vehiculoIds.add(asignacion.vehiculoId);
+          });
 
-          todosTraslados.push(
-            ...traslados.map(t => ({
-              ...t,
+          traslados.forEach(traslado => {
+            const key = `${context.getAbbreviation()}-${traslado.id}`;
+            const asignacion = asignacionesMap.get(traslado.id) ?? null;
+            items.set(key, {
+              traslado: Object.assign(traslado, { contexto: context }),
+              asignacion: asignacion ? Object.assign(asignacion, { contexto: context }) : null,
               contexto: context,
-            }))
-          );
-
-          asignaciones.forEach(a => vehiculoIds.add(a.vehiculoId));
+            });
+          });
         } finally {
           await qr.release();
         }
       }
 
-      if (!todasAsignaciones.length) {
+      if (!items.size) {
         return {
           usuario: {
             id: empleado.id,
@@ -660,15 +708,18 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
         };
       }
 
-      const vehiculos = await vehiculoRp.find({
-        where: {
-          id: In([...vehiculoIds]),
-        },
-      });
+      const vehiculos = vehiculoIds.size
+        ? await vehiculoRp.find({ where: { id: In([...vehiculoIds]) } })
+        : [];
 
       const vehiculoMap = new Map(vehiculos.map(v => [v.id, v]));
 
-      const trasladosBase = newDataToTraslados(todosTraslados, vehiculoMap, undefined, true);
+      const trasladosBase = newDataToTraslados(
+        [...items.values()].map(item => item.traslado),
+        vehiculoMap,
+        undefined,
+        true
+      );
 
       const trasladoBaseMap = new Map(
         trasladosBase.map(t => [`${t.contexto.getAbbreviation()}-${t.id}`, t])
@@ -680,29 +731,35 @@ export class TrasladoCrudSource extends RecursosCompartidosSource {
           nombre: empleado.nombre,
           cedula: empleado.documento,
         },
-        traslados: todasAsignaciones
-          .map(asignacion => {
-            const trasladoBase = trasladoBaseMap.get(
-              `${asignacion.contexto.getAbbreviation()}-${asignacion.trasladoId}`
-            );
+        traslados: [...items.entries()]
+          .map(([key, item]) => {
+            const trasladoBase = trasladoBaseMap.get(key);
 
             if (!trasladoBase) {
               return null;
             }
 
+            const asignacion = item.asignacion;
+            const tramoActivo = trasladoBase.tramos?.find(tramo => tramo.isActivo);
             return {
               ...trasladoBase,
-              contextoCode: asignacion.contexto.getCode(),
-              tramoId: asignacion.tramoId ?? null,
-              asignacionActual:
-                this.enrichAsignacion(
-                  asignacion,
-                  vehiculoMap,
-                  new Map([[empleado.id, empleado]])
-                ) ?? null,
+              contextoCode: item.contexto.getCode(),
+              tramoId: asignacion?.tramoId ?? tramoActivo?.id ?? null,
+              asignacionActual: asignacion
+                ? (this.enrichAsignacion(
+                    asignacion,
+                    vehiculoMap,
+                    new Map([[empleado.id, empleado]])
+                  ) ?? null)
+                : null,
             };
           })
-          .filter(Boolean),
+          .filter(Boolean)
+          .sort((a, b) => {
+            const fechaA = a?.fechaCreacion ? new Date(a.fechaCreacion).getTime() : 0;
+            const fechaB = b?.fechaCreacion ? new Date(b.fechaCreacion).getTime() : 0;
+            return fechaB - fechaA;
+          }),
       };
     } catch (error: any) {
       throw new BadRequestException(error.message);

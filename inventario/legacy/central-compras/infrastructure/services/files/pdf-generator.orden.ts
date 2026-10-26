@@ -1,4 +1,4 @@
-import { UserOptions } from 'jspdf-autotable';
+import autoTable, { UserOptions } from 'jspdf-autotable';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import * as fs from 'fs';
@@ -7,7 +7,6 @@ import { TimerService } from '../../base';
 import { GcmContexts } from '@common/domain/types';
 import { CTC_FILE_LOCATIONS } from '@inn/lgc/ctc/application/constants';
 import { ENVIRONMENTS } from '@inn/app.environments';
-import autoTable from 'jspdf-autotable';
 
 export interface OCFirma {
   subtitle?: string;
@@ -162,16 +161,18 @@ const BE_EPDF_FONT_FAMILIES = {
 };
 
 export async function generateOrdCo(payload: OCPayload) {
-  payload.productos.map(el => {
-    try {
-      if (el.id) {
-        const itemCotizado = payload.productosCotizados.filter(
-          pc => pc.item.productoId === el.id
-        )[0];
-        el.marca = itemCotizado.item.marca || 'N/A';
-      }
-    } catch (error: any) {}
-  });
+  if (payload.productosCotizados.length) {
+    payload.productos.map(el => {
+      try {
+        if (el.id) {
+          const itemCotizado = payload.productosCotizados.filter(
+            pc => pc.item.productoId === el.id
+          )[0];
+          el.marca = itemCotizado.item.marca || 'N/A';
+        }
+      } catch (error: any) {}
+    });
+  }
 
   const doc = new jsPDF('p', 'pt') as jsPDFWithPlugin;
   const maxPageHeight = 811.89;
