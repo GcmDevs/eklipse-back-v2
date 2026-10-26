@@ -45,6 +45,19 @@ interface ArchivoWorker {
   superseded?: boolean;
 }
 interface EstadoWorker {
+  notices?: {
+    type:
+      | 'recalculo-ingreso'
+      | 'ordenes-sin-confirmar'
+      | 'enfermeria-sin-notas'
+      | 'historias-sin-folios'
+      | 'prefactura-sin-servicios'
+      | 'prefactura-no-disponible';
+    admission: string;
+    occurredAt: string;
+    message: string;
+    orders: string[];
+  }[];
   pendingFailures?: NonNullable<EstadoWorker['failure']>[];
   failure?: {
     occurredAt: string;
@@ -372,6 +385,28 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
       estado: estado.status,
       mensaje: estado.message,
       updatedAt: estado.updatedAt,
+      avisos: (estado.notices ?? []).map(notice => ({
+        tipo: notice.type,
+        ingreso: notice.admission,
+        fecha: notice.occurredAt,
+        mensaje: notice.message,
+        ordenes: notice.orders,
+      })),
+      fallas: (estado.failures ?? []).flatMap(failure =>
+        failure
+          ? [
+              {
+                fecha: failure.occurredAt,
+                mensaje: failure.message,
+                paso: failure.step,
+                etapa: failure.stage,
+                grupo: failure.group,
+                totalGrupos: failure.totalGroups,
+                detalle: failure.details,
+              },
+            ]
+          : []
+      ),
       reanudable: estado.status === 'failed',
       ...(estado.pendingFailures?.length
         ? {
@@ -456,6 +491,90 @@ export class EjecucionesReportesImpl implements OnModuleDestroy {
         updatedAt: job.createdAt,
         files: [],
       };
+    }
+    // Recupera los avisos que las ejecuciones anteriores guardaban solo junto a la prefactura.
+    if (
+      !estado.notices?.length &&
+      /^\d{1,20}$/.test(job.documento) &&
+      /^\d{1,20}$/.test(job.ingreso)
+    ) {
+      try {
+        const notices: EstadoWorker['notices'] = JSON.parse(
+          await readFile(
+            join(carpeta, 'reportes', job.documento, job.ingreso, 'prefactura', 'avisos.json'),
+            'utf8'
+          )
+        );
+        if (Array.isArray(notices))
+          estado.notices = notices.filter(
+            notice =>
+              notice.admission === job.ingreso &&
+              [
+                'recalculo-ingreso',
+                'ordenes-sin-confirmar',
+                'prefactura-sin-servicios',
+                'prefactura-no-disponible',
+              ].includes(notice.type) &&
+              typeof notice.message === 'string' &&
+              Array.isArray(notice.orders)
+          );
+      } catch {
+        /* La ausencia de avisos antiguos no invalida una ejecución ni sus PDF. */
+      }
+    }
+    // Presenta la ausencia de folios de versiones anteriores como aviso, sin modificar su archivo histórico.
+    const esSinFolios = (fallo: EstadoWorker['failure']) =>
+      fallo?.stage === 'historias-clinicas' && fallo.message === 'Paciente sin folios';
+    const sinFolios = [
+      ...(estado.failures ?? []),
+      ...(estado.pendingFailures ?? []),
+      estado.failure,
+    ].filter(esSinFolios);
+    if (sinFolios.length) {
+      estado.notices ??= [];
+      if (!estado.notices.some(aviso => aviso.type === 'historias-sin-folios')) {
+        estado.notices.push({
+          type: 'historias-sin-folios',
+          admission: job.ingreso,
+          occurredAt: sinFolios[0]!.occurredAt,
+          message: 'Paciente sin folios',
+          orders: [],
+        });
+      }
+      const pendientes =
+        estado.pendingFailures ?? (estado.failure ? [estado.failure] : (estado.failures ?? []));
+      estado.pendingFailures = pendientes.filter(fallo => !esSinFolios(fallo));
+      estado.failures = estado.failures?.filter(fallo => !esSinFolios(fallo));
+      if (esSinFolios(estado.failure)) estado.failure = undefined;
+      if (estado.status === 'failed' && !estado.failure && !estado.pendingFailures.length) {
+        let enfermeriaCompleta = estado.notices.some(
+          aviso => aviso.type === 'enfermeria-sin-notas'
+        );
+        for (const archivo of estado.files.filter(
+          archivo => archivo.kind === 'enfermeria' && !archivo.superseded
+        )) {
+          try {
+            await this.rutaArchivo(carpeta, archivo);
+            enfermeriaCompleta = true;
+          } catch {
+            /* Permite reanudar documentos ausentes. */
+          }
+        }
+        if (enfermeriaCompleta) {
+          const disponibles = estado.files.filter(archivo => !archivo.superseded).length;
+          estado.status = 'complete';
+          estado.message = `Paciente sin folios. ${disponibles} PDF disponibles.`;
+          estado.progress = {
+            stage: 'completo',
+            completed: disponibles,
+            total: disponibles,
+            current: null,
+            generalPercentage: 100,
+          };
+        } else {
+          estado.message = 'Quedan reportes de enfermería pendientes de generar.';
+        }
+      }
     }
     // Mientras close guarda el resultado final, conservar el estado anterior evita
     // que la pantalla deje de consultar antes de conocer la causa del cierre.

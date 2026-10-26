@@ -56,6 +56,81 @@ describe('GeneradorReportesImpl', () => {
     expect(resultado.ingresos[0].fechaIngreso).toBe('2026-10-09T10:30:00.000Z');
   });
 
+  it('expone el tipo de cada ingreso junto con su estado y conserva el valor desconocido', async () => {
+    query.mockResolvedValueOnce([paciente]).mockResolvedValueOnce([
+      {
+        AINCONSEC: 201,
+        AINFECING: null,
+        ESTADO_INGRESO: 'Registrado',
+        TIPO_INGRESO: ' Urgencias ',
+      },
+      { AINCONSEC: 200, AINFECING: null, ESTADO_INGRESO: 'Facturado', TIPO_INGRESO: 'UCI Adulto' },
+      { AINCONSEC: 199, AINFECING: null, ESTADO_INGRESO: 'Cerrado', TIPO_INGRESO: null },
+    ]);
+    const result = await servicio.consultar('001234');
+    expect(result.ingresos.map(ingreso => ingreso.tipoIngreso)).toEqual([
+      'Urgencias',
+      'UCI Adulto',
+      'Desconocido',
+    ]);
+    expect(result.ingresos.map(ingreso => ingreso.estado)).toEqual([
+      'Registrado',
+      'Facturado',
+      'Cerrado',
+    ]);
+    expect(INGRESOS_REPORTES_SQL).toContain('CASE i.AINURGCON');
+    expect(INGRESOS_REPORTES_SQL).toContain('END AS TIPO_INGRESO');
+  });
+
+  it('devuelve la cama actual solo para el ingreso activo del paciente', async () => {
+    query.mockResolvedValueOnce([paciente]).mockResolvedValueOnce([
+      {
+        AINCONSEC: 201,
+        AINFECING: null,
+        ESTADO_INGRESO: 'Registrado',
+        INGRESO_ACTIVO: true,
+        CAMA_CODIGO: ' 401A ',
+        CAMA_NOMBRE: ' Cama 401 A ',
+        CAMA_UNIDAD: ' Hospitalización ',
+      },
+      {
+        AINCONSEC: 199,
+        AINFECING: null,
+        ESTADO_INGRESO: 'Cerrado',
+        INGRESO_ACTIVO: false,
+        CAMA_CODIGO: '301B',
+        CAMA_NOMBRE: 'Cama anterior',
+      },
+    ]);
+    const result = await servicio.consultar('001234');
+    expect(result.ingresos[0]).toMatchObject({
+      activo: true,
+      cama: { codigo: '401A', nombre: 'Cama 401 A', unidad: 'Hospitalización' },
+    });
+    expect(result.ingresos[1]).toMatchObject({ activo: false, cama: null });
+    expect(INGRESOS_REPORTES_SQL).toContain('e.HESFECSAL IS NULL');
+    expect(INGRESOS_REPORTES_SQL).toContain('i.AINFECEGRE IS NULL');
+    expect(INGRESOS_REPORTES_SQL).toContain('c.ADNINGRESO = i.OID');
+    expect(INGRESOS_REPORTES_SQL).toContain('e.ADNINGRES = i.OID');
+  });
+
+  it('conserva el ingreso activo sin inventar cama cuando no tiene asignación', async () => {
+    query.mockResolvedValueOnce([paciente]).mockResolvedValueOnce([
+      {
+        AINCONSEC: 201,
+        AINFECING: null,
+        ESTADO_INGRESO: 'Registrado',
+        INGRESO_ACTIVO: 1,
+        CAMA_CODIGO: ' ',
+        CAMA_NOMBRE: null,
+      },
+    ]);
+    expect((await servicio.consultar('001234')).ingresos[0]).toMatchObject({
+      activo: true,
+      cama: null,
+    });
+  });
+
   it('conserva el paciente cuando no tiene ingresos', async () => {
     query.mockResolvedValueOnce([paciente]).mockResolvedValueOnce([]);
     expect(await servicio.consultar('001234')).toEqual({

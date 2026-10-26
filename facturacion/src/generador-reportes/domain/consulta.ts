@@ -5,7 +5,16 @@ export interface PacienteReportes {
   sexo: string;
 }
 
+export interface CamaIngresoReportes {
+  codigo: string | null;
+  nombre: string | null;
+  unidad: string | null;
+}
+
 export interface IngresoReportes {
+  tipoIngreso?: string;
+  activo?: boolean;
+  cama?: CamaIngresoReportes | null;
   consecutivo: number;
   fechaIngreso: string | null;
   estado: string;

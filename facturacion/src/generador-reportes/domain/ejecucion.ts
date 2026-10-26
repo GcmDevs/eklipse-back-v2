@@ -23,7 +23,23 @@ export interface ProgresoReportes {
   porcentajeGeneral?: number;
 }
 
+export interface AvisoReporte {
+  tipo:
+    | 'recalculo-ingreso'
+    | 'ordenes-sin-confirmar'
+    | 'enfermeria-sin-notas'
+    | 'historias-sin-folios'
+    | 'prefactura-sin-servicios'
+    | 'prefactura-no-disponible';
+  ingreso: string;
+  fecha: string;
+  mensaje: string;
+  ordenes: string[];
+}
+
 export interface EjecucionReportes {
+  avisos?: AvisoReporte[];
+  fallas?: NonNullable<EjecucionReportes['fallo']>[];
   fallasPendientes?: NonNullable<EjecucionReportes['fallo']>[];
   pendiente?: EjecucionReportes;
   reanudable?: boolean;

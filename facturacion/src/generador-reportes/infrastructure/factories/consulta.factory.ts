@@ -12,6 +12,11 @@ export interface FilaPacienteReportes {
 }
 
 export interface FilaIngresoReportes {
+  TIPO_INGRESO?: string | null;
+  INGRESO_ACTIVO?: boolean | number;
+  CAMA_CODIGO?: string | null;
+  CAMA_NOMBRE?: string | null;
+  CAMA_UNIDAD?: string | null;
   AINCONSEC: number;
   AINFECING: Date | string | null;
   ESTADO_INGRESO: string;
@@ -33,9 +38,18 @@ export function pacienteReportesFactory(fila: FilaPacienteReportes): PacienteRep
 }
 
 export function ingresoReportesFactory(fila: FilaIngresoReportes): IngresoReportes {
+  const activo = fila.INGRESO_ACTIVO === true || fila.INGRESO_ACTIVO === 1;
+  const codigo = fila.CAMA_CODIGO?.trim() || null;
+  const nombre = fila.CAMA_NOMBRE?.trim() || null;
   return {
+    activo,
+    cama:
+      activo && (codigo || nombre)
+        ? { codigo, nombre, unidad: fila.CAMA_UNIDAD?.trim() || null }
+        : null,
     consecutivo: Number(fila.AINCONSEC),
     fechaIngreso: fila.AINFECING instanceof Date ? fila.AINFECING.toISOString() : fila.AINFECING,
     estado: fila.ESTADO_INGRESO,
+    tipoIngreso: fila.TIPO_INGRESO?.trim() || 'Desconocido',
   };
 }

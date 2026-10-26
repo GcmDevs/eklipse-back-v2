@@ -200,6 +200,240 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     ).toContain('%PDF');
   });
 
+  it.each(['running', 'complete', 'failed'])(
+    'expone las órdenes sin confirmar cuando la ejecución está %s',
+    async status => {
+      const job = await guardado({ estado: status });
+      const jobPath = join(job.destino, 'job.json');
+      const data = JSON.parse(await readFile(jobPath, 'utf8'));
+      data.pid = process.pid;
+      await writeFile(jobPath, JSON.stringify(data));
+      const statePath = join(job.destino, 'execution.json');
+      const state = JSON.parse(await readFile(statePath, 'utf8'));
+      await writeFile(
+        statePath,
+        JSON.stringify({
+          ...state,
+          notices: [
+            {
+              type: 'ordenes-sin-confirmar',
+              admission: '20',
+              occurredAt: '2026-10-26T12:00:00Z',
+              message: 'Órdenes de servicio sin confirmar del ingreso 20: 12485732, 12485733.',
+              orders: ['12485732', '12485733'],
+            },
+          ],
+        })
+      );
+      const result = await servicio.consultar(job.id, propietario);
+      expect(result.avisos).toEqual([
+        {
+          tipo: 'ordenes-sin-confirmar',
+          ingreso: '20',
+          fecha: '2026-10-26T12:00:00Z',
+          mensaje: 'Órdenes de servicio sin confirmar del ingreso 20: 12485732, 12485733.',
+          ordenes: ['12485732', '12485733'],
+        },
+      ]);
+    }
+  );
+
+  it('recupera las órdenes de avisos.json en ejecuciones anteriores y protege su propietario', async () => {
+    const job = await guardado({ archivos: [] });
+    const folder = join(job.destino, 'reportes', '001234', '20', 'prefactura');
+    await mkdir(folder, { recursive: true });
+    await writeFile(
+      join(folder, 'avisos.json'),
+      JSON.stringify([
+        {
+          type: 'ordenes-sin-confirmar',
+          admission: '20',
+          occurredAt: '2026-10-26T12:00:00Z',
+          message: 'Orden sin confirmar: 12485732.',
+          orders: ['12485732'],
+        },
+        {
+          type: 'ordenes-sin-confirmar',
+          admission: '999',
+          occurredAt: '',
+          message: 'Aviso de otro ingreso.',
+          orders: ['99999'],
+        },
+      ])
+    );
+    expect((await servicio.consultar(job.id, propietario)).avisos).toHaveLength(1);
+    expect((await servicio.consultar(job.id, propietario)).avisos?.[0].ordenes).toEqual([
+      '12485732',
+    ]);
+    expect((await servicio.listar('001234', ['20'], propietario))[0].avisos?.[0].mensaje).toContain(
+      '12485732'
+    );
+    await expect(servicio.consultar(job.id, { ...propietario, usuario: 8 })).rejects.toBeInstanceOf(
+      NotFoundException
+    );
+  });
+
+  it('mantiene la ausencia de notas como aviso informativo con ejecución completa al 100%', async () => {
+    const job = await guardado({
+      estado: 'complete',
+      progreso: {
+        stage: 'completo',
+        completed: 1,
+        total: 1,
+        current: null,
+        generalPercentage: 100,
+      },
+    });
+    const path = join(job.destino, 'execution.json');
+    const state = JSON.parse(await readFile(path, 'utf8'));
+    await writeFile(
+      path,
+      JSON.stringify({
+        ...state,
+        message: 'Este ingreso no tiene notas de enfermería',
+        notices: [
+          {
+            type: 'enfermeria-sin-notas',
+            admission: '20',
+            occurredAt: '2026-10-26T12:00:00Z',
+            message: 'Este ingreso no tiene notas de enfermería',
+            orders: [],
+          },
+        ],
+      })
+    );
+    const result = await servicio.consultar(job.id, propietario);
+    expect(result.estado).toBe('complete');
+    expect(result.reanudable).toBe(false);
+    expect(result.progreso?.porcentajeGeneral).toBe(100);
+    expect(result.fallo).toBeUndefined();
+    expect(result.fallas).toEqual([]);
+    expect(result.avisos?.[0]).toMatchObject({
+      tipo: 'enfermeria-sin-notas',
+      mensaje: 'Este ingreso no tiene notas de enfermería',
+    });
+  });
+
+  it.each(['prefactura-sin-servicios', 'prefactura-no-disponible'] as const)(
+    'expone el aviso %s de una generación completa',
+    async tipo => {
+      const job = await guardado({ estado: 'complete' });
+      const path = join(job.destino, 'execution.json');
+      const state = JSON.parse(await readFile(path, 'utf8'));
+      await writeFile(
+        path,
+        JSON.stringify({
+          ...state,
+          notices: [
+            {
+              type: tipo,
+              admission: '20',
+              occurredAt: '2026-10-26T12:00:00Z',
+              message:
+                'Este ingreso no tiene una prefactura disponible. No se han cargado servicios a la hoja de trabajo.',
+              orders: [],
+            },
+          ],
+        })
+      );
+      const result = await servicio.consultar(job.id, propietario);
+      expect(result.estado).toBe('complete');
+      expect(result.reanudable).toBe(false);
+      expect(result.fallo).toBeUndefined();
+      expect(result.avisos?.[0].tipo).toBe(tipo);
+      expect(result.avisos?.[0].mensaje).toContain('No se han cargado servicios');
+    }
+  );
+
+  for (const tecnico of [false, true]) {
+    it(`reclasifica Paciente sin folios de ejecuciones anteriores sin ocultar errores técnicos=${tecnico}`, async () => {
+      const job = await guardado({ estado: 'failed' });
+      const path = join(job.destino, 'execution.json');
+      const state = JSON.parse(await readFile(path, 'utf8'));
+      state.files[0].kind = 'enfermeria';
+      const sinFolios = {
+        occurredAt: '2026-10-26T12:00:00Z',
+        message: 'Paciente sin folios',
+        stage: 'historias-clinicas',
+        step: 'Consultando folios',
+        group: null,
+        totalGroups: null,
+        details: 'Paciente sin folios',
+      };
+      const fallaTecnica = {
+        ...sinFolios,
+        stage: 'enfermeria',
+        message: 'No se pudo descargar el PDF',
+      };
+      state.failures = tecnico ? [sinFolios, fallaTecnica] : [sinFolios];
+      state.pendingFailures = state.failures;
+      state.failure = tecnico ? fallaTecnica : sinFolios;
+      await writeFile(path, JSON.stringify(state));
+      const result = await servicio.consultar(job.id, propietario);
+      expect(result.estado).toBe(tecnico ? 'failed' : 'complete');
+      expect(result.reanudable).toBe(tecnico);
+      expect(result.avisos).toContainEqual(
+        expect.objectContaining({ tipo: 'historias-sin-folios', mensaje: 'Paciente sin folios' })
+      );
+      expect(result.fallas?.some(fallo => fallo.mensaje === 'Paciente sin folios')).toBe(false);
+      if (tecnico) expect(result.fallo?.mensaje).toBe('No se pudo descargar el PDF');
+      else {
+        expect(result.fallo).toBeUndefined();
+        expect(result.progreso?.porcentajeGeneral).toBe(100);
+        const listado = await servicio.listar('001234', ['20'], propietario);
+        expect(listado[0].estado).toBe('complete');
+        expect(listado[0].avisos?.[0].tipo).toBe('historias-sin-folios');
+      }
+      expect(JSON.parse(await readFile(path, 'utf8')).failures[0].message).toBe(
+        'Paciente sin folios'
+      );
+    });
+  }
+
+  it('conserva la reanudación si una ejecución anterior sin folios todavía no generó enfermería', async () => {
+    const job = await guardado({ estado: 'failed', archivos: [] });
+    const path = join(job.destino, 'execution.json');
+    const state = JSON.parse(await readFile(path, 'utf8'));
+    state.failure = {
+      occurredAt: '',
+      message: 'Paciente sin folios',
+      stage: 'historias-clinicas',
+      step: '',
+      group: null,
+      totalGroups: null,
+      details: '',
+    };
+    await writeFile(path, JSON.stringify(state));
+    const result = await servicio.consultar(job.id, propietario);
+    expect(result.estado).toBe('failed');
+    expect(result.reanudable).toBe(true);
+    expect(result.fallo).toBeUndefined();
+    expect(result.mensaje).toContain('enfermería pendientes');
+    expect(result.avisos?.[0].tipo).toBe('historias-sin-folios');
+  });
+
+  it('expone todos los errores registrados aunque la ejecución termine correctamente al reanudar', async () => {
+    const job = await guardado({ estado: 'complete' });
+    const path = join(job.destino, 'execution.json');
+    const state = JSON.parse(await readFile(path, 'utf8'));
+    const failures = [1, 2].map(group => ({
+      occurredAt: '2026-10-26T12:00:00Z',
+      message: 'Falló grupo ' + group,
+      step: 'Descargando',
+      stage: 'historias-clinicas',
+      group,
+      totalGroups: 3,
+      details: 'Tiempo agotado.',
+    }));
+    await writeFile(path, JSON.stringify({ ...state, failures, pendingFailures: [] }));
+    const result = await servicio.consultar(job.id, propietario);
+    expect(result.estado).toBe('complete');
+    expect(result.fallas).toHaveLength(2);
+    expect(result.fallas?.map(fallo => fallo.grupo)).toEqual([1, 2]);
+    expect(result.fallo).toBeUndefined();
+    expect((await servicio.listar('001234', ['20'], propietario))[0].fallas).toHaveLength(2);
+  });
+
   it('expone todas las fallas pendientes mientras el ejecutor continúa trabajando', async () => {
     const job = await guardado({ estado: 'running' });
     const ruta = join(job.destino, 'execution.json');
