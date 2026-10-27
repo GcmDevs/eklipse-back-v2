@@ -16,9 +16,12 @@ export async function resolverOrdenRelacionada(qr: QueryRunner, tipo?: number, c
     },
     take: 2,
   });
-  if (documentos.length !== 1)
-    throw new Error(
-      'No se encontro una orden unica del tipo y consecutivo indicados en este contexto'
-    );
+
+  if (documentos.length > 1) {
+    throw new Error('Existe mas de una orden del tipo y consecutivo indicados en este contexto');
+  }
+  if (!documentos.length) {
+    throw new Error('No se encontró orden del tipo y consecutivo indicados en este contexto');
+  }
   return { id: documentos[0].id, consecutivo: documentos[0].consecutivo };
 }
