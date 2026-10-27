@@ -243,6 +243,22 @@ export class PrimarioSegmentadoImpl extends RecursosCompartidosSource {
       const tramo = await this.qr.manager
         .getRepository(TrasladoTramoOrm)
         .findOneOrFail({ where: { trasladoId, orden: 1 } });
+      const llegadaEscena = new Date(body.llegadaEscenaHora);
+      const gruposClinicos = await Promise.all([
+        this.qr.manager.getRepository(TrasladoSignosVitalesOrm).find({ where: { trasladoId } }),
+        this.qr.manager.getRepository(TrasladoNotaOrm).find({ where: { trasladoId } }),
+        this.qr.manager.getRepository(ProcedimientoOrm).find({ where: { trasladoId } }),
+        this.qr.manager.getRepository(MedicamentoOrm).find({ where: { trasladoId } }),
+      ]);
+      for (const registros of gruposClinicos) {
+        for (const registro of registros) {
+          if (new Date(registro.fechaRegistro) < llegadaEscena) {
+            throw new Error(
+              `La llegada a escena no puede ser posterior al registro clínico #${registro.id}. Corrige la fecha del registro antes de modificar la llegada.`
+            );
+          }
+        }
+      }
       Object.assign(tramo, {
         horaSolicitud: new Date(body.solicitadoEl),
         horaDespacho: new Date(body.despachoHora),

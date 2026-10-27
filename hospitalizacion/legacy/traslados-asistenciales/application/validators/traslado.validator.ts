@@ -19,7 +19,7 @@ interface TrasladoValidable {
 }
 
 interface TramoClinicoValidable {
-  horaSalidaEscena?: Date;
+  horaLlegadaEscena?: Date;
   horaRecepcionInst?: Date;
 }
 
@@ -317,7 +317,13 @@ export class TrasladoValidator {
     descripcion: string,
     tramo: TramoClinicoValidable
   ): void {
-    this.validateFechaRegistro(value, descripcion, tramo.horaSalidaEscena);
+    if (!this.isValidDate(tramo.horaLlegadaEscena)) {
+      throw new Error('Registra primero la fecha y hora de llegada a escena');
+    }
+    this.validateFechaRegistro(value, descripcion);
+    if (new Date(value) < new Date(tramo.horaLlegadaEscena)) {
+      throw new Error(`${descripcion} no puede ser anterior a la llegada a escena`);
+    }
     if (tramo.horaRecepcionInst && new Date(value) > new Date(tramo.horaRecepcionInst)) {
       throw new Error(`${descripcion} no puede ser posterior a la recepción institucional`);
     }
