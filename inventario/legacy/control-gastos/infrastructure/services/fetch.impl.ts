@@ -9,6 +9,7 @@ import { orderBy } from 'lodash';
 import { IngresoOrm } from '@inn/lgc/cgt/orm/gen/ingreso.orm';
 import { ENVIRONMENTS } from '../../../../src/app.environments';
 import { INN_AUTHORITIES } from '../../../../authorities';
+import { mapOrdenesControlGasto } from './ordenes-control-gasto.mapper';
 
 @Injectable()
 export class FetchControlGastoImpl extends BaseSource {
@@ -41,6 +42,8 @@ export class FetchControlGastoImpl extends BaseSource {
           where: { fechaCreacion: Between(fechaInicio, fechaFin) },
           relations: [
             'ordenRelacionada',
+            'archivos',
+            'archivos.documento',
             'creadoPor',
             'detalle',
             'detalle.item',
@@ -104,8 +107,13 @@ export class FetchControlGastoImpl extends BaseSource {
 
       return {
         id: c.id,
+        ordenesRelacionadas: mapOrdenesControlGasto(c),
         ordenRelacionada: c.ordenRelacionada
-          ? { id: c.ordenRelacionada.id, consecutivo: c.ordenRelacionada.consecutivo }
+          ? {
+              id: c.ordenRelacionada.id,
+              consecutivo: c.ordenRelacionada.consecutivo,
+              tipoCode: c.ordenRelacionada.tipoCode,
+            }
           : null,
         contexto: c.context.getCode(),
         estadoCode: c.estadoCode,

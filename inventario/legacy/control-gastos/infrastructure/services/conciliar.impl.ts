@@ -34,10 +34,15 @@ export class ConciliarControlGastoImpl extends BaseSource {
       const controlGasto = await controlGastoRp.findOne({
         where: { id: payload.idControlGasto },
         relations: ['detalle'],
+        lock: { mode: 'pessimistic_write' },
       });
 
       if (!controlGasto) {
         throw new Error('No existe reporte de control de gastos con este id');
+      }
+
+      if (controlGasto.estadoCode === ESTADOS_CONTROL_GASTO.INICIADO.getCode()) {
+        throw new Error('Debe finalizar la carga de órdenes antes de conciliar');
       }
 
       if (controlGasto.estadoCode === ESTADOS_CONTROL_GASTO.RECHAZADO.getCode()) {

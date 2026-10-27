@@ -5,7 +5,7 @@ export type EstadoControlGastoCode = 6 | 7 | 1 | 2 | 3 | 4 | 5;
 export class EstadoControlGastoType extends CtmType<EstadoControlGastoCode> {}
 
 const INICIADO = new EstadoControlGastoType(6, 'INICIADO');
-const ORDEN_AGREGADA = new EstadoControlGastoType(7, 'ORDEN AGREGADA');
+const ORDENES_CARGADAS = new EstadoControlGastoType(7, 'OC/OS CARGADAS');
 const PENDIENTE = new EstadoControlGastoType(1, 'PENDIENTE');
 const EN_TRAMITE = new EstadoControlGastoType(2, 'EN TRAMITE');
 const PRODU_FACT = new EstadoControlGastoType(3, 'PRODUCTOS POR FACTURAR');
@@ -22,7 +22,7 @@ export function estadoControlGastoTypeFactory(
     case 1:
       return PENDIENTE;
     case 7:
-      return ORDEN_AGREGADA;
+      return ORDENES_CARGADAS;
     case 2:
       return EN_TRAMITE;
     case 3:
@@ -46,12 +46,9 @@ export const ESTADOS_CONTROL_GASTO = {
   PRODU_FACT,
   FINALIZADO,
   INICIADO,
+  ORDENES_CARGADAS,
 };
 
 export const ESTADOS_CONTROL_GASTO_VALUES = Object.values(ESTADOS_CONTROL_GASTO);
 
-export const ESTADOS_AL_CONCILIAR_CODES = [
-  PRODU_FACT.getCode(),
-  FINALIZADO.getCode(),
-  INICIADO.getCode(),
-];
+export const ESTADOS_AL_CONCILIAR_CODES = [PRODU_FACT.getCode(), FINALIZADO.getCode()];

@@ -19,7 +19,7 @@ export function tipoDocumentoAdjuntoTypeFactory(
       return ORDEN_SERVICIO;
     case 3:
       return TRASLADO;
-    case 3:
+    case 4:
       return FACTURA;
   }
 }

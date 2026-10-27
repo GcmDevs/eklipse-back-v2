@@ -86,14 +86,33 @@ export class GenerateReporteControlGastosPayload {
   detalle: ItemReporteControlGastosPayload[];
 }
 
-export class AsociarOrdenControlGastosPayload {
+export class SolicitudOrdenesControlGastosPayload {
   @IsInt()
   @Min(1)
   idControlGasto: number;
 
   @IsString()
   contextCode: GcmContextCode;
+}
 
+export class DescartarOrdenControlGastosPayload extends SolicitudOrdenesControlGastosPayload {
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  archivoId?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  documentoAnteriorId?: number;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  motivoRechazo?: string;
+}
+
+export class AsociarOrdenControlGastosPayload extends SolicitudOrdenesControlGastosPayload {
   @IsIn([0, 19])
   ordenRelacionadaTipoCode: 0 | 19;
 

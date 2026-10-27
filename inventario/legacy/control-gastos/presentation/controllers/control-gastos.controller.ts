@@ -23,6 +23,8 @@ import {
   GenerateReporteControlGastosPayload,
   RechazarDocumentoControlGastosPayload,
   UpdateControlGastoPayload,
+  SolicitudOrdenesControlGastosPayload,
+  DescartarOrdenControlGastosPayload,
 } from '@inn/lgc/cgt/application/payloads/control-gastos.payloads';
 import { Authorities, CommonGuards } from '@common/presentation/decorators';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
@@ -35,6 +37,7 @@ import { GcmContextCode, GcmContextType } from '@common/domain/types';
 import { DocumentoVistoControlGastoImpl } from '@inn/lgc/cgt/infrastructure/services/documento-visto.impl';
 import { SolicitudMaosImpl } from '@inn/lgc/cgt/infrastructure/services/solicitud-maos.impl';
 import { INN_AUTHORITIES } from '../../../../authorities';
+import { OrdenesControlGastoImpl } from '@inn/lgc/cgt/infrastructure/services/ordenes-control-gasto.impl';
 
 @CommonGuards()
 @Controller('v1/cgt')
@@ -49,14 +52,17 @@ export class ControlGastosController {
     private _documentoVisto: DocumentoVistoControlGastoImpl,
     private _solicitudMaos: SolicitudMaosImpl,
     private _findById: FindByIdControlGastoImpl,
-    private _update: UpdateControlGastoImpl
+    private _update: UpdateControlGastoImpl,
+    private _ordenes: OrdenesControlGastoImpl
   ) {}
 
   @Patch('orden-relacionada')
   @Authorities([INN_AUTHORITIES.FARMACIA.CONTROL_GASTOS_FACTURADOR])
   async asociarOrden(@Body() body: AsociarOrdenControlGastosPayload) {
     try {
-      return await this._cargarFactura.asociarOrden(body);
+      const response = await this._ordenes.agregar(body);
+      const orden = response.ordenes.filter(item => !item.rechazadoAt).at(-1);
+      return { id: orden.documentoId, consecutivo: orden.consecutivo };
     } catch (error: any) {
       throw new BadRequestException(error.message);
     }
@@ -72,6 +78,52 @@ export class ControlGastosController {
     try {
       if (tipoCode !== '0' && tipoCode !== '19') throw new Error('Seleccione compra o servicio');
       return await this._cargarFactura.previewOrden(contextCode, Number(tipoCode), consecutivo);
+    } catch (error: any) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Get('ordenes')
+  @Authorities([
+    INN_AUTHORITIES.FARMACIA.CONTROL_GASTOS_SOLICITANTE,
+    INN_AUTHORITIES.FARMACIA.CONTROL_GASTOS_FACTURADOR,
+  ])
+  async consultarOrdenes(
+    @Query('idControlGasto') id: string,
+    @Query('contextCode') contextCode: GcmContextCode
+  ) {
+    try {
+      return await this._ordenes.consultar({ idControlGasto: Number(id), contextCode });
+    } catch (error: any) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Post('ordenes')
+  @Authorities([INN_AUTHORITIES.FARMACIA.CONTROL_GASTOS_FACTURADOR])
+  async agregarOrden(@Body() body: AsociarOrdenControlGastosPayload) {
+    try {
+      return await this._ordenes.agregar(body);
+    } catch (error: any) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Post('ordenes/finalizar')
+  @Authorities([INN_AUTHORITIES.FARMACIA.CONTROL_GASTOS_FACTURADOR])
+  async finalizarOrdenes(@Body() body: SolicitudOrdenesControlGastosPayload) {
+    try {
+      return await this._ordenes.finalizar(body);
+    } catch (error: any) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Patch('ordenes/descartar')
+  @Authorities([INN_AUTHORITIES.FARMACIA.CONTROL_GASTOS_FACTURADOR])
+  async descartarOrden(@Body() body: DescartarOrdenControlGastosPayload) {
+    try {
+      return await this._ordenes.descartar(body);
     } catch (error: any) {
       throw new BadRequestException(error.message);
     }

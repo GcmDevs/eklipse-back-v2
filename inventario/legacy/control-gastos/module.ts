@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ControlGastosController } from './presentation/controllers';
+import { OrdenesControlGastoImpl } from './infrastructure/services/ordenes-control-gasto.impl';
 import {
   CargarFacturaControlGastoImpl,
   ConciliarControlGastoImpl,
@@ -16,6 +17,7 @@ import {
 @Module({
   controllers: [ControlGastosController],
   providers: [
+    OrdenesControlGastoImpl,
     CreateControlGastoImpl,
     ConciliarControlGastoImpl,
     FetchControlGastoImpl,

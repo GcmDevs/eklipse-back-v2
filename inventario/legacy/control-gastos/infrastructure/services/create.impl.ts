@@ -78,7 +78,7 @@ export class CreateControlGastoImpl extends BaseSource {
         detalleOrigenIds = ordenDespacho.detalle.map(detalle => detalle.id);
 
         const newControlGasto = new ControlGastoOrm();
-        newControlGasto.estadoCode = ESTADOS_CONTROL_GASTO.PENDIENTE.getCode();
+        newControlGasto.estadoCode = ESTADOS_CONTROL_GASTO.INICIADO.getCode();
         newControlGasto.fechaCreacion = new Date();
         newControlGasto.fechaProcedimiento = new Date(`${body.fechaProcedimiento}:00:00`);
         newControlGasto.area = body.area;
@@ -92,7 +92,7 @@ export class CreateControlGastoImpl extends BaseSource {
 
         const historial = new ControlGastoHistorialOrm();
         historial.controlGastoId = controlGastoStored.id;
-        historial.estadoCode = ESTADOS_CONTROL_GASTO.PENDIENTE.getCode();
+        historial.estadoCode = ESTADOS_CONTROL_GASTO.INICIADO.getCode();
         historial.fechaCambio = now;
         historial.usuarioId = this.auth.id;
         historial.facturaLink = body.documentoFileName;
@@ -177,7 +177,7 @@ const solicitudTrasladoProductoFn = async (
 
   const now = new Date();
   const newControlGasto = new ControlGastoOrm();
-  newControlGasto.estadoCode = ESTADOS_CONTROL_GASTO.PENDIENTE.getCode();
+  newControlGasto.estadoCode = ESTADOS_CONTROL_GASTO.INICIADO.getCode();
   newControlGasto.fechaCreacion = new Date();
   newControlGasto.fechaProcedimiento = new Date(`${body.fechaProcedimiento}:00:00`);
   newControlGasto.area = body.area;
@@ -190,7 +190,7 @@ const solicitudTrasladoProductoFn = async (
 
   const historial = new ControlGastoHistorialOrm();
   historial.controlGastoId = controlGastoStored.id;
-  historial.estadoCode = ESTADOS_CONTROL_GASTO.PENDIENTE.getCode();
+  historial.estadoCode = ESTADOS_CONTROL_GASTO.INICIADO.getCode();
   historial.fechaCambio = now;
   historial.usuarioId = idUsuario;
   historial.facturaLink = body.documentoFileName;
