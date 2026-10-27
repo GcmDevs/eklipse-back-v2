@@ -19,10 +19,13 @@ export interface IngresoReportes {
   fechaIngreso: string | null;
   estado: string;
   reportes?: EjecucionReportes;
+  reportesAnteriores?: EjecucionReportes;
 }
 
 export interface ConsultaReportes {
+  proceso?: ProcesoReportes;
   paciente: PacienteReportes | null;
   ingresos: IngresoReportes[];
 }
 import { EjecucionReportes } from './ejecucion';
+import { ProcesoReportes } from './proceso';

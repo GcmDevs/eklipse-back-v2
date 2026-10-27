@@ -1,3 +1,5 @@
+import { ProcesoReportes, TipoDocumentoReporte } from './proceso';
+
 export interface ArchivoReporte {
   id: string;
   nombre: string;
@@ -38,6 +40,12 @@ export interface AvisoReporte {
 }
 
 export interface EjecucionReportes {
+  proceso?: ProcesoReportes;
+  posicionCola?: number;
+  enColaDesde?: string;
+  loteId?: string;
+  disponibleParaProceso: boolean;
+  documentosPendientes: TipoDocumentoReporte[];
   avisos?: AvisoReporte[];
   fallas?: NonNullable<EjecucionReportes['fallo']>[];
   fallasPendientes?: NonNullable<EjecucionReportes['fallo']>[];
@@ -57,8 +65,35 @@ export interface EjecucionReportes {
   ingreso: string;
   createdAt: string;
   updatedAt: string;
-  estado: 'starting' | 'running' | 'complete' | 'failed' | 'prefactura-unavailable';
+  estado: 'queued' | 'starting' | 'running' | 'complete' | 'failed' | 'prefactura-unavailable';
   mensaje: string;
   archivos: ArchivoReporte[];
   progreso?: ProgresoReportes;
+}
+
+export interface ColaReportes {
+  trabajos: EjecucionReportes[];
+  totalEnCola: number;
+  resumen: {
+    total: number;
+    procesados: number;
+    enCurso: number;
+    pendientes: number;
+    porcentaje: number;
+  };
+}
+
+export interface HistorialReportes {
+  reportes: EjecucionReportes[];
+  total: number;
+  pagina: number;
+  porPagina: number;
+}
+
+export interface FiltrosHistorialReportes {
+  documento?: string;
+  ingreso?: string;
+  proceso?: ProcesoReportes | 'anteriores';
+  archivo?: string;
+  busqueda?: string;
 }
