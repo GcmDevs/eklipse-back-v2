@@ -47,6 +47,7 @@ export interface EjecucionReportes {
   loteId?: string;
   disponibleParaProceso: boolean;
   documentosPendientes: TipoDocumentoReporte[];
+  sinSoportesRequeridos?: boolean;
   avisos?: AvisoReporte[];
   fallas?: NonNullable<EjecucionReportes['fallo']>[];
   fallasPendientes?: NonNullable<EjecucionReportes['fallo']>[];

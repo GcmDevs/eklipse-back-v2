@@ -687,13 +687,16 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
 
   async reanudar(id: string, propietario: PropietarioReportes) {
     await this.inicializar();
-    const { job, estado, disponibles, soportesCompletos } = await this.leer(id, propietario);
+    const { job, estado, disponibles, soportesCompletos, sinSoportesRequeridos } = await this.leer(
+      id,
+      propietario
+    );
     if (!job.proceso)
       throw new ConflictException(
         'Los reportes anteriores son de consulta. Genera una nueva ejecución seleccionando el proceso.'
       );
     if (['queued', 'starting', 'running'].includes(estado.status))
-      return this.respuesta(job, estado);
+      return this.respuesta(job, estado, disponibles, soportesCompletos, sinSoportesRequeridos);
     if (
       estado.status !== 'failed' &&
       !(
@@ -742,8 +745,16 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
           job.proceso === proceso &&
           ['queued', 'starting', 'running'].includes(estado.status)
       );
-      if (duplicado && (!reanudarId || duplicado.job.id === reanudarId))
-        return this.respuesta(duplicado.job, duplicado.estado);
+      if (duplicado && (!reanudarId || duplicado.job.id === reanudarId)) {
+        const contenido = await this.leer(duplicado.job.id, propietario);
+        return this.respuesta(
+          contenido.job,
+          contenido.estado,
+          contenido.disponibles,
+          contenido.soportesCompletos,
+          contenido.sinSoportesRequeridos
+        );
+      }
       if (duplicado)
         throw new ConflictException('Ya existe una solicitud activa para ese ingreso y proceso.');
       const anterior = reanudarId ? await this.leer(reanudarId, propietario) : undefined;
@@ -835,7 +846,13 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
         throw error;
       }
       this.cola.push(job.id);
-      return this.respuesta(job, estado);
+      return this.respuesta(
+        job,
+        estado,
+        anterior?.disponibles,
+        anterior?.soportesCompletos,
+        anterior?.sinSoportesRequeridos
+      );
     });
     this.programar();
     return respuesta;
@@ -990,7 +1007,8 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
     job: Trabajo,
     estado: EstadoWorker,
     disponibles?: Set<string>,
-    soportesCompletos = false
+    soportesCompletos = false,
+    sinSoportesRequeridos = false
   ): EjecucionReportes {
     const archivos = estado.files.flatMap((archivo, indice) =>
       archivo.superseded ||
@@ -1046,6 +1064,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
           );
         })
       : [];
+    const mensaje = typeof estado.message === 'string' ? estado.message : '';
     return {
       id: job.id,
       documento: job.documento,
@@ -1060,9 +1079,13 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
         job.proceso && estado.status === 'complete' && !documentosPendientes.length
       ),
       documentosPendientes,
+      ...(sinSoportesRequeridos ? { sinSoportesRequeridos: true } : {}),
       createdAt: job.createdAt,
       estado: estado.status,
-      mensaje: estado.message,
+      mensaje:
+        sinSoportesRequeridos && !mensaje.includes('Sin reportes requeridos')
+          ? `${mensaje.trim()} Sin reportes requeridos.`.trim()
+          : mensaje,
       updatedAt: estado.updatedAt,
       avisos: (estado.notices ?? []).map(notice => ({
         tipo: notice.type,
@@ -1124,9 +1147,11 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
               completados: estado.progress.completed,
               total: estado.progress.total,
               grupoActual: estado.progress.current,
-              ...(estado.progress.generalPercentage === undefined
-                ? {}
-                : { porcentajeGeneral: estado.progress.generalPercentage }),
+              ...(estado.status === 'complete' && sinSoportesRequeridos
+                ? { porcentajeGeneral: 100 }
+                : estado.progress.generalPercentage === undefined
+                  ? {}
+                  : { porcentajeGeneral: estado.progress.generalPercentage }),
             },
           }
         : {}),
@@ -1139,39 +1164,47 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
     job: Trabajo,
     estado: EstadoWorker,
     disponibles: Set<string>
-  ): Promise<boolean> {
-    if (!estado.completedStages?.includes('soportes-requeridos') || !estado.supportManifest)
-      return false;
+  ): Promise<'sin-adjuntos' | 'con-adjuntos' | undefined> {
+    if (
+      !job.proceso ||
+      !DOCUMENTOS_POR_PROCESO[job.proceso].includes('soportes-requeridos') ||
+      estado.process !== job.proceso ||
+      !estado.completedStages?.includes('soportes-requeridos') ||
+      !estado.supportManifest
+    )
+      return undefined;
     try {
       const descriptor = estado.supportManifest;
       if (typeof descriptor.relativePath !== 'string' || !/^[a-f0-9]{64}$/.test(descriptor.sha256))
-        return false;
+        return undefined;
       const ruta = await realpath(rutaArchivoPermitida(carpeta, descriptor.relativePath));
       rutaArchivoPermitida(await realpath(carpeta), ruta);
       const body = await readFile(ruta);
-      if (createHash('sha256').update(body).digest('hex') !== descriptor.sha256) return false;
+      if (createHash('sha256').update(body).digest('hex') !== descriptor.sha256) return undefined;
       const manifest = JSON.parse(body.toString('utf8'));
       if (
         manifest.admission !== job.ingreso ||
         manifest.status !== 'complete' ||
+        manifest.error !== undefined ||
         !Array.isArray(manifest.supports) ||
         !manifest.supports.length
       )
-        return false;
+        return undefined;
       let total = 0;
       let paginas = 0;
       for (const support of manifest.supports) {
         if (
           !Number.isSafeInteger(support.quantity) ||
           support.quantity < 0 ||
-          !Array.isArray(support.files)
+          !Array.isArray(support.files) ||
+          support.error !== undefined
         )
-          return false;
+          return undefined;
         if (support.quantity === 0) {
-          if (support.status !== 'skipped' || support.files.length) return false;
+          if (support.status !== 'skipped' || support.files.length) return undefined;
         } else {
           if (support.status !== 'downloaded' || support.files.length !== support.quantity)
-            return false;
+            return undefined;
           for (const file of support.files) {
             if (
               typeof file.file !== 'string' ||
@@ -1182,17 +1215,17 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
               !Number.isSafeInteger(file.pages) ||
               file.pages < 1
             )
-              return false;
+              return undefined;
             paginas += file.pages;
           }
         }
         total += support.quantity;
       }
-      if (!Number.isSafeInteger(total) || !Number.isSafeInteger(paginas)) return false;
+      if (!Number.isSafeInteger(total) || !Number.isSafeInteger(paginas)) return undefined;
       const publicados = estado.files
         .map((file, index) => ({ file, index }))
         .filter(({ file }) => file.kind === 'soportes-requeridos' && !file.superseded);
-      if (total === 0) return !manifest.unified && !publicados.length;
+      if (total === 0) return !manifest.unified && !publicados.length ? 'sin-adjuntos' : undefined;
       const unified = manifest.unified;
       if (
         !unified ||
@@ -1203,7 +1236,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
         unified.pages !== paginas ||
         !Number.isFinite(Date.parse(unified.savedAt))
       )
-        return false;
+        return undefined;
       const expectedPath = resolve(dirname(ruta), unified.file);
       const expectedRealPath = await realpath(expectedPath);
       for (const { file, index } of publicados) {
@@ -1217,11 +1250,11 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
           file.sha256 === unified.sha256 &&
           (await realpath(rutaArchivoPermitida(carpeta, file.relativePath))) === expectedRealPath
         )
-          return true;
+          return 'con-adjuntos';
       }
-      return false;
+      return undefined;
     } catch {
-      return false;
+      return undefined;
     }
   }
 
@@ -1355,16 +1388,21 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
       };
       await this.guardar(carpeta, 'execution.json', estado);
     }
-    const soportesCompletos = await this.validarSoportes(carpeta, job, estado, disponibles);
+    const validacionSoportes = await this.validarSoportes(carpeta, job, estado, disponibles);
+    const soportesCompletos = validacionSoportes !== undefined;
+    const sinSoportesRequeridos = validacionSoportes === 'sin-adjuntos';
     await this.retirarAnteriores(job, estado, disponibles, soportesCompletos);
-    return { job, estado, carpeta, disponibles, soportesCompletos };
+    return { job, estado, carpeta, disponibles, soportesCompletos, sinSoportesRequeridos };
   }
 
   async consultar(id: string, propietario: PropietarioReportes) {
     await this.inicializar();
     this.programar();
-    const { job, estado, disponibles, soportesCompletos } = await this.leer(id, propietario);
-    return this.respuesta(job, estado, disponibles, soportesCompletos);
+    const { job, estado, disponibles, soportesCompletos, sinSoportesRequeridos } = await this.leer(
+      id,
+      propietario
+    );
+    return this.respuesta(job, estado, disponibles, soportesCompletos, sinSoportesRequeridos);
   }
 
   async consultarCola(propietario: PropietarioReportes): Promise<ColaReportes> {
@@ -1386,8 +1424,13 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
         .sort((a, b) => (a.job.secuenciaCola ?? 0) - (b.job.secuenciaCola ?? 0));
       const lista: EjecucionReportes[] = [];
       for (const { job } of lote) {
-        const { estado, disponibles, soportesCompletos } = await this.leer(job.id, propietario);
-        lista.push(this.respuesta(job, estado, disponibles, soportesCompletos));
+        const { estado, disponibles, soportesCompletos, sinSoportesRequeridos } = await this.leer(
+          job.id,
+          propietario
+        );
+        lista.push(
+          this.respuesta(job, estado, disponibles, soportesCompletos, sinSoportesRequeridos)
+        );
       }
       const procesados = lista.filter(
         trabajo => !['queued', 'starting', 'running'].includes(trabajo.estado)
@@ -1486,7 +1529,8 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
         contenido.job,
         contenido.estado,
         contenido.disponibles,
-        contenido.soportesCompletos
+        contenido.soportesCompletos,
+        contenido.sinSoportesRequeridos
       );
       // Una reanudación concurrente puede cambiar a queued durante esta lectura.
       if (!terminales.includes(reporte.estado) || !reporte.archivos.length) continue;
@@ -1553,7 +1597,8 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
             contenido.job,
             contenido.estado,
             contenido.disponibles,
-            contenido.soportesCompletos
+            contenido.soportesCompletos,
+            contenido.sinSoportesRequeridos
           )
         );
       } catch (error) {

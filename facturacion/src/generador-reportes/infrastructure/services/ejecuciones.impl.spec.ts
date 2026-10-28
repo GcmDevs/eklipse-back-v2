@@ -222,11 +222,154 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
       disponibleParaProceso: true,
       documentosPendientes: [],
       reanudable: false,
+      sinSoportesRequeridos: true,
     });
     expect((await servicio.consultar(job.id, propietario)).archivos).toHaveLength(3);
+    expect((await servicio.consultar(job.id, propietario)).mensaje).toContain(
+      'Sin reportes requeridos'
+    );
     const sinEvidencia = await preenvio({ soportes: false });
     expect(await servicio.consultar(sinEvidencia.id, propietario)).toMatchObject({
       estado: 'complete',
+      disponibleParaProceso: false,
+      documentosPendientes: ['soportes-requeridos'],
+      reanudable: true,
+    });
+    expect(await servicio.consultar(sinEvidencia.id, propietario)).not.toHaveProperty(
+      'sinSoportesRequeridos'
+    );
+  });
+
+  it('restaura la confirmación de todos los requerimientos con cero adjuntos y propaga el cierre al 100% sin reanudar', async () => {
+    const job = await preenvio();
+    await cambiarManifestSoportes(job, (manifest, state) => {
+      manifest.supports.push({
+        plan: 'Otro plan',
+        requirement: 'Otro requerimiento',
+        quantity: 0,
+        status: 'skipped',
+        files: [],
+      });
+      state.message = '3 PDF disponibles. Factura pendiente.';
+      state.progress = {
+        stage: 'soportes-requeridos',
+        completed: 0,
+        total: 0,
+        current: null,
+        generalPercentage: 94,
+      };
+    });
+    const jobPath = join(job.destino, 'job.json');
+    await writeFile(
+      jobPath,
+      JSON.stringify({ ...JSON.parse(await readFile(jobPath, 'utf8')), loteId: 'lote-sintetico' })
+    );
+    const recuperado = new EjecucionesReportesImpl(consultaClinica as any);
+    try {
+      const result = await recuperado.consultar(job.id, propietario);
+      expect(result).toMatchObject({
+        estado: 'complete',
+        sinSoportesRequeridos: true,
+        disponibleParaProceso: true,
+        documentosPendientes: [],
+        reanudable: false,
+        progreso: { porcentajeGeneral: 100 },
+      });
+      expect(result.mensaje).toContain('3 PDF disponibles. Factura pendiente.');
+      expect(result.mensaje.match(/Sin reportes requeridos/g)).toHaveLength(1);
+      expect(
+        (await recuperado.listar('001234', ['20'], propietario, 'pre-envio'))[0]
+          .sinSoportesRequeridos
+      ).toBe(true);
+      expect(
+        (await recuperado.listarGenerados(propietario)).reportes[0].sinSoportesRequeridos
+      ).toBe(true);
+      const cola = await recuperado.consultarCola(propietario);
+      expect(cola.trabajos[0].sinSoportesRequeridos).toBe(true);
+      expect(cola.resumen).toMatchObject({ procesados: 1, pendientes: 0, porcentaje: 100 });
+      await expect(recuperado.reanudar(job.id, propietario)).rejects.toBeInstanceOf(
+        ConflictException
+      );
+      expect((await recuperado.archivo(job.id, '0', propietario)).nombre).toBe('historia.pdf');
+    } finally {
+      recuperado.onModuleDestroy();
+    }
+  });
+
+  it('conserva factura pendiente en conciliación aunque soportes confirme cero adjuntos', async () => {
+    const job = await guardado({
+      proceso: 'conciliacion',
+      archivos: ['historia.pdf', 'notas.pdf'],
+      tipos: ['historias-clinicas', 'enfermeria'],
+      etapas: ['historias-clinicas', 'enfermeria'],
+      progreso: {
+        stage: 'soportes-requeridos',
+        completed: 0,
+        total: 0,
+        current: null,
+        generalPercentage: 94,
+      },
+    });
+    expect(await servicio.consultar(job.id, propietario)).toMatchObject({
+      estado: 'complete',
+      sinSoportesRequeridos: true,
+      disponibleParaProceso: false,
+      documentosPendientes: ['factura'],
+      reanudable: false,
+      progreso: { porcentajeGeneral: 100 },
+    });
+    await expect(servicio.reanudar(job.id, propietario)).rejects.toBeInstanceOf(ConflictException);
+  });
+
+  it.each(['historias-clinicas', 'enfermeria', 'prefactura'] as const)(
+    'cero soportes no completa el documento faltante %s de pre-envío',
+    async faltante => {
+      const tipos = (['historias-clinicas', 'enfermeria', 'prefactura'] as const).filter(
+        tipo => tipo !== faltante
+      );
+      const job = await guardado({
+        proceso: 'pre-envio',
+        archivos: tipos.map(tipo => tipo + '.pdf'),
+        tipos,
+        etapas: tipos,
+      });
+      expect(await servicio.consultar(job.id, propietario)).toMatchObject({
+        sinSoportesRequeridos: true,
+        disponibleParaProceso: false,
+        documentosPendientes: [faltante],
+      });
+    }
+  );
+
+  it('no convierte una falla técnica ajena en completa por tener soportes sin adjuntos', async () => {
+    const job = await guardado({
+      estado: 'failed',
+      progreso: { stage: 'enfermeria', completed: 0, total: 2, current: 1, generalPercentage: 60 },
+    });
+    expect(await servicio.consultar(job.id, propietario)).toMatchObject({
+      estado: 'failed',
+      sinSoportesRequeridos: true,
+      disponibleParaProceso: false,
+      documentosPendientes: ['enfermeria', 'prefactura'],
+      reanudable: true,
+      progreso: { porcentajeGeneral: 60 },
+    });
+  });
+
+  it('no acepta mensajes ni un indicador del worker como evidencia de cero soportes', async () => {
+    const job = await preenvio({ soportes: false });
+    const path = join(job.destino, 'execution.json');
+    await writeFile(
+      path,
+      JSON.stringify({
+        ...JSON.parse(await readFile(path, 'utf8')),
+        sinSoportesRequeridos: true,
+        message: 'Sin reportes requeridos',
+      })
+    );
+    const result = await servicio.consultar(job.id, propietario);
+    expect(result).not.toHaveProperty('sinSoportesRequeridos');
+    expect(result).toMatchObject({
       disponibleParaProceso: false,
       documentosPendientes: ['soportes-requeridos'],
       reanudable: true,
@@ -242,16 +385,27 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     'sin etapa',
     'ruta',
     'cero con archivos',
+    'incompleto',
+    'error del manifiesto',
+    'error del requerimiento',
+    'cantidad negativa',
+    'perdido',
   ] as const)('rechaza evidencia inválida de soportes: %s', async modo => {
     const job = await preenvio();
     expect((await servicio.consultar(job.id, propietario)).disponibleParaProceso).toBe(true);
-    if (modo === 'checksum') {
+    if (modo === 'checksum' || modo === 'perdido') {
       const state = JSON.parse(await readFile(join(job.destino, 'execution.json'), 'utf8'));
-      await writeFile(join(job.destino, state.supportManifest.relativePath), '{}');
+      const path = join(job.destino, state.supportManifest.relativePath);
+      if (modo === 'perdido') await rm(path);
+      else await writeFile(path, '{}');
     } else
       await cambiarManifestSoportes(job, (manifest, state) => {
         if (modo === 'ingreso') manifest.admission = '999';
         if (modo === 'estado') manifest.status = 'failed';
+        if (modo === 'incompleto') manifest.status = 'running';
+        if (modo === 'error del manifiesto') manifest.error = 'Error técnico';
+        if (modo === 'error del requerimiento') manifest.supports[0].error = 'Error técnico';
+        if (modo === 'cantidad negativa') manifest.supports[0].quantity = -1;
         if (modo === 'vacío') manifest.supports = [];
         if (modo === 'cantidad') {
           manifest.supports[0].quantity = 1;
@@ -271,6 +425,9 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
       reanudable: true,
     });
     expect((await servicio.consultar(job.id, propietario)).archivos).toHaveLength(3);
+    expect(await servicio.consultar(job.id, propietario)).not.toHaveProperty(
+      'sinSoportesRequeridos'
+    );
   });
 
   it('publica el PDF de soportes unificado en listado, filtros y ZIP conservando sus originales', async () => {
@@ -337,6 +494,7 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     });
     const result = await servicio.consultar(job.id, propietario);
     expect(result).toMatchObject({ disponibleParaProceso: true, documentosPendientes: [] });
+    expect(result).not.toHaveProperty('sinSoportesRequeridos');
     expect(result.archivos.filter(file => file.tipo === 'soportes-requeridos')).toEqual([
       expect.objectContaining({
         id: '3',
@@ -1203,7 +1361,7 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
   });
 
   it('conserva el aviso sin prefactura y no permite reanudarlo como falla', async () => {
-    const job = await guardado({ estado: 'prefactura-unavailable', archivos: [] });
+    const job = await guardado({ estado: 'prefactura-unavailable', archivos: [], soportes: false });
     const path = join(job.destino, 'execution.json');
     const state = JSON.parse(await readFile(path, 'utf8'));
     await writeFile(
@@ -1484,7 +1642,7 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
   });
 
   it('expone todas las fallas pendientes mientras el ejecutor continúa trabajando', async () => {
-    const job = await guardado({ estado: 'running' });
+    const job = await guardado({ estado: 'running', soportes: false });
     const ruta = join(job.destino, 'execution.json');
     const estado = JSON.parse(await readFile(ruta, 'utf8'));
     // Simula el ejecutor activo para que la consulta no lo clasifique como huérfano.

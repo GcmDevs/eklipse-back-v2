@@ -26,6 +26,8 @@ El worker publica `completedStages` y `supportManifest: { relativePath, sha256 }
 
 Si hay adjuntos, se exige además un PDF `soportes-requeridos` unificado, cuyo tamaño, SHA-256, páginas y ruta coincidan con `manifest.unified`. La vista de archivos y el ZIP ofrecen ese PDF; los individuales se conservan como respaldo. Si todos los requerimientos tienen cantidad cero, deben estar `skipped`, sin archivos ni unificado: esa evidencia permite completar la etapa sin inventar un PDF vacío.
 
+Solo esa confirmación verificada publica `sinSoportesRequeridos: true` y añade «Sin reportes requeridos» al mensaje conservando el texto anterior. No se infiere del número de PDF ni de un mensaje o indicador enviado por el worker. El manifiesto debe estar completo, sin errores globales ni de requerimientos; la etapa debe estar finalizada y corresponder al proceso y al ingreso. Una extracción terminada se presenta al 100% y no ofrece reanudar por esa etapa. Los requisitos de HC, enfermería y prefactura, la factura pendiente de conciliación y las fallas de otras etapas conservan sus propios estados.
+
 Sin etapa finalizada o evidencia válida, `soportes-requeridos` permanece en `documentosPendientes`. La ejecución vigente con proceso que ya terminó puede reanudarse para obtener esta nueva etapa, conservando sus documentos clínicos. Una factura pendiente por sí sola no habilita reanudación. Las ejecuciones sin proceso quedan ocultas y no se reclasifican.
 
 ## API
