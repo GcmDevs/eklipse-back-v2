@@ -63,38 +63,26 @@ export class GeneradorReportesController {
     // La consulta clínica delimita los ingresos a los que se pueden asociar los PDF guardados.
     const propietario = this.propietario(request);
     const consecutivos = ingresos.map(ingreso => String(ingreso.consecutivo));
-    const [reportes, anteriores] = await Promise.all([
-      this.ejecuciones.listar(
-        consulta.paciente.documento,
-        consecutivos,
-        propietario,
-        busqueda.proceso
-      ),
-      this.ejecuciones.listar(consulta.paciente.documento, consecutivos, propietario, null),
-    ]);
+    const reportes = await this.ejecuciones.listar(
+      consulta.paciente.documento, consecutivos, propietario, busqueda.proceso
+    );
     const porIngreso = new Map(reportes.map(reporte => [reporte.ingreso, reporte]));
-    const anterioresPorIngreso = new Map(anteriores.map(reporte => [reporte.ingreso, reporte]));
     return {
       ...consulta,
       proceso: busqueda.proceso,
       ingresos: ingresos.map(ingreso => {
         const reporte = porIngreso.get(String(ingreso.consecutivo));
-        const anterior = anterioresPorIngreso.get(String(ingreso.consecutivo));
         const elegible = ingresoElegibleParaProceso(ingreso, busqueda.proceso);
         const reportes =
           reporte && !elegible
             ? {
                 ...reporte,
                 disponibleParaProceso: false,
-                ...(reporte.pendiente
-                  ? { pendiente: { ...reporte.pendiente, disponibleParaProceso: false } }
-                  : {}),
               }
             : reporte;
         return {
           ...ingreso,
           ...(reportes ? { reportes } : {}),
-          ...(anterior ? { reportesAnteriores: anterior } : {}),
         };
       }),
     };
@@ -187,15 +175,17 @@ export class GeneradorReportesController {
     ) {
       throw new BadRequestException('El ingreso seleccionado no pertenece al paciente consultado.');
     }
-    this.validarProceso(
-      consulta.ingresos.find(ingreso => String(ingreso.consecutivo) === datos.ingreso),
-      datos.proceso
+    const ingreso = consulta.ingresos.find(
+      ingreso => String(ingreso.consecutivo) === datos.ingreso
     );
+    this.validarProceso(ingreso, datos.proceso);
     return this.ejecuciones.crear(
       consulta.paciente.documento,
       datos.ingreso,
       this.propietario(request),
-      datos.proceso
+      datos.proceso,
+      undefined,
+      ingreso.tipoIngreso?.trim() || 'Desconocido'
     );
   }
 

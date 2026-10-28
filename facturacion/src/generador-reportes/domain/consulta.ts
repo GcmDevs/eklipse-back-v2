@@ -19,7 +19,6 @@ export interface IngresoReportes {
   fechaIngreso: string | null;
   estado: string;
   reportes?: EjecucionReportes;
-  reportesAnteriores?: EjecucionReportes;
 }
 
 export interface ConsultaReportes {

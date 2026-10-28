@@ -19,12 +19,13 @@ import {
   readFile,
   readdir,
   realpath,
+  rm,
   rename,
   unlink,
   writeFile,
   stat,
 } from 'node:fs/promises';
-import { basename, isAbsolute, join, relative, resolve, sep } from 'node:path';
+import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import {
   ColaReportes,
   EjecucionReportes,
@@ -53,13 +54,14 @@ interface ArchivoWorker {
   bytes: number;
   group: number;
   totalGroups: number;
-  kind: 'historias-clinicas' | 'enfermeria' | 'prefactura';
+  kind: 'historias-clinicas' | 'enfermeria' | 'prefactura' | 'soportes-requeridos';
   unified?: boolean;
   pages?: number;
   superseded?: boolean;
   sha256?: string;
 }
 interface EstadoWorker {
+  supportManifest?: { relativePath: string; sha256: string };
   pid?: number;
   document?: string;
   admission?: string;
@@ -106,6 +108,7 @@ interface Trabajo {
   documento: string;
   ingreso: string;
   proceso?: ProcesoReportes;
+  tipoIngreso?: string;
   propietario: PropietarioReportes;
   createdAt: string;
   pid?: number;
@@ -115,6 +118,7 @@ interface Trabajo {
   reanudar?: boolean;
   startedAt?: string;
   deadline?: string;
+  reemplazadoPor?: string;
 }
 
 function procesoVivo(pid?: number): boolean {
@@ -165,8 +169,31 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
     return a.usuario === b.usuario && a.contexto === b.contexto && a.esDinamica === b.esDinamica;
   }
 
+  private estadoPerdido(job: Trabajo): EstadoWorker {
+    const failure = {
+      occurredAt: new Date().toISOString(),
+      message: 'No se pudo recuperar el estado de esta solicitud. Puedes reanudarla.',
+      step: 'Recuperando la solicitud vigente.',
+      stage: 'preparacion',
+      group: null,
+      totalGroups: null,
+      details: 'El archivo de estado está ausente o no es válido.',
+    };
+    return {
+      process: job.proceso,
+      status: 'failed',
+      message: failure.message,
+      updatedAt: failure.occurredAt,
+      files: [],
+      failure,
+      failures: [failure],
+      pendingFailures: [failure],
+    };
+  }
+
   private async registros(
-    trabajos: string
+    trabajos: string,
+    propietario?: PropietarioReportes
   ): Promise<Array<{ job: Trabajo; estado: EstadoWorker }>> {
     const carpetas = await readdir(trabajos, { withFileTypes: true }).catch(error => {
       if (error.code === 'ENOENT') return [];
@@ -179,11 +206,40 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
         const job: Trabajo = JSON.parse(
           await readFile(join(trabajos, carpeta.name, 'job.json'), 'utf8')
         );
-        const estado: EstadoWorker = JSON.parse(
-          await readFile(join(trabajos, carpeta.name, 'execution.json'), 'utf8')
-        );
-        if (job.id === carpeta.name && job.propietario && PROCESOS_REPORTES.includes(job.proceso))
-          encontrados.push({ job, estado });
+        if (
+          job.id !== carpeta.name ||
+          !job.propietario ||
+          !PROCESOS_REPORTES.includes(job.proceso) ||
+          !/^\d{1,20}$/.test(job.documento) ||
+          !/^\d{1,20}$/.test(job.ingreso)
+        )
+          continue;
+        if (
+          propietario &&
+          (!job.propietario || !this.mismoPropietario(job.propietario, propietario))
+        )
+          continue;
+        let estado: EstadoWorker;
+        try {
+          estado = JSON.parse(
+            await readFile(join(trabajos, carpeta.name, 'execution.json'), 'utf8')
+          );
+          if (
+            !Array.isArray(estado.files) ||
+            ![
+              'queued',
+              'starting',
+              'running',
+              'complete',
+              'failed',
+              'prefactura-unavailable',
+            ].includes(estado.status)
+          )
+            estado = this.estadoPerdido(job);
+        } catch {
+          estado = this.estadoPerdido(job);
+        }
+        encontrados.push({ job, estado });
       } catch {
         /* Un archivo incompleto nunca se convierte en una solicitud ejecutable. */
       }
@@ -191,10 +247,109 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
     return encontrados;
   }
 
-  private async persistirCola(trabajos: string) {
+  private clave(job: Trabajo): string {
+    return JSON.stringify([
+      job.propietario.usuario,
+      job.propietario.contexto,
+      job.propietario.esDinamica,
+      job.documento,
+      job.ingreso,
+      job.proceso,
+    ]);
+  }
+
+  private compararSolicitudes(a: Trabajo, b: Trabajo): number {
+    return (
+      (a.secuenciaCola ?? 0) - (b.secuenciaCola ?? 0) ||
+      (Date.parse(a.createdAt) || 0) - (Date.parse(b.createdAt) || 0) ||
+      a.id.localeCompare(b.id)
+    );
+  }
+
+  private ultimos(registros: Array<{ job: Trabajo; estado: EstadoWorker }>) {
+    const porClave = new Map<string, { job: Trabajo; estado: EstadoWorker }>();
+    for (const registro of registros) {
+      if (registro.job.reemplazadoPor) continue;
+      const clave = this.clave(registro.job);
+      const anterior = porClave.get(clave);
+      if (!anterior || this.compararSolicitudes(registro.job, anterior.job) > 0)
+        porClave.set(clave, registro);
+    }
+    return [...porClave.values()];
+  }
+
+  private async vigente(job: Trabajo, trabajos: string): Promise<boolean> {
+    if (!job.proceso || job.reemplazadoPor) return false;
+    return (
+      this.ultimos(await this.registros(trabajos, job.propietario)).find(
+        registro => this.clave(registro.job) === this.clave(job)
+      )?.job.id === job.id
+    );
+  }
+
+  private async retirarAnteriores(
+    job: Trabajo,
+    estado: EstadoWorker,
+    disponibles: Set<string>,
+    soportesCompletos: boolean
+  ) {
+    if (!['complete', 'failed', 'prefactura-unavailable'].includes(estado.status)) return;
+    const ausenciaConfirmada =
+      estado.status === 'complete' &&
+      DOCUMENTOS_POR_PROCESO[job.proceso].every(
+        tipo =>
+          tipo === 'factura' ||
+          (tipo === 'soportes-requeridos' && soportesCompletos) ||
+          (tipo === 'historias-clinicas' &&
+            estado.notices?.some(
+              notice => notice.type === 'historias-sin-folios' && notice.admission === job.ingreso
+            )) ||
+          (tipo === 'enfermeria' &&
+            estado.notices?.some(
+              notice => notice.type === 'enfermeria-sin-notas' && notice.admission === job.ingreso
+            ))
+      );
+    if (!disponibles.size && !ausenciaConfirmada) return;
+    const { trabajos } = await this.ubicacion();
+    if (!(await this.vigente(job, trabajos))) return;
+    const raiz = await realpath(trabajos);
+    for (const anterior of await this.registros(trabajos, job.propietario)) {
+      if (
+        anterior.job.id === job.id ||
+        this.clave(anterior.job) !== this.clave(job) ||
+        this.compararSolicitudes(anterior.job, job) >= 0 ||
+        !['complete', 'failed', 'prefactura-unavailable'].includes(anterior.estado.status) ||
+        anterior.job.id === this.activo
+      )
+        continue;
+      try {
+        const carpeta = rutaArchivoPermitida(trabajos, anterior.job.id);
+        const real = await realpath(carpeta);
+        rutaArchivoPermitida(raiz, real);
+        const guardado: Trabajo = JSON.parse(await readFile(join(carpeta, 'job.json'), 'utf8'));
+        if (
+          guardado.id !== anterior.job.id ||
+          this.clave(guardado) !== this.clave(job) ||
+          !(await this.vigente(job, trabajos))
+        )
+          continue;
+        if (guardado.reemplazadoPor !== job.id)
+          await this.guardar(carpeta, 'job.json', { ...guardado, reemplazadoPor: job.id });
+        for (const entrada of await readdir(carpeta, { withFileTypes: true })) {
+          if (entrada.name === 'job.json' || entrada.name === 'execution.json') continue;
+          const destino = rutaArchivoPermitida(real, entrada.name);
+          await rm(destino, { recursive: entrada.isDirectory(), force: true });
+        }
+      } catch {
+        // El vigente ya está validado; una lectura posterior reintenta una limpieza bloqueada en Windows.
+      }
+    }
+  }
+
+  private async persistirCola(trabajos: string, pendientes = this.cola) {
     await this.guardar(trabajos, 'queue.json', {
       secuencia: this.secuenciaCola,
-      pendientes: this.cola,
+      pendientes,
       activo: this.activo ?? null,
     });
   }
@@ -244,7 +399,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
               );
           }
         }
-        this.cola = registros
+        this.cola = this.ultimos(registros)
           .filter(({ estado }) => estado.status === 'queued')
           .sort(
             (a, b) =>
@@ -362,6 +517,10 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
         continue;
       }
       const { job, estado } = registro;
+      if (!(await this.vigente(job, trabajos))) {
+        this.cola.shift();
+        continue;
+      }
       try {
         const consulta = await this.consultaClinica.consultar(job.documento, job.propietario);
         const ingreso = consulta.ingresos.find(
@@ -376,6 +535,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
           throw new BadRequestException(
             'El ingreso ya no está disponible para el proceso solicitado.'
           );
+        job.tipoIngreso = ingreso.tipoIngreso?.trim() || 'Desconocido';
       } catch (error) {
         await this.registrarFallo(
           job,
@@ -527,16 +687,31 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
 
   async reanudar(id: string, propietario: PropietarioReportes) {
     await this.inicializar();
-    const { job, estado } = await this.leer(id, propietario);
+    const { job, estado, disponibles, soportesCompletos } = await this.leer(id, propietario);
     if (!job.proceso)
       throw new ConflictException(
         'Los reportes anteriores son de consulta. Genera una nueva ejecución seleccionando el proceso.'
       );
     if (['queued', 'starting', 'running'].includes(estado.status))
       return this.respuesta(job, estado);
-    if (estado.status !== 'failed')
+    if (
+      estado.status !== 'failed' &&
+      !(
+        estado.status === 'complete' &&
+        this.respuesta(job, estado, disponibles, soportesCompletos).documentosPendientes.includes(
+          'soportes-requeridos'
+        )
+      )
+    )
       throw new ConflictException('Solo puedes reanudar una ejecución que se haya detenido.');
-    return this.crear(job.documento, job.ingreso, propietario, job.proceso, id);
+    return this.crear(
+      job.documento,
+      job.ingreso,
+      propietario,
+      job.proceso,
+      id,
+      job.tipoIngreso ?? 'Desconocido'
+    );
   }
 
   async crear(
@@ -544,7 +719,8 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
     ingreso: string,
     propietario: PropietarioReportes,
     proceso: ProcesoReportes,
-    reanudarId?: string
+    reanudarId?: string,
+    tipoIngreso = 'Desconocido'
   ) {
     if (!PROCESOS_REPORTES.includes(proceso))
       throw new BadRequestException('Selecciona un proceso de auditoría válido.');
@@ -557,7 +733,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
     await this.inicializar();
     const respuesta = await this.exclusivo(async () => {
       const { trabajos } = await this.ubicacion();
-      const registros = await this.registros(trabajos);
+      const registros = this.ultimos(await this.registros(trabajos));
       const duplicado = registros.find(
         ({ job, estado }) =>
           this.mismoPropietario(job.propietario, propietario) &&
@@ -581,7 +757,19 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
         throw new ConflictException(
           'La ejecución no corresponde al paciente, ingreso o proceso seleccionado.'
         );
-      if (anterior && anterior.estado.status !== 'failed')
+      if (
+        anterior &&
+        anterior.estado.status !== 'failed' &&
+        !(
+          anterior.estado.status === 'complete' &&
+          this.respuesta(
+            anterior.job,
+            anterior.estado,
+            anterior.disponibles,
+            anterior.soportesCompletos
+          ).documentosPendientes.includes('soportes-requeridos')
+        )
+      )
         throw new ConflictException('La ejecución ya se está procesando o terminó.');
       if (
         anterior &&
@@ -607,6 +795,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
           createdAt: new Date().toISOString(),
         }),
         loteId,
+        tipoIngreso: tipoIngreso.trim() || 'Desconocido',
         enColaDesde: new Date().toISOString(),
         secuenciaCola: ++this.secuenciaCola,
         reanudar: Boolean(anterior),
@@ -616,7 +805,6 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
       };
       const destino = join(trabajos, job.id);
       if (!anterior) await mkdir(destino);
-      await this.guardar(destino, 'job.json', job);
       const estado: EstadoWorker = {
         ...anterior?.estado,
         process: proceso,
@@ -629,9 +817,24 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
         files: anterior?.estado.files ?? [],
         failure: undefined,
       };
-      await this.guardar(destino, 'execution.json', estado);
+      try {
+        if (!anterior) await this.guardar(destino, 'execution.json', estado);
+        await this.persistirCola(trabajos, [...this.cola, job.id]);
+        await this.guardar(destino, 'job.json', job);
+        if (anterior) await this.guardar(destino, 'execution.json', estado);
+      } catch (error) {
+        if (anterior) {
+          await this.guardar(destino, 'job.json', anterior.job).catch(() => {});
+        } else {
+          const raiz = await realpath(trabajos);
+          const nuevo = await realpath(destino);
+          rutaArchivoPermitida(raiz, nuevo);
+          await rm(nuevo, { recursive: true, force: true }).catch(() => {});
+        }
+        await this.persistirCola(trabajos).catch(() => {});
+        throw error;
+      }
       this.cola.push(job.id);
-      await this.persistirCola(trabajos);
       return this.respuesta(job, estado);
     });
     this.programar();
@@ -670,6 +873,8 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
           destino,
           '--proceso',
           proceso,
+          '--tipo-ingreso',
+          job.tipoIngreso?.trim() || 'Desconocido',
           ...(anterior ? ['--reanudar'] : []),
         ],
         {
@@ -749,6 +954,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
               });
               await this.guardar(destino, `fallo-${Date.now()}.json`, failure);
             }
+            await this.leer(job.id, job.propietario).catch(() => {});
           } finally {
             await unlink(rutaBloqueo).catch(() => {});
             if (this.child === child) {
@@ -783,7 +989,8 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
   private respuesta(
     job: Trabajo,
     estado: EstadoWorker,
-    disponibles?: Set<string>
+    disponibles?: Set<string>,
+    soportesCompletos = false
   ): EjecucionReportes {
     const archivos = estado.files.flatMap((archivo, indice) =>
       archivo.superseded ||
@@ -810,6 +1017,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
             !estado.completedStages?.includes(tipo)
           )
             return true;
+          if (tipo === 'soportes-requeridos') return !soportesCompletos;
           const documentos = archivos.filter(archivo => archivo.tipo === tipo);
           if (
             documentos.some(
@@ -878,7 +1086,11 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
             ]
           : []
       ),
-      reanudable: Boolean(job.proceso && estado.status === 'failed'),
+      reanudable: Boolean(
+        job.proceso &&
+        (estado.status === 'failed' ||
+          (estado.status === 'complete' && documentosPendientes.includes('soportes-requeridos')))
+      ),
       ...(estado.pendingFailures?.length
         ? {
             fallasPendientes: estado.pendingFailures.map(failure => ({
@@ -922,6 +1134,97 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
     };
   }
 
+  private async validarSoportes(
+    carpeta: string,
+    job: Trabajo,
+    estado: EstadoWorker,
+    disponibles: Set<string>
+  ): Promise<boolean> {
+    if (!estado.completedStages?.includes('soportes-requeridos') || !estado.supportManifest)
+      return false;
+    try {
+      const descriptor = estado.supportManifest;
+      if (typeof descriptor.relativePath !== 'string' || !/^[a-f0-9]{64}$/.test(descriptor.sha256))
+        return false;
+      const ruta = await realpath(rutaArchivoPermitida(carpeta, descriptor.relativePath));
+      rutaArchivoPermitida(await realpath(carpeta), ruta);
+      const body = await readFile(ruta);
+      if (createHash('sha256').update(body).digest('hex') !== descriptor.sha256) return false;
+      const manifest = JSON.parse(body.toString('utf8'));
+      if (
+        manifest.admission !== job.ingreso ||
+        manifest.status !== 'complete' ||
+        !Array.isArray(manifest.supports) ||
+        !manifest.supports.length
+      )
+        return false;
+      let total = 0;
+      let paginas = 0;
+      for (const support of manifest.supports) {
+        if (
+          !Number.isSafeInteger(support.quantity) ||
+          support.quantity < 0 ||
+          !Array.isArray(support.files)
+        )
+          return false;
+        if (support.quantity === 0) {
+          if (support.status !== 'skipped' || support.files.length) return false;
+        } else {
+          if (support.status !== 'downloaded' || support.files.length !== support.quantity)
+            return false;
+          for (const file of support.files) {
+            if (
+              typeof file.file !== 'string' ||
+              !/^soporte-\d{3,}-adjunto-\d{3,}\.pdf$/.test(file.file) ||
+              !/^[a-f0-9]{64}$/.test(file.sha256) ||
+              !Number.isSafeInteger(file.size) ||
+              file.size < 1 ||
+              !Number.isSafeInteger(file.pages) ||
+              file.pages < 1
+            )
+              return false;
+            paginas += file.pages;
+          }
+        }
+        total += support.quantity;
+      }
+      if (!Number.isSafeInteger(total) || !Number.isSafeInteger(paginas)) return false;
+      const publicados = estado.files
+        .map((file, index) => ({ file, index }))
+        .filter(({ file }) => file.kind === 'soportes-requeridos' && !file.superseded);
+      if (total === 0) return !manifest.unified && !publicados.length;
+      const unified = manifest.unified;
+      if (
+        !unified ||
+        unified.file !== 'soportes-unificado.pdf' ||
+        !/^[a-f0-9]{64}$/.test(unified.sha256) ||
+        !Number.isSafeInteger(unified.size) ||
+        unified.size < 1 ||
+        unified.pages !== paginas ||
+        !Number.isFinite(Date.parse(unified.savedAt))
+      )
+        return false;
+      const expectedPath = resolve(dirname(ruta), unified.file);
+      const expectedRealPath = await realpath(expectedPath);
+      for (const { file, index } of publicados) {
+        if (
+          disponibles.has(String(index)) &&
+          file.unified === true &&
+          file.group === 1 &&
+          file.totalGroups === total &&
+          file.bytes === unified.size &&
+          file.pages === unified.pages &&
+          file.sha256 === unified.sha256 &&
+          (await realpath(rutaArchivoPermitida(carpeta, file.relativePath))) === expectedRealPath
+        )
+          return true;
+      }
+      return false;
+    } catch {
+      return false;
+    }
+  }
+
   private async leer(id: string, propietario: PropietarioReportes) {
     if (!JOB_ID.test(id)) throw new NotFoundException();
     const { trabajos } = await this.ubicacion();
@@ -932,23 +1235,28 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
     } catch {
       throw new NotFoundException();
     }
-    if (job.proceso && !PROCESOS_REPORTES.includes(job.proceso)) throw new NotFoundException();
+    if (job.id !== id || !job.propietario || !PROCESOS_REPORTES.includes(job.proceso))
+      throw new NotFoundException();
     if (
       job.propietario.usuario !== propietario.usuario ||
       job.propietario.contexto !== propietario.contexto ||
       job.propietario.esDinamica !== propietario.esDinamica
     )
       throw new NotFoundException();
+    if (!(await this.vigente(job, trabajos)))
+      throw new NotFoundException('La solicitud fue reemplazada o no tiene un proceso vigente.');
     let estado: EstadoWorker;
     try {
       estado = JSON.parse(await readFile(join(carpeta, 'execution.json'), 'utf8'));
+      if (
+        !Array.isArray(estado.files) ||
+        !['queued', 'starting', 'running', 'complete', 'failed', 'prefactura-unavailable'].includes(
+          estado.status
+        )
+      )
+        estado = this.estadoPerdido(job);
     } catch {
-      estado = {
-        status: 'starting',
-        message: 'Preparando el navegador.',
-        updatedAt: job.createdAt,
-        files: [],
-      };
+      estado = this.estadoPerdido(job);
     }
     // Recupera los avisos que las ejecuciones anteriores guardaban solo junto a la prefactura.
     if (
@@ -978,60 +1286,6 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
           );
       } catch {
         /* La ausencia de avisos antiguos no invalida una ejecución ni sus PDF. */
-      }
-    }
-    // Presenta la ausencia de folios de versiones anteriores como aviso, sin modificar su archivo histórico.
-    const esSinFolios = (fallo: EstadoWorker['failure']) =>
-      fallo?.stage === 'historias-clinicas' && fallo.message === 'Paciente sin folios';
-    const sinFolios = [
-      ...(estado.failures ?? []),
-      ...(estado.pendingFailures ?? []),
-      estado.failure,
-    ].filter(esSinFolios);
-    if (!job.proceso && sinFolios.length) {
-      estado.notices ??= [];
-      if (!estado.notices.some(aviso => aviso.type === 'historias-sin-folios')) {
-        estado.notices.push({
-          type: 'historias-sin-folios',
-          admission: job.ingreso,
-          occurredAt: sinFolios[0]!.occurredAt,
-          message: 'Paciente sin folios',
-          orders: [],
-        });
-      }
-      const pendientes =
-        estado.pendingFailures ?? (estado.failure ? [estado.failure] : (estado.failures ?? []));
-      estado.pendingFailures = pendientes.filter(fallo => !esSinFolios(fallo));
-      estado.failures = estado.failures?.filter(fallo => !esSinFolios(fallo));
-      if (esSinFolios(estado.failure)) estado.failure = undefined;
-      if (estado.status === 'failed' && !estado.failure && !estado.pendingFailures.length) {
-        let enfermeriaCompleta = estado.notices.some(
-          aviso => aviso.type === 'enfermeria-sin-notas'
-        );
-        for (const archivo of estado.files.filter(
-          archivo => archivo.kind === 'enfermeria' && !archivo.superseded
-        )) {
-          try {
-            await this.rutaArchivo(carpeta, archivo);
-            enfermeriaCompleta = true;
-          } catch {
-            /* Permite reanudar documentos ausentes. */
-          }
-        }
-        if (enfermeriaCompleta) {
-          const disponibles = estado.files.filter(archivo => !archivo.superseded).length;
-          estado.status = 'complete';
-          estado.message = `Paciente sin folios. ${disponibles} PDF disponibles.`;
-          estado.progress = {
-            stage: 'completo',
-            completed: disponibles,
-            total: disponibles,
-            current: null,
-            generalPercentage: 100,
-          };
-        } else {
-          estado.message = 'Quedan reportes de enfermería pendientes de generar.';
-        }
       }
     }
     // Mientras close guarda el resultado final, conservar el estado anterior evita
@@ -1101,14 +1355,16 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
       };
       await this.guardar(carpeta, 'execution.json', estado);
     }
-    return { job, estado, carpeta, disponibles };
+    const soportesCompletos = await this.validarSoportes(carpeta, job, estado, disponibles);
+    await this.retirarAnteriores(job, estado, disponibles, soportesCompletos);
+    return { job, estado, carpeta, disponibles, soportesCompletos };
   }
 
   async consultar(id: string, propietario: PropietarioReportes) {
     await this.inicializar();
     this.programar();
-    const { job, estado, disponibles } = await this.leer(id, propietario);
-    return this.respuesta(job, estado, disponibles);
+    const { job, estado, disponibles, soportesCompletos } = await this.leer(id, propietario);
+    return this.respuesta(job, estado, disponibles, soportesCompletos);
   }
 
   async consultarCola(propietario: PropietarioReportes): Promise<ColaReportes> {
@@ -1116,7 +1372,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
     this.programar();
     return this.exclusivo(async () => {
       const { trabajos } = await this.ubicacion();
-      const registros = (await this.registros(trabajos)).filter(
+      const registros = this.ultimos(await this.registros(trabajos, propietario)).filter(
         ({ job }) => job.loteId && this.mismoPropietario(job.propietario, propietario)
       );
       const porOrden = (a: { job: Trabajo }, b: { job: Trabajo }) =>
@@ -1130,8 +1386,8 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
         .sort((a, b) => (a.job.secuenciaCola ?? 0) - (b.job.secuenciaCola ?? 0));
       const lista: EjecucionReportes[] = [];
       for (const { job } of lote) {
-        const { estado, disponibles } = await this.leer(job.id, propietario);
-        lista.push(this.respuesta(job, estado, disponibles));
+        const { estado, disponibles, soportesCompletos } = await this.leer(job.id, propietario);
+        lista.push(this.respuesta(job, estado, disponibles, soportesCompletos));
       }
       const procesados = lista.filter(
         trabajo => !['queued', 'starting', 'running'].includes(trabajo.estado)
@@ -1204,6 +1460,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
     };
     const porPagina = 10;
     const vacio = () => ({ reportes: [], total: 0, pagina, porPagina });
+    if (proceso === 'anteriores') return vacio();
     let trabajos: string;
     try {
       ({ trabajos } = await this.ubicacion());
@@ -1211,46 +1468,26 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
       if (error instanceof ServiceUnavailableException) return vacio();
       throw error;
     }
-    let carpetas;
-    try {
-      carpetas = await readdir(trabajos, { withFileTypes: true });
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === 'ENOENT') return vacio();
-      throw new ServiceUnavailableException(
-        'No fue posible consultar los reportes generados. Intenta nuevamente.'
-      );
-    }
     const terminales = ['complete', 'failed', 'prefactura-unavailable'];
     const reportes: EjecucionReportes[] = [];
-    for (const carpeta of carpetas) {
-      if (!carpeta.isDirectory() || !JOB_ID.test(carpeta.name)) continue;
-      // El propietario se comprueba antes de leer o validar cualquier estado o PDF ajeno.
-      let job: Trabajo;
-      let estado: EstadoWorker;
-      try {
-        job = JSON.parse(await readFile(join(trabajos, carpeta.name, 'job.json'), 'utf8'));
-        if (
-          job.id !== carpeta.name ||
-          !job.propietario ||
-          !this.mismoPropietario(job.propietario, propietario)
-        )
-          continue;
-        estado = JSON.parse(await readFile(join(trabajos, carpeta.name, 'execution.json'), 'utf8'));
-      } catch {
-        continue;
-      }
+    for (const { job, estado } of this.ultimos(await this.registros(trabajos, propietario))) {
       if (documento && !String(job.documento ?? '').includes(documento)) continue;
       if (ingreso && !String(job.ingreso ?? '').includes(ingreso)) continue;
       if (proceso && (job.proceso ?? 'anteriores') !== proceso) continue;
       if (!terminales.includes(estado.status)) continue;
       let contenido: Awaited<ReturnType<EjecucionesReportesImpl['leer']>>;
       try {
-        contenido = await this.leer(carpeta.name, propietario);
+        contenido = await this.leer(job.id, propietario);
       } catch (error) {
         if (error instanceof NotFoundException) continue;
         throw error;
       }
-      const reporte = this.respuesta(contenido.job, contenido.estado, contenido.disponibles);
+      const reporte = this.respuesta(
+        contenido.job,
+        contenido.estado,
+        contenido.disponibles,
+        contenido.soportesCompletos
+      );
       // Una reanudación concurrente puede cambiar a queued durante esta lectura.
       if (!terminales.includes(reporte.estado) || !reporte.archivos.length) continue;
       if (
@@ -1296,9 +1533,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
     propietario: PropietarioReportes,
     proceso: ProcesoReportes | null
   ): Promise<EjecucionReportes[]> {
-    const encontrados = new Map<string, EjecucionReportes>();
-    const pendientes = new Map<string, EjecucionReportes>();
-    if (!ingresos.length) return [];
+    if (!ingresos.length || !proceso) return [];
     let trabajos: string;
     try {
       ({ trabajos } = await this.ubicacion());
@@ -1306,102 +1541,27 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
       if (error instanceof ServiceUnavailableException) return [];
       throw error;
     }
-    let carpetas;
-    try {
-      carpetas = await readdir(trabajos, { withFileTypes: true });
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code === 'ENOENT') return [];
-      throw new ServiceUnavailableException(
-        'No fue posible consultar los reportes guardados. Intenta nuevamente.'
-      );
-    }
     const permitidos = new Set(ingresos);
-    for (const carpeta of carpetas) {
-      if (!carpeta.isDirectory() || !JOB_ID.test(carpeta.name)) continue;
-      let contenido: Awaited<ReturnType<EjecucionesReportesImpl['leer']>>;
-      try {
-        contenido = await this.leer(carpeta.name, propietario);
-      } catch (error) {
-        if (error instanceof NotFoundException) continue;
-        throw error;
-      }
-      const { job, estado } = contenido;
-      if (
-        job.documento !== documento ||
-        !permitidos.has(job.ingreso) ||
-        (job.proceso ?? null) !== proceso
-      )
+    const reportes: EjecucionReportes[] = [];
+    for (const { job } of this.ultimos(await this.registros(trabajos, propietario))) {
+      if (job.documento !== documento || !permitidos.has(job.ingreso) || job.proceso !== proceso)
         continue;
-      const reporte = this.respuesta(job, estado, contenido.disponibles);
-      const esperados = estado.files.filter(
-        archivo =>
-          !archivo.superseded &&
-          (!job.proceso || DOCUMENTOS_POR_PROCESO[job.proceso].includes(archivo.kind))
-      ).length;
-      if (reporte.estado === 'complete' && reporte.archivos.length !== esperados) {
-        const failure = {
-          occurredAt: new Date().toISOString(),
-          message: 'Algunos PDF guardados ya no están disponibles.',
-          step: 'Verificando los PDF guardados.',
-          stage: estado.progress?.stage ?? 'finalizacion',
-          group: null,
-          totalGroups: null,
-          details: 'Reanuda para descargar los grupos ausentes o reconstruir el PDF unificado.',
-        };
-        await this.guardar(contenido.carpeta, 'execution.json', {
-          ...estado,
-          status: 'failed',
-          failure,
-          failures: [...(estado.failures ?? []), failure],
-          pendingFailures: [...(estado.pendingFailures ?? []), failure],
-        });
-        reporte.estado = 'failed';
-        reporte.reanudable = Boolean(job.proceso);
-        reporte.fallo = {
-          fecha: failure.occurredAt,
-          mensaje: failure.message,
-          paso: failure.step,
-          etapa: failure.stage,
-          grupo: null,
-          totalGrupos: null,
-          detalle: failure.details,
-        };
-        reporte.mensaje =
-          'Algunos PDF guardados ya no están disponibles. Puedes consultar los archivos conservados.';
-        if (reporte.progreso)
-          reporte.progreso = {
-            etapa: 'completo',
-            completados: reporte.archivos.length,
-            total: esperados,
-            grupoActual: null,
-          };
-      }
-      if (
-        (['failed', 'prefactura-unavailable'].includes(reporte.estado) ||
-          (proceso && reporte.estado === 'complete' && !reporte.disponibleParaProceso)) &&
-        (!pendientes.has(job.ingreso) || pendientes.get(job.ingreso).createdAt < reporte.createdAt)
-      )
-        pendientes.set(job.ingreso, reporte);
-      const anterior = encontrados.get(job.ingreso);
-      // Una generación fallida posterior no oculta una descarga completa anterior.
-      const prioridad = (valor: EjecucionReportes) =>
-        Number(valor.disponibleParaProceso) * 2 + Number(valor.estado === 'complete');
-      if (
-        !anterior ||
-        prioridad(reporte) > prioridad(anterior) ||
-        (prioridad(reporte) === prioridad(anterior) && reporte.createdAt > anterior.createdAt)
-      ) {
-        encontrados.set(job.ingreso, reporte);
+      try {
+        const contenido = await this.leer(job.id, propietario);
+        reportes.push(
+          this.respuesta(
+            contenido.job,
+            contenido.estado,
+            contenido.disponibles,
+            contenido.soportesCompletos
+          )
+        );
+      } catch (error) {
+        if (!(error instanceof NotFoundException)) throw error;
       }
     }
-    return [...encontrados.values()].map(reporte => {
-      const pendiente = pendientes.get(reporte.ingreso);
-      return pendiente && pendiente.id !== reporte.id && pendiente.createdAt > reporte.createdAt
-        ? { ...reporte, pendiente }
-        : reporte;
-    });
+    return reportes;
   }
-
   private async rutaArchivo(carpeta: string, archivo: ArchivoWorker, validarIntegridad = false) {
     const ruta = await realpath(rutaArchivoPermitida(carpeta, archivo.relativePath));
     rutaArchivoPermitida(await realpath(carpeta), ruta);
@@ -1471,7 +1631,9 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
           ? 'prefactura'
           : archivo.kind === 'enfermeria'
             ? 'enfermeria'
-            : 'historias-clinicas';
+            : archivo.kind === 'soportes-requeridos'
+              ? 'soportes-requeridos'
+              : 'historias-clinicas';
       zip.file(
         `${job.documento}/${job.ingreso}/${tipo}/${indice + 1}-${basename(archivo.name)}`,
         entrada

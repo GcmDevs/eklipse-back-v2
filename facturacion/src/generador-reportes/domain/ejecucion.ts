@@ -4,7 +4,7 @@ export interface ArchivoReporte {
   id: string;
   nombre: string;
   bytes: number;
-  tipo: 'historias-clinicas' | 'enfermeria' | 'prefactura';
+  tipo: 'historias-clinicas' | 'enfermeria' | 'prefactura' | 'soportes-requeridos';
   grupo: number;
   totalGrupos: number;
   unificado?: boolean;
@@ -17,6 +17,7 @@ export interface ProgresoReportes {
     | 'historias-clinicas'
     | 'enfermeria'
     | 'prefactura'
+    | 'soportes-requeridos'
     | 'finalizacion'
     | 'completo';
   completados: number;
@@ -49,7 +50,6 @@ export interface EjecucionReportes {
   avisos?: AvisoReporte[];
   fallas?: NonNullable<EjecucionReportes['fallo']>[];
   fallasPendientes?: NonNullable<EjecucionReportes['fallo']>[];
-  pendiente?: EjecucionReportes;
   reanudable?: boolean;
   fallo?: {
     fecha: string;

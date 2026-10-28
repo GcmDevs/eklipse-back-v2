@@ -15,11 +15,13 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
   let servicio: EjecucionesReportesImpl;
   let consultaClinica: { consultar: jest.Mock };
   let procesosExternos: ChildProcess[];
+  let ordenGuardado: number;
   const original = { ...process.env };
   const propietario = { usuario: 7, contexto: 'ALTACENTRO', esDinamica: true };
 
   beforeEach(async () => {
     procesosExternos = [];
+    ordenGuardado = 0;
     carpeta = await mkdtemp(join(tmpdir(), 'eklipse-reportes-'));
     process.env.EKLIPSE_AUTOMATION_DIR = carpeta;
     delete process.env.EKLIPSE_AUTOMATION_NODE;
@@ -49,6 +51,7 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
           consecutivo,
           estado: 'Registrado',
           activo: true,
+          tipoIngreso: 'Urgencias',
         })),
       })),
     };
@@ -80,8 +83,10 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
 
   async function guardado(opciones: {
     proceso?: ProcesoReportes;
-    etapas?: Array<'historias-clinicas' | 'enfermeria' | 'prefactura'>;
-    tipos?: Array<'historias-clinicas' | 'enfermeria' | 'prefactura'>;
+    legacy?: boolean;
+    etapas?: Array<'historias-clinicas' | 'enfermeria' | 'prefactura' | 'soportes-requeridos'>;
+    tipos?: Array<'historias-clinicas' | 'enfermeria' | 'prefactura' | 'soportes-requeridos'>;
+    soportes?: boolean;
     documento?: string;
     ingreso?: string;
     estado?: string;
@@ -99,6 +104,7 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     };
   }) {
     const id = randomUUID();
+    const proceso = opciones.legacy ? undefined : (opciones.proceso ?? 'pre-envio');
     const destino = join(carpeta, 'artifacts/eklipse-jobs', id);
     await mkdir(destino, { recursive: true });
     await writeFile(
@@ -107,7 +113,8 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
         id,
         documento: opciones.documento ?? '001234',
         ingreso: opciones.ingreso ?? '20',
-        proceso: opciones.proceso,
+        proceso,
+        secuenciaCola: ++ordenGuardado,
         loteId: opciones.loteId,
         propietario: opciones.propietario ?? propietario,
         createdAt: opciones.fecha ?? '2026-10-09T12:00:00Z',
@@ -118,8 +125,8 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
       join(destino, 'execution.json'),
       JSON.stringify({
         status: opciones.estado ?? 'complete',
-        process: opciones.proceso,
-        completedStages: opciones.etapas ?? (opciones.proceso ? ['historias-clinicas'] : undefined),
+        process: proceso,
+        completedStages: opciones.etapas ?? (proceso ? ['historias-clinicas'] : undefined),
         message: 'Reportes guardados',
         updatedAt: opciones.actualizacion ?? '2026-10-09T12:00:00Z',
         progress: opciones.progreso,
@@ -135,6 +142,45 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
       })
     );
     for (const nombre of archivos) await writeFile(join(destino, nombre), '%PDF-1.7 test');
+    if (opciones.soportes !== false && ['pre-envio', 'conciliacion'].includes(proceso)) {
+      const manifestFolder = join(
+        destino,
+        'reportes',
+        opciones.documento ?? '001234',
+        opciones.ingreso ?? '20',
+        'soportes'
+      );
+      await mkdir(manifestFolder, { recursive: true });
+      const manifest = {
+        admission: opciones.ingreso ?? '20',
+        status: 'complete',
+        supports: [
+          {
+            plan: 'Plan sintético',
+            requirement: 'Sin adjuntos',
+            quantity: 0,
+            status: 'skipped',
+            files: [],
+          },
+        ],
+      };
+      const body = JSON.stringify(manifest);
+      await writeFile(join(manifestFolder, 'manifest.json'), body);
+      const rutaEstado = join(destino, 'execution.json');
+      const state = JSON.parse(await readFile(rutaEstado, 'utf8'));
+      state.completedStages = [...(state.completedStages ?? []), 'soportes-requeridos'];
+      state.supportManifest = {
+        relativePath: join(
+          'reportes',
+          opciones.documento ?? '001234',
+          opciones.ingreso ?? '20',
+          'soportes',
+          'manifest.json'
+        ),
+        sha256: createHash('sha256').update(body).digest('hex'),
+      };
+      await writeFile(rutaEstado, JSON.stringify(state));
+    }
     return { id, destino };
   }
 
@@ -145,8 +191,238 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     await (servicio as any).mutex;
   }
 
-  it('el historial incluye todos los lotes y tipos propios con PDF, incluidos anteriores y parciales, sin tocar la cola', async () => {
+  async function cambiarManifestSoportes(
+    job: { destino: string },
+    cambiar: (manifest: any, state: any) => void
+  ) {
+    const rutaEstado = join(job.destino, 'execution.json');
+    const state = JSON.parse(await readFile(rutaEstado, 'utf8'));
+    const rutaManifest = join(job.destino, state.supportManifest.relativePath);
+    const manifest = JSON.parse(await readFile(rutaManifest, 'utf8'));
+    cambiar(manifest, state);
+    const body = JSON.stringify(manifest);
+    await writeFile(rutaManifest, body);
+    state.supportManifest.sha256 = createHash('sha256').update(body).digest('hex');
+    await writeFile(rutaEstado, JSON.stringify(state));
+  }
+
+  async function preenvio(opciones: { soportes?: boolean } = {}) {
+    return guardado({
+      proceso: 'pre-envio',
+      archivos: ['historia.pdf', 'notas.pdf', 'prefactura.pdf'],
+      tipos: ['historias-clinicas', 'enfermeria', 'prefactura'],
+      etapas: ['historias-clinicas', 'enfermeria', 'prefactura'],
+      ...opciones,
+    });
+  }
+
+  it('acepta soportes sin adjuntos solo con etapa completa y manifiesto válido, sin crear un PDF ficticio', async () => {
+    const job = await preenvio();
+    expect(await servicio.consultar(job.id, propietario)).toMatchObject({
+      disponibleParaProceso: true,
+      documentosPendientes: [],
+      reanudable: false,
+    });
+    expect((await servicio.consultar(job.id, propietario)).archivos).toHaveLength(3);
+    const sinEvidencia = await preenvio({ soportes: false });
+    expect(await servicio.consultar(sinEvidencia.id, propietario)).toMatchObject({
+      estado: 'complete',
+      disponibleParaProceso: false,
+      documentosPendientes: ['soportes-requeridos'],
+      reanudable: true,
+    });
+  });
+
+  it.each([
+    'checksum',
+    'ingreso',
+    'estado',
+    'vacío',
+    'cantidad',
+    'sin etapa',
+    'ruta',
+    'cero con archivos',
+  ] as const)('rechaza evidencia inválida de soportes: %s', async modo => {
+    const job = await preenvio();
+    expect((await servicio.consultar(job.id, propietario)).disponibleParaProceso).toBe(true);
+    if (modo === 'checksum') {
+      const state = JSON.parse(await readFile(join(job.destino, 'execution.json'), 'utf8'));
+      await writeFile(join(job.destino, state.supportManifest.relativePath), '{}');
+    } else
+      await cambiarManifestSoportes(job, (manifest, state) => {
+        if (modo === 'ingreso') manifest.admission = '999';
+        if (modo === 'estado') manifest.status = 'failed';
+        if (modo === 'vacío') manifest.supports = [];
+        if (modo === 'cantidad') {
+          manifest.supports[0].quantity = 1;
+          manifest.supports[0].status = 'downloaded';
+        }
+        if (modo === 'sin etapa')
+          state.completedStages = state.completedStages.filter(
+            stage => stage !== 'soportes-requeridos'
+          );
+        if (modo === 'ruta') state.supportManifest.relativePath = '../manifest-ajeno.json';
+        if (modo === 'cero con archivos')
+          manifest.supports[0].files = [{ file: 'soporte-001-adjunto-001.pdf' }];
+      });
+    expect(await servicio.consultar(job.id, propietario)).toMatchObject({
+      disponibleParaProceso: false,
+      documentosPendientes: ['soportes-requeridos'],
+      reanudable: true,
+    });
+    expect((await servicio.consultar(job.id, propietario)).archivos).toHaveLength(3);
+  });
+
+  it('publica el PDF de soportes unificado en listado, filtros y ZIP conservando sus originales', async () => {
+    const job = await preenvio();
+    const state = JSON.parse(await readFile(join(job.destino, 'execution.json'), 'utf8'));
+    const relativeFolder = join('reportes', '001234', '20', 'soportes-requeridos', 'soportes');
+    await mkdir(join(job.destino, relativeFolder), { recursive: true });
+    await writeFile(
+      join(job.destino, relativeFolder, 'manifest.json'),
+      await readFile(join(job.destino, state.supportManifest.relativePath))
+    );
+    state.supportManifest.relativePath = join(relativeFolder, 'manifest.json');
+    const body = '%PDF-1.7 test';
+    const sha256 = createHash('sha256').update(body).digest('hex');
+    await writeFile(join(job.destino, relativeFolder, 'soportes-unificado.pdf'), body);
+    const originals = ['soporte-001-adjunto-001.pdf', 'soporte-001-adjunto-002.pdf'];
+    for (const file of originals) await writeFile(join(job.destino, relativeFolder, file), body);
+    state.files.push({
+      name: 'soportes-unificado.pdf',
+      relativePath: join(relativeFolder, 'soportes-unificado.pdf'),
+      bytes: Buffer.byteLength(body),
+      sha256,
+      group: 1,
+      totalGroups: 2,
+      kind: 'soportes-requeridos',
+      unified: true,
+      pages: 2,
+    });
+    for (const [index, file] of originals.entries())
+      state.files.push({
+        name: file,
+        relativePath: join(relativeFolder, file),
+        bytes: Buffer.byteLength(body),
+        sha256,
+        group: index + 1,
+        totalGroups: 2,
+        kind: 'soportes-requeridos',
+        superseded: true,
+      });
+    await writeFile(join(job.destino, 'execution.json'), JSON.stringify(state));
+    await cambiarManifestSoportes(job, manifest => {
+      manifest.supports = [
+        {
+          plan: 'Plan sintético',
+          requirement: 'Autorización',
+          quantity: 2,
+          status: 'downloaded',
+          files: originals.map(file => ({
+            attachment: file,
+            file,
+            sha256,
+            size: Buffer.byteLength(body),
+            pages: 1,
+          })),
+        },
+      ];
+      manifest.unified = {
+        file: 'soportes-unificado.pdf',
+        sha256,
+        size: Buffer.byteLength(body),
+        pages: 2,
+        savedAt: new Date().toISOString(),
+      };
+    });
+    const result = await servicio.consultar(job.id, propietario);
+    expect(result).toMatchObject({ disponibleParaProceso: true, documentosPendientes: [] });
+    expect(result.archivos.filter(file => file.tipo === 'soportes-requeridos')).toEqual([
+      expect.objectContaining({
+        id: '3',
+        nombre: 'soportes-unificado.pdf',
+        unificado: true,
+        paginas: 2,
+      }),
+    ]);
+    expect((await servicio.archivo(job.id, '4', propietario)).nombre).toBe(originals[0]);
+    const historial = await servicio.listarGenerados(propietario, 1, { archivo: 'soportes' });
+    expect(historial.reportes.map(file => file.id)).toEqual([job.id]);
+    const resultado = await servicio.archivos(job.id, propietario);
+    const bloques: Buffer[] = [];
+    for await (const bloque of resultado.contenido) bloques.push(Buffer.from(bloque));
+    const zip = await JSZip.loadAsync(Buffer.concat(bloques));
+    expect(zip.file('001234/20/soportes-requeridos/4-soportes-unificado.pdf')).not.toBeNull();
+    expect(Object.keys(zip.files).some(file => file.includes('soporte-001-adjunto'))).toBe(false);
+    await cambiarManifestSoportes(job, manifest => {
+      manifest.unified.pages = 1;
+    });
+    expect((await servicio.consultar(job.id, propietario)).documentosPendientes).toEqual([
+      'soportes-requeridos',
+    ]);
+  });
+
+  it('reanuda una extracción completa sin soportes y no reintenta automáticamente la factura pendiente', async () => {
+    const job = await preenvio({ soportes: false });
+    const resumed = await servicio.reanudar(job.id, propietario);
+    expect(resumed).toMatchObject({ id: job.id, estado: 'queued' });
+    expect(await readFile(join(job.destino, 'historia.pdf'), 'utf8')).toContain('%PDF');
+    await esperar(job.id, 'complete');
+    await esperarCierre();
+    const conciliacion = await guardado({
+      proceso: 'conciliacion',
+      archivos: ['historia.pdf', 'notas.pdf'],
+      tipos: ['historias-clinicas', 'enfermeria'],
+      etapas: ['historias-clinicas', 'enfermeria'],
+    });
+    expect(await servicio.consultar(conciliacion.id, propietario)).toMatchObject({
+      documentosPendientes: ['factura'],
+      reanudable: false,
+    });
+    await expect(servicio.reanudar(conciliacion.id, propietario)).rejects.toBeInstanceOf(
+      ConflictException
+    );
+  });
+
+  it('actualiza el tipo de ingreso real al comenzar el turno y lo pasa explícito al worker', async () => {
+    consultaClinica.consultar.mockImplementation(async documento => ({
+      paciente: { documento },
+      ingresos: [
+        {
+          consecutivo: 20,
+          estado: 'Registrado',
+          activo: true,
+          tipoIngreso: 'Hospitalización de Urgencias',
+        },
+      ],
+    }));
+    await writeFile(
+      join(carpeta, 'src/worker.ts'),
+      `
+      const fs = require('node:fs/promises'), path = require('node:path');
+      const folder = process.argv[process.argv.indexOf('--carpeta') + 1];
+      fs.writeFile(path.join(folder, 'execution.json'), JSON.stringify({ process: 'concurrente', completedStages: [], status: 'complete', files: [], message: process.argv[process.argv.indexOf('--tipo-ingreso') + 1], updatedAt: new Date().toISOString() }));
+    `
+    );
+    const job = await servicio.crear(
+      '001234',
+      '20',
+      propietario,
+      'concurrente',
+      undefined,
+      'Consulta Externa'
+    );
+    expect((await esperar(job.id, 'complete')).mensaje).toBe('Hospitalización de Urgencias');
+    expect(
+      JSON.parse(
+        await readFile(join(carpeta, 'artifacts/eklipse-jobs', job.id, 'job.json'), 'utf8')
+      ).tipoIngreso
+    ).toBe('Hospitalización de Urgencias');
+  });
+
+  it('el historial muestra vigentes propios con PDF y oculta legacy sin tocar la cola', async () => {
     const anterior = await guardado({
+      legacy: true,
       archivos: ['historia.pdf', 'notas.pdf', 'prefactura.pdf'],
       tipos: ['historias-clinicas', 'enfermeria', 'prefactura'],
       actualizacion: '2026-10-08T12:00:00Z',
@@ -165,35 +441,27 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     });
     const sinPrefactura = await guardado({
       proceso: 'pre-envio',
+      ingreso: '21',
       estado: 'prefactura-unavailable',
       actualizacion: '2026-10-09T12:00:00Z',
     });
     await guardado({ propietario: { ...propietario, usuario: 8 } });
     await guardado({ propietario: { ...propietario, contexto: 'SANJUAN' } });
     await guardado({ propietario: { ...propietario, esDinamica: false } });
-    await guardado({ estado: 'failed', archivos: [] });
+    await guardado({ estado: 'failed', archivos: [], ingreso: '22' });
     const activos = [];
-    for (const estado of ['queued', 'starting', 'running'])
-      activos.push(await guardado({ proceso: 'concurrente', estado }));
+    for (const [index, estado] of ['queued', 'starting', 'running'].entries())
+      activos.push(await guardado({ proceso: 'concurrente', estado, ingreso: String(30 + index) }));
     const inicializar = jest.spyOn(servicio as any, 'inicializar');
     const programar = jest.spyOn(servicio as any, 'programar');
     const historial = await servicio.listarGenerados(propietario);
-    expect(historial).toMatchObject({ total: 4, pagina: 1, porPagina: 10 });
+    expect(historial).toMatchObject({ total: 3, pagina: 1, porPagina: 10 });
     expect(historial.reportes.map(reporte => reporte.id)).toEqual([
       parcial.id,
       completo.id,
       sinPrefactura.id,
-      anterior.id,
     ]);
-    expect(historial.reportes.find(reporte => reporte.id === anterior.id)).toMatchObject({
-      proceso: undefined,
-      reanudable: false,
-    });
-    expect(
-      historial.reportes
-        .find(reporte => reporte.id === anterior.id)
-        ?.archivos.map(archivo => archivo.tipo)
-    ).toEqual(['historias-clinicas', 'enfermeria', 'prefactura']);
+    expect(historial.reportes.some(reporte => reporte.id === anterior.id)).toBe(false);
     expect(inicializar).not.toHaveBeenCalled();
     expect(programar).not.toHaveBeenCalled();
     expect(consultaClinica.consultar).not.toHaveBeenCalled();
@@ -212,6 +480,7 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
       guardados.push(
         await guardado({
           proceso: i % 2 ? 'concurrente' : undefined,
+          ingreso: String(100 + i),
           actualizacion: new Date(Date.UTC(2026, 9, 27, 0, i)).toISOString(),
         })
       );
@@ -260,7 +529,7 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
 
   it('busca por proceso y archivo sin distinguir mayúsculas o tildes y admite palabras combinadas', async () => {
     const cuenta = await guardado({ proceso: 'conciliacion', archivos: ['NOTAS-ENFERMERÍA.pdf'] });
-    const anterior = await guardado({ documento: '009999', archivos: ['HC-antigua.pdf'] });
+    await guardado({ documento: '009999', archivos: ['HC-antigua.pdf'], legacy: true });
     for (const busqueda of [
       'CONCILIACIÓN',
       'cuentas MÉDICAS',
@@ -277,7 +546,7 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
       (await servicio.listarGenerados(propietario, 1, 'anteriores antigua')).reportes.map(
         reporte => reporte.id
       )
-    ).toEqual([anterior.id]);
+    ).toEqual([]);
   });
 
   it('combina filtros independientes con coincidencias parciales y proceso exacto en el historial propio', async () => {
@@ -300,6 +569,7 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
       archivos: ['HC.pdf'],
     });
     const anterior = await guardado({
+      legacy: true,
       documento: '001234',
       ingreso: '00921160',
       archivos: ['HC-antigua.pdf'],
@@ -325,7 +595,7 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
       (await servicio.listarGenerados(propietario, 1, { proceso: 'anteriores' })).reportes.map(
         reporte => reporte.id
       )
-    ).toEqual([anterior.id]);
+    ).toEqual([]);
     expect(
       (
         await servicio.listarGenerados(propietario, 1, {
@@ -342,7 +612,7 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
         })
       ).total
     ).toBe(0);
-    expect((await servicio.listarGenerados(propietario, 1, {})).total).toBe(4);
+    expect((await servicio.listarGenerados(propietario, 1, {})).total).toBe(3);
   });
 
   it('aplica los filtros por campo antes de paginar todos los resultados', async () => {
@@ -389,9 +659,9 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
       proceso: 'concurrente',
       archivos: ['borrado.pdf', 'conservado.pdf'],
     });
-    const borrado = await guardado({ proceso: 'concurrente' });
-    const alterado = await guardado({ proceso: 'concurrente' });
-    const legadoInvalido = await guardado({});
+    const borrado = await guardado({ proceso: 'concurrente', ingreso: '21' });
+    const alterado = await guardado({ proceso: 'concurrente', ingreso: '22' });
+    const legadoInvalido = await guardado({ legacy: true });
     const ajeno = await guardado({
       proceso: 'concurrente',
       propietario: { ...propietario, usuario: 8 },
@@ -423,9 +693,21 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
   });
 
   it('ordena el historial con fecha de creación cuando updatedAt no existe y mantiene un desempate estable', async () => {
-    const antiguo = await guardado({ actualizacion: 'sin fecha', fecha: '2026-10-08T00:00:00Z' });
-    const reciente = await guardado({ actualizacion: 'sin fecha', fecha: '2026-10-10T00:00:00Z' });
-    const empate = await guardado({ actualizacion: 'sin fecha', fecha: '2026-10-10T00:00:00Z' });
+    const antiguo = await guardado({
+      ingreso: '20',
+      actualizacion: 'sin fecha',
+      fecha: '2026-10-08T00:00:00Z',
+    });
+    const reciente = await guardado({
+      ingreso: '21',
+      actualizacion: 'sin fecha',
+      fecha: '2026-10-10T00:00:00Z',
+    });
+    const empate = await guardado({
+      ingreso: '22',
+      actualizacion: 'sin fecha',
+      fecha: '2026-10-10T00:00:00Z',
+    });
     const esperado = [reciente.id, empate.id].sort((a, b) => b.localeCompare(a)).concat(antiguo.id);
     expect(
       (await servicio.listarGenerados(propietario)).reportes.map(reporte => reporte.id)
@@ -740,7 +1022,7 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
   );
 
   it('calcula la disponibilidad por documentos completos y mantiene aislados los procesos e históricos', async () => {
-    const anterior = await guardado({});
+    const anterior = await guardado({ legacy: true });
     const concurrente = await guardado({ proceso: 'concurrente' });
     const preenvio = await guardado({
       proceso: 'pre-envio',
@@ -772,25 +1054,23 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
       ['pre-envio', preenvio.id],
       ['concurrente', concurrente.id],
       ['conciliacion', conciliacion.id],
-      [null, anterior.id],
     ] as const) {
       expect(
         (await servicio.listar('001234', ['20'], propietario, proceso)).map(job => job.id)
       ).toEqual([id]);
     }
-    expect(await servicio.consultar(anterior.id, propietario)).toMatchObject({
-      disponibleParaProceso: false,
-      reanudable: false,
-    });
-    await expect(servicio.reanudar(anterior.id, propietario)).rejects.toThrow(
-      'reportes anteriores'
+    await expect(servicio.consultar(anterior.id, propietario)).rejects.toBeInstanceOf(
+      NotFoundException
+    );
+    await expect(servicio.reanudar(anterior.id, propietario)).rejects.toBeInstanceOf(
+      NotFoundException
     );
     expect((await servicio.archivos(conciliacion.id, propietario)).nombre).toBe(
       'reportes-conciliacion-paciente-001234-ingreso-20.zip'
     );
   });
 
-  it('conserva los PDF de conciliación aunque una generación posterior falle sin documentos', async () => {
+  it('muestra solo la última conciliación fallida sin revivir el paquete anterior', async () => {
     const completo = await guardado({
       proceso: 'conciliacion',
       fecha: '2026-10-08T12:00:00Z',
@@ -806,12 +1086,12 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     });
     const listado = await servicio.listar('001234', ['20'], propietario, 'conciliacion');
     expect(listado[0]).toMatchObject({
-      id: completo.id,
+      id: fallido.id,
       disponibleParaProceso: false,
-      documentosPendientes: ['factura'],
-      pendiente: { id: fallido.id },
     });
-    expect(listado[0].archivos).toHaveLength(2);
+    expect(listado[0].archivos).toHaveLength(0);
+    expect(listado[0]).not.toHaveProperty('pendiente');
+    expect(await readFile(join(completo.destino, 'historia.pdf'), 'utf8')).toContain('%PDF');
   });
 
   it('no confunde un grupo parcial ni una etapa sin confirmar con un documento completo', async () => {
@@ -935,24 +1215,25 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     expect(result.mensaje).toBe('Este ingreso no tiene una prefactura disponible');
     expect(result.reanudable).toBe(false);
     expect(result.fallo).toBeUndefined();
-    expect((await servicio.listar('001234', ['20'], propietario, null))[0].estado).toBe(
+    expect((await servicio.listar('001234', ['20'], propietario, 'pre-envio'))[0].estado).toBe(
       'prefactura-unavailable'
     );
     await expect(servicio.reanudar(job.id, propietario)).rejects.toBeInstanceOf(ConflictException);
   });
 
-  it('mantiene archivos anteriores y expone el aviso posterior sin prefactura', async () => {
+  it('muestra solo el aviso vigente sin prefactura y oculta los archivos anteriores', async () => {
     const old = await guardado({ fecha: '2026-10-09T12:00:00Z' });
     const latest = await guardado({
       estado: 'prefactura-unavailable',
       archivos: [],
       fecha: '2026-10-26T12:00:00Z',
     });
-    const result = (await servicio.listar('001234', ['20'], propietario, null))[0];
-    expect(result.id).toBe(old.id);
-    expect(result.archivos).toHaveLength(1);
-    expect(result.pendiente?.id).toBe(latest.id);
-    expect(result.pendiente?.estado).toBe('prefactura-unavailable');
+    const result = (await servicio.listar('001234', ['20'], propietario, 'pre-envio'))[0];
+    expect(result.id).toBe(latest.id);
+    expect(result.archivos).toHaveLength(0);
+    expect(result.estado).toBe('prefactura-unavailable');
+    expect(result).not.toHaveProperty('pendiente');
+    expect(await readFile(join(old.destino, 'grupo-001.pdf'), 'utf8')).toContain('%PDF');
   });
 
   it('ofrece vista previa, descarga individual y ZIP con tipo prefactura', async () => {
@@ -1047,7 +1328,7 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
       '12485732',
     ]);
     expect(
-      (await servicio.listar('001234', ['20'], propietario, null))[0].avisos?.[0].mensaje
+      (await servicio.listar('001234', ['20'], propietario, 'pre-envio'))[0].avisos?.[0].mensaje
     ).toContain('12485732');
     await expect(servicio.consultar(job.id, { ...propietario, usuario: 8 })).rejects.toBeInstanceOf(
       NotFoundException
@@ -1127,8 +1408,8 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
   );
 
   for (const tecnico of [false, true]) {
-    it(`reclasifica Paciente sin folios de ejecuciones anteriores sin ocultar errores técnicos=${tecnico}`, async () => {
-      const job = await guardado({ estado: 'failed' });
+    it(`oculta ejecuciones sin proceso y conserva sus metadatos sin reclasificar: técnico=${tecnico}`, async () => {
+      const job = await guardado({ estado: 'failed', legacy: true });
       const path = join(job.destino, 'execution.json');
       const state = JSON.parse(await readFile(path, 'utf8'));
       state.files[0].kind = 'enfermeria';
@@ -1150,29 +1431,18 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
       state.pendingFailures = state.failures;
       state.failure = tecnico ? fallaTecnica : sinFolios;
       await writeFile(path, JSON.stringify(state));
-      const result = await servicio.consultar(job.id, propietario);
-      expect(result.estado).toBe(tecnico ? 'failed' : 'complete');
-      expect(result.reanudable).toBe(false);
-      expect(result.avisos).toContainEqual(
-        expect.objectContaining({ tipo: 'historias-sin-folios', mensaje: 'Paciente sin folios' })
+      await expect(servicio.consultar(job.id, propietario)).rejects.toBeInstanceOf(
+        NotFoundException
       );
-      expect(result.fallas?.some(fallo => fallo.mensaje === 'Paciente sin folios')).toBe(false);
-      if (tecnico) expect(result.fallo?.mensaje).toBe('No se pudo descargar el PDF');
-      else {
-        expect(result.fallo).toBeUndefined();
-        expect(result.progreso?.porcentajeGeneral).toBe(100);
-        const listado = await servicio.listar('001234', ['20'], propietario, null);
-        expect(listado[0].estado).toBe('complete');
-        expect(listado[0].avisos?.[0].tipo).toBe('historias-sin-folios');
-      }
+      expect(await servicio.listar('001234', ['20'], propietario, null)).toEqual([]);
       expect(JSON.parse(await readFile(path, 'utf8')).failures[0].message).toBe(
         'Paciente sin folios'
       );
     });
   }
 
-  it('conserva para consulta los reportes anteriores sin folios ni enfermería sin reanudarlos', async () => {
-    const job = await guardado({ estado: 'failed', archivos: [] });
+  it('no permite consultar ni reanudar ejecuciones sin proceso', async () => {
+    const job = await guardado({ estado: 'failed', archivos: [], legacy: true });
     const path = join(job.destino, 'execution.json');
     const state = JSON.parse(await readFile(path, 'utf8'));
     state.failure = {
@@ -1185,12 +1455,8 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
       details: '',
     };
     await writeFile(path, JSON.stringify(state));
-    const result = await servicio.consultar(job.id, propietario);
-    expect(result.estado).toBe('failed');
-    expect(result.reanudable).toBe(false);
-    expect(result.fallo).toBeUndefined();
-    expect(result.mensaje).toContain('enfermería pendientes');
-    expect(result.avisos?.[0].tipo).toBe('historias-sin-folios');
+    await expect(servicio.consultar(job.id, propietario)).rejects.toBeInstanceOf(NotFoundException);
+    await expect(servicio.reanudar(job.id, propietario)).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('expone todos los errores registrados aunque la ejecución termine correctamente al reanudar', async () => {
@@ -1212,7 +1478,9 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     expect(result.fallas).toHaveLength(2);
     expect(result.fallas?.map(fallo => fallo.grupo)).toEqual([1, 2]);
     expect(result.fallo).toBeUndefined();
-    expect((await servicio.listar('001234', ['20'], propietario, null))[0].fallas).toHaveLength(2);
+    expect(
+      (await servicio.listar('001234', ['20'], propietario, 'pre-envio'))[0].fallas
+    ).toHaveLength(2);
   });
 
   it('expone todas las fallas pendientes mientras el ejecutor continúa trabajando', async () => {
@@ -1264,7 +1532,7 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     for await (const bloque of resultado.contenido) bloques.push(Buffer.from(bloque));
     const zip = await JSZip.loadAsync(Buffer.concat(bloques));
     const archivos = Object.values(zip.files).filter(archivo => !archivo.dir);
-    expect(resultado.nombre).toBe('reportes-paciente-001234-ingreso-20.zip');
+    expect(resultado.nombre).toBe('reportes-pre-envio-paciente-001234-ingreso-20.zip');
     expect(archivos.map(archivo => archivo.name)).toEqual([
       '001234/20/historias-clinicas/1-grupo-001.pdf',
       '001234/20/historias-clinicas/2-grupo-002.pdf',
@@ -1397,31 +1665,31 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     await guardado({ propietario: { ...propietario, usuario: 8 } });
     await guardado({ propietario: { ...propietario, contexto: 'SANJUAN' } });
     await guardado({ propietario: { ...propietario, esDinamica: false } });
-    const resultado = await servicio.listar('001234', ['20'], propietario, null);
+    const resultado = await servicio.listar('001234', ['20'], propietario, 'pre-envio');
     expect(resultado.map(reporte => reporte.id)).toEqual([correcto.id]);
     expect(resultado[0].archivos[0].id).toBe('0');
     expect(JSON.stringify(resultado)).not.toContain(carpeta);
   });
 
-  it('prefiere la descarga completa más reciente ante una ejecución parcial posterior', async () => {
+  it('muestra únicamente la solicitud parcial posterior a una descarga completa', async () => {
     await guardado({ fecha: '2026-10-07T12:00:00Z' });
-    const reciente = await guardado({ fecha: '2026-10-08T12:00:00Z' });
+    await guardado({ fecha: '2026-10-08T12:00:00Z' });
     const fallida = await guardado({ fecha: '2026-10-09T12:00:00Z', estado: 'failed' });
-    const reporte = (await servicio.listar('001234', ['20'], propietario, null))[0];
-    expect(reporte.id).toBe(reciente.id);
-    expect(reporte.pendiente?.id).toBe(fallida.id);
+    const reporte = (await servicio.listar('001234', ['20'], propietario, 'pre-envio'))[0];
+    expect(reporte.id).toBe(fallida.id);
+    expect(reporte).not.toHaveProperty('pendiente');
   });
 
   it('omite archivos borrados, conserva sus identificadores y ofrece resultados parciales', async () => {
     const job = await guardado({ archivos: ['borrado.pdf', 'conservado.pdf'] });
     await rm(join(job.destino, 'borrado.pdf'));
-    const resultado = await servicio.listar('001234', ['20'], propietario, null);
+    const resultado = await servicio.listar('001234', ['20'], propietario, 'pre-envio');
     expect(resultado[0].estado).toBe('failed');
     expect(resultado[0].archivos.map(archivo => archivo.id)).toEqual(['1']);
     expect((await servicio.archivo(job.id, '1', propietario)).nombre).toBe('conservado.pdf');
     await rm(join(job.destino, 'conservado.pdf'));
-    const sinArchivos = await servicio.listar('001234', ['20'], propietario, null);
-    expect(sinArchivos[0]).toMatchObject({ estado: 'failed', archivos: [], reanudable: false });
+    const sinArchivos = await servicio.listar('001234', ['20'], propietario, 'pre-envio');
+    expect(sinArchivos[0]).toMatchObject({ estado: 'failed', archivos: [], reanudable: true });
   });
 
   it('devuelve una búsqueda vacía cuando todavía no se han guardado reportes', async () => {

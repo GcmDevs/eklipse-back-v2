@@ -2,12 +2,17 @@ import type { IngresoReportes } from './consulta';
 
 export const PROCESOS_REPORTES = ['pre-envio', 'concurrente', 'conciliacion'] as const;
 export type ProcesoReportes = (typeof PROCESOS_REPORTES)[number];
-export type TipoDocumentoReporte = 'historias-clinicas' | 'enfermeria' | 'prefactura' | 'factura';
+export type TipoDocumentoReporte =
+  | 'historias-clinicas'
+  | 'enfermeria'
+  | 'prefactura'
+  | 'factura'
+  | 'soportes-requeridos';
 
 export const DOCUMENTOS_POR_PROCESO: Record<ProcesoReportes, readonly TipoDocumentoReporte[]> = {
-  'pre-envio': ['historias-clinicas', 'enfermeria', 'prefactura'],
+  'pre-envio': ['historias-clinicas', 'enfermeria', 'prefactura', 'soportes-requeridos'],
   concurrente: ['historias-clinicas'],
-  conciliacion: ['historias-clinicas', 'enfermeria', 'factura'],
+  conciliacion: ['historias-clinicas', 'enfermeria', 'factura', 'soportes-requeridos'],
 };
 
 export function ingresoElegibleParaProceso(

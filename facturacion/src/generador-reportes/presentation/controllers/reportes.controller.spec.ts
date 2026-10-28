@@ -1,4 +1,9 @@
-import { INestApplication, ServiceUnavailableException, ValidationPipe } from '@nestjs/common';
+import {
+  INestApplication,
+  NotFoundException,
+  ServiceUnavailableException,
+  ValidationPipe,
+} from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import * as jwt from 'jsonwebtoken';
 import request = require('supertest');
@@ -37,6 +42,7 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
   const listar = jest.fn();
   const consultarCola = jest.fn();
   const listarGenerados = jest.fn();
+  const archivo = jest.fn();
   const archivos = jest.fn();
   const token = jwt.sign({ passWasReset: false }, 'reportes-test-key');
 
@@ -54,7 +60,7 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
             listar,
             consultarCola,
             listarGenerados,
-            archivo: jest.fn(),
+            archivo,
             archivos,
           },
         },
@@ -79,6 +85,7 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
     listarGenerados
       .mockReset()
       .mockResolvedValue({ reportes: [], total: 0, pagina: 1, porPagina: 10 });
+    archivo.mockReset();
     archivos.mockReset().mockImplementation(async () => ({
       contenido: Readable.from([Buffer.from('ZIP de prueba')]),
       nombre: 'reportes-ingreso-20.zip',
@@ -344,7 +351,7 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
     }
   );
 
-  it('conserva los PDF de generados parciales y anteriores sin atribuirles disponibilidad', async () => {
+  it('conserva los PDF de generados vigentes parciales sin atribuirles disponibilidad', async () => {
     const historial = {
       reportes: [
         {
@@ -358,14 +365,15 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
           archivos: [{ id: '0', nombre: 'historia.pdf' }],
         },
         {
-          id: 'anterior',
+          id: 'parcial-otro-proceso',
           documento: '005678',
           ingreso: '21',
+          proceso: 'concurrente',
           estado: 'complete',
           disponibleParaProceso: false,
           documentosPendientes: [],
           reanudable: false,
-          archivos: [{ id: '1', nombre: 'enfermeria-anterior.pdf' }],
+          archivos: [{ id: '1', nombre: 'historia-parcial.pdf' }],
         },
       ],
       total: 2,
@@ -548,7 +556,9 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
         '001234',
         ingreso,
         { usuario: 7, contexto: 'ALTACENTRO', esDinamica: true },
-        'concurrente'
+        'concurrente',
+        undefined,
+        'Desconocido'
       );
     }
     expect(crear).toHaveBeenCalledTimes(2);
@@ -718,11 +728,64 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
         contexto: 'ALTACENTRO',
         esDinamica: true,
       },
-      'pre-envio'
+      'pre-envio',
+      undefined,
+      'Desconocido'
     );
   });
 
-  it('la búsqueda asocia reportes guardados al ingreso correspondiente sin generar otra ejecución', async () => {
+  it('envía el tipo de ingreso clínico al ejecutor e ignora el tipo indicado por el cliente', async () => {
+    consultar.mockResolvedValue({
+      paciente: { documento: '001234' },
+      ingresos: [{ consecutivo: 20, estado: 'Registrado', tipoIngreso: ' UCI Adulto ' }],
+    });
+    await request(app.getHttpServer())
+      .post('/v1/generador-reportes/ejecuciones')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        documento: '001234',
+        ingreso: '20',
+        proceso: 'pre-envio',
+        tipoIngreso: 'Consulta Externa',
+      })
+      .expect(201);
+    expect(crear).toHaveBeenCalledWith(
+      '001234',
+      '20',
+      { usuario: 7, contexto: 'ALTACENTRO', esDinamica: true },
+      'pre-envio',
+      undefined,
+      'UCI Adulto'
+    );
+  });
+
+  it('permite solicitar reanudación de una extracción completa con soportes pendientes', async () => {
+    consultarEjecucion.mockResolvedValue({
+      id: 'job-test',
+      documento: '001234',
+      ingreso: '20',
+      proceso: 'pre-envio',
+      estado: 'complete',
+      reanudable: true,
+      documentosPendientes: ['soportes-requeridos'],
+    });
+    consultar.mockResolvedValue({
+      paciente: { documento: '001234' },
+      ingresos: [{ consecutivo: 20, estado: 'Registrado' }],
+    });
+    await request(app.getHttpServer())
+      .post('/v1/generador-reportes/ejecuciones/job-test/reanudar')
+      .set('Authorization', `Bearer ${token}`)
+      .send({})
+      .expect(201, { id: 'job-test', estado: 'queued', posicionCola: 3 });
+    expect(reanudar).toHaveBeenCalledWith('job-test', {
+      usuario: 7,
+      contexto: 'ALTACENTRO',
+      esDinamica: true,
+    });
+  });
+
+  it('la búsqueda asocia una sola versión vigente al ingreso y consulta únicamente el proceso seleccionado', async () => {
     consultar.mockResolvedValue({
       paciente: { documento: '001234' },
       ingresos: [{ consecutivo: 20 }, { consecutivo: 19 }],
@@ -730,24 +793,24 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
     const reporte = {
       id: 'guardado',
       ingreso: '20',
+      proceso: 'pre-envio',
       estado: 'complete',
       archivos: [{ id: '0', nombre: 'grupo.pdf' }],
     };
-    const anterior = { ...reporte, id: 'anterior' };
-    listar.mockImplementation(async (_documento, _ingresos, _propietario, proceso) =>
-      proceso === null ? [anterior] : [reporte]
-    );
+    listar.mockResolvedValue([reporte]);
     const respuesta = await request(app.getHttpServer())
       .get('/v1/generador-reportes?documento=001234&proceso=pre-envio')
       .set('Authorization', `Bearer ${token}`)
       .expect(200);
     expect(respuesta.body.ingresos).toEqual([
-      { consecutivo: 20, reportes: reporte, reportesAnteriores: anterior },
+      { consecutivo: 20, reportes: reporte },
       { consecutivo: 19 },
     ]);
     const propietario = { usuario: 7, contexto: 'ALTACENTRO', esDinamica: true };
+    expect(listar).toHaveBeenCalledTimes(1);
     expect(listar).toHaveBeenCalledWith('001234', ['20', '19'], propietario, 'pre-envio');
-    expect(listar).toHaveBeenCalledWith('001234', ['20', '19'], propietario, null);
+    expect(respuesta.body.ingresos[0]).not.toHaveProperty('reportesAnteriores');
+    expect(respuesta.body.ingresos[0].reportes).not.toHaveProperty('pendiente');
     expect(crear).not.toHaveBeenCalled();
     expect(respuesta.headers['cache-control']).toBe('no-store');
   });
@@ -778,15 +841,8 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
       disponibleParaProceso: true,
       documentosPendientes: [],
       archivos: [{ id: '0', nombre: 'prefactura.pdf' }],
-      pendiente: {
-        id: 'posterior',
-        disponibleParaProceso: true,
-        archivos: [{ id: '0', nombre: 'historia.pdf' }],
-      },
     };
-    listar.mockImplementation(async (_documento, _ingresos, _propietario, proceso) =>
-      proceso === 'pre-envio' ? [reporte] : []
-    );
+    listar.mockResolvedValue([reporte]);
     const resultado = await request(app.getHttpServer())
       .get('/v1/generador-reportes')
       .query({ documento: '001234', proceso: 'pre-envio' })
@@ -795,8 +851,10 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
     expect(resultado.body.ingresos[0].reportes).toEqual({
       ...reporte,
       disponibleParaProceso: false,
-      pendiente: { ...reporte.pendiente, disponibleParaProceso: false },
     });
+    expect(listar).toHaveBeenCalledTimes(1);
+    expect(resultado.body.ingresos[0]).not.toHaveProperty('reportesAnteriores');
+    expect(resultado.body.ingresos[0].reportes).not.toHaveProperty('pendiente');
     expect(reporte.disponibleParaProceso).toBe(true);
   });
 
@@ -825,6 +883,7 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
       expect(resultado.body.proceso).toBe(proceso);
       expect(resultado.body.ingresos.map(ingreso => ingreso.consecutivo)).toEqual(esperados);
       const propietario = { usuario: 7, contexto: 'ALTACENTRO', esDinamica: true };
+      expect(listar).toHaveBeenCalledTimes(1);
       expect(listar).toHaveBeenCalledWith('001234', esperados.map(String), propietario, proceso);
     }
   );
@@ -864,7 +923,9 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
       '001234',
       '20',
       { usuario: 7, contexto: 'ALTACENTRO', esDinamica: true },
-      proceso
+      proceso,
+      undefined,
+      'Desconocido'
     );
   });
 
@@ -925,21 +986,32 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
     });
   });
 
-  it('mantiene ejecuciones anteriores sin proceso de solo consulta', async () => {
-    consultarEjecucion.mockResolvedValue({
-      id: 'job-test',
-      documento: '001234',
-      ingreso: '20',
-      estado: 'failed',
-    });
-    await request(app.getHttpServer())
-      .post('/v1/generador-reportes/ejecuciones/job-test/reanudar')
-      .send({ proceso: 'concurrente' })
-      .set('Authorization', `Bearer ${token}`)
-      .expect(409);
-    expect(consultar).not.toHaveBeenCalled();
-    expect(reanudar).not.toHaveBeenCalled();
-  });
+  it.each(['legacy-sin-proceso', 'job-reemplazado'])(
+    'propaga 404 del servicio para %s al consultar, reanudar o descargar',
+    async id => {
+      const error = new NotFoundException('La ejecución ya no está disponible.');
+      consultarEjecucion.mockRejectedValue(error);
+      archivo.mockRejectedValue(error);
+      archivos.mockRejectedValue(error);
+      for (const ruta of ['', '/archivos', '/archivos/0']) {
+        await request(app.getHttpServer())
+          .get(`/v1/generador-reportes/ejecuciones/${id}${ruta}`)
+          .set('Authorization', `Bearer ${token}`)
+          .expect(404);
+      }
+      await request(app.getHttpServer())
+        .post(`/v1/generador-reportes/ejecuciones/${id}/reanudar`)
+        .send({ proceso: 'concurrente' })
+        .set('Authorization', `Bearer ${token}`)
+        .expect(404);
+      const propietario = { usuario: 7, contexto: 'ALTACENTRO', esDinamica: true };
+      expect(consultarEjecucion).toHaveBeenCalledWith(id, propietario);
+      expect(archivo).toHaveBeenCalledWith(id, '0', propietario);
+      expect(archivos).toHaveBeenCalledWith(id, propietario);
+      expect(consultar).not.toHaveBeenCalled();
+      expect(reanudar).not.toHaveBeenCalled();
+    }
+  );
 
   it.each([
     { estado: 'Registrado', esperado: true },
