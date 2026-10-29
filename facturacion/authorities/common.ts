@@ -9,5 +9,6 @@ export const SLN_MODULES = {
     VALIDACION_DE_IDENTIDAD: `${sln}004`,
     CUENTA_ALTO_COSTO: `${sln}005`,
     GENERADOR_REPORTES: `${sln}006`,
+    PREAUDITORIA: `${sln}007`,
   },
 };

@@ -1,0 +1,1817 @@
+{
+  "codes": [
+    {
+      "code": "AU0101",
+      "specific": "El número de días en habitación que vienen relacionados en la factura de venta en salud presenta diferencia con los días autorizados",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Estancia . '",
+      "resolution": "2284 de 2023",
+      "page": 28
+    },
+    {
+      "code": "AU0102",
+      "specific": "El servicio de internación donde se produjo la estancia no corresponde al autorizado",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Estancia . '",
+      "resolution": "2284 de 2023",
+      "page": 28
+    },
+    {
+      "code": "AU0201",
+      "specific": "El número de consultas, interconsultas o atenciones (visitas) domiciliarias que vienen relacionadas en la factura de venta en salud presenta diferencia con las autorizadas",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Consultas, interconsultas y atenciones (visitas) domiciliarias •",
+      "resolution": "2284 de 2023",
+      "page": 28
+    },
+    {
+      "code": "AU0202",
+      "specific": "La consulta, interconsulta o atención (visita) domiciliaria relacionada o justificada en los soportes de la factura de venta en salud no corresponde a la autorizada",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Consultas, interconsultas y atenciones (visitas) domiciliarias •",
+      "resolution": "2284 de 2023",
+      "page": 28
+    },
+    {
+      "code": "AU0302",
+      "specific": "Los honorarios profesionales relacionados o justificados en los soportes de la factura de venta en salud no corresponde a la autorizada",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Honorarios profesionales en procedimientos",
+      "resolution": "2284 de 2023",
+      "page": 28
+    },
+    {
+      "code": "AU0303",
+      "specific": "La entidad responsable de pago emitió autorización directamente al profesional para la ejecución del procedimiento y la IPS está facturando a su nombre estos honorarios.",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Honorarios profesionales en procedimientos",
+      "resolution": "2284 de 2023",
+      "page": 28
+    },
+    {
+      "code": "AU0601",
+      "specific": "El número de dispositivos médicos que vienen relacionados en la factura de venta en salud presenta diferencia con lo autorizado, sin la debida justificación",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Dispositivos médicos",
+      "resolution": "2284 de 2023",
+      "page": 28
+    },
+    {
+      "code": "AU0602",
+      "specific": "Los dispositivos médicos que vienen relacionados o justificados en los soportes de la factura de venta en salud no corresponden a los autorizados, sin la debida justificación",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Dispositivos médicos",
+      "resolution": "2284 de 2023",
+      "page": 28
+    },
+    {
+      "code": "AU0701",
+      "specific": "El número de unidades de la forma farmacéutica que vienen relacionados en la factura de venta en salud presenta diferencia con lo autorizado",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Medicamentos y Alimentos para Propósitos Médicos Especiales - APME",
+      "resolution": "2284 de 2023",
+      "page": 28
+    },
+    {
+      "code": "AU0702",
+      "specific": "La forma farmacéutica que vienen relacionada en la factura de-venta en salud presenta diferencia con la autorizada",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Medicamentos y Alimentos para Propósitos Médicos Especiales - APME",
+      "resolution": "2284 de 2023",
+      "page": 28
+    },
+    {
+      "code": "AU0703",
+      "specific": "El principio activo que viene relacionado en la factura de venta en salud presenta diferencia con el autorizado",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Medicamentos y Alimentos para Propósitos Médicos Especiales - APME",
+      "resolution": "2284 de 2023",
+      "page": 28
+    },
+    {
+      "code": "AU0704",
+      "specific": "La concentración que viene relacionada en la factura de venta en salud presenta diferencia con la autorizada",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Medicamentos y Alimentos para Propósitos Médicos Especiales - APME",
+      "resolution": "2284 de 2023",
+      "page": 28
+    },
+    {
+      "code": "AU0801",
+      "specific": "El número de apoyos diagnósticos que vienen relacionados en la factura de venta en salud presenta diferencia con lo autorizado",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Apoyo diagnóstico",
+      "resolution": "2284 de 2023",
+      "page": 28
+    },
+    {
+      "code": "AU0802",
+      "specific": "Los apoyos diagnósticos relacionados o justificados en los soportes de la factura de venta en salud no corresponden con los autorizados",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Apoyo diagnóstico",
+      "resolution": "2284 de 2023",
+      "page": 28
+    },
+    {
+      "code": "AU2103",
+      "specific": "El número de la autorización registrado en la factura de venta en salud o RIPS no corresponde al servicio o tecnología prestada o facturada",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Número de Autorización",
+      "resolution": "2284 de 2023",
+      "page": 29
+    },
+    {
+      "code": "AU2301",
+      "specific": "El número de procedimientos no quirúrgicos que vienen relacionados en la factura de venta en salud presenta diferencia con lo autorizado",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Otros procedimientos no quirúrgicos",
+      "resolution": "2284 de 2023",
+      "page": 29
+    },
+    {
+      "code": "AU2302",
+      "specific": "El procedimiento no quirúrgico relacionado o justificado en los soportes de la factura de venta en salud no corresponden con el autorizado",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Otros procedimientos no quirúrgicos",
+      "resolution": "2284 de 2023",
+      "page": 29
+    },
+    {
+      "code": "AU3803",
+      "specific": "El traslado asistencial de pacientes no cuenta con la autorización",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Traslado asistencial de pacientes",
+      "resolution": "2284 de 2023",
+      "page": 29
+    },
+    {
+      "code": "AU4303",
+      "specific": "La orden o prescripción facultativa del profesional tratante o el número de la autorización de-servicios registrado en los soportes de cobro ha superado el limite de días de vigencia",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Orden o prescripción facultativa del profesional tratante o autorización de servicios , vencida al momento de su dispensación",
+      "resolution": "2284 de 2023",
+      "page": 29
+    },
+    {
+      "code": "AU4304",
+      "specific": "La orden o prescripción facultativa del profesional tratante o el número de la autorización de servicios registrado en los soportes de cobro no corresponde a la autorización, orden o prescripción facultativa reemplazada por vencimiento",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Orden o prescripción facultativa del profesional tratante o autorización de servicios , vencida al momento de su dispensación",
+      "resolution": "2284 de 2023",
+      "page": 29
+    },
+    {
+      "code": "AU5701",
+      "specific": "El número de apoyos terapéuticos que vienen relacionados en la factura de venta en salud presenta diferencia con lo autorizado",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Apoyo terapéutico",
+      "resolution": "2284 de 2023",
+      "page": 29
+    },
+    {
+      "code": "AU5702",
+      "specific": "Los apoyos terapéuticos relacionados o justificados en los soportes de la factura de venta en salud no corresponden con los autorizados",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Apoyo terapéutico",
+      "resolution": "2284 de 2023",
+      "page": 29
+    },
+    {
+      "code": "AU5801",
+      "specific": "El número de procedimientos quirúrgicos o intervencionistas que vienen relacionados en la factura de venta en salud presenta diferencia con lo autorizado",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Procedimientos quirúrgicos e intervencionistas",
+      "resolution": "2284 de 2023",
+      "page": 29
+    },
+    {
+      "code": "AU5802",
+      "specific": "Los procedimientos quirúrgicos o intervencionistas que vienen relacionados o justificados en los soportes de la factura de venta en salud no corresponden a los autorizados",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Procedimientos quirúrgicos e intervencionistas",
+      "resolution": "2284 de 2023",
+      "page": 29
+    },
+    {
+      "code": "AU5903",
+      "specific": "El transporte no asistencial ambulatorio de la persona no cuenta con la autorización",
+      "general": "Autorizaciones",
+      "type": "glosa",
+      "concept": "Transporte no asistencial ambulatorio de la persona",
+      "resolution": "2284 de 2023",
+      "page": 29
+    },
+    {
+      "code": "CL0101",
+      "specific": "El cargo por estancia sea en observación de urgencias o habitación, que viene relacionado en los soportes de la factura de venta en salud no es pertinente",
+      "general": "Calidad",
+      "type": "glosa",
+      "concept": "Estancia u observación de urgencias",
+      "resolution": "2284 de 2023",
+      "page": 30
+    },
+    {
+      "code": "CL0201",
+      "specific": "El cargo por consulta, interconsulta o atención (visita) domiciliaria que viene relacionado en los soportes de cobro no es pertinente",
+      "general": "Calidad",
+      "type": "glosa",
+      "concept": "Consultas, interconsultas y atenciones (visitas) domiciliarias",
+      "resolution": "2284 de 2023",
+      "page": 30
+    },
+    {
+      "code": "CL0301",
+      "specific": "Los cargos por honorarios profesionales en procedimientos quirúrgicos o intervencionistas, de hemodinamia, radiología u otros procedimientos que vienen relacionados en los soportes de cobro no son pertinentes",
+      "general": "Calidad",
+      "type": "glosa",
+      "concept": "Honorarios profesionales en procedimientos",
+      "resolution": "2284 de 2023",
+      "page": 30
+    },
+    {
+      "code": "CL0302",
+      "specific": "Los cargos por honorarios de anestesia que vienen relacionados en los soportes de cobro no son pertinentes",
+      "general": "Calidad",
+      "type": "glosa",
+      "concept": "Honorarios profesionales en procedimientos",
+      "resolution": "2284 de 2023",
+      "page": 31
+    },
+    {
+      "code": "CL0601",
+      "specific": "Los cargos por dispositivos médicos que vienen relacionados en los soportes de cobro no son pertinentes",
+      "general": "Calidad",
+      "type": "glosa",
+      "concept": "Dispositivos médicos",
+      "resolution": "2284 de 2023",
+      "page": 31
+    },
+    {
+      "code": "CL0701",
+      "specific": "Los cargos por medicamentos o APME que vienen relacionados en los soportes de cobro, no son pertinentes",
+      "general": "Calidad",
+      "type": "glosa",
+      "concept": "Medicamentos y Alimentos para Propósitos Médicos Especiales — APME",
+      "resolution": "2284 de 2023",
+      "page": 31
+    },
+    {
+      "code": "CL0703",
+      "specific": "Los cargos por medicamentos o APME que vienen relacionados en los soportes de cobro, corresponden á un suministro incompleto de acuerdo a la orden o la prescripción facultativa",
+      "general": "Calidad",
+      "type": "glosa",
+      "concept": "Medicamentos y Alimentos para Propósitos Médicos Especiales — APME",
+      "resolution": "2284 de 2023",
+      "page": 31
+    },
+    {
+      "code": "CL0801",
+      "specific": "Los cargos por apoyo diagnóstico que vienen relacionados en los soportes de cobro no son pertinentes",
+      "general": "Calidad",
+      "type": "glosa",
+      "concept": "Apoyo diagnóstico",
+      "resolution": "2284 de 2023",
+      "page": 31
+    },
+    {
+      "code": "CL2301",
+      "specific": "Los cargos por otros procedimientos no quirúrgicos o actividades que vienen relacionados en los soportes de cobro no son pertinentes",
+      "general": "Calidad",
+      "type": "glosa",
+      "concept": "Otros procedimientos no quirúrgicos",
+      "resolution": "2284 de 2023",
+      "page": 31
+    },
+    {
+      "code": "CL3801",
+      "specific": "Los cargos por traslado asistencial de las pacientes que vienen relacionados en los soportes de cobro no son pertinentes",
+      "general": "Calidad",
+      "type": "glosa",
+      "concept": "Traslado asistencial de las pacientes",
+      "resolution": "2284 de 2023",
+      "page": 31
+    },
+    {
+      "code": "CL5301",
+      "specific": "Los servicios prestados no obedecen a una atención de urgencia de acuerdo con la definición de la normativa vigente",
+      "general": "Calidad",
+      "type": "glosa",
+      "concept": "Atención de urgencia",
+      "resolution": "2284 de 2023",
+      "page": 31
+    },
+    {
+      "code": "CL5701",
+      "specific": "Los cargos por apoyo terapéutico que vienen relacionados en los soportes de cobro no son pertinentes",
+      "general": "Calidad",
+      "type": "glosa",
+      "concept": "Apoyo terapéutico",
+      "resolution": "2284 de 2023",
+      "page": 31
+    },
+    {
+      "code": "CL5801",
+      "specific": "Los cargos por procedimientos quirúrgicos o intervencionistas que vienen relacionados en los soportes de cobro no son pertinentes",
+      "general": "Calidad",
+      "type": "glosa",
+      "concept": "Procedimientos quirúrgicos e intervencionistas •",
+      "resolution": "2284 de 2023",
+      "page": 31
+    },
+    {
+      "code": "CL5901",
+      "specific": "Los cargos por transporte no asistencial ambulatorio de las personas que vienen relacionados en los soportes de cobro no son pertinentes",
+      "general": "Calidad",
+      "type": "glosa",
+      "concept": "Transporte no asistencial ambulatorio de las personas",
+      "resolution": "2284 de 2023",
+      "page": 31
+    },
+    {
+      "code": "CO0101",
+      "specific": "El número de dias en observación o habitación que vienen relacionados en los soportes de cobro no están incluidos en la respectiva cobertura",
+      "general": "Cobertura",
+      "type": "glosa",
+      "concept": "Estancia u observación de urgencias",
+      "resolution": "2284 de 2023",
+      "page": 29
+    },
+    {
+      "code": "CO0201",
+      "specific": "La consulta, interconsulta o atención (visita) domiciliaria relacionada en los soportes de cobro no está incluida en la respectiva cobertura",
+      "general": "Cobertura",
+      "type": "glosa",
+      "concept": "Consultas, interconsultas y atenciones (visitas) domiciliarias",
+      "resolution": "2284 de 2023",
+      "page": 29
+    },
+    {
+      "code": "CO0301",
+      "specific": "Los honorarios profesionales relacionados en los soportes de cobro no están incluidos en la respectiva cobertura",
+      "general": "Cobertura",
+      "type": "glosa",
+      "concept": "Honorarios profesionales en procedimientos",
+      "resolution": "2284 de 2023",
+      "page": 30
+    },
+    {
+      "code": "CO0401",
+      "specific": "Los honorarios de otros profesionales asistenciales relacionados en los soportes de cobro no están incluidos en la respectiva cobertura",
+      "general": "Cobertura",
+      "type": "glosa",
+      "concept": "Honorarios otros profesionales asistenciales",
+      "resolution": "2284 de 2023",
+      "page": 30
+    },
+    {
+      "code": "CO0601",
+      "specific": "Los dispositivos médicos que vienen relacionados o justificados en los soportes de cobro no están incluidos en la respectiva cobertura",
+      "general": "Cobertura",
+      "type": "glosa",
+      "concept": "Dispositivos médicos",
+      "resolution": "2284 de 2023",
+      "page": 30
+    },
+    {
+      "code": "CO0701",
+      "specific": "Los medicamentos o APME relacionados en los soportes de cobro no están incluidos en la respectiva cobertura",
+      "general": "Cobertura",
+      "type": "glosa",
+      "concept": "Medicamentos y Alimentos para Propósitos Médicos Especiales — APME",
+      "resolution": "2284 de 2023",
+      "page": 30
+    },
+    {
+      "code": "CO0801",
+      "specific": "Los apoyos diagnósticos relacionados en los soportes de cobro no están incluidos en la respectiva cobertura",
+      "general": "Cobertura",
+      "type": "glosa",
+      "concept": "Apoyo diagnóstico",
+      "resolution": "2284 de 2023",
+      "page": 30
+    },
+    {
+      "code": "CO2301",
+      "specific": "Los procedimientos no quirúrgicos relacionados en los soportes de cobro no están incluidos en la respectiva cobertura",
+      "general": "Cobertura",
+      "type": "glosa",
+      "concept": "Otros procedimientos no quirúrgicos",
+      "resolution": "2284 de 2023",
+      "page": 30
+    },
+    {
+      "code": "CO3801",
+      "specific": "El traslado asistencial de pacientes relacionado en los soportes de cobro no está incluido en la respectiva cobertura",
+      "general": "Cobertura",
+      "type": "glosa",
+      "concept": "Traslado asistencial de pacientes",
+      "resolution": "2284 de 2023",
+      "page": 30
+    },
+    {
+      "code": "CO4601",
+      "specific": "Se facturan servicios a la entidad responsable de pago sin agotar los topes cubiertos por la póliza dé Seguro Obligatorio de Accidentes de Tránsito (SOAT), la ADRES o la entidad que haga sus veces",
+      "general": "Cobertura",
+      "type": "glosa",
+      "concept": "Cobertura sin agotar en la póliza del seguro obligatorio de accidentes de tránsito SOAT, la ADRES o la entidad que haga sus veces",
+      "resolution": "2284 de 2023",
+      "page": 30
+    },
+    {
+      "code": "CO5701",
+      "specific": "Los apoyos terapéuticos relacionados en los soportes de cobro no están incluidos en la respectiva cobertura o hacen parte integral de un servicio Y se están cobrando adicionalmente.",
+      "general": "Cobertura",
+      "type": "glosa",
+      "concept": "Apoyo terapéutico",
+      "resolution": "2284 de 2023",
+      "page": 30
+    },
+    {
+      "code": "CO5801",
+      "specific": "Los procedimientos quirúrgicos o intervencionistas relacionados en los soportes de cobro no están incluidos en la respectiva cobertura",
+      "general": "Cobertura",
+      "type": "glosa",
+      "concept": "Procedimientos quirúrgicos e intervencionistas",
+      "resolution": "2284 de 2023",
+      "page": 30
+    },
+    {
+      "code": "CO5901",
+      "specific": "El transporte no asistencial ambulatorio de la persona relacionado en los soportes de cobro no está incluido en la respectiva cobertura o hacen parte integral de un servicio y se están cobrando adicionalmente",
+      "general": "Cobertura",
+      "type": "glosa",
+      "concept": "Transporte no asistencial ambulatorio de la persona",
+      "resolution": "2284 de 2023",
+      "page": 30
+    },
+    {
+      "code": "DE1601",
+      "specific": "La factura corresponde a una persona que pertenecía a otro responsable de pago en el momento de la atención",
+      "general": "Devoluciones",
+      "type": "devolucion",
+      "concept": "Persona corresponde a otro responsable de pago ,",
+      "resolution": "2284 de 2023",
+      "page": 20
+    },
+    {
+      "code": "DE4401",
+      "specific": "El profesional que ordenó el servicio o tecnología de salud facturado lo hizo desde una IPS que no hace parte de la red integral e integrada de la entidad responsable de pago",
+      "general": "Devoluciones",
+      "type": "devolucion",
+      "concept": "El prestador de servicios de salud que factura no hace parte de la red integral e integrada de la entidad responsable de pago",
+      "resolution": "2284 de 2023",
+      "page": 20
+    },
+    {
+      "code": "DE4402",
+      "specific": "El profesional independiente que ordenó el servicio o tecnología de salud no hace parte de la red integral e integrada de la entidad responsable de pago",
+      "general": "Devoluciones",
+      "type": "devolucion",
+      "concept": "El prestador de servicios de salud que factura no hace parte de la red integral e integrada de la entidad responsable de pago",
+      "resolution": "2284 de 2023",
+      "page": 20
+    },
+    {
+      "code": "DE5001",
+      "specific": "La totalidad de la factura fue pagada por la entidad responsable de pago",
+      "general": "Devoluciones",
+      "type": "devolucion",
+      "concept": "",
+      "resolution": "2284 de 2023",
+      "page": 20
+    },
+    {
+      "code": "DE5002",
+      "specific": "La factura ya fue radicada a la entidad responsable de pago y se encuentra en trámite",
+      "general": "Devoluciones",
+      "type": "devolucion",
+      "concept": "",
+      "resolution": "2284 de 2023",
+      "page": 20
+    },
+    {
+      "code": "DE5601",
+      "specific": "El prestador de servicios de salud o proveedor de tecnologías en salud no radica los soportes dentro de los veintidós (22) días hábiles siguientes a la fecha de expedición 'de la factura conforme al articulo 5 de la Resolución 510 de 2022 o la que la modifique o sustituya",
+      "general": "Devoluciones",
+      "type": "devolucion",
+      "concept": "No radicación de los soportes dentro de los veintidós (22) días hábiles siguientes a la fecha de expedición de la factura conforme al artículo 5 de la Resolución 510 de 2022 o la que la modifique o sustituya",
+      "resolution": "2284 de 2023",
+      "page": 20
+    },
+    {
+      "code": "FA0101",
+      "specific": "El cargo por estancia u observación de urgencias, que viene relacionado o justificado en los soportes de cobro, presenta diferencia con las cantidades facturadas",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Estancia u observación de urgencias",
+      "resolution": "2284 de 2023",
+      "page": 20
+    },
+    {
+      "code": "FA0102",
+      "specific": "Se facturan consultas, interconsultas o atenciones (visitas) domiciliarias que están incluidas en la estancia u observación de urgencias de acuerdo con lo pactado",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Estancia u observación de urgencias",
+      "resolution": "2284 de 2023",
+      "page": 20
+    },
+    {
+      "code": "FA0103",
+      "specific": "Se cobra estancia u observación de urgencias que ya se encuentra incluida en una atención agrupada, de acuerdo con lo pactado por las partes",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Estancia u observación de urgencias",
+      "resolution": "2284 de 2023",
+      "page": 20
+    },
+    {
+      "code": "FA0105",
+      "specific": "Se facturan servicios o tecnologías en salud que se encuentran incluidos en la estancia u observación de urgencias de acuerdo con lo pactado",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Estancia u observación de urgencias",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA0201",
+      "specific": "El cargo por consulta, interconsulta o atención (visita) domiciliaria que viene relacionado o justificado en los soportes de cobro, presenta diferencias con las cantidades facturadas",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Consultas, interconsultas y atenciones (visita) domiciliaria",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA0202",
+      "specific": "Se cobran consultas o atenciones (visitas) domiciliarias que se encuentran incluidas en los honorarios profesionales post quirúrgicos",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Consultas, interconsultas y atenciones (visita) domiciliaria",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA0203",
+      "specific": "Se cobran consultas o atenciones (visitas) domiciliarias que ya se encuentran incluidas en una atención agrupada, de acuerdo con lo pactado por las partes",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Consultas, interconsultas y atenciones (visita) domiciliaria",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA0205",
+      "specific": "Se cobran consultas que se encuentran incluidas en los honorarios profesionales del procedimiento, de acuerdo con lo pactado por las partes",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Consultas, interconsultas y atenciones (visita) domiciliaria",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA0206",
+      "specific": "En una factura se registra una interconsulta que originó la práctica de un procedimiento quirúrgico o intervencionista que realizó el mismo prestador",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Consultas, interconsultas y atenciones (visita) domiciliaria",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA0301",
+      "specific": "Los cargos por honorarios profesionales en procedimientos quirúrgicos o intervencionistas, que vienen relacionados o justificados en los soportes de cobro, presentan diferencias con las cantidades que fueron facturadas",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Honorarios profesionales en procedimientos",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA0302",
+      "specific": "Los cargos por honorarios de anestesia que vienen relacionados o justificados en los soportes de cobro presentan diferencias con las cantidades que fueron facturadas",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Honorarios profesionales en procedimientos",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA0303",
+      "specific": "Se cobran honorarios profesionales que ya se encuentran incluidos en una atención agrupada, de acuerdo con lo pactado por las partes",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Honorarios profesionales en procedimientos",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA0501",
+      "specific": "Los cargos por derechos de sala que vienen relacionados o justificados en los soportes de cobro presentan diferencias con las cantidades que fueron facturadas",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Derechos de sala",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA0502",
+      "specific": "Se cobran tecnologías en salud que ya se encuentran incluidas en el ítem de derechos de sala o materiales quirúrgicos",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Derechos de sala",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA0503",
+      "specific": "Se cobran derechos de sala que ya se encuentran incluidos en una atención agrupada, de acuerdo con lo pactado por las partes",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Derechos de sala",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA0601",
+      "specific": "Los cargos por dispositivos médicos que vienen relacionados en los soportes de cobro presentan diferencias con las cantidades que fueron facturadas",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Dispositivos médicos",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA0602",
+      "specific": "Se cobran dispositivos médicos que ya se encuentran incluidos en el ítem de materiales por grupo quirúrgico",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Dispositivos médicos",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA0603",
+      "specific": "Se cobran dispositivos médicos que ya se encuentran incluidos en una atención agrupada",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Dispositivos médicos",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA0701",
+      "specific": "Los cargos por Medicamentos o APME que vienen relacionados en los soportes de cobro, presentan diferencias con las cantidades que fueron facturadas",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Medicamentos y Alimentos para Propósitos Médicos Especiales - APME",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA0702",
+      "specific": "Se facturan separadamente principios activos que fueron dispensados en una presentación combinada",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Medicamentos y Alimentos para Propósitos Médicos Especiales - APME",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA0703",
+      "specific": "Se cobran medicamentos o APME que ya se encuentran incluidos en una atención agrupada, de acuerdo con lo pactado por las partes",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Medicamentos y Alimentos para Propósitos Médicos Especiales - APME",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA0705",
+      "specific": "Se cobran medicamentos que ya se encuentran incluidos en el procedimiento quirúrgico.",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Medicamentos y Alimentos para Propósitos Médicos Especiales - APME",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA0801",
+      "specific": "Los cargos por apoyo diagnóstico que vienen relacionados o justificados en los soportes de cobro presentan diferencias con las cantidades que fueron facturadas",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Apoyo diagnóstico",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA0802",
+      "specific": "Se facturan separadamente apoyos diagnósticos incluidos uno en el otro",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Apoyo diagnóstico",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA0803",
+      "specific": "Se cobran apoyos diagnósticos que ya se encuentran incluidos en una atención agrupada, de acuerdo con lo pactado por las partes",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Apoyo diagnóstico",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA0805",
+      "specific": "Se cobran apoyos diagnósticos que ya se encuentran incluidos en el procedimiento quirúrgico o intervencionista",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Apoyo diagnóstico",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA1305",
+      "specific": "Servicio o tecnología corresponde a diferente cobertura",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Factura incluye servicios y tecnologías en salud de diferentes coberturas",
+      "resolution": "2284 de 2023",
+      "page": 21
+    },
+    {
+      "code": "FA1605",
+      "specific": "En la factura se relacionan una o varias personas que en el momento de la prestación del servicio corresponden a otro responsable de pago",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Persona, servicio o tecnología pertenecía a otro responsable de pago en el Momento de la prestación",
+      "resolution": "2284 de 2023",
+      "page": 22
+    },
+    {
+      "code": "FA1606",
+      "specific": "En la factura se relacionan uno o varios servicios o tecnologías en salud que corresponden a otro responsable de pago",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Persona, servicio o tecnología pertenecía a otro responsable de pago en el Momento de la prestación",
+      "resolution": "2284 de 2023",
+      "page": 22
+    },
+    {
+      "code": "FA1905",
+      "specific": "Hay descuentos otorgados, que fueron aplicados de manera diferente a lo pactado o no fueron aplicados",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "",
+      "resolution": "2284 de 2023",
+      "page": 22
+    },
+    {
+      "code": "FA2006",
+      "specific": "Los recaudos efectivos de pagos compartidos o copagos y cuotas moderadoras, que por acuerdo de voluntades efectuó el prestador de servicios de salud o proveedor de tecnologías en salud, no corresponden a lo informado por la entidad responsable de pago para la liquidación del pago compartido",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Pago compartido",
+      "resolution": "2284 de 2023",
+      "page": 22
+    },
+    {
+      "code": "FA2301",
+      "specific": "Los cargos por otros procedimientos no quirúrgicos que vienen relacionados o justificados en los soportes de cobro presentan diferencias con las cantidades que fueron facturadas",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Otros procedimientos no quirúrgicos",
+      "resolution": "2284 de 2023",
+      "page": 22
+    },
+    {
+      "code": "FA2302",
+      "specific": "Se facturan separadamente otros procedimientos no quirúrgicos incluidos en otro.",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Otros procedimientos no quirúrgicos",
+      "resolution": "2284 de 2023",
+      "page": 22
+    },
+    {
+      "code": "FA2303",
+      "specific": "Se cobran otros procedimientos no quirúrgicos que ya se encuentran incluidos en una atención agrupada, de acuerdo con lo pactado por las partes",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Otros procedimientos no quirúrgicos",
+      "resolution": "2284 de 2023",
+      "page": 22
+    },
+    {
+      "code": "FA2702",
+      "specific": "Se cobran servicios y tecnologias en salud que se encuentran ya cobrados dentro de la misma u otra factura",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Servicio o tecnología de salud ya facturado",
+      "resolution": "2284 de 2023",
+      "page": 22
+    },
+    {
+      "code": "FA2805",
+      "specific": "se factura un servicio o tecnología de salud ya pagada por la entidad responsable de pago",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "servicio o tecnología de salud ya pagada al prestador de servicios de salud o proveedor de tecnologías en salud",
+      "resolution": "2284 de 2023",
+      "page": 22
+    },
+    {
+      "code": "FA3801",
+      "specific": "Los cargos por traslado asistencial de pacientes que vienen relacionados o justificados en los soportes de cobro presentan diferencias con las cantidades que fueron facturadas",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Traslado asistencial de pacientes",
+      "resolution": "2284 de 2023",
+      "page": 22
+    },
+    {
+      "code": "FA3803",
+      "specific": "Se cobra traslado asistencial de pacientes que ya se encuentran incluidos en una atención agrupada, de acuerdo con lo pactado por las partes",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Traslado asistencial de pacientes",
+      "resolution": "2284 de 2023",
+      "page": 22
+    },
+    {
+      "code": "FA5103",
+      "specific": "Servicio o tecnología de salud incluido en una atención agrupada, prestado por otro prestador de servicios de salud en caso de urgencias ó por proceso de referencia",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Servicio o tecnología prestado o suministrada por un prestador de servicios de salud o proveedor de tecnologías en salud diferente al que tiene a su cargo la atención agrupada",
+      "resolution": "2284 de 2023",
+      "page": 22
+    },
+    {
+      "code": "FA5105",
+      "specific": "Servicio o tecnología de salud incluido en una atención agrupada, que hace parte de la RIAS para la promoción y mantenimiento de la salud o la RIAS para la población materno perinatal o aquellas que el Ministerio de Salud y Protección Social disponga como obligatorias, fue prestado o provisto por otro prestador de servicios de salud o proveedor de tecnologías en salud",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Servicio o tecnología prestado o suministrada por un prestador de servicios de salud o proveedor de tecnologías en salud diferente al que tiene a su cargo la atención agrupada",
+      "resolution": "2284 de 2023",
+      "page": 22
+    },
+    {
+      "code": "FA5106",
+      "specific": "Servicio o tecnología de salud incluido en una atención agrupada prestado por otro prestador de servicios de salud, con la finalidad de determinar el nivel de control o la aparición de complicaciones de una condición en salud ya establecida",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Servicio o tecnología prestado o suministrada por un prestador de servicios de salud o proveedor de tecnologías en salud diferente al que tiene a su cargo la atención agrupada",
+      "resolution": "2284 de 2023",
+      "page": 22
+    },
+    {
+      "code": "FA5205",
+      "specific": "el número de personas incluidas en la modalidad de pago prospectiva es disminuido por novedades en la base de datos proporcionada por la entidad responsable de pago",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Disminución en el número de personas incluidas en una modalidad de pago prospectiva",
+      "resolution": "2284 de 2023",
+      "page": 23
+    },
+    {
+      "code": "FA5206",
+      "specific": "La persona incluida en una modalidad de pago prospectiva fallece y aplica una deducción proporcional del valor facturado",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Disminución en el número de personas incluidas en una modalidad de pago prospectiva",
+      "resolution": "2284 de 2023",
+      "page": 23
+    },
+    {
+      "code": "FA5701",
+      "specific": "Los cargos por apoyo terapéutico que vienen relacionados o justificados en los soportes de cobro presentan diferencias con las cantidades que fueron facturadas",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Apoyo terapéutico",
+      "resolution": "2284 de 2023",
+      "page": 23
+    },
+    {
+      "code": "FA5702",
+      "specific": "Se facturan separadamente apoyos terapéuticos incluidos en otro",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Apoyo terapéutico",
+      "resolution": "2284 de 2023",
+      "page": 23
+    },
+    {
+      "code": "FA5703",
+      "specific": "Se cobran apoyos terapéuticos que ya se encuentran incluidos en una atención agrupada, de acuerdo con lo pactado por las partes",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Apoyo terapéutico",
+      "resolution": "2284 de 2023",
+      "page": 23
+    },
+    {
+      "code": "FA5801",
+      "specific": "Los cargos por procedimientos quirúrgicos o intervencionistas que vienen relacionados o justificados en los soportes de cobro presentan diferencias con las cantidades que fueron facturadas",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Procedimientos quirúrgicos e intervencionistas",
+      "resolution": "2284 de 2023",
+      "page": 23
+    },
+    {
+      "code": "FA5802",
+      "specific": "Se facturan separadamente procedimientos quirúrgicos o intervencionistas incluidos en otro",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Procedimientos quirúrgicos e intervencionistas",
+      "resolution": "2284 de 2023",
+      "page": 23
+    },
+    {
+      "code": "FA5803",
+      "specific": "Se cobran procedimientos quirúrgicos o intervencionistas que ya se encuentran incluidos en una atención agrupada",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Procedimientos quirúrgicos e intervencionistas",
+      "resolution": "2284 de 2023",
+      "page": 23
+    },
+    {
+      "code": "FA5901",
+      "specific": "Los cargos por transporte no asistencial ambulatorio de la persona que vienen relacionados o justificados en los soportes de cobro presentan diferencias con las cantidades que fueron facturadas",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Transporte no asistencial ambulatorio de la persona",
+      "resolution": "2284 de 2023",
+      "page": 23
+    },
+    {
+      "code": "FA5903",
+      "specific": "Se cobra transporte no asistencial ambulatorio de la persona que ya se encuentra incluido en una atención agrupada, de acuerdo con lo pactado por las partes",
+      "general": "Facturación",
+      "type": "glosa",
+      "concept": "Transporte no asistencial ambulatorio de la persona",
+      "resolution": "2284 de 2023",
+      "page": 23
+    },
+    {
+      "code": "RE2201",
+      "specific": "La entidad responsable de pago informa al prestador de servicios de salud o proveedor de tecnologías en salud que la respuesta a la devolución se presenta por fuera de los términos legales, configurándose la aceptación tácita de la devolución.",
+      "general": "Respuestas a devoluciones o glosas",
+      "type": "respuesta",
+      "concept": ", Respuesta a devolución y_glosa extemporánea",
+      "resolution": "2284 de 2023",
+      "page": 33
+    },
+    {
+      "code": "RE2202",
+      "specific": "La entidad responsable de pago informa al prestador de servicios de salud o proveedor de tecnologías en salud que la respuesta a la glosa se presenta por fuera de los términos legales, configurándose la aceptación tácita de la glosa.",
+      "general": "Respuestas a devoluciones o glosas",
+      "type": "respuesta",
+      "concept": ", Respuesta a devolución y_glosa extemporánea",
+      "resolution": "2284 de 2023",
+      "page": 33
+    },
+    {
+      "code": "RE9501",
+      "specific": "La devolución no procede por haber sido generada fuera de los términos establecidos en el articulo 6 de la presente resolución.",
+      "general": "Respuestas a devoluciones o glosas",
+      "type": "respuesta",
+      "concept": "Glosa o devolución extemporánea",
+      "resolution": "2284 de 2023",
+      "page": 32
+    },
+    {
+      "code": "RE9502",
+      "specific": "La glosa no procede por haber sido generada fuera de los términos establecidos por la Ley configurándose la aceptación tácita de la factura de venta en salud.",
+      "general": "Respuestas a devoluciones o glosas",
+      "type": "respuesta",
+      "concept": "Glosa o devolución extemporánea",
+      "resolution": "2284 de 2023",
+      "page": 32
+    },
+    {
+      "code": "RE9601",
+      "specific": "El prestador de servicios de salud o proveedor de tecnologías en salud aporta a la entidad responsable de pago la evidencia que demuestra que la devolución es injustificada al 100%",
+      "general": "Respuestas a devoluciones o glosas",
+      "type": "respuesta",
+      "concept": "Glosa o devolución injustificada",
+      "resolution": "2284 de 2023",
+      "page": 32
+    },
+    {
+      "code": "RE9602",
+      "specific": "El prestador de servicios de salud o proveedor de tecnologías en salud aporta a la entidad responsable de pago la evidencia que demuestra que la glosa es injustificada al 100%.",
+      "general": "Respuestas a devoluciones o glosas",
+      "type": "respuesta",
+      "concept": "Glosa o devolución injustificada",
+      "resolution": "2284 de 2023",
+      "page": 33
+    },
+    {
+      "code": "RE9701",
+      "specific": "El prestador de servicios de salud o proveedor de tecnologías en salud informa a la entidad responsable de pago que la devolución ha sido aceptada al 100%",
+      "general": "Respuestas a devoluciones o glosas",
+      "type": "respuesta",
+      "concept": "Glosa o devolución totalmente aceptada",
+      "resolution": "2284 de 2023",
+      "page": 33
+    },
+    {
+      "code": "RE9702",
+      "specific": "El prestador de servicios de salud o proveedor de tecnologías en salud informa a la entidad responsable de pago que la glosa ha sido aceptada al 100%.",
+      "general": "Respuestas a devoluciones o glosas",
+      "type": "respuesta",
+      "concept": "Glosa o devolución totalmente aceptada",
+      "resolution": "2284 de 2023",
+      "page": 33
+    },
+    {
+      "code": "RE9801",
+      "specific": "El prestador de servicios de salud o proveedor de tecnologías en salud informa a la entidad responsable de pago que la glosa ha sido aceptada y subsanada parcialmente.",
+      "general": "Respuestas a devoluciones o glosas",
+      "type": "respuesta",
+      "concept": "Glosa parcialmente aceptada y subsanada parcialmente",
+      "resolution": "2284 de 2023",
+      "page": 33
+    },
+    {
+      "code": "RE9901",
+      "specific": "El prestador de servicios de salud o proveedor de tecnologías en salud informa a la entidad responsable de pago que la glosa siendo justificada ha podido ser subsanada totalmente.",
+      "general": "Respuestas a devoluciones o glosas",
+      "type": "respuesta",
+      "concept": "Glosa no aceptada y subsanada en su totalidad",
+      "resolution": "2284 de 2023",
+      "page": 33
+    },
+    {
+      "code": "SA5401",
+      "specific": "Incumplimiento o falta de evidencia del cumplimiento de los indicadores relacionados con las intervenciones obligatorias para la promoción y el mantenimiento de la salud, según lo establecido la Resolución 3280 de 2018 o la que la modifique o sustituya, según lo pactado en el acuerdo de voluntades.",
+      "general": "Seguimiento a acuerdos",
+      "type": "glosa",
+      "concept": "Incumplimiento de indicadores de seguimiento",
+      "resolution": "2284 de 2023",
+      "page": 32
+    },
+    {
+      "code": "SA5403",
+      "specific": "Incumplimiento o falta de evidencia del cumplimiento de los indicadores relacionados con las intervenciones obligatorias para la atención de las condiciones crónicas y de alto costo, según lo establecido por la normativa vigente y lo pactado entre las partes.",
+      "general": "Seguimiento a acuerdos",
+      "type": "glosa",
+      "concept": "Incumplimiento de indicadores de seguimiento",
+      "resolution": "2284 de 2023",
+      "page": 32
+    },
+    {
+      "code": "SA5501",
+      "specific": "Disminución en el número de la población inicial a atender en una modalidad de pago prospectíva",
+      "general": "Seguimiento a acuerdos",
+      "type": "glosa",
+      "concept": "Ajuste frente a la desviación de la nota técnica",
+      "resolution": "2284 de 2023",
+      "page": 32
+    },
+    {
+      "code": "SA5502",
+      "specific": "Disminución en la frecuencia observada en el uso de los servicios y tecnologías en salud frente a lo proyectado en la nota técnica",
+      "general": "Seguimiento a acuerdos",
+      "type": "glosa",
+      "concept": "Ajuste frente a la desviación de la nota técnica",
+      "resolution": "2284 de 2023",
+      "page": 32
+    },
+    {
+      "code": "SA5601",
+      "specific": "Incumplimiento de las metas, rangos y umbrales pactados de los indicadores de calidad para hacer seguimiento al acuerdo de voluntades.",
+      "general": "Seguimiento a acuerdos",
+      "type": "glosa",
+      "concept": "Incumplimiento de indicadores de calidad, gestión y resultados",
+      "resolution": "2284 de 2023",
+      "page": 32
+    },
+    {
+      "code": "SA5602",
+      "specific": "Incumplimiento de las metas, rangos y umbrales pactados de los indicadores de gestión para hacer seguimiento al acuerdo de voluntades",
+      "general": "Seguimiento a acuerdos",
+      "type": "glosa",
+      "concept": "Incumplimiento de indicadores de calidad, gestión y resultados",
+      "resolution": "2284 de 2023",
+      "page": 32
+    },
+    {
+      "code": "SA5603",
+      "specific": "Incumplimiento de las metas, rangos y umbrales pactados de los indicadores de resultados en salud para hacer seguimiento al acuerdo de voluntades",
+      "general": "Seguimiento a acuerdos",
+      "type": "glosa",
+      "concept": "Incumplimiento de indicadores de calidad, gestión y resultados",
+      "resolution": "2284 de 2023",
+      "page": 32
+    },
+    {
+      "code": "SO0101",
+      "specific": "Existe ausencia total, parcial o inconsistencia en la epicrisis que soporta la estancia u observación de urgéncias",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Estancia u observación de urgencias",
+      "resolution": "2284 de 2023",
+      "page": 25
+    },
+    {
+      "code": "SO0102",
+      "specific": "Los soportes de cobro que evidencian la estancia u observación de urgencias no corresponden a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Estancia u observación de urgencias",
+      "resolution": "2284 de 2023",
+      "page": 25
+    },
+    {
+      "code": "SO0201",
+      "specific": "Existe ausencia total, parcial o inconsistencia en los soportes de cobro que evidencian la realización de la consulta interconsulta o atención (visita) domiciliaria",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Consultas, interconsultas y atenciones visitas domiciliarias",
+      "resolution": "2284 de 2023",
+      "page": 25
+    },
+    {
+      "code": "SO0202",
+      "specific": "Los soportes de cobro que evidencian la realización de la consulta, interconsulta o atención (visita) domiciliaria no corresponden a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Consultas, interconsultas y atenciones visitas domiciliarias",
+      "resolution": "2284 de 2023",
+      "page": 25
+    },
+    {
+      "code": "SO0301",
+      "specific": "Existe ausencia total, parcial o inconsistencia en los soportes de cobro que evidencian los honorarios profesionales en procedimientos quirúrgicos o intervencionista",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Honorarios profesionales en procedimientos",
+      "resolution": "2284 de 2023",
+      "page": 25
+    },
+    {
+      "code": "SO0302",
+      "specific": "Los soportes de cobro que evidencian los honorarios de profesionales en procedimientos no corresponden a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Honorarios profesionales en procedimientos",
+      "resolution": "2284 de 2023",
+      "page": 25
+    },
+    {
+      "code": "SO0303",
+      "specific": "Existe ausencia total, parcial o inconsistencia en los soportes de cobro que evidencian los honorarios de anestesia",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Honorarios profesionales en procedimientos",
+      "resolution": "2284 de 2023",
+      "page": 25
+    },
+    {
+      "code": "SO0401",
+      "specific": "Existe ausencia total, parcial o inconsistencia en los soportes de cobro que evidencian los honorarios de otro talento humano que interviene en la atención, diferente a los quirúrgicos y clínicos",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Honorarios de talento humano que interviene en la atención .",
+      "resolution": "2284 de 2023",
+      "page": 25
+    },
+    {
+      "code": "SO0402",
+      "specific": "Los soportes de cobro que evidencian los honorarios de otros profesionales asistenciales no corresponden a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Honorarios de talento humano que interviene en la atención .",
+      "resolution": "2284 de 2023",
+      "page": 25
+    },
+    {
+      "code": "SO0601",
+      "specific": "Existe ausencia total, parcial o inconsistencia en los soportes de cobro que evidencian los dispositivos médicos empleados en procedimientos quirúrgicos o intervencionistas que sean motivo de cobro adicional",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "",
+      "resolution": "2284 de 2023",
+      "page": 25
+    },
+    {
+      "code": "SO0602",
+      "specific": "Los soportes de cobro que evidencian los dispositivos médicos empleados no corresponden a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "",
+      "resolution": "2284 de 2023",
+      "page": 25
+    },
+    {
+      "code": "SO0603",
+      "specific": "Existe ausencia total, parcial o inconsistencia en los soportes de cobro que evidencian los dispositivos médicos empleados en procedimientos no quirúrgicos que sean motivo de cobro adicional",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "",
+      "resolution": "2284 de 2023",
+      "page": 25
+    },
+    {
+      "code": "SO0604",
+      "specific": "Existe ausencia total, parcial o inconsistencia en los soportes de cobro que evidencian los dispositivos médicos entregados como parte de una acción de protección específica o tratamiento",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "",
+      "resolution": "2284 de 2023",
+      "page": 25
+    },
+    {
+      "code": "SO0701",
+      "specific": "Existe ausencia total, parcial o inconsistencia en la hoja de administración de medicamentos",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Medicamentos y Alimentos para Propósitos Médicos Especiales — APME",
+      "resolution": "2284 de 2023",
+      "page": 25
+    },
+    {
+      "code": "SO0702",
+      "specific": "Los soportes de cobro que evidencian los medicamentos suministrados no corresponden a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Medicamentos y Alimentos para Propósitos Médicos Especiales — APME",
+      "resolution": "2284 de 2023",
+      "page": 25
+    },
+    {
+      "code": "SO0703",
+      "specific": "Existe ausencia total, parcial o inconsistencia en el comprobante de recibido de medicamentos de las personas",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Medicamentos y Alimentos para Propósitos Médicos Especiales — APME",
+      "resolution": "2284 de 2023",
+      "page": 25
+    },
+    {
+      "code": "SO0801",
+      "specific": "Existe ausencia total, parcial o inconsistencia en los soportes de cobro que evidencian la práctica del apoyo diagnóstico",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Apoyo diagnóstico",
+      "resolution": "2284 de 2023",
+      "page": 25
+    },
+    {
+      "code": "SO0802",
+      "specific": "Los soportes de cobro que evidencian el apoyo diagnóstico no corresponden a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Apoyo diagnóstico",
+      "resolution": "2284 de 2023",
+      "page": 25
+    },
+    {
+      "code": "SO0803",
+      "specific": "Existe ausencia en los soportes de cobro de la lectura o interpretación del apoyo diagnóstico por parte del profesional correspondiente",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Apoyo diagnóstico",
+      "resolution": "2284 de 2023",
+      "page": 25
+    },
+    {
+      "code": "SO2101",
+      "specific": "El número de la autorización no está incluido en el RIPS.",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Número de autorización",
+      "resolution": "2284 de 2023",
+      "page": 25
+    },
+    {
+      "code": "SO2102",
+      "specific": "el número de la autorización incluido en el RIPS no corresponde al prestador de servicios de salud",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Número de autorización",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO2103",
+      "specific": "El número de la autorización de servicios y tecnologías en salud incluido en el RIPS no corresponde al servicio o tecnología prestada o facturada",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Número de autorización",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO2104",
+      "specific": "El número de la autorización incluido en el RIPS no corresponde a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Número de autorización",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO2301",
+      "specific": "Existe ausencia total, parcial o inconsistencia en los soportes de cobro que evidencian la práctica de otros procedimientos no quirúrgicos",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Otros procedimientos no quirúrgicos",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO2302",
+      "specific": "Los soportes de cobro que evidencian otros procedimientos no quirúrgicos no corresponden a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Otros procedimientos no quirúrgicos",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO3401",
+      "specific": "Existe ausencia total, parcial o inconsistencia en la epicrisis",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Resumen de atención o epicrisis, hoja de atención de urgencias u hoja de atención odontológica",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO3402",
+      "specific": "La epicrisis no corresponde a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Resumen de atención o epicrisis, hoja de atención de urgencias u hoja de atención odontológica",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO3403",
+      "specific": "Existe ausencia total, parcial o inconsistencia en la hoja de atención de urgencias",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Resumen de atención o epicrisis, hoja de atención de urgencias u hoja de atención odontológica",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO3404",
+      "specific": "La hoja de atención de urgencias no corresponde a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Resumen de atención o epicrisis, hoja de atención de urgencias u hoja de atención odontológica",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO3405",
+      "specific": "Existe ausencia total, parcial o inconsistencia en el resumen de atención",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Resumen de atención o epicrisis, hoja de atención de urgencias u hoja de atención odontológica",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO3406",
+      "specific": "El resumen de atención no corresponde a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Resumen de atención o epicrisis, hoja de atención de urgencias u hoja de atención odontológica",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO3407",
+      "specific": "Existe ausencia total, parcial o inconsistencia en la hoja de atención odontológica",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Resumen de atención o epicrisis, hoja de atención de urgencias u hoja de atención odontológica",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO3408",
+      "specific": "La hoja de atención odontológica no corresponde a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Resumen de atención o epicrisis, hoja de atención de urgencias u hoja de atención odontológica",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO3601",
+      "specific": "Existe ausencia total, parcial o inconsistencia en las copias de la factura enviada a la compañia de seguros SOAT, la ADRES o la entidad que haga sus veces, cuando aplica, con sus respectivos detalles, con las que se cumple los topes de cobertura",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Copia de la factura expedida a la aseguradora del SOAT, la ADRES o la entidad que , iaga sus veces",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO3602",
+      "specific": "Las copias de la factura enviada a la compañía de seguros SOAT, la ADRES o la entidad que haga sus veces, cuando aplica, no corresponde a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Copia de la factura expedida a la aseguradora del SOAT, la ADRES o la entidad que , iaga sus veces",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO3701",
+      "specific": "Existe ausencia total, parcial o inconsistencia en la orden o prescripción facultativa del profesional tratante",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Orden o prescripción facultativa del profesional tratante",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO3702",
+      "specific": "La orden o prescripción facultativa no corresponde a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Orden o prescripción facultativa del profesional tratante",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO3801",
+      "specific": "Existe ausencia total, parcial o inconsistencia en la hoja de traslado asistencial",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Hoja de traslado asistencial de sacientes",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO3802",
+      "specific": "La hoja de traslado asistencial no corresponde a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Hoja de traslado asistencial de sacientes",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO3901",
+      "specific": "Existe ausencia total, parcial o inconsistencia en el comprobante de recibido del usuario",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Comprobante de recibido del usuario",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO3902",
+      "specific": "El comprobante de recibido del usuario no corresponde a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Comprobante de recibido del usuario",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO4001",
+      "specific": "Existe ausencia total, parcial o inconsistencia de la copia del registro de anestesia",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Registro de anestesia",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO4002",
+      "specific": "El registro de anestesia no corresponde a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Registro de anestesia",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO4101",
+      "specific": "Existe ausencia total parcial o inconsistencia de la copia de la descripción quirúrgica",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Descripción quirúrgica",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO4102",
+      "specific": "La descripción quirúrgica no corresponde a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Descripción quirúrgica",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO4201",
+      "specific": "Existe ausencia total, parcial o inconsistencia de la lista de precios",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Lista de precios",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO4701",
+      "specific": "No se incluye en la factura de venta en salud, los soportes de los servicios y tecnologías en salud para recobros a cargo de la ADRES, accidentes de trabajo o enfermedad profesional a cargo de la ARL, de conformidad con la normativa vigente",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Faltan soportes de los servicios y tecnologías en salud de los recobros a cargo de la ADRES o de la ARL",
+      "resolution": "2284 de 2023",
+      "page": 26
+    },
+    {
+      "code": "SO4801",
+      "specific": "Existe ausencia total, parcial o inconsistencia en la evidencia del envío del trámite respectivo",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Evidencia del envío del trámite respectivo",
+      "resolution": "2284 de 2023",
+      "page": 27
+    },
+    {
+      "code": "SO4802",
+      "specific": "El informe de atención de urgencias no corresponde a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Evidencia del envío del trámite respectivo",
+      "resolution": "2284 de 2023",
+      "page": 27
+    },
+    {
+      "code": "SO5701",
+      "specific": "Existe ausencia total, parcial o inconsistencia en los soportes de cobro que evidencian la práctica del apoyo terapéutico",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Apoyo tera .éutico",
+      "resolution": "2284 de 2023",
+      "page": 27
+    },
+    {
+      "code": "SO5702",
+      "specific": "Los soportes de cobro que evidencian el apoyo terapéutico no corresponden a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Apoyo tera .éutico",
+      "resolution": "2284 de 2023",
+      "page": 27
+    },
+    {
+      "code": "SO5801",
+      "specific": "Existe ausencia total, parcial o inconsistencia en los soportes de cobro que evidencian los procedimientos quirúrgicos o intervencionistas",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Procedimientos quirúrgicos e intervencionistas",
+      "resolution": "2284 de 2023",
+      "page": 27
+    },
+    {
+      "code": "SO5802",
+      "specific": "Los soportes de cobro que evidencian los procedimientos quirúrgicos o intervencionistas no corresponden a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Procedimientos quirúrgicos e intervencionistas",
+      "resolution": "2284 de 2023",
+      "page": 27
+    },
+    {
+      "code": "SO5901",
+      "specific": "Existe ausencia total, parcial o inconsistencia en el soporte del transporte no asistencial ambulatorio de la persona.",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Transporte no asistencial ambulatorio de la persona %",
+      "resolution": "2284 de 2023",
+      "page": 27
+    },
+    {
+      "code": "SO5902",
+      "specific": "El tiquete de transporte no corresponde a la persona atendida",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Transporte no asistencial ambulatorio de la persona %",
+      "resolution": "2284 de 2023",
+      "page": 27
+    },
+    {
+      "code": "SO6101",
+      "specific": "En el caso de que uno o varios campos de RIPS presente inconsistencias con la atención prestada",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Registro Individual de Prestaciones de Servicios de Salud",
+      "resolution": "2284 de 2023",
+      "page": 27
+    },
+    {
+      "code": "SO6102",
+      "specific": "En el caso de que uno o varios campos de RIPS presente inconsistencias con relación al contrato",
+      "general": "Soportes",
+      "type": "glosa",
+      "concept": "Registro Individual de Prestaciones de Servicios de Salud",
+      "resolution": "2284 de 2023",
+      "page": 27
+    },
+    {
+      "code": "TA0101",
+      "specific": "El cargo por estancias u observación de urgencias, que viene relacionado o justificado en los soportes de cobro, presenta diferencia con los valores pactados o establecidos por la norma",
+      "general": "Tarifas",
+      "type": "glosa",
+      "concept": "Estancia u observación de urgencias",
+      "resolution": "2284 de 2023",
+      "page": 23
+    },
+    {
+      "code": "TA0201",
+      "specific": "El cargo por consulta, interconsulta o atención (visita) domiciliaria que viene relacionado o justificado en los soportes de cobro, presenta diferencias con los valores pactados o establecidos por la norma",
+      "general": "Tarifas",
+      "type": "glosa",
+      "concept": "Consultas, interconsultas y atenciones (visitas) domiciliarias",
+      "resolution": "2284 de 2023",
+      "page": 23
+    },
+    {
+      "code": "TA0301",
+      "specific": "Los cargos por honorarios profesionales en procedimientos quirúrgicos o intervencionistas, que vienen relacionados o justificados en los soportes de cobro, presentan diferencias con los valores pactados o establecidos por la norma",
+      "general": "Tarifas",
+      "type": "glosa",
+      "concept": "Honorarios profesionales en procedimientos",
+      "resolution": "2284 de 2023",
+      "page": 23
+    },
+    {
+      "code": "TA0302",
+      "specific": "Los cargos por honorarios de anestesia que vienen relacionados o justificados en los soportes de cobro presentan diferencias con los valores pactados o establecidos por la norma",
+      "general": "Tarifas",
+      "type": "glosa",
+      "concept": "Honorarios profesionales en procedimientos",
+      "resolution": "2284 de 2023",
+      "page": 23
+    },
+    {
+      "code": "TA0401",
+      "specific": "Los cargos por honorarios de otro talento humano que interviene en la atención que vienen relacionados o justificados en soportes de cobro, presentan diferencias con los valores pactados o establecidos por la norma .",
+      "general": "Tarifas",
+      "type": "glosa",
+      "concept": "Honorarios otro talento humano que interviene en la atención",
+      "resolution": "2284 de 2023",
+      "page": 23
+    },
+    {
+      "code": "TA0501",
+      "specific": "Los cargos por derechos de sala que vienen relacionados o justificados en los soportes de cobro presentan diferencias con los valores pactados o establecidos por la norma",
+      "general": "Tarifas",
+      "type": "glosa",
+      "concept": "Derechos de sala",
+      "resolution": "2284 de 2023",
+      "page": 23
+    },
+    {
+      "code": "TA0601",
+      "specific": "Los cargos por dispositivos médicos que vienen relacionados o justificados en los soportes de cobro presentan diferencias con los valores pactados o establecidos por la norma",
+      "general": "Tarifas",
+      "type": "glosa",
+      "concept": "Dispositivos médicos",
+      "resolution": "2284 de 2023",
+      "page": 24
+    },
+    {
+      "code": "TA0701",
+      "specific": "Los cargos por medicamentos o APME que vienen relacionados o justificados en los soportes de cobro, presentan diferencias con los valores pactados o establecidos por la norma",
+      "general": "Tarifas",
+      "type": "glosa",
+      "concept": "Medicamentos y Alimentos para Propósitos Médicos Especiales - APME",
+      "resolution": "2284 de 2023",
+      "page": 24
+    },
+    {
+      "code": "TA0801",
+      "specific": "Los cargos por apoyo diagnóstico que vienen relacionados o justificados en los soportes de cobro presentan diferencias con los valores pactados o establecidos por la norma",
+      "general": "Tarifas",
+      "type": "glosa",
+      "concept": "Apoyo diagnóstico",
+      "resolution": "2284 de 2023",
+      "page": 24
+    },
+    {
+      "code": "TA0901",
+      "specific": "Los cargos por atención agrupada que vienen relacionados o justificados en los soportes de cobro presentan diferencias con los valores pactados.",
+      "general": "Tarifas",
+      "type": "glosa",
+      "concept": "Atención agrupada",
+      "resolution": "2284 de 2023",
+      "page": 24
+    },
+    {
+      "code": "TA2301",
+      "specific": "Los cargos por otros procedimientos no quirúrgicos que vienen relacionados o justificados en los soportes de cobro presentan diferencias con los valores pactados o establecidos por la norma",
+      "general": "Tarifas",
+      "type": "glosa",
+      "concept": "Otros procedimientos no quirúrgicos .",
+      "resolution": "2284 de 2023",
+      "page": 24
+    },
+    {
+      "code": "TA2901",
+      "specific": "En la factura se adicionan cobros de recargos no pactados previamente entre las partes o establecidos por la norma",
+      "general": "Tarifas",
+      "type": "glosa",
+      "concept": "Recargos no pactados",
+      "resolution": "2284 de 2023",
+      "page": 24
+    },
+    {
+      "code": "TA3801",
+      "specific": "Los cargos por traslado asistencial de pacientes que vienen relacionados o justificados en los soportes de cobro presentan diferencias con los valores pactados o establecidos por la norma",
+      "general": "Tarifas",
+      "type": "glosa",
+      "concept": "Traslado asistencial de pacientes",
+      "resolution": "2284 de 2023",
+      "page": 24
+    },
+    {
+      "code": "TA5701",
+      "specific": "Los cargos por apoyo terapéutico que vienen relacionados o justificados en los soportes de cobro presentan diferencias con los valores pactados o establecidos por la norma",
+      "general": "Tarifas",
+      "type": "glosa",
+      "concept": "Apoyo terapéutico",
+      "resolution": "2284 de 2023",
+      "page": 24
+    },
+    {
+      "code": "TA5801",
+      "specific": "Los cargos por procedimientos quirúrgicos o intervencionistas que vienen relacionados o justificados en los soportes de cobro presentan diferencias con los valores pactados o establecidos por la norma",
+      "general": "Tarifas",
+      "type": "glosa",
+      "concept": "Procedimientos quirúrgicos e intervencionistas",
+      "resolution": "2284 de 2023",
+      "page": 24
+    },
+    {
+      "code": "TA5901",
+      "specific": "Los cargos por otro transporte no asistencial ambulatorio de personas que vienen relacionados o justificados en los soportes de cobro presentan diferencias con los valores pactados o establecidos por la norma",
+      "general": "Tarifas",
+      "type": "glosa",
+      "concept": "Transporte no asistencial ambulatorio de las personas",
+      "resolution": "2284 de 2023",
+      "page": 24
+    }
+  ],
+  "areas": [
+    "Facturación",
+    "Radiología",
+    "Enfermería",
+    "Admisiones",
+    "Laboratorio",
+    "Farmacia",
+    "Gobierno Clínico",
+    "Autorización",
+    "Contratación",
+    "Terapia Renal",
+    "Fisioterapia",
+    "Materiales",
+    "Sin novedad",
+    "Tranfusional"
+  ],
+  "glosasSource": {
+    "resolution": "2284 de 2023",
+    "annex": 3,
+    "verified": "2026-10-23",
+    "url": "https://www.minsalud.gov.co/Normatividad_Nuevo/Resoluci%C3%B3n%20No%202284%20de%202023.pdf"
+  }
+}

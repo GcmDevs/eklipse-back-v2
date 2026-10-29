@@ -41,6 +41,7 @@ async function bootstrap() {
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['X-Preauditoria-Vista', 'Content-Disposition'],
     optionsSuccessStatus: 204,
   });
 
