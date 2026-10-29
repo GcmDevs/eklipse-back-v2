@@ -1,9 +1,5 @@
 import autoTable, { CellInput, Table } from 'jspdf-autotable';
 import jsPDF from 'jspdf';
-import { mkdir, writeFile } from 'fs/promises';
-import { join } from 'path';
-import { CTC_FILE_LOCATIONS } from '@inn/lgc/ctc/application/constants';
-import { ENVIRONMENTS } from '@inn/app.environments';
 import type { DataInterfaceI } from './impl';
 
 const MARGIN = 40;
@@ -258,13 +254,7 @@ export function createOrdenTrasladoDocument(payload: DataInterfaceI): jsPDF {
   return doc;
 }
 
-export async function generateOrdenTraslado(payload: DataInterfaceI): Promise<string> {
+export async function generateOrdenTraslado(payload: DataInterfaceI): Promise<Buffer> {
   const doc = createOrdenTrasladoDocument(payload);
-  const directory = join('..', CTC_FILE_LOCATIONS.ordenesTraslado);
-  await mkdir(directory, { recursive: true });
-  await writeFile(
-    join(directory, `${payload.consecutivo}.pdf`),
-    Buffer.from(doc.output('arraybuffer'))
-  );
-  return `${ENVIRONMENTS.apiUrl}/${CTC_FILE_LOCATIONS.ordenesTraslado}/${payload.consecutivo}.pdf`;
+  return Buffer.from(doc.output('arraybuffer'));
 }
