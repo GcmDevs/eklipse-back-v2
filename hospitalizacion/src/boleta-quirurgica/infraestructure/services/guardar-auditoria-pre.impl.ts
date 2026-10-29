@@ -45,7 +45,7 @@ export class GuardarAuditoriaPreImpl extends BaseSource {
       ]);
 
       if (body.observacionPendiente?.trim()) {
-        await guardarObservacionPendiente(runner, body, 'AUDITORIA', this.auth.user.fullName);
+        await guardarObservacionPendiente(runner, body, 'PRE AUDITORIA', this.auth.user.fullName);
       }
       await runner.commitTransaction();
       return { created, updated: !created, estado: 'EN GESTION' as const };

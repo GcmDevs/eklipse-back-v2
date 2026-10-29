@@ -27,7 +27,8 @@ export class AutorizacionBoletaQuirurgicaImpl extends BaseSource {
       await this.qr.startTransaction();
       transactionStarted = true;
       if (body.observacionPendiente?.trim()) {
-        await guardarObservacionPendiente(this.qr, body, 'AUDITORIA', this.auth.user.fullName);
+        const gestorObs = body.gestor?.trim() || 'AUDITORIA';
+      await guardarObservacionPendiente(this.qr, body, gestorObs as any, this.auth.user.fullName);
       }
 
       const auditoriaRp = this.qr.manager.getRepository(BoletaQuirurgicaAuditoriaOrm);
