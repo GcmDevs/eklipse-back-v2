@@ -5,8 +5,6 @@ import * as fs from 'fs';
 import { DetalleCotizacionOrm } from '@inn/lgc/ctc/orm/inn/central-compras';
 import { TimerService } from '../../base';
 import { GcmContexts } from '@common/domain/types';
-import { CTC_FILE_LOCATIONS } from '@inn/lgc/ctc/application/constants';
-import { ENVIRONMENTS } from '@inn/app.environments';
 
 export interface OCFirma {
   subtitle?: string;
@@ -160,7 +158,7 @@ const BE_EPDF_FONT_FAMILIES = {
   default: 'helvetica',
 };
 
-export async function generateOrdCo(payload: OCPayload) {
+export async function generateOrdCo(payload: OCPayload): Promise<Buffer> {
   if (payload.productosCotizados.length) {
     payload.productos.map(el => {
       try {
@@ -598,14 +596,5 @@ export async function generateOrdCo(payload: OCPayload) {
     }
   }
 
-  fs.mkdir(`../${CTC_FILE_LOCATIONS.ordenes}/${payload.usuario.cedula}`, _err => {
-    /* if (_err) return console.error(_err);
-    console.log('Directory created successfully!'); */
-  });
-
-  const url = `../${CTC_FILE_LOCATIONS.ordenes}/${payload.usuario.cedula}/${payload.ordenCompra.consecutivo}.pdf`;
-
-  doc.save(url);
-
-  return `${ENVIRONMENTS.apiUrl}/${url}`;
+  return Buffer.from(doc.output('arraybuffer'));
 }

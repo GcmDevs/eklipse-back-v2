@@ -1,4 +1,4 @@
-import { BadRequestException, Controller, Get, Param } from '@nestjs/common';
+import { BadRequestException, Controller, Get, Header, HttpException, Param } from '@nestjs/common';
 import { Authorities, CommonGuards } from '@common/presentation/decorators';
 import { INN_AUTHORITIES } from '@inn/authorities';
 import { GcmContexts } from '@common/domain/types';
@@ -15,6 +15,7 @@ export class CotizacionFilesController {
   @ApiOkResponse({ type: GenerateFileRes })
   @Authorities([INN_AUTHORITIES.CENTRAL_COMPRAS.CODE])
   @Get('orden-compra/:contextCode/:cotizacionId')
+  @Header('Cache-Control', 'private, no-store, max-age=0')
   public async generateOrdenCompra(
     @Param('contextCode') contextCode: GcmContexts,
     @Param('cotizacionId') cotizacionId: number
@@ -26,6 +27,7 @@ export class CotizacionFilesController {
       });
       return { url };
     } catch (error: any) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
@@ -36,6 +38,7 @@ export class CotizacionFilesController {
     INN_AUTHORITIES.FARMACIA.CONTROL_GASTOS_SOLICITANTE,
   ])
   @Get('orden-compra-by-documento/:contextCode/:ocId')
+  @Header('Cache-Control', 'private, no-store, max-age=0')
   public async generateOrdenCompraByOID(
     @Param('contextCode') contextCode: GcmContexts,
     @Param('ocId') ocId: number
@@ -47,6 +50,7 @@ export class CotizacionFilesController {
       );
       return { url };
     } catch (error: any) {
+      if (error instanceof HttpException) throw error;
       throw new BadRequestException(error.message);
     }
   }
