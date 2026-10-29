@@ -22,7 +22,9 @@ export interface IngresoReportes {
 }
 
 export interface ConsultaReportes {
+  proceso?: ProcesoReportes;
   paciente: PacienteReportes | null;
   ingresos: IngresoReportes[];
 }
 import { EjecucionReportes } from './ejecucion';
+import { ProcesoReportes } from './proceso';

@@ -114,6 +114,37 @@ describe('GeneradorReportesImpl', () => {
     expect(INGRESOS_REPORTES_SQL).toContain('e.ADNINGRES = i.OID');
   });
 
+  it.each(['Facturado', 'Cerrado', 'Anulado', ' Facturado ', 'CERRADO'])(
+    'no devuelve como activo ni con cama un ingreso %s aunque venga marcado activo',
+    async estado => {
+      query.mockResolvedValueOnce([paciente]).mockResolvedValueOnce([
+        {
+          AINCONSEC: 201,
+          AINFECING: null,
+          ESTADO_INGRESO: estado,
+          INGRESO_ACTIVO: true,
+          CAMA_CODIGO: '401A',
+          CAMA_NOMBRE: 'Cama 401 A',
+          CAMA_UNIDAD: 'Hospitalización',
+        },
+        {
+          AINCONSEC: 200,
+          AINFECING: null,
+          ESTADO_INGRESO: estado,
+          INGRESO_ACTIVO: 1,
+          CAMA_CODIGO: '301B',
+        },
+      ]);
+      const result = await servicio.consultar('001234');
+      expect(result.ingresos).toHaveLength(2);
+      expect(result.ingresos).toEqual([
+        expect.objectContaining({ estado, activo: false, cama: null }),
+        expect.objectContaining({ estado, activo: false, cama: null }),
+      ]);
+      expect(INGRESOS_REPORTES_SQL.match(/i\.AINESTADO NOT IN \(1, 2, 4\)/g)).toHaveLength(2);
+    }
+  );
+
   it('conserva el ingreso activo sin inventar cama cuando no tiene asignación', async () => {
     query.mockResolvedValueOnce([paciente]).mockResolvedValueOnce([
       {
