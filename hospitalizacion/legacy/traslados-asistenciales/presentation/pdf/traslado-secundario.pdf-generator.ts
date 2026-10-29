@@ -3,14 +3,14 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { MEDICALIZADO, MEDICALIZADO_NEONATAL, TIPOS_TRASLADO } from '@hpn/lgc/tas/types/gcn';
 import { TrasladoAsistencialDetalleDataRes } from '../../application/responses';
-import { findImageFromContext } from '@common/application/services';
-import { gcmContextFactory, GcmContexts } from '@common/domain/types';
+import {  GcmContexts } from '@common/domain/types';
 import { TIPOS_EMPLEADO } from '@hpn/lgc/tas/types/gcn';
 import {
   codigoCupsFactory,
   TIPO_REMISIONES_VALUES,
   VIVO,
 } from '@hpn/lgc/tas/types/gcn/traslados-asistenciales';
+import { findImageFromContext } from './traslado-primario.pdf-generator';
 
 export interface TrasladoPdfPayload {
   clinica: {
@@ -104,7 +104,8 @@ function drawOfficialHeader(
   w: number,
   title: string,
   code: string,
-  contexto: GcmContexts
+  contexto: GcmContexts,
+  codigoDestino?: string
 ): number {
   const h = 22;
   const col1W = 40;
@@ -119,11 +120,18 @@ function drawOfficialHeader(
 
   // Logo institucional
   try {
-    const logoPath = resolveBackendResource(findImageFromContext(gcmContextFactory(contexto)));
+    const usarLogoMedicos =
+      contexto === GcmContexts.ALTACENTRO && codigoDestino?.trim().toUpperCase() === 'IPS010';
+    const logoPath = resolveBackendResource(findImageFromContext(contexto, usarLogoMedicos));
     if (fs.existsSync(logoPath)) {
       const img: any = fs.readFileSync(logoPath);
       const ext = logoPath.endsWith('.png') ? 'png' : 'jpg';
-      doc.addImage(img, ext, x + 5, y + 2, 30, 10);
+      const props = doc.getImageProperties(img);
+      const margen = 1;
+      const escala = Math.min((col1W - margen * 2) / props.width, (h - margen * 2) / props.height);
+      const ancho = props.width * escala;
+      const alto = props.height * escala;
+      doc.addImage(img, ext, x + (col1W - ancho) / 2, y + (h - alto) / 2, ancho, alto);
     }
   } catch (e) {}
 
@@ -249,11 +257,11 @@ function drawNotasPage(
   titulo: string,
   codigo: string,
   secciones: { titulo?: string; subtitulo?: string; notas: any[] }[],
-  opts: { M: number; CW: number; PH: number }
+  opts: { M: number; CW: number; PH: number; codigoDestino?: string }
 ): void {
   doc.addPage();
   let y = opts.M;
-  y += drawOfficialHeader(doc, opts.M, y, opts.CW, titulo, codigo, contexto);
+  y += drawOfficialHeader(doc, opts.M, y, opts.CW, titulo, codigo, contexto, opts.codigoDestino);
   y += 4;
 
   let lastTitulo = '';
@@ -573,7 +581,8 @@ export async function generateTrasladoSecundarioPdf(
     CW,
     'FORMATO TRASLADO SECUNDARIO ASISTENCIAL',
     'REF-FT-13',
-    payload.clinica.contexto
+    payload.clinica.contexto,
+    activeTramo?.destino?.codigo
   );
   doc.rect(M, Y, CW, 4); // Espaciador
   doc.setFont(FM.h, F.b);
@@ -1223,7 +1232,7 @@ export async function generateTrasladoSecundarioPdf(
           : 'NOTAS DE ENFERMERÍA',
       tieneMedicas && tieneEnfermeria ? 'ASI-FT-35/36' : tieneMedicas ? 'ASI-FT-36' : 'ASI-FT-35',
       seccionesNotas,
-      { M, CW, PH }
+      { M, CW, PH, codigoDestino: activeTramo?.destino?.codigo }
     );
   }
 

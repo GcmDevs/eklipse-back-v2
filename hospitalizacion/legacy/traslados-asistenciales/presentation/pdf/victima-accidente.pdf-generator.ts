@@ -4,7 +4,6 @@ import * as path from 'path';
 import type { TrasladoPdfPayload } from './traslado-primario.pdf-generator';
 import { getFirmaBufferFromCedula } from './traslado-primario.pdf-generator';
 import { drawFirmaBlock } from './traslado-secundario.pdf-generator';
-import { GcmContexts } from '@common/domain/types';
 import {
   estadoCivilTypeFactory,
   generoTypeFactory,
@@ -80,13 +79,6 @@ export async function generateVictimaAccidentePdf(
     path.basename(process.cwd()).toLowerCase() === 'hospitalizacion'
       ? path.resolve(process.cwd(), '..')
       : process.cwd();
-  const logos: Partial<Record<GcmContexts, string>> = {
-    [GcmContexts.ALTACENTRO]: 'alta-centro.jpg',
-    [GcmContexts.AGUACHICA]: 'aguachica.jpg',
-    [GcmContexts.AMMEDICAL]: 'am-medical.png',
-    [GcmContexts.SANJUAN]: 'sanjuan.jpg',
-    [GcmContexts.VALLEDUPAR]: 'valledupar.jpg',
-  };
   const fechaDescarga = fecha(new Date());
   const paginaY = 21;
   const inicioContenido = 43;
@@ -122,7 +114,7 @@ export async function generateVictimaAccidentePdf(
     }
   };
   const encabezado = () => {
-    const logo = logos[payload.clinica.contexto];
+    const logo = 'medicos.jpeg';
     if (!logo || !imagen(path.join(raiz, 'private', 'clinicas', logo), M, 15, 35, 18)) {
       fuente(true, 9);
       doc.text(payload.clinica.nombre || 'Institución', M, 23, { maxWidth: 35 });
