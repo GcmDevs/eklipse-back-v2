@@ -76,7 +76,12 @@ export class CargarFacturaControlGastoImpl extends BaseSource {
       if (controlGasto.estadoCode === ESTADOS_CONTROL_GASTO.FINALIZADO.getCode()) {
         throw new Error('El control de gastos ya fue conciliado');
       }
-      if (controlGasto.estadoCode === ESTADOS_CONTROL_GASTO.INICIADO.getCode()) {
+      if (
+        [
+          ESTADOS_CONTROL_GASTO.INICIADO.getCode(),
+          ESTADOS_CONTROL_GASTO.PENDIENTE.getCode(),
+        ].includes(controlGasto.estadoCode)
+      ) {
         throw new Error('Debe finalizar la carga de órdenes antes de subir la factura');
       }
       if (!mapOrdenesControlGasto(controlGasto).some(orden => !orden.rechazadoAt)) {

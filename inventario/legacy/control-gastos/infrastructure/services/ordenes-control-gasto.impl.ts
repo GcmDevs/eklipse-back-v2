@@ -126,8 +126,8 @@ export class OrdenesControlGastoImpl extends BaseSource {
         lock: { mode: 'pessimistic_write' },
       });
       if (!gasto) throw new Error('No existe la solicitud');
-      if (gasto.estadoCode !== ESTADOS_CONTROL_GASTO.INICIADO.getCode()) {
-        throw new Error('Solo se pueden agregar, descartar o finalizar órdenes en estado INICIADO');
+      if (gasto.estadoCode !== ESTADOS_CONTROL_GASTO.PENDIENTE.getCode()) {
+        throw new Error('Solo se pueden agregar, descartar o finalizar órdenes en estado PENDIENTE');
       }
       await action(qr, gasto);
       const response = await this.respuesta(qr, gasto.id);
