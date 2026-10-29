@@ -41,7 +41,13 @@ export class ConciliarControlGastoImpl extends BaseSource {
         throw new Error('No existe reporte de control de gastos con este id');
       }
 
-      if (controlGasto.estadoCode === ESTADOS_CONTROL_GASTO.INICIADO.getCode()) {
+      if (
+        [
+          ESTADOS_CONTROL_GASTO.INICIADO.getCode(),
+          ESTADOS_CONTROL_GASTO.PENDIENTE.getCode(),
+          ESTADOS_CONTROL_GASTO.ORDENES_CARGADAS.getCode(),
+        ].includes(controlGasto.estadoCode)
+      ) {
         throw new Error('Debe finalizar la carga de órdenes antes de conciliar');
       }
 

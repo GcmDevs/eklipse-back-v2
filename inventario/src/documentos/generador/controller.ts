@@ -35,7 +35,7 @@ export class FileGeneratorController {
   public async generateOrdenCompraById(
     @Param('contextCode') contextCode: GcmContexts,
     @Query('documentoId') documentoId: number,
-    @Query(':consecutivo') consecutivo: string
+    @Query('consecutivo') consecutivo: string
   ) {
     try {
       const token = await this.temporary.generate(

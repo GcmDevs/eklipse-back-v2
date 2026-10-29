@@ -45,6 +45,7 @@ export class OrdenTrasladoImpl extends BaseSource {
         { consecutivo, tipoCode: TIPOS_DOCUMENTO.TRASLADO_PRODUCTOS_CONSIGNACION.getCode() },
       ],
     });
+    if (!documento) throw new Error('No existe la orden de traslado indicada');
 
     const ordenTraslado = await ordenTrasladoRp.findOne({
       where: { id: documento.id },
@@ -59,6 +60,7 @@ export class OrdenTrasladoImpl extends BaseSource {
         'detalle.producto',
       ],
     });
+    if (!ordenTraslado) throw new Error('No existe el detalle de la orden de traslado indicada');
 
     const dataMapped: DataInterfaceI = {
       clinica: clinicaSeleccionada(contextCode),

@@ -87,6 +87,10 @@ export class GenerateReporteControlGastosPayload {
 }
 
 export class SolicitudOrdenesControlGastosPayload {
+  @IsOptional()
+  @IsIn(['compra', 'traslado'])
+  grupo?: 'compra' | 'traslado';
+
   @IsInt()
   @Min(1)
   idControlGasto: number;
@@ -113,8 +117,8 @@ export class DescartarOrdenControlGastosPayload extends SolicitudOrdenesControlG
 }
 
 export class AsociarOrdenControlGastosPayload extends SolicitudOrdenesControlGastosPayload {
-  @IsIn([0, 19])
-  ordenRelacionadaTipoCode: 0 | 19;
+  @IsIn([0, 19, 24])
+  ordenRelacionadaTipoCode: 0 | 19 | 24;
 
   @IsString()
   @IsNotEmpty()

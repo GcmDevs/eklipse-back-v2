@@ -61,7 +61,9 @@ export class ControlGastosController {
   async asociarOrden(@Body() body: AsociarOrdenControlGastosPayload) {
     try {
       const response = await this._ordenes.agregar(body);
-      const orden = response.ordenes.filter(item => !item.rechazadoAt).at(-1);
+      const ordenes =
+        body.ordenRelacionadaTipoCode === 24 ? response.ordenesTraslado : response.ordenes;
+      const orden = ordenes.filter(item => !item.rechazadoAt).at(-1);
       return { id: orden.documentoId, consecutivo: orden.consecutivo };
     } catch (error: any) {
       throw new BadRequestException(error.message);
@@ -76,7 +78,8 @@ export class ControlGastosController {
     @Query('consecutivo') consecutivo: string
   ) {
     try {
-      if (tipoCode !== '0' && tipoCode !== '19') throw new Error('Seleccione compra o servicio');
+      if (!['0', '19', '24'].includes(tipoCode))
+        throw new Error('Seleccione compra, servicio o traslado');
       return await this._cargarFactura.previewOrden(contextCode, Number(tipoCode), consecutivo);
     } catch (error: any) {
       throw new BadRequestException(error.message);
@@ -124,6 +127,26 @@ export class ControlGastosController {
   async descartarOrden(@Body() body: DescartarOrdenControlGastosPayload) {
     try {
       return await this._ordenes.descartar(body);
+    } catch (error: any) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Post('ordenes/traslados/no-requiere')
+  @Authorities([INN_AUTHORITIES.FARMACIA.CONTROL_GASTOS_FACTURADOR])
+  async omitirTraslados(@Body() body: SolicitudOrdenesControlGastosPayload) {
+    try {
+      return await this._ordenes.omitirTraslados(body);
+    } catch (error: any) {
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  @Post('ordenes/compras/no-requiere')
+  @Authorities([INN_AUTHORITIES.FARMACIA.CONTROL_GASTOS_FACTURADOR])
+  async omitirCompras(@Body() body: SolicitudOrdenesControlGastosPayload) {
+    try {
+      return await this._ordenes.omitirCompras(body);
     } catch (error: any) {
       throw new BadRequestException(error.message);
     }

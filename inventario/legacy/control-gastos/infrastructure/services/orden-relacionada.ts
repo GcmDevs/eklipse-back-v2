@@ -1,4 +1,3 @@
-import { QueryRunner } from 'typeorm';
 import { DocumentoOrm } from '@inn/lgc/cgt/orm/inn/documentos/documento.orm';
 import { consecutivosServices } from '@common/application/services';
 import { switchConn } from '../../../../../@common/infrastructure/services';
@@ -8,7 +7,7 @@ export async function resolverOrdenRelacionada(tipo?: number, codigo?: string) {
   const conn = switchConn(GCM_CONTEXTS.AMMEDICAL);
   const consecutivo = codigo?.trim();
   if (!consecutivo && tipo == null) return null;
-  if (!consecutivo || (tipo !== 0 && tipo !== 19)) {
+  if (!consecutivo || (tipo !== 0 && tipo !== 19 && tipo !== 24)) {
     throw new Error('Indique el tipo de orden y su consecutivo');
   }
   if (!/\d$/.test(consecutivo)) throw new Error('El consecutivo debe terminar en un numero');

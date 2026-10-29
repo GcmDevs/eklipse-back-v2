@@ -33,3 +33,19 @@ export function mapOrdenesControlGasto(gasto: ControlGastoOrm) {
   }
   return ordenes;
 }
+
+export function mapTrasladosControlGasto(gasto: ControlGastoOrm) {
+  return (gasto.archivos || [])
+    .filter(archivo => archivo.tipoCode === 3)
+    .sort((a, b) => a.id - b.id)
+    .map(archivo => ({
+      id: archivo.id,
+      documentoId: archivo.documentoId,
+      tipoCode: 24 as const,
+      consecutivo: archivo.documento?.consecutivo ?? String(archivo.documentoId),
+      updatedAt: archivo.updatedAt ?? null,
+      rechazadoAt: archivo.rechazadoAt ?? null,
+      motivoRechazo: archivo.motivoRechazo ?? null,
+      esAnterior: false,
+    }));
+}

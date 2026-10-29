@@ -80,11 +80,17 @@ export class CargarFacturaControlGastoImpl extends BaseSource {
         [
           ESTADOS_CONTROL_GASTO.INICIADO.getCode(),
           ESTADOS_CONTROL_GASTO.PENDIENTE.getCode(),
+          ESTADOS_CONTROL_GASTO.ORDENES_CARGADAS.getCode(),
         ].includes(controlGasto.estadoCode)
       ) {
-        throw new Error('Debe finalizar la carga de órdenes antes de subir la factura');
+        throw new Error(
+          'Debe finalizar la carga de órdenes de compra/servicio y traslado antes de subir la factura'
+        );
       }
-      if (!mapOrdenesControlGasto(controlGasto).some(orden => !orden.rechazadoAt)) {
+      if (
+        controlGasto.requiereOrdenesCompraServicio !== false &&
+        !mapOrdenesControlGasto(controlGasto).some(orden => !orden.rechazadoAt)
+      ) {
         throw new Error('Debe asociar una orden de compra o servicio antes de subir la factura');
       }
 

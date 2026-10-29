@@ -9,7 +9,8 @@ import { orderBy } from 'lodash';
 import { IngresoOrm } from '@inn/lgc/cgt/orm/gen/ingreso.orm';
 import { ENVIRONMENTS } from '../../../../src/app.environments';
 import { INN_AUTHORITIES } from '../../../../authorities';
-import { mapOrdenesControlGasto } from './ordenes-control-gasto.mapper';
+import { mapOrdenesControlGasto, mapTrasladosControlGasto } from './ordenes-control-gasto.mapper';
+import { cargarDocumentosRelacionados } from './cargar-documentos-relacionados';
 
 @Injectable()
 export class FetchControlGastoImpl extends BaseSource {
@@ -66,6 +67,7 @@ export class FetchControlGastoImpl extends BaseSource {
         //   cg.context = el;
         // });
 
+        await cargarDocumentosRelacionados(controlGastosTemp);
         for (const cg of controlGastosTemp) {
           let ingreso: IngresoOrm;
           cg.context = el;
@@ -108,6 +110,9 @@ export class FetchControlGastoImpl extends BaseSource {
       return {
         id: c.id,
         ordenesRelacionadas: mapOrdenesControlGasto(c),
+        ordenesTraslado: mapTrasladosControlGasto(c),
+        requiereOrdenesTraslado: c.requiereOrdenesTraslado,
+        requiereOrdenesCompraServicio: c.requiereOrdenesCompraServicio,
         ordenRelacionada: c.ordenRelacionada
           ? {
               id: c.ordenRelacionada.id,

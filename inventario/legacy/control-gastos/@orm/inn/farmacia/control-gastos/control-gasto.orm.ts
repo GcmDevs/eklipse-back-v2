@@ -28,6 +28,12 @@ export class ControlGastoOrm {
   @Column({ name: 'ESTADO' })
   estadoCode: EstadoControlGastoCode;
 
+  @Column({ name: 'REQUIEREORDENESTRASLADO', type: 'bit', default: true })
+  requiereOrdenesTraslado: boolean;
+
+  @Column({ name: 'REQUIEREORDENESCOMPRASERVICIO', type: 'bit', default: true })
+  requiereOrdenesCompraServicio: boolean;
+
   @Column({ name: 'FECHACREAC' })
   fechaCreacion: Date;
 

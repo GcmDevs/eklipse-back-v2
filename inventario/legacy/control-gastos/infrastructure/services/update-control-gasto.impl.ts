@@ -31,7 +31,10 @@ export class UpdateControlGastoImpl extends BaseSource {
 
       const estadoCode = isEps
         ? ESTADOS_CONTROL_GASTO.FINALIZADO.getCode()
-        : controlGasto.estadoCode === ESTADOS_CONTROL_GASTO.ORDENES_CARGADAS.getCode()
+        : [
+              ESTADOS_CONTROL_GASTO.ORDENES_CARGADAS.getCode(),
+              ESTADOS_CONTROL_GASTO.ORDENES_TRASLADO_CARGADAS.getCode(),
+            ].includes(controlGasto.estadoCode)
           ? controlGasto.estadoCode
           : ESTADOS_CONTROL_GASTO.PENDIENTE.getCode();
 
