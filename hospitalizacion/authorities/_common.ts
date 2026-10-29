@@ -15,5 +15,6 @@ export const HPN_MODULES = {
     ROTULO_MEDICAMENTOS: `${hpn}010`,
     ANATOMOPATOLOGICOS: `${hpn}011`,
     SEGUIMIENTO_QUIRURGICO: `${hpn}012`,
+    BOLETA_QUIRURGICA: `${hpn}013`,
   },
 };

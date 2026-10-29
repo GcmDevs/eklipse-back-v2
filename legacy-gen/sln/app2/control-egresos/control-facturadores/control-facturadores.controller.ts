@@ -1,6 +1,7 @@
 import { Authorities, CommonGuards } from '@common/presentation/decorators';
 import {
   Body,
+  BadRequestException,
   Controller,
   Get,
   Param,
@@ -12,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { FacturadoresImpl } from './control-facturadores.impl';
 import { SLN_AUTHORITIES } from '@authorities/facturacion';
+import { ActualizarFacturadorDto } from './dtos/actualizar-facturador.dto';
 
 @CommonGuards()
 @Controller('/v4/control-egresos/facturadores')
@@ -25,6 +27,12 @@ export class FacturadoresController {
   }
 
   @Authorities([SLN_AUTHORITIES.CONTROL_EGRESOS.ASIGNAR_USUARIO])
+  @Get('/roles')
+  async getRoles() {
+    return this._facturadoresImpl.getRoles();
+  }
+
+  @Authorities([SLN_AUTHORITIES.CONTROL_EGRESOS.ASIGNAR_USUARIO])
   @Post('/estado')
   async toggleFacturadorEstado(
     @Query('facturadorId', ParseIntPipe) facturadorId: number,
@@ -34,21 +42,49 @@ export class FacturadoresController {
   }
 
   @Authorities([SLN_AUTHORITIES.CONTROL_EGRESOS.ASIGNAR_USUARIO])
-  @Get('/facturas-asignadas')
-  async facturasAsignadas(@Query('usuarioId') usuarioId: number) {
-    return await this._facturadoresImpl.facturasAsignadas(usuarioId);
+  @Get(['/facturas-asignadas', '/facturas-asignadas/periodo'])
+  async facturasAsignadas(
+    @Query('usuarioId', ParseIntPipe) usuarioId: number,
+    @Query('start') start: string,
+    @Query('end') end: string
+  ) {
+    const [inicio, fin] = this.parseDateRange(start, end);
+    return await this._facturadoresImpl.facturasAsignadas(usuarioId, inicio, fin);
   }
 
   @Authorities([SLN_AUTHORITIES.CONTROL_EGRESOS.ASIGNAR_USUARIO])
-  @Get('/facturas-finalizadas')
-  async facturasFinalizadas(@Query('usuarioId') usuarioId: number) {
-    return await this._facturadoresImpl.facturasFinalizadas(usuarioId);
+  @Get(['/facturas-finalizadas', '/facturas-finalizadas/periodo'])
+  async facturasFinalizadas(
+    @Query('usuarioId', ParseIntPipe) usuarioId: number,
+    @Query('start') start: string,
+    @Query('end') end: string
+  ) {
+    const [inicio, fin] = this.parseDateRange(start, end);
+    return await this._facturadoresImpl.facturasFinalizadas(usuarioId, inicio, fin);
   }
 
   @Authorities([SLN_AUTHORITIES.CONTROL_EGRESOS.ASIGNAR_USUARIO])
   @Get('/ingreso-egresos-data')
   async ingresoAbiertos() {
     return await this._facturadoresImpl.ingresoAbiertos();
+  }
+
+  @Authorities([SLN_AUTHORITIES.CONTROL_EGRESOS.ASIGNAR_USUARIO])
+  @Get('/comportamiento-robot')
+  async comportamientoRobot(@Query('fecha') fecha: string) {
+    const [dia] = this.parseDateRange(fecha, fecha);
+    return this._facturadoresImpl.comportamientoRobot(dia);
+  }
+
+  @Authorities([SLN_AUTHORITIES.CONTROL_EGRESOS.ASIGNAR_USUARIO])
+  @Get('/comportamiento-robot/detalle')
+  async detalleComportamientoRobot(
+    @Query('usuarioId', ParseIntPipe) usuarioId: number,
+    @Query('fecha') fecha: string
+  ) {
+    if (usuarioId <= 0) throw new BadRequestException('Selecciona un facturador válido.');
+    const [dia] = this.parseDateRange(fecha, fecha);
+    return this._facturadoresImpl.detalleComportamientoRobot(usuarioId, dia);
   }
 
   @Authorities([SLN_AUTHORITIES.CONTROL_EGRESOS.ASIGNAR_USUARIO])
@@ -60,27 +96,34 @@ export class FacturadoresController {
   @Authorities([SLN_AUTHORITIES.CONTROL_EGRESOS.ASIGNAR_USUARIO])
   @Get('/generar-excel')
   async generarExcelEgresosFacturacion(@Query('start') start: string, @Query('end') end: string) {
-    try {
-      const inicioDate = new Date(`${start}T00:00:00`);
-      const finalDate = new Date(`${end}T23:59:59`);
+    const [inicioDate, finalDate] = this.parseDateRange(start, end);
+    return this._facturadoresImpl.generarExcelEgresosFacturacion(inicioDate, finalDate);
+  }
 
-      const success = await this._facturadoresImpl.generarExcelEgresosFacturacion(
-        inicioDate,
-        finalDate
-      );
-
-      return success;
-    } catch (error: any) {
-      console.error('Error procesando asignación de usuario de ingreso:', error);
-      return { success: false, error: error.message || 'Error desconocido' };
+  private parseDateRange(start: string, end: string): [Date, Date] {
+    const parseDate = (value: string): Date => {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(value ?? '')) {
+        throw new BadRequestException('Selecciona un rango de fechas válido (YYYY-MM-DD).');
+      }
+      const date = new Date(`${value}T00:00:00Z`);
+      if (isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value) {
+        throw new BadRequestException('El rango contiene una fecha inválida.');
+      }
+      return date;
+    };
+    const inicioDate = parseDate(start);
+    const finalDate = parseDate(end);
+    if (inicioDate > finalDate) {
+      throw new BadRequestException('La fecha inicial no puede ser posterior a la final.');
     }
+    return [inicioDate, finalDate];
   }
 
   @Authorities([SLN_AUTHORITIES.CONTROL_EGRESOS.ASIGNAR_USUARIO])
   @Put('/:id')
   async actualizarFacturador(
     @Param('id', ParseIntPipe) id: number,
-    @Body() body: { rolId: number; estado: boolean }
+    @Body() body: ActualizarFacturadorDto
   ) {
     return await this._facturadoresImpl.actualizarFacturador(id, body);
   }

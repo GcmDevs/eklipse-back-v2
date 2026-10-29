@@ -3,6 +3,11 @@ export const getEgresosFacturacionQuery = (banderaPermisos: boolean, id: number)
     SELECT DISTINCT 
         ADNINGRESO.AINCONSEC AS NUMERO_INGRESO,
         ADNEGRESO.ADENUMEGR AS NUMERO_EGRESO,
+        ISNULL((
+            SELECT SUM(SLNCONHOJ.SCOTOTENT)
+            FROM SLNCONHOJ
+            WHERE SLNCONHOJ.ADNINGRES1 = ADNINGRESO.OID
+        ), 0) AS [TOTAL_CARGADO_$],
         CASE adningreso.adncenate
             WHEN 1 THEN 'CENTRO MEDICO'
             WHEN 2 THEN 'ALTA COMPLEJIDAD'
@@ -66,6 +71,7 @@ export const getEgresosFacturacionQuery = (banderaPermisos: boolean, id: number)
         HCNEPICRI.HCECONSEC AS NUMERO_EPICRISIS,
         HCNEPICRI.HCEFECDOC AS FECHA_EPICRISIS,
         CASE 
+            WHEN ADNINGRESO.AINESTADO = 4 THEN 'CIERRE ADMINISTRATIVO'
             WHEN EKSLNEGRFACASIG.ESTADO IS NOT NULL THEN 
                 CASE EKSLNEGRFACASIG.ESTADO
                     WHEN 1 THEN 'PENDIENTE'

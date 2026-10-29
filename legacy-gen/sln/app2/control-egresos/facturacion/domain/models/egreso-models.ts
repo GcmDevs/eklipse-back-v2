@@ -6,6 +6,7 @@ export interface Egreso {
   // Información básica del egreso
   NUMERO_INGRESO: number;
   NUMERO_EGRESO: number;
+  TOTAL_CARGADO_$: number;
   SEDE: string;
 
   // Fechas principales
