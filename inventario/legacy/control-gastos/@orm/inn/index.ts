@@ -1,0 +1,11 @@
+import { LGC_CGT_INN_ACTIVOS_FIJOS_ENTITIES } from './activos-fijos';
+import { LGC_CGT_INN_DOCUMENTOS_ENTITIES } from './documentos';
+import { LGC_CGT_INN_FARMACIA_ENTITIES } from './farmacia';
+import { LGC_CGT_INN_PRODUCTOS_ENTITIES } from './productos';
+
+export const LGC_CGT_INN_ENTITIES = [
+  ...LGC_CGT_INN_ACTIVOS_FIJOS_ENTITIES,
+  ...LGC_CGT_INN_DOCUMENTOS_ENTITIES,
+  ...LGC_CGT_INN_FARMACIA_ENTITIES,
+  ...LGC_CGT_INN_PRODUCTOS_ENTITIES,
+];

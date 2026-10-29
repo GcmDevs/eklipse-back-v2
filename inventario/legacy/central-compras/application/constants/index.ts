@@ -70,6 +70,7 @@ export const CTC_FILE_LOCATIONS = {
   cotizaciones: 'public/inn/ctc/cotizaciones',
   itemsSolicitud: 'public/inn/ctc/items-solicitud',
   ordenes: 'public/temp/inn-ctc-ordenes',
+  ordenesTraslado: 'public/temp/inn-ordenes-traslado',
   cxp: 'public/temp/inn-ctc-cxp',
 };
 

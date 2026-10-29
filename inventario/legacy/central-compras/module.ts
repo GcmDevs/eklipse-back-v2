@@ -49,8 +49,10 @@ import {
 } from './infrastructure/services/solicitud-services';
 import { CreateCotizacionImpl } from './infrastructure/repositories/cotizacion-crud';
 import { FilesCotizacionesImpl } from './infrastructure/services/files';
+import { TemporaryPdfModule } from '@common/temporary-pdf';
 
 @Module({
+  imports: [TemporaryPdfModule],
   controllers: [
     SolicitudCompraServicesController,
     SolicitudCompraCrudController,
