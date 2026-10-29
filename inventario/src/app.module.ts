@@ -2,6 +2,7 @@ import { Module, OnModuleInit } from '@nestjs/common';
 import { initializeSources } from '@common/infrastructure/services';
 import { ENTITIES } from './app.entities';
 import { LgcCtcModule } from '@inn/lgc/ctc/module';
+import { LgcCgtModule } from '@inn/lgc/cgt/module';
 import { LgcAfnModule } from '@inn/lgc/afn/activos-fijos.module';
 import { LgcRctModule } from '@inn/lgc/rct/recepcion-tecnica.module';
 import { DocumentosModule } from './documentos/module';
@@ -16,6 +17,7 @@ import { InvimaModule } from './invima/invima.module';
     LgcCtcModule,
     LgcAfnModule,
     LgcRctModule,
+    LgcCgtModule,
     DocumentosModule,
     MAOSModule,
     CentralMezclasModule,

@@ -2,6 +2,7 @@ import { JustForVerifyOrm } from '@common/infrastructure/services';
 import { LGC_CTC_ENTITIES } from '@inn/lgc/ctc/@orm';
 import { LGC_AFN_ENTITIES } from '@inn/lgc/afn/@orm';
 import { LGC_RCT_ENTITIES } from '@inn/lgc/rct/@orm';
+import { LGC_CGT_ENTITIES } from '@inn/lgc/cgt/@orm';
 import { ORM_ADN_ENTITIES } from '@inn/orm/adn';
 import { ORM_GEN_ENTITIES } from '@inn/orm/gen';
 import { ORM_HPN_ENTITIES } from '@inn/orm/hpn';
@@ -17,5 +18,6 @@ export const ENTITIES = [
   ...ORM_GEN_ENTITIES,
   ...ORM_HPN_ENTITIES,
   ...ORM_INN_ENTITIES,
+  ...LGC_CGT_ENTITIES,
   ...ORM_SHARED_ENTITIES,
 ];
