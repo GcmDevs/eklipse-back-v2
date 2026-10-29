@@ -123,6 +123,11 @@ export class GuardarAutorizacionDto {
   @IsString()
   @MaxLength(150)
   usuarioCambioCups?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  gestor?: string;
 }
 
 export class GuardarObservacionDto {
@@ -143,7 +148,7 @@ export class GuardarObservacionDto {
   fecha: string;
 
   @IsString()
-  @IsIn(['AUDITORIA', 'GESTOR', 'MAOS', 'PROGRAMA', 'POST_QX'])
+  @IsIn(['AUDITORIA', 'GESTOR', 'MAOS', 'PROGRAMA', 'POST_QX', 'PRE AUDITORIA', 'POST AUDITORIA'])
   @MaxLength(50)
   gestor: string;
 }
@@ -159,7 +164,8 @@ export class ObservacionesDto {
   folio: number;
 
   @IsString()
-  gestor: 'AUDITORIA' | 'GESTOR' | 'MAOS' | 'PROGRAMA' | 'POST_QX';
+  @IsIn(['AUDITORIA', 'GESTOR', 'MAOS', 'PROGRAMA', 'POST_QX', 'PRE AUDITORIA', 'POST AUDITORIA'])
+  gestor: 'AUDITORIA' | 'GESTOR' | 'MAOS' | 'PROGRAMA' | 'POST_QX' | 'PRE AUDITORIA' | 'POST AUDITORIA';
 }
 
 export class GuardarProgramacionDto {
