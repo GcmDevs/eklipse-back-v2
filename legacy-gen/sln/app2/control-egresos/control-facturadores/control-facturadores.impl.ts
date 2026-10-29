@@ -1,18 +1,37 @@
 import { BaseSource } from '@common/infrastructure/services';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { FacturadoresOrm } from '@sln/orm/sln/control-egresos/facturadores';
 import { HistorialFacturadorOrm } from '@sln/orm/sln/control-egresos/historial-facturador';
+import { RolFacturadorOrm } from '@sln/orm/sln/control-egresos/rol-facturador';
 import { UsuarioOrm } from '@sln/orm/gen';
-import { Like } from 'typeorm';
+import { EntityManager, Like } from 'typeorm';
 import {
   fetchFacturasFinalizadasQuery,
   fetchFacturasAsignadasQuery,
   fetchIngresoAbiertos,
   generarExcelFacturacionEgresosQuery,
+  fetchComportamientoRobotQuery,
+  fetchDetalleComportamientoRobotQuery,
 } from './query/query-facturadores';
 
 @Injectable()
 export class FacturadoresImpl extends BaseSource {
+  private async verificarHistorialRoles(manager: EntityManager): Promise<void> {
+    const [schema] = await manager.query(`
+      SELECT COL_LENGTH('dbo.EKSLNEGRFACTURHIST', 'ROLANTERIOR') AS rolAnterior,
+             COL_LENGTH('dbo.EKSLNEGRFACTURHIST', 'ROLNUEVO') AS rolNuevo
+    `);
+    if (!schema?.rolAnterior || !schema?.rolNuevo) {
+      throw new ServiceUnavailableException(
+        'Falta actualizar el historial de facturadores en esta sede. Ejecuta el script 2026-10-29-historial-roles-facturadores.sql antes de guardar cambios.'
+      );
+    }
+  }
   public async getFacturadores() {
     try {
       const facturadoresRepo = this.conn.getRepository(FacturadoresOrm);
@@ -28,10 +47,10 @@ export class FacturadoresImpl extends BaseSource {
       return facturadores.map(facturador => ({
         id: facturador.id,
         usuarioId: facturador.usuarioId,
-        usuarioNombre: facturador.usuario.nombreCompleto,
-        usuarioCedula: facturador.usuario.cedula,
+        usuarioNombre: facturador.usuario?.nombreCompleto ?? 'Sin usuario registrado',
+        usuarioCedula: facturador.usuario?.cedula ?? '',
         rolId: facturador.rolId,
-        rolNombre: facturador.rol.nombre,
+        rolNombre: facturador.rol?.nombre ?? 'Sin rol',
         estado: facturador.estado,
       }));
     } catch (error) {
@@ -40,13 +59,26 @@ export class FacturadoresImpl extends BaseSource {
     }
   }
 
+  public async getRoles() {
+    return this.conn.getRepository(RolFacturadorOrm).find({
+      select: { id: true, nombre: true },
+      order: { nombre: 'ASC' },
+    });
+  }
+
   public async toggleFacturadorEstado(facturadorId: number, nuevoEstado: boolean) {
     return await this.conn.transaction(async manager => {
       const facturadoresRepo = manager.getRepository(FacturadoresOrm);
       const historialRepo = manager.getRepository(HistorialFacturadorOrm);
-      const facturador = await facturadoresRepo.findOne({ where: { id: facturadorId } });
+      const facturador = await facturadoresRepo.findOne({
+        where: { id: facturadorId },
+        lock: { mode: 'pessimistic_write' },
+      });
 
       if (!facturador) throw new NotFoundException('Facturador no encontrado');
+      if (facturador.estado === nuevoEstado) return true;
+
+      await this.verificarHistorialRoles(manager);
 
       const fecha = new Date();
       const estadoAnterior = facturador.estado;
@@ -59,6 +91,8 @@ export class FacturadoresImpl extends BaseSource {
           facturadorId,
           estadoAnterior,
           estadoNuevo: nuevoEstado,
+          rolAnteriorId: facturador.rolId,
+          rolNuevoId: facturador.rolId,
           fecha,
           usuarioCambioId: this.auth.id,
         })
@@ -68,9 +102,9 @@ export class FacturadoresImpl extends BaseSource {
     });
   }
 
-  public async facturasAsignadas(usuarioId: number) {
+  public async facturasAsignadas(usuarioId: number, inicio: Date, fin: Date) {
     try {
-      const query = await this.conn.query(fetchFacturasAsignadasQuery(usuarioId));
+      const query = await this.conn.query(fetchFacturasAsignadasQuery(), [usuarioId, inicio, fin]);
 
       return query;
     } catch (error) {
@@ -79,9 +113,13 @@ export class FacturadoresImpl extends BaseSource {
     }
   }
 
-  public async facturasFinalizadas(usuarioId: number) {
+  public async facturasFinalizadas(usuarioId: number, inicio: Date, fin: Date) {
     try {
-      const query = await this.conn.query(fetchFacturasFinalizadasQuery(usuarioId));
+      const query = await this.conn.query(fetchFacturasFinalizadasQuery(), [
+        usuarioId,
+        inicio,
+        fin,
+      ]);
 
       return query;
     } catch (error) {
@@ -99,6 +137,17 @@ export class FacturadoresImpl extends BaseSource {
       console.log(error);
       throw error;
     }
+  }
+
+  public async comportamientoRobot(fecha: Date) {
+    return this.conn.query(fetchComportamientoRobotQuery(), [fecha.toISOString().slice(0, 10)]);
+  }
+
+  public async detalleComportamientoRobot(usuarioId: number, fecha: Date) {
+    return this.conn.query(fetchDetalleComportamientoRobotQuery(), [
+      usuarioId,
+      fecha.toISOString().slice(0, 10),
+    ]);
   }
 
   public async generarExcelEgresosFacturacion(start: Date, end: Date) {
@@ -123,29 +172,41 @@ export class FacturadoresImpl extends BaseSource {
     return await this.conn.transaction(async manager => {
       const facturadoresRepo = manager.getRepository(FacturadoresOrm);
       const historialRepo = manager.getRepository(HistorialFacturadorOrm);
-      const facturador = await facturadoresRepo.findOne({ where: { id: facturadorId } });
+      const facturador = await facturadoresRepo.findOne({
+        where: { id: facturadorId },
+        lock: { mode: 'pessimistic_write' },
+      });
 
       if (!facturador) throw new NotFoundException('Facturador no encontrado');
 
       const estadoAnterior = facturador.estado;
+      const rolAnteriorId = facturador.rolId;
       const estadoCambio = estadoAnterior !== payload.estado;
+      const rolCambio = rolAnteriorId !== payload.rolId;
+      const rol = await manager
+        .getRepository(RolFacturadorOrm)
+        .findOne({ where: { id: payload.rolId } });
+      if (!rol) throw new BadRequestException('El rol seleccionado no existe.');
+      if (!estadoCambio && !rolCambio) return true;
+      await this.verificarHistorialRoles(manager);
+      const fecha = new Date();
       facturador.rolId = payload.rolId;
       facturador.estado = payload.estado;
 
-      if (estadoCambio) facturador.fechaCambioEstado = new Date();
+      if (estadoCambio) facturador.fechaCambioEstado = fecha;
       await facturadoresRepo.save(facturador);
 
-      if (estadoCambio) {
-        await historialRepo.save(
-          historialRepo.create({
-            facturadorId,
-            estadoAnterior,
-            estadoNuevo: payload.estado,
-            fecha: facturador.fechaCambioEstado,
-            usuarioCambioId: this.auth.id,
-          })
-        );
-      }
+      await historialRepo.save(
+        historialRepo.create({
+          facturadorId,
+          estadoAnterior,
+          estadoNuevo: payload.estado,
+          rolAnteriorId,
+          rolNuevoId: payload.rolId,
+          fecha,
+          usuarioCambioId: this.auth.id,
+        })
+      );
 
       return true;
     });
