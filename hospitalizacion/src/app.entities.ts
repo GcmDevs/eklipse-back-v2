@@ -9,6 +9,7 @@ import { ROTULO_MEDICAMENTOS_ENTITIES } from './rotulo-medicamentos/infraestruct
 import { FORMATO_MUESTRAS_ANATOMOPATOLOGICAS_ENTITIES } from './formato-anatomopatologicos/infraestructure/orm';
 import { SEGUIMIENTO_QUIRURGICO_ENTITIES } from './seguimiento-quirurgico/infraestructure/orm';
 import { JustForVerifyOrm } from '@common/infrastructure/services';
+import { BOLETA_QUIRURGICA_ENTITIES } from './boleta-quirurgica/infraestructure/orm';
 
 export const ENTITIES = [
   JustForVerifyOrm,
@@ -22,4 +23,5 @@ export const ENTITIES = [
   ...ROTULO_MEDICAMENTOS_ENTITIES,
   ...FORMATO_MUESTRAS_ANATOMOPATOLOGICAS_ENTITIES,
   ...SEGUIMIENTO_QUIRURGICO_ENTITIES,
+  ...BOLETA_QUIRURGICA_ENTITIES,
 ];
