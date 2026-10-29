@@ -7,6 +7,8 @@ import { ContratoOrm } from './contrato.orm';
 import { TerceroOrm } from './tercero.orm';
 import { UsuarioOrm } from './usuario.orm';
 import { UsuarioExternoOrm } from './usuario-externo.orm';
+import { DepartamentoOrm } from './departamento.orm';
+import { MunicipioOrm } from './municipio.orm';
 
 export * from './area-servicio.orm';
 export * from './dependencia.orm';
@@ -17,6 +19,8 @@ export * from './contrato.orm';
 export * from './tercero.orm';
 export * from './usuario.orm';
 export * from './usuario-externo.orm';
+export * from './departamento.orm';
+export * from './municipio.orm';
 
 export const ORM_GEN_ENTITIES = [
   AreaServicioOrm,
@@ -28,4 +32,6 @@ export const ORM_GEN_ENTITIES = [
   UsuarioOrm,
   ContratoOrm,
   UsuarioExternoOrm,
+  DepartamentoOrm,
+  MunicipioOrm,
 ];

@@ -1,9 +1,17 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { MunicipioOrm } from './municipio.orm';
 
 @Entity({ name: 'GENTERCER' })
 export class TerceroOrm {
   @PrimaryGeneratedColumn({ name: 'OID' })
   id: number;
+
+  @Column({ name: 'DGNMUNICIPIO' })
+  municipioId: number;
+
+  @ManyToOne(() => MunicipioOrm, { nullable: false })
+  @JoinColumn({ name: 'DGNMUNICIPIO' })
+  municipio: MunicipioOrm;
 
   @Column({ name: 'TERNUMDOC' })
   numeroDocumento: string;

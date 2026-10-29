@@ -7,9 +7,13 @@ import { ORM_INN_SOLICITUD_PEDIDO_ENTITIES } from './solicitud-pedido';
 import { ORM_INN_PRODUCTS_ENTITIES } from './productos/inn';
 import { ORM_INN_RONDAS_HABITACIONES_ENTITIES } from './rondas-habitaciones';
 import { ORM_INN_INVIMA_ENTITIES } from './invima';
+import { AlmacenOrm } from './almacen.orm';
+
+export * from './almacen.orm';
 
 export const ORM_INN_ENTITIES = [
   ProductoOrm,
+  AlmacenOrm,
   ...ORM_INN_PRODUCTOS_ENTITIES,
   ...ORM_INN_DOCUMENTOS_ENTITIES,
   ...ORM_INN_MAOS_ENTITIES,

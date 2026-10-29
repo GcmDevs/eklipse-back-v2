@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CentralComprasSource } from '../../base';
 import { GcmContexts } from '@common/domain/types';
 import { OCPayload, generateOrdCo } from './pdf-generator.orden';
@@ -23,14 +23,31 @@ import { DataSource } from 'typeorm';
 import { INN_AUTHORITIES } from '@inn/authorities';
 import { DocumentoOrm } from '../../../@orm/inn/documentos';
 import { UsuarioOrm } from '../../../@orm/gen';
+import { TemporaryPdfService } from '@common/temporary-pdf';
+import { ENVIRONMENTS } from '@inn/app.environments';
 
 @Injectable()
 export class FilesCotizacionesImpl extends CentralComprasSource {
+  @Inject(TemporaryPdfService)
+  private readonly temporary: TemporaryPdfService;
+
   public async generateOrdenCompra(
     payload: { context: GcmContexts; cotizacionId: number },
     documentoId?: number
-  ) {
-    const { context, cotizacionId } = payload;
+  ): Promise<string> {
+    const token = await this.temporary.generate(
+      () => this._generateOrdenCompraContents(payload, documentoId),
+      'Orden de compra o servicio'
+    );
+    return this.temporary.url(ENVIRONMENTS.apiUrl, token);
+  }
+
+  private async _generateOrdenCompraContents(
+    payload: { context: GcmContexts; cotizacionId: number },
+    documentoId?: number
+  ): Promise<Buffer> {
+    const { context } = payload;
+    let cotizacionId = payload.cotizacionId;
 
     const ekConn = switchConn(gcmContextFactory(context));
     const cotizacionRp = ekConn.getRepository(CotizacionOrm);
@@ -40,11 +57,11 @@ export class FilesCotizacionesImpl extends CentralComprasSource {
     if (documentoId) {
       const documentoCoti = await documentoCotiRp.findOne({ where: { documentoId } });
       if (documentoCoti) {
-        payload.cotizacionId = documentoCoti.cotizacionId;
+        cotizacionId = documentoCoti.cotizacionId;
       }
     }
 
-    const cotizacion = payload.cotizacionId
+    const cotizacion = cotizacionId
       ? await cotizacionRp.findOne({
           where: { id: cotizacionId },
           relations: [

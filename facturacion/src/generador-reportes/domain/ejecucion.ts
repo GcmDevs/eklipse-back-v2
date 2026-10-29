@@ -1,8 +1,10 @@
+import { ProcesoReportes, TipoDocumentoReporte } from './proceso';
+
 export interface ArchivoReporte {
   id: string;
   nombre: string;
   bytes: number;
-  tipo: 'historias-clinicas' | 'enfermeria' | 'prefactura';
+  tipo: 'historias-clinicas' | 'enfermeria' | 'prefactura' | 'soportes-requeridos';
   grupo: number;
   totalGrupos: number;
   unificado?: boolean;
@@ -15,6 +17,7 @@ export interface ProgresoReportes {
     | 'historias-clinicas'
     | 'enfermeria'
     | 'prefactura'
+    | 'soportes-requeridos'
     | 'finalizacion'
     | 'completo';
   completados: number;
@@ -38,10 +41,16 @@ export interface AvisoReporte {
 }
 
 export interface EjecucionReportes {
+  proceso?: ProcesoReportes;
+  posicionCola?: number;
+  enColaDesde?: string;
+  loteId?: string;
+  disponibleParaProceso: boolean;
+  documentosPendientes: TipoDocumentoReporte[];
+  sinSoportesRequeridos?: boolean;
   avisos?: AvisoReporte[];
   fallas?: NonNullable<EjecucionReportes['fallo']>[];
   fallasPendientes?: NonNullable<EjecucionReportes['fallo']>[];
-  pendiente?: EjecucionReportes;
   reanudable?: boolean;
   fallo?: {
     fecha: string;
@@ -57,8 +66,35 @@ export interface EjecucionReportes {
   ingreso: string;
   createdAt: string;
   updatedAt: string;
-  estado: 'starting' | 'running' | 'complete' | 'failed' | 'prefactura-unavailable';
+  estado: 'queued' | 'starting' | 'running' | 'complete' | 'failed' | 'prefactura-unavailable';
   mensaje: string;
   archivos: ArchivoReporte[];
   progreso?: ProgresoReportes;
+}
+
+export interface ColaReportes {
+  trabajos: EjecucionReportes[];
+  totalEnCola: number;
+  resumen: {
+    total: number;
+    procesados: number;
+    enCurso: number;
+    pendientes: number;
+    porcentaje: number;
+  };
+}
+
+export interface HistorialReportes {
+  reportes: EjecucionReportes[];
+  total: number;
+  pagina: number;
+  porPagina: number;
+}
+
+export interface FiltrosHistorialReportes {
+  documento?: string;
+  ingreso?: string;
+  proceso?: ProcesoReportes | 'anteriores';
+  archivo?: string;
+  busqueda?: string;
 }

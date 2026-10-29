@@ -38,7 +38,9 @@ export function pacienteReportesFactory(fila: FilaPacienteReportes): PacienteRep
 }
 
 export function ingresoReportesFactory(fila: FilaIngresoReportes): IngresoReportes {
-  const activo = fila.INGRESO_ACTIVO === true || fila.INGRESO_ACTIVO === 1;
+  const activo =
+    (fila.INGRESO_ACTIVO === true || fila.INGRESO_ACTIVO === 1) &&
+    !['facturado', 'anulado', 'cerrado'].includes(fila.ESTADO_INGRESO.trim().toLowerCase());
   const codigo = fila.CAMA_CODIGO?.trim() || null;
   const nombre = fila.CAMA_NOMBRE?.trim() || null;
   return {
