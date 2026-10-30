@@ -49,7 +49,7 @@ export class OrdenesControlGastoImpl extends BaseSource {
         }
         const archivo = new ControlGastoArchivoOrm();
         archivo.controlGastoId = gasto.id;
-        archivo.usuarioId = this.auth.id;
+        //archivo.usuarioId = this.auth.id;
         archivo.documentoId = orden.id;
         archivo.tipoCode = esTraslado ? 3 : payload.ordenRelacionadaTipoCode === 0 ? 1 : 2;
         archivo.updatedAt = new Date();
@@ -106,7 +106,7 @@ export class OrdenesControlGastoImpl extends BaseSource {
             throw new Error('La orden anterior no pertenece a esta solicitud o ya fue descartada');
           archivo = new ControlGastoArchivoOrm();
           archivo.controlGastoId = gasto.id;
-          archivo.usuarioId = this.auth.id;
+          //archivo.usuarioId = this.auth.id;
           archivo.documentoId = anterior.documentoId;
           archivo.tipoCode = anterior.tipoCode === 0 ? 1 : 2;
           archivo.updatedAt = new Date();
