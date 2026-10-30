@@ -40,3 +40,4 @@ branch_structure.json
 .public.gitignore
 /inventario/dist.gitignore
 branch_structure.json
+.vscode

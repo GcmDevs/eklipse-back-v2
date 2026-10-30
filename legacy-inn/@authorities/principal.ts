@@ -41,8 +41,6 @@ export const MODULES = {
       COSTOS: `${codeModules.inn}007`,
       FARMACIA: `${codeModules.inn}008`,
       SERVICIO_TECNICO: `${codeModules.inn}009`,
-      GESTION_ACTIVOS: `${codeModules.inn}013`,
-      GESTION_TANQUEOS: `${codeModules.inn}016`,
     },
   },
   HISTORIA_CLINICA: {

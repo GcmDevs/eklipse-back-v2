@@ -1,14 +1,12 @@
 import { ORM_AFN_ENTITIES } from './activos-fijos';
 import { ORM_AFN_SVT_ENTITIES } from './activos-fijos/servicio-tecnico';
-import { ORM_PDT_STT_ENTITIES } from './productos/estantes';
 import { ORM_DCM_ENTITIES } from './documentos';
-import { ORM_PDT_ENTITIES, ProductoOrm } from './productos';
 import { ORM_RECTEC_ENTITIES } from './farmacia/recepcion-tecnica';
 import { ORM_INN_CONTEO_ENTITIES } from './inventario';
 import { ORM_OFER_ENTITIES } from './ofertas';
+import { ORM_PDT_ENTITIES, ProductoOrm } from './productos';
+import { ORM_PDT_STT_ENTITIES } from './productos/estantes';
 import { ORM_SUM_PAC_ENTITIES } from './suministro-paciente';
-import { ORM_EQPS_ENTITIES } from './equipos';
-import { ORM_INN_VEHICULOS_ENTITIES } from '@vehiculos/infrastructure/persistence/orm';
 
 export const ORM_INN_ENTITIES = [
   ProductoOrm,
@@ -21,6 +19,4 @@ export const ORM_INN_ENTITIES = [
   ...ORM_INN_CONTEO_ENTITIES,
   ...ORM_OFER_ENTITIES,
   ...ORM_SUM_PAC_ENTITIES,
-  ...ORM_EQPS_ENTITIES,
-  ...ORM_INN_VEHICULOS_ENTITIES,
 ];

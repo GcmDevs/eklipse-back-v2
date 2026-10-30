@@ -32,6 +32,3 @@ export const dataToUsuarioBasicoRes = (data: any) => {
     return null;
   }
 };
-
-export * from './database-exception.factory';
-export * from './domain-error.factory';
