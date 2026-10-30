@@ -1,11 +1,14 @@
 import { TipoProductoInvima } from './invima.models';
 
-export const EXTRACTOR_VERSION = '2';
+export const EXTRACTOR_VERSION = '6';
 export interface RenglonFactura {
   tipo: TipoProductoInvima;
   descripcion: string;
   codigoDeclarado: string;
   registroSanitario: string;
+  cantidad?: number | null;
+  cantidadPresentacion?: number | null;
+  unidadMedida?: string;
 }
 export interface RenglonExtraido extends RenglonFactura {
   hoja?: string;

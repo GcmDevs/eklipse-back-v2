@@ -29,6 +29,7 @@ describe('Pedido Excel Disfarma', () => {
     expect(r.renglones).toHaveLength(2);
     expect(r.renglones[0]).toMatchObject({
       tipo: 'MEDICAMENTO',
+      cantidad: 0,
       codigoDeclarado: '000123-001',
       hoja: 'DetallePedido',
       fila: 5,
@@ -65,5 +66,70 @@ describe('Pedido Excel Disfarma', () => {
     expect(() => extraerPedidoDisfarma([h])).toThrow('longitud');
     expect(() => extraerPedidoDisfarma([h, h])).toThrow('varias hojas');
     expect(() => extraerPedidoDisfarma([])).toThrow('columnas');
+  });
+  it('lee la factura original con NOMBRE_PRODUCTO, unidades y presentaciones sin convertir totales en productos', () => {
+    const h: HojaPedido = {
+      nombre: 'DetalleFactura',
+      filas: [
+        { numero: 1, celdas: [{ texto: 'FECHA EXPEDICIÓN DCTO: 30/09/2026' }] },
+        { numero: 2, celdas: [{ texto: 'FACTURA ZD NO. 753889' }] },
+        {
+          numero: 3,
+          celdas: [
+            'PRODUCTO',
+            'NOMBRE_PRODUCTO',
+            'CANTIDAD_PRESENTACION',
+            'CANTIDAD_UNIDADES',
+            'CUM',
+            'INVIMA',
+          ].map(texto => ({ texto })),
+        },
+        {
+          numero: 4,
+          celdas: [
+            { texto: '319184' },
+            { texto: 'AMOKEM CV' },
+            { texto: '3', numero: 3 },
+            { texto: '42', numero: 42 },
+            { texto: '00020192258-01' },
+            { texto: '2021M-0020426' },
+          ],
+        },
+        { numero: 5, celdas: [{ texto: 'TOTAL:' }, { texto: 'TOTAL:' }] },
+      ],
+    };
+    const r = extraerPedidoDisfarma([h]);
+    expect(r).toMatchObject({
+      tipoDocumento: 'FACTURA',
+      numero: 'ZD 753889',
+      proveedor: 'Disfarma',
+      cliente: '',
+      extractorVersion: '2',
+      fecha: '2026-09-30',
+    });
+    expect(r.renglones).toHaveLength(1);
+    expect(r.renglones[0]).toMatchObject({
+      descripcion: 'AMOKEM CV',
+      codigoDeclarado: '00020192258-01',
+      cantidad: 42,
+      cantidadPresentacion: 3,
+    });
+    expect(r.renglones[0].fragmento).toContain('CANTIDAD_UNIDADES: 42');
+  });
+  it('conserva cero, decimales y vacío sin usar fórmulas ni cantidades ambiguas', () => {
+    const h = hoja([
+      ['1', 'Producto cero', '', '', '', '0'],
+      ['2', 'Producto decimal', '', '', '', '1,5'],
+      ['3', 'Producto vacío', '', '', '', ''],
+      ['4', 'Producto inválido', '', '', '', '-2'],
+      ['5', 'Producto ambiguo', '', '', '', '1.000'],
+      ['6', 'Producto fórmula', '', '', '', 'A1*2'],
+    ]);
+    h.filas[9].celdas[5].formula = true;
+    const r = extraerPedidoDisfarma([h]);
+    expect(r.renglones.map(row => row.cantidad)).toEqual([0, 1.5, null, null, null, null]);
+    for (const row of r.renglones.slice(3))
+      expect(row.advertencias.join(' ')).toContain('Cantidad inválida');
+    expect(r.renglones[0].cantidadPresentacion).toBeUndefined();
   });
 });

@@ -27,6 +27,30 @@ describe('Lectura Excel aislada', () => {
     process.env.INVIMA_EXCEL_MAX_BYTES = '4';
     await expect(s.extraer(await excel())).rejects.toMatchObject({ status: 413 });
   });
+  it('lee cantidades numéricas del original sin confundirlas con precios, lotes ni factores', async () => {
+    const w = new Workbook(),
+      h = w.addWorksheet('DetalleFactura');
+    h.addRow(['FACTURA ZD NO. 753889']);
+    h.addRow([
+      'PRODUCTO',
+      'NOMBRE_PRODUCTO',
+      'CANTIDAD_PRESENTACION',
+      'VALOR_PRESENTACION',
+      'CANTIDAD_UNIDADES',
+      'FACTOR_CONVERSION',
+      'CUM',
+      'INVIMA',
+    ]);
+    h.addRow(['0001', 'Producto', 3, 13454, 42, 14, '000123-001', '2021M-006528-R4']);
+    h.addRow(['0002', 'Producto cero', 0, 0, 0, 10, '', '']);
+    const r = await new PedidoExcelService().extraer(Buffer.from(await w.xlsx.writeBuffer()));
+    expect(r.renglones[0]).toMatchObject({
+      cantidad: 42,
+      cantidadPresentacion: 3,
+      codigoDeclarado: '000123-001',
+    });
+    expect(r.renglones[1]).toMatchObject({ cantidad: 0, cantidadPresentacion: 0 });
+  });
   it('limita renglones y termina el trabajador cuando se agota el plazo', async () => {
     const b = await excel();
     process.env.INVIMA_EXCEL_MAX_ROWS = '1';

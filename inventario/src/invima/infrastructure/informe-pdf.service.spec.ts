@@ -86,6 +86,26 @@ describe('Informe PDF INVIMA', () => {
     expect(html).toContain('Fecha de pedido');
     expect(html).not.toContain('Factura <strong>');
   });
+  it('muestra unidades y presentaciones separadas y conserva cantidades cero', () => {
+    const f = fixture();
+    f.productos = [
+      {
+        orden: 1,
+        datos: { descripcion: 'Producto', cantidad: 42, cantidadPresentacion: 3 },
+        resultado: 'PENDIENTE',
+        observacion: { texto: '' },
+      },
+      {
+        orden: 2,
+        datos: { descripcion: 'Cero', cantidad: 0, unidadMedida: 'caj x100' },
+        resultado: 'PENDIENTE',
+        observacion: { texto: '' },
+      },
+    ];
+    const html = htmlInformeInvima(f);
+    expect(html).toContain('Unidades: 42 · Presentaciones: 3');
+    expect(html).toContain('Cantidad: 0 caj x100');
+  });
   it('usa tabla con encabezados repetibles, comparte fuentes y conserva notas largas sin repetir vacíos', () => {
     const f = fixture();
     const source = { nombre: 'CUM vigentes', dataset: 'i7cb-raxc' };

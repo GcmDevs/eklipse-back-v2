@@ -5,6 +5,11 @@ import {
   PaginaTexto,
   RenglonExtraido,
 } from './factura.models';
+import {
+  cantidadRenglonPdf,
+  extraerProveedorPdf,
+  PERFILES_PDF_ADICIONALES,
+} from './proveedores-pdf.extractor';
 
 const clean = (value: string) => value.replace(/\s+/g, ' ').trim();
 const normalize = (value: string) =>
@@ -14,6 +19,7 @@ const normalize = (value: string) =>
     .toUpperCase();
 const registroPattern = /\b(?:INVIMA\s*)?(\d{4}\s*(?:DM|RD|MB|M)\s*-\s*\d+(?:\s*-\s*R\d+)?)/gi;
 const profiles = [
+  ...PERFILES_PDF_ADICIONALES,
   {
     id: 'DELTA',
     match: /LABORATORIOS\s+DELTA/,
@@ -105,6 +111,12 @@ function row(
 const cumLabel = (text: string) =>
   text.match(/\bCUM\s*[:(]\s*(\d{1,12}\s*-\s*\d{1,8})/i)?.[1].replace(/\s/g, '') || '';
 
+function cantidadOffimedicas(r: RenglonExtraido): RenglonExtraido {
+  const columns = r.fragmento.split('\n')[0].split('\t');
+  // Precio y total preceden la cantidad; UM pertenece a la siguiente columna, junto al código.
+  return cantidadRenglonPdf(r, columns[1], 'en', columns[2]?.trim().split(/\s+/)[1]);
+}
+
 function bloques(text: string, start: RegExp): string[] {
   const matches = [...text.matchAll(start)];
   return matches.map((m, i) => text.slice(m.index!, matches[i + 1]?.index ?? text.length));
@@ -167,7 +179,8 @@ export function extraerFactura(pages: PaginaTexto[]): FacturaExtraida {
   const text = pages.map(p => p.text).join('\n');
   const profile = profiles.find(p => p.match.test(normalize(text)));
   const formato = profile?.id ?? 'DESCONOCIDO';
-  let numero = '';
+  const adicional = extraerProveedorPdf(formato, pages, row);
+  let numero = adicional?.numero || '';
   if (formato === 'LIFE')
     numero = 'E ' + (text.match(/Actividad ICA[^\n]*\s(\d{4,})\s*\n/)?.[1] || '');
   if (formato === 'SICMAFARMA')
@@ -184,8 +197,8 @@ export function extraerFactura(pages: PaginaTexto[]): FacturaExtraida {
     numero =
       text.match(/FACTURA ELECTR[ÓO]NICA DE VENTA\s+(CVF\d*\s+\d+)/i)?.[1].replace(/\s+/g, ' ') ||
       '';
-  const renglones: RenglonExtraido[] = [];
-  for (const page of pages) {
+  const renglones: RenglonExtraido[] = adicional?.renglones || [];
+  for (const page of adicional ? [] : pages) {
     const t = page.text;
     if (formato === 'BAXTER' || formato === 'VANTIVE') {
       const body =
@@ -201,7 +214,15 @@ export function extraerFactura(pages: PaginaTexto[]): FacturaExtraida {
           columns
             .match(/\t(\d{1,12}\s*-\s*\d{1,8}|N\.A\.|N\/A|NA)[ \t]+\d{2}-\d{2}-\d{2}(?=\s|$)/i)?.[1]
             .replace(/\s/g, '') || '';
-        renglones.push(row(b, desc, codigo, page.num, formato));
+        const r = row(b, desc, codigo, page.num, formato);
+        renglones.push(
+          cantidadRenglonPdf(
+            r,
+            columns.match(/^\s+(?:EA|UN|UND|CAJ|CJ|FCO|BOL)\s+([\d.,]+)/i)?.[1],
+            'es',
+            columns.match(/^\s+(\w+)/)?.[1]
+          )
+        );
       }
     } else if (formato === 'DELTA') {
       const body = t.split(/\nTel:|\nTotal Items:/i)[0];
@@ -226,7 +247,14 @@ export function extraerFactura(pages: PaginaTexto[]): FacturaExtraida {
         const ium = b.match(/^\d[\d.,]*[ \t]+(\d[A-Z]\d+(?:\r?\n\d+)?)/i)?.[1].replace(/\s/g, '');
         if (ium)
           r.advertencias.push(`La factura declara el IUM ${ium}; no se interpreta como CUM.`);
-        renglones.push(r);
+        renglones.push(
+          cantidadRenglonPdf(
+            r,
+            b.match(/^([\d.,]+)[ \t]+/)?.[1],
+            'es',
+            b.match(/\n(UD|UN|UND)\s*$/i)?.[1]
+          )
+        );
       }
     } else if (formato === 'CRUZ_VERDE') {
       const body =
@@ -236,7 +264,15 @@ export function extraerFactura(pages: PaginaTexto[]): FacturaExtraida {
       for (const b of bloques(body, start)) {
         const product = b.replace(new RegExp(start.source, 'i'), '');
         const desc = product.split(/\bCUM\s*[:(]|\nCANTIDAD\b/i)[0];
-        renglones.push(row(b, desc, cumLabel(b), page.num, formato));
+        const columns = b.match(/^([\d.,]+)[ \t]+[\d.,]+[ \t]+[\d.,]+[ \t]+\d+[ \t]+([A-Z]{2,4})/);
+        renglones.push(
+          cantidadRenglonPdf(
+            row(b, desc, cumLabel(b), page.num, formato),
+            columns?.[1],
+            'es',
+            columns?.[2]
+          )
+        );
       }
     } else if (formato === 'B_BRAUN') {
       const body =
@@ -248,7 +284,14 @@ export function extraerFactura(pages: PaginaTexto[]): FacturaExtraida {
         const desc = product.split(
           /\n[A-Z0-9][A-Z0-9./-]*[ \t]+(?:UN|UND|EA|CAJ)\b|\nReg\.\s*Sanitario/i
         )[0];
-        renglones.push(row(b, desc, cumLabel(b), page.num, formato));
+        renglones.push(
+          cantidadRenglonPdf(
+            row(b, desc, cumLabel(b), page.num, formato),
+            b.match(/^\d+[ \t]+([\d.,]+)[ \t]+/)?.[1],
+            'es',
+            b.match(/\n[A-Z0-9][A-Z0-9./-]*[ \t]+(UN|UND|EA|CAJ)\b/i)?.[1]
+          )
+        );
       }
     } else if (formato === 'LIFE') {
       const body = t.split(/Por favor abstenerse|\nSON:|\nSUBTOTAL|\nME OBLIGO/i)[0];
@@ -265,7 +308,10 @@ export function extraerFactura(pages: PaginaTexto[]): FacturaExtraida {
         const r = row(b, desc, codes.length === 1 ? codes[0] : '', page.num, formato);
         if (codes.length > 1)
           r.advertencias.push('Los lotes declaran códigos distintos; revise el renglón.');
-        renglones.push(r);
+        const rawCantidad = b
+          .split('\nLOTE:')[0]
+          .match(/\s+([+-]?[\d,]+\.\d{2})(?=[ \t]+[\d,]+\.\d{2}[ \t]+[\d,]+\.\d{2})/)?.[1];
+        renglones.push(cantidadRenglonPdf(r, rawCantidad, 'en'));
       }
     } else if (formato === 'SICMAFARMA') {
       const body = t.split(/Total Cantidad:/i)[0];
@@ -276,21 +322,24 @@ export function extraerFactura(pages: PaginaTexto[]): FacturaExtraida {
           cells.find(
             s => /^[A-ZÁÉÍÓÚÑ]/i.test(s) && /[a-záéíóúñ®)]\s+/i.test(s) && !/^CJ\s/i.test(s)
           ) || '';
-        renglones.push(
-          row(
-            b,
-            desc.replace(/\n[\d,.]+\s*$/, ''),
-            b.match(/^([^\s]+)/)?.[1] || '',
-            page.num,
-            formato
-          )
+        const r = row(
+          b,
+          desc.replace(/\n[\d,.]+\s*$/, ''),
+          b.match(/^([^\s]+)/)?.[1] || '',
+          page.num,
+          formato
         );
+        const rawCantidad = before.match(
+          /(?:^|[\t\n])[\d,]+[ \t]+\d+[ \t]+\d+(?:[.,]\d+)?[ \t]*(?:\r?\n)?[ \t]*([+-]?[\d,]+(?:\.\d+)?)\s*$/
+        )?.[1];
+        renglones.push(cantidadRenglonPdf(r, rawCantidad, 'en'));
       }
     } else if (formato === 'XINETIX') {
       const body = t.split(/Total Items:/i)[0];
       for (const b of bloques(body, /^\d+\s+\d+\s+[A-Z][^\n]*/gm)) {
         const desc = b.replace(/^\d+\s+\d+\s+/, '').split(/Lote\s*-\s*Fech/i)[0];
-        renglones.push(row(b, desc, cumLabel(b), page.num, formato));
+        const raw = b.match(/^([+-]?[\d.,]+)[ \t]+\$[ \t]*[\d.,]+/m)?.[1];
+        renglones.push(cantidadRenglonPdf(row(b, desc, cumLabel(b), page.num, formato), raw, 'es'));
       }
     } else if (formato === 'OFFIMEDICAS') {
       const body = t.split(/CR[ÉE]DITO\s*\n/i)[1]?.split(/noc\d+\(/i)[0] || '';
@@ -306,23 +355,33 @@ export function extraerFactura(pages: PaginaTexto[]): FacturaExtraida {
           formato
         );
         merged.paginas = [...previous.paginas, page.num];
-        renglones.push(merged);
+        renglones.push(cantidadOffimedicas(merged));
       }
       for (let i = 0; i < starts.length; i++) {
         const b = body.slice(starts[i].index!, starts[i + 1]?.index ?? body.length);
         const firstLine = b.split('\n')[0].split('\t').slice(-1)[0] || '';
         const remainder = b.slice(b.indexOf('\n') + 1);
         const desc = (firstLine + '\n' + remainder).split(/\bCum\s*\(/i)[0];
-        renglones.push(row(b, desc, cumLabel(b), page.num, formato));
+        renglones.push(cantidadOffimedicas(row(b, desc, cumLabel(b), page.num, formato)));
       }
     } else if (formato === 'EVEDISA') {
       const body = t.split(/De conformidad|La presente factura/i)[0];
-      const bs = bloques(body, /^\d{3,}\s+\d{1,3}\s+\d[\d,.]*[^\n]*/gm);
+      const bs = bloques(body, /^\d{3,}[ \t]+\d{1,3}[ \t]+[^\n]+/gm);
       for (const block of bs) {
         const end = /FECHA\s+VENC:\s*(?:\d{8}|\d{2}\/\d{2}\/\d{4})/i.exec(block);
         const b = end ? block.slice(0, end.index + end[0].length) : block;
-        const desc = b.slice(b.indexOf('\n') + 1).split(/\bCUM\s*:/i)[0];
-        if (cumLabel(b)) renglones.push(row(b, desc, cumLabel(b), page.num, formato));
+        const desc = b
+          .slice(b.indexOf('\n') + 1)
+          .split(/\b(?:CUM\s*:|ATC\s*:|R\.INV\s*:|LAB\s*:|LOTE\s*:)/i)[0];
+        const columns = b.match(/^\d{3,}[ \t]+(\d{1,3})[ \t]+(\S+)[ \t]+[\d,]+(?:\.\d+)?[ \t]*$/m);
+        renglones.push(
+          cantidadRenglonPdf(
+            row(b, desc, cumLabel(b), page.num, formato),
+            columns?.[2],
+            'en',
+            columns?.[1]
+          )
+        );
       }
     } else {
       for (const b of bloques(t, /^.*\bCUM\s*[:(][^\n]*/gim)) {
@@ -346,7 +405,7 @@ export function extraerFactura(pages: PaginaTexto[]): FacturaExtraida {
     proveedor: profile?.proveedor || '',
     nitProveedor: profile?.nit || '',
     numero: numero === 'E ' ? '' : numero,
-    fecha: fecha(text, formato),
+    fecha: adicional ? adicional.fecha : fecha(text, formato),
     paginas: pages.length,
     renglones,
     advertencias: [

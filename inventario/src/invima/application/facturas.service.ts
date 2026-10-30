@@ -175,10 +175,10 @@ export class FacturasInvimaService extends BaseSource {
   async subir(file: Express.Multer.File, pedido = false) {
     if (!file?.buffer)
       throw new BadRequestException(
-        pedido ? 'Seleccione un pedido Excel.' : 'Seleccione una factura PDF.'
+        pedido ? 'Seleccione un Excel Disfarma.' : 'Seleccione una factura PDF.'
       );
     if (pedido && !/\.xlsx$/i.test(file.originalname || ''))
-      throw new BadRequestException('El pedido debe ser un archivo .xlsx.');
+      throw new BadRequestException('El documento Disfarma debe ser un archivo .xlsx.');
     const archivoHash = createHash('sha256').update(file.buffer).digest('hex');
     const duplicate = await this.conn.getRepository(InvimaFacturaOrm).findOneBy({ archivoHash });
     if (duplicate)
@@ -237,6 +237,11 @@ export class FacturasInvimaService extends BaseSource {
       descripcion: r.descripcion.trim(),
       codigoDeclarado: r.codigoDeclarado.trim(),
       registroSanitario: r.registroSanitario.trim(),
+      ...(r.unidadMedida != null ? { unidadMedida: r.unidadMedida.trim() } : {}),
+      ...(r.cantidad !== undefined ? { cantidad: r.cantidad } : {}),
+      ...(r.cantidadPresentacion !== undefined
+        ? { cantidadPresentacion: r.cantidadPresentacion }
+        : {}),
     };
   }
   private entrada(r: RenglonFactura): MedicamentoInput {
@@ -445,6 +450,11 @@ export class FacturasInvimaService extends BaseSource {
                 advertencias: ['Renglón agregado manualmente.'],
               }),
             });
+        const anteriores = JSON.parse(item.datos || '{}') as RenglonFactura;
+        // Clientes antiguos omiten las cantidades: no borrar las que ya se importaron.
+        for (const key of ['cantidad', 'cantidadPresentacion', 'unidadMedida'] as const)
+          if (incoming[key] === undefined && anteriores[key] !== undefined)
+            Object.assign(datos, { [key]: anteriores[key] });
         if (!incoming.excluido) {
           const entrada = this.entrada(datos);
           if (item.productoId) {
@@ -455,7 +465,11 @@ export class FacturasInvimaService extends BaseSource {
               throw new ConflictException('Un producto cambió. Recargue la factura.');
             const stored = JSON.parse(p.datos);
             const storedRow = JSON.parse(item.datos) as RenglonFactura;
-            if (Object.entries(datos).some(([k, v]) => storedRow[k] !== v))
+            if (
+              ['tipo', 'descripcion', 'codigoDeclarado', 'registroSanitario'].some(
+                k => storedRow[k] !== datos[k]
+              )
+            )
               await this.invima.editar(
                 p.id,
                 {

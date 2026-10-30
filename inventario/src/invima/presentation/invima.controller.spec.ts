@@ -29,28 +29,34 @@ jest.mock('@common/infrastructure/guards', () => ({
     .AuthoritiesGuard,
 }));
 describe('Permisos de las interfaces INVIMA', () => {
-  it.each(['subir', 'subirPedido', 'listar', 'detalle', 'guardar', 'eliminar', 'observacion', 'informe'])(
-    'protege el endpoint de facturas %s',
-    async method => {
-      const handler = FacturasInvimaController.prototype[method];
-      expect(Reflect.getMetadata('authorities', handler)).toEqual([ADMIN_AUTHORITY, '006005002']);
-      expect(Reflect.getMetadata(GUARDS_METADATA, FacturasInvimaController)).toHaveLength(2);
-      const ctx: any = {
-        getHandler: () => handler,
-        switchToHttp: () => ({
-          getRequest: () => ({ headers: { authorization: 'Bearer prueba' } }),
-        }),
-      };
-      for (const [codes, allowed] of [
-        [[ADMIN_AUTHORITY], true],
-        [['006005002'], true],
-        [[], false],
-      ] as const) {
-        (fetchAuthsByUser as jest.Mock).mockResolvedValue({ onlyCodes: codes });
-        expect(await new AuthoritiesGuard(new Reflector()).canActivate(ctx)).toBe(allowed);
-      }
+  it.each([
+    'subir',
+    'subirPedido',
+    'listar',
+    'detalle',
+    'guardar',
+    'eliminar',
+    'observacion',
+    'informe',
+  ])('protege el endpoint de facturas %s', async method => {
+    const handler = FacturasInvimaController.prototype[method];
+    expect(Reflect.getMetadata('authorities', handler)).toEqual([ADMIN_AUTHORITY, '006005002']);
+    expect(Reflect.getMetadata(GUARDS_METADATA, FacturasInvimaController)).toHaveLength(2);
+    const ctx: any = {
+      getHandler: () => handler,
+      switchToHttp: () => ({
+        getRequest: () => ({ headers: { authorization: 'Bearer prueba' } }),
+      }),
+    };
+    for (const [codes, allowed] of [
+      [[ADMIN_AUTHORITY], true],
+      [['006005002'], true],
+      [[], false],
+    ] as const) {
+      (fetchAuthsByUser as jest.Mock).mockResolvedValue({ onlyCodes: codes });
+      expect(await new AuthoritiesGuard(new Reflector()).canActivate(ctx)).toBe(allowed);
     }
-  );
+  });
   it.each(['listar', 'crear', 'editar', 'verificar', 'historial', 'candidatos', 'confirmar'])(
     'permite administrador o permiso específico en %s',
     method => {
@@ -96,6 +102,27 @@ describe('Permisos de las interfaces INVIMA', () => {
   );
 });
 describe('Validación de entrada INVIMA', () => {
+  it('valida cantidades opcionales sin convertir vacíos, fórmulas ni textos a números', async () => {
+    const base = {
+      tipo: 'MEDICAMENTO',
+      descripcion: 'Producto',
+      codigoDeclarado: '',
+      registroSanitario: '',
+      excluido: false,
+    };
+    const { RenglonFacturaDto } = await import('./factura.dto');
+    for (const cantidad of [0, 42, 1.5, null, undefined])
+      expect(
+        await validate(
+          plainToInstance(RenglonFacturaDto, { ...base, cantidad, cantidadPresentacion: cantidad }),
+          { whitelist: true }
+        )
+      ).toHaveLength(0);
+    for (const cantidad of [-1, Infinity, NaN, '42', '', Number.MAX_SAFE_INTEGER + 1])
+      expect(
+        (await validate(plainToInstance(RenglonFacturaDto, { ...base, cantidad }))).length
+      ).toBeGreaterThan(0);
+  });
   it('valida longitud, versión y pertenencia del renglón y descarta identidad en observaciones', async () => {
     for (const invalid of [
       { texto: 'x'.repeat(4001), version: 0 },

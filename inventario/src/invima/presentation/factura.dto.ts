@@ -6,6 +6,7 @@ import {
   IsDateString,
   IsIn,
   IsInt,
+  IsNumber,
   IsOptional,
   IsString,
   Max,
@@ -25,6 +26,17 @@ export class RenglonFacturaDto implements RenglonFactura {
   @Transform(trim) @IsString() @MaxLength(240) descripcion: string;
   @Transform(trim) @IsString() @MaxLength(120) codigoDeclarado: string;
   @Transform(trim) @IsString() @MaxLength(100) registroSanitario: string;
+  @IsOptional() @Transform(trim) @IsString() @MaxLength(80) unidadMedida?: string;
+  @IsOptional()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0)
+  @Max(Number.MAX_SAFE_INTEGER)
+  cantidad?: number | null;
+  @IsOptional()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
+  @Min(0)
+  @Max(Number.MAX_SAFE_INTEGER)
+  cantidadPresentacion?: number | null;
   @IsBoolean() excluido: boolean;
 }
 export class GuardarFacturaDto {

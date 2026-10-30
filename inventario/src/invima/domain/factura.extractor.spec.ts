@@ -121,7 +121,7 @@ describe('Extracción de facturas desde texto pdf-parse', () => {
       formato: 'DELTA',
       numero: 'FE53153',
       fecha: '2026-09-28',
-      extractorVersion: '2',
+      extractorVersion: '6',
       nitProveedor: '811009393',
     });
     expect(f.renglones).toHaveLength(2);
@@ -226,10 +226,13 @@ describe('Extracción de facturas desde texto pdf-parse', () => {
     expect(f.renglones[0]).toMatchObject({
       descripcion: 'PRODUCTO A',
       codigoDeclarado: '00032897-22',
+      cantidad: 1,
+      unidadMedida: 'CAJ',
     });
     expect(f.renglones[1]).toMatchObject({
       descripcion: 'PRODUCTO B',
       codigoDeclarado: '20288002-01',
+      cantidad: 6,
     });
   });
 
@@ -267,6 +270,8 @@ describe('Extracción de facturas desde texto pdf-parse', () => {
       tipo: 'DISPOSITIVO',
       codigoDeclarado: '',
       registroSanitario: '2018DM-0017953',
+      cantidad: 10,
+      unidadMedida: 'UN',
     });
     expect(f.renglones[0].fragmento).toContain('20144345');
     expect(f.renglones[0].fragmento).not.toContain('Carrera');

@@ -150,10 +150,87 @@ const input = (f: any): GuardarFacturaDto => ({
     descripcion: r.descripcion,
     codigoDeclarado: r.codigoDeclarado,
     registroSanitario: r.registroSanitario,
+    cantidad: r.cantidad,
+    cantidadPresentacion: r.cantidadPresentacion,
+    unidadMedida: r.unidadMedida,
     excluido: r.excluido,
   })),
 });
 describe('Pedidos Excel y facturas comparten revisión sin confundir cliente y proveedor', () => {
+  it('conserva la cantidad y unidad de un PDF en originales, revisión, recarga e informe', async () => {
+    const { service, pdf, file } = setup();
+    const parsed = await pdf.extraer();
+    parsed.renglones[0].cantidad = 10;
+    parsed.renglones[0].unidadMedida = 'caj x100';
+    pdf.extraer.mockResolvedValue(parsed);
+    const draft = await service.subir(file);
+    expect(draft.renglones[0]).toMatchObject({
+      cantidad: 10,
+      unidadMedida: 'caj x100',
+      original: { cantidad: 10, unidadMedida: 'caj x100' },
+    });
+    const saved = await service.guardar(draft.id, input(draft));
+    const legacy = input(saved);
+    delete legacy.renglones[0].cantidad;
+    delete legacy.renglones[0].unidadMedida;
+    await service.guardar(saved.id, legacy);
+    expect((await service.detalle(saved.id)).renglones[0]).toMatchObject({
+      cantidad: 10,
+      unidadMedida: 'caj x100',
+    });
+    expect((await service.informe(saved.id)).productos[0].datos).toMatchObject({
+      cantidad: 10,
+      unidadMedida: 'caj x100',
+    });
+  });
+  it('conserva cantidades al guardar, recargar, editar producto y generar informe sin reiniciar verificación al cambiar solo cantidades', async () => {
+    const { service, invima, connection, excel, file } = setup();
+    const parsed = await excel.extraer();
+    parsed.renglones[0].cantidad = 42;
+    parsed.renglones[0].cantidadPresentacion = 3;
+    parsed.renglones[1].cantidad = 0;
+    excel.extraer.mockResolvedValue(parsed);
+    file.originalname = 'Disfarma.xlsx';
+    const d = await service.subir(file, true);
+    expect(d.renglones[0]).toMatchObject({
+      cantidad: 42,
+      cantidadPresentacion: 3,
+      original: { cantidad: 42, cantidadPresentacion: 3 },
+    });
+    const f = await service.guardar(d.id, input(d));
+    const p = f.renglones[0].producto!;
+    const editar = jest.spyOn(invima, 'editar');
+    const next = input(f);
+    next.renglones[0].cantidad = 56;
+    next.renglones[0].cantidadPresentacion = 4;
+    const updated = await service.guardar(f.id, next);
+    expect(editar).not.toHaveBeenCalled();
+    expect(updated.renglones[0].producto!.version).toBe(p.version);
+    expect(updated.renglones[1].cantidad).toBe(0);
+    const oldClient = input(updated);
+    for (const row of oldClient.renglones) {
+      delete row.cantidad;
+      delete row.cantidadPresentacion;
+    }
+    const kept = await service.guardar(f.id, oldClient);
+    expect(kept.renglones[0]).toMatchObject({
+      cantidad: 56,
+      cantidadPresentacion: 4,
+      original: { cantidad: 42, cantidadPresentacion: 3 },
+    });
+    await invima.editar(p.id, {
+      ...kept.renglones[0].producto!.datos,
+      version: p.version,
+      nombre: 'Corregido',
+    });
+    const report = await service.informe(f.id);
+    expect(report.productos[0].datos).toMatchObject({
+      cantidad: 56,
+      cantidadPresentacion: 4,
+      descripcion: 'Corregido',
+    });
+    expect((await service.detalle(f.id)).renglones[0].cantidad).toBe(56);
+  });
   it('guarda pedido, cliente, observaciones e informe sin inventar proveedor', async () => {
     const { service, file, excel, pdf } = setup();
     file.originalname = 'pedido.xlsx';
