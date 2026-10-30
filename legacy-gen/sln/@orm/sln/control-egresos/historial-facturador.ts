@@ -21,6 +21,12 @@ export class HistorialFacturadorOrm {
   @Column({ name: 'ESTADONUEVO' })
   estadoNuevo: boolean;
 
+  @Column({ name: 'ROLANTERIOR', type: 'int', nullable: true })
+  rolAnteriorId: number | null;
+
+  @Column({ name: 'ROLNUEVO', type: 'int', nullable: true })
+  rolNuevoId: number | null;
+
   @Column({ name: 'FECHA' })
   fecha: Date;
 

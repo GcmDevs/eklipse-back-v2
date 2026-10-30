@@ -46,7 +46,8 @@ const getUsuarioLabel = (nombre?: string, documento?: string): string => {
   return n && d ? `${n} / CC: ${d}` : n || d;
 };
 
-const findImageFromContext = (contexto: GcmContexts) => {
+export const findImageFromContext = (contexto: GcmContexts, usarLogoMedicos = false) => {
+  if (usarLogoMedicos) return 'private/clinicas/medicos.jpeg';
   return `private/clinicas/${
     contexto === GcmContexts.ALTACENTRO
       ? 'alta-centro.jpg'
@@ -121,7 +122,8 @@ function drawOfficialHeader(
   w: number,
   title: string,
   code: string,
-  contexto: GcmContexts
+  contexto: GcmContexts,
+  usarLogoMedicos = false
 ): number {
   const h = 22;
   const col1W = 40;
@@ -136,11 +138,16 @@ function drawOfficialHeader(
 
   // Logo institucional
   try {
-    const logoPath = resolveBackendResource(findImageFromContext(contexto));
+    const logoPath = resolveBackendResource(findImageFromContext(contexto, usarLogoMedicos));
     if (fs.existsSync(logoPath)) {
       const img: any = fs.readFileSync(logoPath);
       const ext = logoPath.endsWith('.png') ? 'png' : 'jpg';
-      doc.addImage(img, ext, x + 5, y + 2, 30, 10);
+      const props = doc.getImageProperties(img);
+      const margen = 1;
+      const escala = Math.min((col1W - margen * 2) / props.width, (h - margen * 2) / props.height);
+      const ancho = props.width * escala;
+      const alto = props.height * escala;
+      doc.addImage(img, ext, x + (col1W - ancho) / 2, y + (h - alto) / 2, ancho, alto);
     }
   } catch (e) {
     doc.setFont(FM.h, F.b);
@@ -270,11 +277,11 @@ function drawNotasPage(
   titulo: string,
   codigo: string,
   secciones: { titulo?: string; subtitulo?: string; notas: any[] }[],
-  opts: { M: number; CW: number; PH: number }
+  opts: { M: number; CW: number; PH: number; usarLogoMedicos?: boolean }
 ): void {
   doc.addPage();
   let y = opts.M;
-  y += drawOfficialHeader(doc, opts.M, y, opts.CW, titulo, codigo, contexto);
+  y += drawOfficialHeader(doc, opts.M, y, opts.CW, titulo, codigo, contexto, opts.usarLogoMedicos);
   y += 4;
 
   let lastTitulo = '';
@@ -544,6 +551,7 @@ export async function generateTrasladoPrimarioPdf(
 
   const tramos = data.tramos ?? [];
   const activeTramo = tramos.find(t => t.isActivo) || tramos[tramos.length - 1];
+  const usarLogoMedicos = isAccidenteTransito || activeTramo?.destino?.codigo === 'IPS010';
   const p = data.paciente;
 
   // Obtener los últimos signos vitales
@@ -576,7 +584,8 @@ export async function generateTrasladoPrimarioPdf(
     CW,
     'FORMATO TRASLADO PRIMARIO ASISTENCIAL',
     'REF-FT-04',
-    payload.clinica.contexto
+    payload.clinica.contexto,
+    usarLogoMedicos
   );
   doc.rect(M, Y, CW, 4); // Espaciador
   doc.setFont(FM.h, F.b);
@@ -882,8 +891,7 @@ export async function generateTrasladoPrimarioPdf(
   const firmaConductor = getFirmaBufferFromCedula(conductor?.documento);
   const firmaAuxiliar = getFirmaBufferFromCedula(auxiliar?.documento);
   const firmaMedico = isMedicalizado ? getFirmaBufferFromCedula(medico?.documento) : null;
-  const firmaIPS = getFirmaBufferFromCedula(
-    isAccidenteTransito ? 'IPS010' : `${activeTramo.destino.codigo}`,
+  const firmaIPS = getFirmaBufferFromCedula(`${activeTramo.destino.codigo}`,
     'private/clinicas/sellos'
   );
 
@@ -961,7 +969,7 @@ export async function generateTrasladoPrimarioPdf(
           : 'NOTAS DE ENFERMERÍA',
       tieneMedicas && tieneEnfermeria ? 'ASI-FT-35/36' : tieneMedicas ? 'ASI-FT-36' : 'ASI-FT-35',
       seccionesNotas,
-      { M, CW, PH }
+      { M, CW, PH, usarLogoMedicos }
     );
   }
 

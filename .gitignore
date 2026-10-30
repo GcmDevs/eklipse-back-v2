@@ -1,16 +1,19 @@
 # compiled output
 /node_modules
 /.env
+/Automatización
 /env.ts
 .agents
 skill.md
 skills-lock.json
 /rsa
+/inventario/dist
 /ignored
 /private
 /inventario/private
 /public
 /dist
+temp_auto_push.bat
 /.cursor
 /legacy-gen/dist
 temp_auto_push.bat
@@ -33,3 +36,5 @@ temp_auto_push.bat
 branch_structure.json
 /inventario/private.gitignore
 .public.gitignore
+/inventario/dist.gitignore
+branch_structure.json

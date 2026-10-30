@@ -1,0 +1,5 @@
+export const insertarObservacionQuery = () => `
+  INSERT INTO GCMCIRDERINTRAHOSPOBS
+    (INGRESO, OBSERVACION, FECHA_OBSERVACION, FOLIO, GESTOR, USUARIO)
+  VALUES (@0, @1, GETDATE(), @2, @3, @4)
+`;

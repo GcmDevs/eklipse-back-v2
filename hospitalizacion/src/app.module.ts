@@ -8,6 +8,7 @@ import { RotuloMedicamentosModule } from './rotulo-medicamentos/rotulo-medicamen
 import { FormatoAnatomopatologicosModule } from './formato-anatomopatologicos/formato-anatomopatologicos.module';
 import { SeguimientoQuirurgicoModule } from './seguimiento-quirurgico/seguimiento-quirurgico.module';
 import { ENTITIES } from './app.entities';
+import { BoletaQuirurgicaModule } from './boleta-quirurgica/boleta-quirugica.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ENTITIES } from './app.entities';
     RotuloMedicamentosModule,
     FormatoAnatomopatologicosModule,
     SeguimientoQuirurgicoModule,
+    BoletaQuirurgicaModule,
   ],
 })
 export class AppModule implements OnModuleInit {

@@ -1565,14 +1565,14 @@ export class RecursosCompartidosSource extends BaseSource {
         if (
           !this.isValidDate(registro.fechaRegistro) ||
           fecha.getTime() > Date.now() ||
-          (this.isValidDate(tramo.horaSalidaEscena) && fecha < new Date(tramo.horaSalidaEscena)) ||
+          (!this.isValidDate(tramo.horaLlegadaEscena) || fecha < new Date(tramo.horaLlegadaEscena)) ||
           (this.isValidDate(body.recepcionInstitucionHora) && fecha > recepcion)
         ) {
           this.addPending(
             pendientes,
             'atencion',
             campo,
-            `El registro de ${nombre} #${registro.id} tiene una fecha inválida o fuera del rango entre salida de escena y recepción institucional`
+            `El registro de ${nombre} #${registro.id} tiene una fecha inválida o fuera del rango entre llegada a escena y recepción institucional`
           );
         }
       }

