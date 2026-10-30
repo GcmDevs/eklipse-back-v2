@@ -1,4 +1,3 @@
-/** @deprecated Uso totalmente desaconsejado, agregado por los modulos legacy */
 export const TABLE_NAMES = {
   adn: {
     centros: 'ADNCENATE',
