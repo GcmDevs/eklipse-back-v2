@@ -38,7 +38,7 @@ import {
   PropietarioReportes,
 } from '../../infrastructure/services/ejecuciones.impl';
 
-@ApiTags('Generador de reportes')
+@ApiTags('AUDITOR-IA')
 @CommonGuards()
 @Controller('v1/generador-reportes')
 export class GeneradorReportesController {

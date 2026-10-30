@@ -1,6 +1,6 @@
-# Generador de reportes
+# AUDITOR-IA
 
-Accesible en **Facturación → Generador de reportes** (`/sln/generador-reportes`). Consulta pacientes e ingresos y descarga los documentos del proceso seleccionado mediante el proyecto hermano de automatización. El ingreso se valida contra el paciente y el proceso antes de encolar, reanudar y comenzar su turno.
+Accesible en **Facturación → AUDITOR-IA** (`/sln/generador-reportes`). Consulta pacientes e ingresos y descarga los documentos del proceso seleccionado mediante el proyecto hermano de automatización. El ingreso se valida contra el paciente y el proceso antes de encolar, reanudar y comenzar su turno.
 
 | Proceso                                     | Ingresos                                  | Documentos requeridos                                     |
 | ------------------------------------------- | ----------------------------------------- | --------------------------------------------------------- |
@@ -12,7 +12,7 @@ Pre-envío obtiene primero la prefactura, después HC, enfermería y finalmente 
 
 ## Generación local
 
-`POST /v1/generador-reportes/ejecuciones` recibe `{ "documento": "001234", "ingreso": "20", "proceso": "pre-envio" }` y devuelve HTTP 201 con la ejecución en estado `queued` y su posición global. `GET /v1/generador-reportes/ejecuciones/:id` entrega estado y archivos; `GET /v1/generador-reportes/ejecuciones/:id/archivos/:archivo` entrega el PDF autenticado. Requieren el permiso existente de Generador de reportes. Cada ejecución pertenece a su usuario, origen de usuario, contexto, paciente, ingreso y proceso; ni otro usuario autorizado ni un administrador diferente pueden acceder a sus archivos mediante estos endpoints.
+`POST /v1/generador-reportes/ejecuciones` recibe `{ "documento": "001234", "ingreso": "20", "proceso": "pre-envio" }` y devuelve HTTP 201 con la ejecución en estado `queued` y su posición global. `GET /v1/generador-reportes/ejecuciones/:id` entrega estado y archivos; `GET /v1/generador-reportes/ejecuciones/:id/archivos/:archivo` entrega el PDF autenticado. Requieren el permiso existente de AUDITOR-IA. Cada ejecución pertenece a su usuario, origen de usuario, contexto, paciente, ingreso y proceso; ni otro usuario autorizado ni un administrador diferente pueden acceder a sus archivos mediante estos endpoints.
 
 El backend localiza la carpeta hermana `Automatización` o usa `EKLIPSE_AUTOMATION_DIR`. Ejecuta Node 24 con `src/worker.ts`, su `.env` y argumentos validados mediante `spawn` sin shell. `EKLIPSE_AUTOMATION_NODE` permite elegir otro ejecutable de Node. El contexto habilitado predeterminado es `ALTACENTRO`; `EKLIPSE_AUTOMATION_CONTEXT` debe coincidir con la sede configurada de DG Web.
 
@@ -72,9 +72,13 @@ Si el paciente no existe, la respuesta es `{ "paciente": null, "ingresos": [] }`
 
 El código fuente incorpora el submódulo `004006` y el permiso `004006001`. Las constantes no crean registros en la base de seguridad.
 
+Para registrar ambos en una sede, ejecutar completo [`database/20261029_crear_permiso_generador_reportes.sql`](database/20261029_crear_permiso_generador_reportes.sql) en su base de datos. El script se puede repetir, valida los códigos ocupados y conserva la activación de registros existentes. Los nuevos se crean activos; al terminar muestra los estados de módulo, submódulo y permiso. La asignación a usuarios o roles se realiza por separado desde Seguridad.
+
+Si ya se crearon con los nombres anteriores, ejecutar [`database/20261029_renombrar_auditor_ia.sql`](database/20261029_renombrar_auditor_ia.sql) en esa misma base. Solo cambia el nombre del submódulo y del permiso a **AUDITOR-IA**; conserva los identificadores, códigos, activación y asignaciones. El script de creación admite ambos nombres para poder repetirse antes o después del cambio.
+
 1. En Seguridad, localizar el módulo Facturación, código local `004`.
-2. Registrar el submódulo **Generador de reportes** con código local `006` en `EKGENSUBMODULO`, asociado a Facturación; el código completo es `004006`.
-3. Registrar **Consultar pacientes e ingresos** con código local `001` en `GCMMODULOS`, asociado al módulo y submódulo; el código completo es `004006001`.
+2. Registrar el submódulo **AUDITOR-IA** con código local `006` en `EKGENSUBMODULO`, asociado a Facturación; el código completo es `004006`.
+3. Registrar el permiso **AUDITOR-IA** con código local `001` en `GCMMODULOS`, asociado al módulo y submódulo; el código completo es `004006001`.
 4. Comprobar los códigos que devuelve el administrador existente: la creación asigna códigos consecutivos automáticamente. Si `006` ya está ocupado por otro submódulo, resolver el conflicto de catálogo antes de habilitar esta versión, sin reasignar permisos existentes.
 5. Activar módulo, submódulo y permiso en las sedes correspondientes; asignar el permiso a los roles o usuarios autorizados y renovar su sesión.
 6. Verificar menú, acceso directo y API con un usuario autorizado y uno sin permiso. Los administradores conservan el acceso habitual.
