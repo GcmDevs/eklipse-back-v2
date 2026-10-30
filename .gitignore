@@ -15,6 +15,7 @@ skills-lock.json
 /dist
 temp_auto_push.bat
 /.cursor
+temp_auto_push.bat
 /legacy-gen/dist
 temp_auto_push.bat
 /legacy-hpn/dist
@@ -30,6 +31,7 @@ temp_auto_push.bat
 /inventario/dist
 /pacientes
 /chatbot
+.public.gitignore
 .public
 /inventario/private
 .gitignore
