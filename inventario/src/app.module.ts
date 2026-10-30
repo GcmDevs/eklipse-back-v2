@@ -1,19 +1,26 @@
-import { Module, OnModuleInit } from '@nestjs/common';
 import { initializeSources } from '@common/infrastructure/services';
-import { ENTITIES } from './app.entities';
-import { LgcCtcModule } from '@inn/lgc/ctc/module';
-import { LgcCgtModule } from '@inn/lgc/cgt/module';
+import { RequestContextMiddleware } from '@common/presentation/interceptors';
 import { LgcAfnModule } from '@inn/lgc/afn/activos-fijos.module';
+import { LgcCgtModule } from '@inn/lgc/cgt/module';
+import { LgcCtcModule } from '@inn/lgc/ctc/module';
 import { LgcRctModule } from '@inn/lgc/rct/recepcion-tecnica.module';
-import { DocumentosModule } from './documentos/module';
-import { MAOSModule } from './maos/module';
-import { CentralMezclasModule } from './central-mezclas/module';
-import { SolicitudPedidoModule } from './solicitud-pedido/solicitud-pedido.module';
+import { MiddlewareConsumer, Module, NestModule, OnModuleInit } from '@nestjs/common';
 import * as fs from 'fs';
-import { FOLDERS_STRINGS } from './folders';
+import { EquiposModule } from './activos/identificacion/equipos.module';
+import { ReportsModule } from './activos/reports/reports.module';
+import { ENTITIES } from './app.entities';
+import { CentralMezclasModule } from './central-mezclas/module';
 import { CloudController } from './cloud.controller';
-import { RondasHabitacionesModule } from './rondas-habitaciones/rondas-habitaciones.module';
+import { COR_MODULES } from './core';
+import { DocumentosModule } from './documentos/module';
+import { FOLDERS_STRINGS } from './folders';
 import { InvimaModule } from './invima/invima.module';
+import { MAOSModule } from './maos/module';
+import { MotorFormatosModule } from './motor-formatos/motor-formatos.module';
+import { VehiculosModule } from './operaciones/tanqueos/vehiculos.module';
+import { FlotaModule } from './operaciones/turnos-vehiculos/flota.module';
+import { RondasHabitacionesModule } from './rondas-habitaciones/rondas-habitaciones.module';
+import { SolicitudPedidoModule } from './solicitud-pedido/solicitud-pedido.module';
 
 @Module({
   controllers: [CloudController],
@@ -28,9 +35,19 @@ import { InvimaModule } from './invima/invima.module';
     SolicitudPedidoModule,
     RondasHabitacionesModule,
     InvimaModule,
+    EquiposModule,
+    MotorFormatosModule,
+    ReportsModule,
+    VehiculosModule,
+    FlotaModule,
+    ...COR_MODULES,
   ],
 })
-export class AppModule implements OnModuleInit {
+export class AppModule implements OnModuleInit, NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(RequestContextMiddleware).forRoutes('*');
+  }
+
   public async onModuleInit(): Promise<void> {
     initializeSources(ENTITIES);
 

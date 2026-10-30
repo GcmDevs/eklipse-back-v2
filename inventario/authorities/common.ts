@@ -20,5 +20,6 @@ export const INN_MODULES = {
     SOLICITUD_PEDIDO: `${inn}015`,
     GESTION_TANQUEOS: `${inn}016`,
     RONDAS_HABITACIONES: `${inn}017`,
+    TURNOS_VEHICULOS: `${inn}018`,
   },
 };

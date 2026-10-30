@@ -1,0 +1,17 @@
+import { Column } from 'typeorm';
+
+export class CoordenadasEmbeddable {
+  @Column({ name: 'LATITUD', type: 'decimal', precision: 9, scale: 6, nullable: true })
+  latitud?: number;
+
+  @Column({ name: 'LONGITUD', type: 'decimal', precision: 9, scale: 6, nullable: true })
+  longitud?: number;
+
+  @Column({ name: 'PRECISIONMETROS', type: 'decimal', precision: 6, scale: 2, nullable: true })
+  precisionMetros?: number;
+}
+
+export class CoordenadasCapturaEmbeddable extends CoordenadasEmbeddable {
+  @Column({ name: 'FECHACAPTURA', type: 'datetime2', nullable: true })
+  fechaCaptura?: Date | null;
+}

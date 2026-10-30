@@ -1,0 +1,12 @@
+-- Índice para grilla mensual de dotación (AMBDOTACION por FECHA).
+-- Aplicar manualmente en cada tenant tras revisión DBA.
+
+IF NOT EXISTS (
+  SELECT 1 FROM sys.indexes
+  WHERE name = N'IX_AMBDOTACION_FECHA_GRILLA' AND object_id = OBJECT_ID(N'dbo.AMBDOTACION')
+)
+BEGIN
+  CREATE NONCLUSTERED INDEX IX_AMBDOTACION_FECHA_GRILLA
+  ON dbo.AMBDOTACION (FECHA)
+  INCLUDE (VEHICULOOID, ESTADO, COMPLETA, USUARIOOID, FECHAINICIO);
+END

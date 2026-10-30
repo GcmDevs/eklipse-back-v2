@@ -99,8 +99,8 @@ export const TBNMS__INN__ = {
     oferta_docs: 'EKINNOFEROFERTADOC',
   },
 
-  /** EQUIPOS */
-  eqp: {
+  /** GESTION ACTIVOS */
+  ges_actvo: {
     iden_equipo: 'EKINNEQPIDEQUIPOS',
     solicitudes: 'EKINNEQPSOLICITUDESAPROBACION',
     eventos: 'EKINNEQPEVENTOSEQUIPO',
@@ -162,5 +162,34 @@ export const TBNMS__INN__ = {
         ejecuciones_items: 'EKFMTEJEITEMS',
       },
     },
+  },
+
+  ges_tan: {
+    tanqueos: 'GCNTANQUEOS',
+    tanqueo_incons: 'GCNTANQUEOINCONS',
+    repositorios_comb: 'GCNREPOSITORIOSCOMB',
+    movimientos_comb: 'GCNMOVIMIENTOSCOMB',
+    abastecimientos: 'GCNABASTECIMIENTOS',
+    sync_logs: 'GCNSYNCLOGS',
+    estaciones_servicio: 'GCNESTACIONESSERVICIO',
+    lecturas_odometro: 'GCNLECTURASODOMETRO',
+    tanqueo_correcciones: 'GCNTANQUEOCORRECCIONES',
+    tanqueo_intentos: 'GCNTANQUEOINTENTOS',
+    tanqueo_evidencias_log: 'GCNTANQUEOEVIDENCIASLOG',
+    tanqueo_eventos_log: 'GCNTANQUEOEVENTOSLOG',
+    vehiculos: 'EKINNDEVEHICULOS',
+  },
+
+  turnos_veh: {
+    ambulancia: 'AMBAMBULANCIA',
+    plantilla: 'AMBPLANTILLA',
+    elemento_venc: 'AMBELEMENTOVENC',
+    turno: 'AMBTURNO',
+    entrega: 'AMBENTREGA',
+    entrega_decl: 'AMBENTREGADECL',
+    limpieza: 'AMBLIMPIEZA',
+    dotacion: 'AMBDOTACION',
+    dotacion_novedad: 'AMBDOTACIONNOVEDAD',
+    evento: 'AMBEVENTO',
   },
 };

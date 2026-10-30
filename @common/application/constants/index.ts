@@ -4,6 +4,8 @@ export * from './money';
 export * from './ports';
 export * from './pagination';
 export * from './keys';
+export * from './regex';
+export * from './file-locations';
 
 export const ALL_CENTROS_ID = 99;
 

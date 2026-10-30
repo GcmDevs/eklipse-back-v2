@@ -41,3 +41,5 @@ branch_structure.json
 /inventario/dist.gitignore
 branch_structure.json
 .vscode
+AGENTS.md
+api.js

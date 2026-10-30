@@ -1,0 +1,12 @@
+export * from './tipo-activo.entity';
+export * from './clase-equipo.entity';
+export * from './subclase-equipo.entity';
+export * from './tipo-equipo.entity';
+export * from './tipo-doc-categoria-activo.entity';
+export * from './accesorio-tipo-equipo.entity';
+export * from './plan-default-tipo-equipo.entity';
+export * from './documento-tipo-equipo.entity';
+export * from './parte-catg.entity';
+export * from './unidad-medida.entity';
+export * from './audit-tipo-equipo.entity';
+

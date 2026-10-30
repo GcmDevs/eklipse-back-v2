@@ -7,6 +7,9 @@ import { _PrivSecEkUserOrm } from './ek-user.orm';
 import { _PrivSecUserDependenceOrm } from './user-dependence.orm';
 import { _PrivSecDependenceOrm } from './dependence.orm';
 
+export * from './base-timestamped.orm';
+export * from './base.orm';
+
 export const _PRIV_ORM_AUTH_SEC_ENTITIES = [
   _PrivSecEkUserOrm,
   _PrivSecAuthOrm,

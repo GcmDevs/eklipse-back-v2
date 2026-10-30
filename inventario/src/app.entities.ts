@@ -4,10 +4,14 @@ import { LGC_AFN_ENTITIES } from '@inn/lgc/afn/@orm';
 import { LGC_RCT_ENTITIES } from '@inn/lgc/rct/@orm';
 import { LGC_CGT_ENTITIES } from '@inn/lgc/cgt/@orm';
 import { ORM_ADN_ENTITIES } from '@inn/orm/adn';
+import { ORM_COR_ENTITIES } from '@inn/orm/cor';
 import { ORM_GEN_ENTITIES } from '@inn/orm/gen';
 import { ORM_HPN_ENTITIES } from '@inn/orm/hpn';
 import { ORM_INN_ENTITIES } from '@inn/orm/inn';
 import { ORM_SHARED_ENTITIES } from '@inn/orm/shared-bd';
+import { ORM_MOTOR_FMTS_ENTITIES } from '@inn/motor-formatos/infrastructure';
+import { ORM_IDEMPOTENCY_ENTITIES } from '@inn/core/idempotency/infrastructure';
+import { ORM_DEFERRED_JOB_ENTITIES } from '@inn/core/deferred-jobs/infrastructure';
 
 export const ENTITIES = [
   JustForVerifyOrm,
@@ -15,9 +19,13 @@ export const ENTITIES = [
   ...LGC_AFN_ENTITIES,
   ...LGC_RCT_ENTITIES,
   ...ORM_ADN_ENTITIES,
+  ...ORM_COR_ENTITIES,
   ...ORM_GEN_ENTITIES,
   ...ORM_HPN_ENTITIES,
   ...ORM_INN_ENTITIES,
+  ...ORM_MOTOR_FMTS_ENTITIES,
+  ...ORM_IDEMPOTENCY_ENTITIES,
+  ...ORM_DEFERRED_JOB_ENTITIES,
   ...LGC_CGT_ENTITIES,
   ...ORM_SHARED_ENTITIES,
 ];

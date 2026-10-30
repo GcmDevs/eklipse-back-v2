@@ -1,4 +1,4 @@
-import { ADMIN_AUTHORITY } from '@authorities/principal';
+import { ADMIN_AUTHORITY } from '@common/application/constants';
 import { SelectQueryBuilder } from 'typeorm';
 import { DataScopeType } from '../../domain/enums/data-scope.enum';
 import {

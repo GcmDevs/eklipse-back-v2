@@ -1,4 +1,4 @@
-import { ADMIN_AUTHORITY } from '@authorities/principal';
+import { ADMIN_AUTHORITY } from '@common/application/constants';
 import { ForbiddenAccessError } from '@common/domain/errors';
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';

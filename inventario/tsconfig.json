@@ -21,6 +21,7 @@
       "@env": ["../env"],
       "@rsa/*": ["../rsa/*"],
       "@common/*": ["../@common/*"],
+      "@auth/*": ["../@auth/*"],
       "@inn/authorities": ["./authorities"],
       "@inn/types/*": ["./@types/*"],
       "@inn/orm/*": ["./@orm/*"],
@@ -58,7 +59,8 @@
     "@types/**/*",
     "@orm/**/*",
     "authorities/**/*",
-    "../@common/**/*"
+    "../@common/**/*",
+    "../@auth/**/*"
   ],
   "exclude": ["node_modules", "dist", "test", "ignored", "**/*spec.ts"]
 }
