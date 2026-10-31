@@ -56,7 +56,7 @@ function grupoFuente(fuente: FuenteInvima): string {
   return fuente.grupo;
 }
 export function fuentesInvima(tipo?: TipoProductoInvima): FuenteInvima[] {
-  if (tipo === 'SIN_CLASIFICAR') return [];
+  if (tipo === 'SIN_CLASIFICAR' || tipo === 'VITAL_NO_DISPONIBLE') return [];
   if (tipo && GRUPOS_REGISTROS[tipo])
     return [
       {

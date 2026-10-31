@@ -104,7 +104,7 @@ describe('Pedido Excel Disfarma', () => {
       numero: 'ZD 753889',
       proveedor: 'Disfarma',
       cliente: '',
-      extractorVersion: '2',
+      extractorVersion: '3',
       fecha: '2026-09-30',
     });
     expect(r.renglones).toHaveLength(1);

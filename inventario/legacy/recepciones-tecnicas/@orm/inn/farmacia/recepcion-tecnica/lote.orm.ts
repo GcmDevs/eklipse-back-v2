@@ -14,7 +14,7 @@ export class RTCLoteOrm {
   @Column({ name: 'GCMRECTECPROD' })
   RTCProductoId: number;
 
-  @Column({ name: 'CANTIDAD' })
+  @Column({ name: 'CANTIDAD', type: 'decimal', precision: 28, scale: 4 })
   cantidad: number;
 
   @Column({ name: 'LOTE' })

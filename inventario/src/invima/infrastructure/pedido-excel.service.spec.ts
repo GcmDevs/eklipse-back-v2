@@ -20,6 +20,16 @@ describe('Lectura Excel aislada', () => {
     expect(r.renglones).toHaveLength(2);
     expect(r.renglones[0].codigoDeclarado).toBe('000123-001');
   });
+  it('lee LOTE_PRODUCTO como texto, incluido el formato numérico con ceros iniciales', async () => {
+    const w = new Workbook(),
+      h = w.addWorksheet('DetalleFactura');
+    h.addRow(['FACTURA ZD NO. 753889']);
+    h.addRow(['NOMBRE_PRODUCTO', 'CUM', 'INVIMA', 'LOTE_PRODUCTO', 'Fecha Vence']);
+    h.addRow(['Producto', '000123-001', '2021M-1', 123, '02N1C2']);
+    h.getCell('D3').numFmt = '000000';
+    const r = await new PedidoExcelService().extraer(Buffer.from(await w.xlsx.writeBuffer()));
+    expect(r.renglones[0].lotesDeclarados).toEqual(['000123']);
+  });
   it('rechaza archivos ajenos, dañados y superiores al límite', async () => {
     const s = new PedidoExcelService();
     await expect(s.extraer(Buffer.from('PDF'))).rejects.toMatchObject({ status: 400 });

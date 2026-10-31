@@ -7,6 +7,9 @@ import { validate } from 'class-validator';
 import { AuthoritiesGuard } from '@common/infrastructure/guards/authorities.guard';
 import { fetchAuthsByUser } from '@common/infrastructure/services';
 import { InvimaController } from './invima.controller';
+import { RecepcionInvimaController } from './recepcion.controller';
+import { FisicoRecepcionDto, GuardarRecepcionItemDto } from './recepcion.dto';
+import { fisicoVacio } from '../domain/recepcion.models';
 import { FacturasInvimaController } from './facturas.controller';
 import {
   EliminarFacturaDto,
@@ -22,6 +25,7 @@ jest.mock('@common/application/services', () => ({
 }));
 jest.mock('@common/infrastructure/services', () => ({ fetchAuthsByUser: jest.fn() }));
 jest.mock('../application/invima.service', () => ({ InvimaService: class {} }));
+jest.mock('../application/recepcion.service', () => ({ RecepcionInvimaService: class {} }));
 jest.mock('../application/facturas.service', () => ({ FacturasInvimaService: class {} }));
 jest.mock('@common/infrastructure/guards', () => ({
   JwtAuthGuard: class JwtAuthGuard {},
@@ -29,6 +33,41 @@ jest.mock('@common/infrastructure/guards', () => ({
     .AuthoritiesGuard,
 }));
 describe('Permisos de las interfaces INVIMA', () => {
+  it.each(['iniciar', 'detalle', 'guardar', 'finalizar'])(
+    'recepción %s exige administrador o permiso INVIMA',
+    method => {
+      expect(
+        Reflect.getMetadata('authorities', RecepcionInvimaController.prototype[method])
+      ).toEqual([ADMIN_AUTHORITY, '006005002']);
+      expect(Reflect.getMetadata(GUARDS_METADATA, RecepcionInvimaController)).toHaveLength(2);
+    }
+  );
+  it('valida captura física sin coerción y exige versiones y contenido', async () => {
+    const base = {
+      version: 1,
+      recepcionVersion: 1,
+      decision: 'PENDIENTE',
+      justificacion: '',
+      fisico: fisicoVacio('MEDICAMENTO'),
+    };
+    expect(
+      await validate(plainToInstance(GuardarRecepcionItemDto, base), { whitelist: true })
+    ).toHaveLength(0);
+    for (const fisico of [
+      undefined,
+      null,
+      { ...base.fisico, cantidad: '60' },
+      { ...base.fisico, estadoEmpaque: 'INVALIDO' },
+      { ...base.fisico, motivosRechazo: ['OTRO'] },
+    ])
+      expect(
+        (
+          await validate(plainToInstance(GuardarRecepcionItemDto, { ...base, fisico }), {
+            whitelist: true,
+          })
+        ).length
+      ).toBeGreaterThan(0);
+  });
   it.each([
     'subir',
     'subirPedido',
@@ -102,6 +141,24 @@ describe('Permisos de las interfaces INVIMA', () => {
   );
 });
 describe('Validación de entrada INVIMA', () => {
+  it('valida lotes declarados como lista acotada y rechaza null, duplicados y tipos ajenos', async () => {
+    const { RenglonFacturaDto } = await import('./factura.dto');
+    const base = {
+      tipo: 'MEDICAMENTO',
+      descripcion: 'Producto',
+      codigoDeclarado: '',
+      registroSanitario: '',
+      excluido: false,
+    };
+    for (const lotesDeclarados of [undefined, [], ['000A', '000B']])
+      expect(
+        await validate(plainToInstance(RenglonFacturaDto, { ...base, lotesDeclarados }))
+      ).toHaveLength(0);
+    for (const lotesDeclarados of [null, '000A', [123], ['A', 'A'], ['A'.repeat(121)]])
+      expect(
+        (await validate(plainToInstance(RenglonFacturaDto, { ...base, lotesDeclarados }))).length
+      ).toBeGreaterThan(0);
+  });
   it('valida cantidades opcionales sin convertir vacíos, fórmulas ni textos a números', async () => {
     const base = {
       tipo: 'MEDICAMENTO',

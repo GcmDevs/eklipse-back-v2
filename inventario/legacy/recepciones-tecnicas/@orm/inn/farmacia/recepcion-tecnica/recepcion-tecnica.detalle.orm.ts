@@ -35,9 +35,16 @@ import {
   DetalleRemisionEntradaOrm,
 } from '@inn/lgc/rct/orm/inn/documentos';
 import { TABLE_NAMES } from '@common/application/constants';
+import {
+  InspeccionGuardada,
+  leerInspeccion,
+} from '../../../../../../src/recepcion-tecnica/inspeccion';
 
 @Entity(TABLE_NAMES.inn.fmc.rct.detalle)
 export class DetalleRecepcionTecnicaOrm {
+  @Column({ name: 'INSPECCIONJSON', type: 'nvarchar', length: 'MAX', nullable: true })
+  inspeccionJson: string | null;
+  inspeccion?: InspeccionGuardada;
   @PrimaryGeneratedColumn({ name: 'OID' })
   id: number;
 
@@ -98,7 +105,7 @@ export class DetalleRecepcionTecnicaOrm {
   @Column({ name: 'CONCENTRACION' })
   concentracion: number;
 
-  @Column({ name: 'TEMPERATURA' })
+  @Column({ name: 'TEMPERATURA', nullable: true })
   temperatura: number;
 
   @Column({ name: 'CONCENCUNIMED' })
@@ -113,7 +120,7 @@ export class DetalleRecepcionTecnicaOrm {
   @Column({ name: 'FORMAFARMAC' })
   formaFarmaceuticaId: number;
 
-  @Column({ name: 'REGISTROINVIMA', length: 100 })
+  @Column({ name: 'REGISTROINVIMA', length: 100, nullable: true })
   registroInvima: string;
 
   @Column({ name: 'CUM', length: 50 })
@@ -156,6 +163,10 @@ export class DetalleRecepcionTecnicaOrm {
   tempLotes?: RTCLoteOrm[];
 
   setTypes(removeTypeCodes?: boolean) {
+    if (this.inspeccionJson !== undefined) {
+      this.inspeccion = leerInspeccion(this.inspeccionJson);
+      delete this.inspeccionJson;
+    }
     this.UMTemperatura = UMTemperaturaTypeFactory(this.UMTemperaturaCode);
     this.tipoProducto = tipoProductoTypeFactory(this.tipoProductoCode);
     this.tipoRiesgo = riesgoProductoTypeFactory(this.tipoRiesgoCode);

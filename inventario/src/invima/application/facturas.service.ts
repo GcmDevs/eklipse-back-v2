@@ -238,6 +238,9 @@ export class FacturasInvimaService extends BaseSource {
       codigoDeclarado: r.codigoDeclarado.trim(),
       registroSanitario: r.registroSanitario.trim(),
       ...(r.unidadMedida != null ? { unidadMedida: r.unidadMedida.trim() } : {}),
+      ...(r.lotesDeclarados !== undefined
+        ? { lotesDeclarados: [...new Set(r.lotesDeclarados.map(l => l.trim()).filter(Boolean))] }
+        : {}),
       ...(r.cantidad !== undefined ? { cantidad: r.cantidad } : {}),
       ...(r.cantidadPresentacion !== undefined
         ? { cantidadPresentacion: r.cantidadPresentacion }
@@ -413,6 +416,18 @@ export class FacturasInvimaService extends BaseSource {
       const factura = await this.factura(id, manager, true);
       if (factura.version !== input.version)
         throw new ConflictException('La factura cambió. Recargue antes de guardar.');
+      if (factura.estado === 'REVISADA')
+        throw new ConflictException(
+          'La revisión general está bloqueada. Use la edición individual para corregir productos; cantidades y lotes conservan los datos validados.'
+        );
+      if (
+        input.renglones.some(
+          r => !r.excluido && (r.cantidad == null || !Number.isFinite(r.cantidad) || r.cantidad < 0)
+        )
+      )
+        throw new BadRequestException(
+          'Complete la cantidad facturada de cada producto incluido antes de validar la revisión.'
+        );
       if (factura.tipoDocumento === 'PEDIDO' ? !input.cliente?.trim() : !input.proveedor.trim())
         throw new BadRequestException(
           factura.tipoDocumento === 'PEDIDO'
@@ -452,7 +467,12 @@ export class FacturasInvimaService extends BaseSource {
             });
         const anteriores = JSON.parse(item.datos || '{}') as RenglonFactura;
         // Clientes antiguos omiten las cantidades: no borrar las que ya se importaron.
-        for (const key of ['cantidad', 'cantidadPresentacion', 'unidadMedida'] as const)
+        for (const key of [
+          'cantidad',
+          'cantidadPresentacion',
+          'unidadMedida',
+          'lotesDeclarados',
+        ] as const)
           if (incoming[key] === undefined && anteriores[key] !== undefined)
             Object.assign(datos, { [key]: anteriores[key] });
         if (!incoming.excluido) {

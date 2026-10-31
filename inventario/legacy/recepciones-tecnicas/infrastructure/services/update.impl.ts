@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { dataToRecepcionTecnicaOrm, dataToRecepcionTecnicaProducto } from '../factories';
 import { CreateRTCDto } from '@inn/lgc/rct/presentation/dtos';
 import { BaseSource } from '@common/infrastructure/services';
+import { prepararInspecciones } from './inspeccion';
 import {
   RecepcionTecnicaOrm,
   RTCLoteOrm,
@@ -16,6 +17,7 @@ export class UpdateRecepcionTecnicaImpl extends BaseSource {
     try {
       const recTecRp = this.qr.manager.getRepository(RecepcionTecnicaOrm);
       const recepcionTecnica = await recTecRp.findOne({ where: { id: payload.id } });
+      if (!recepcionTecnica) throw new Error('No existe la recepción técnica.');
 
       if (this.auth.id !== recepcionTecnica.usuarioId) {
         throw new Error(`Esta recepción solo puede ser modificada por el que la registró`);
@@ -45,6 +47,7 @@ export class UpdateRecepcionTecnicaImpl extends BaseSource {
           relations: ['lotes'],
         });
 
+        await prepararInspecciones(this.qr.manager, payload, recepcionTecnica, this.auth.id);
         const recTecStored = await recTecRp.save(recTec);
 
         const productosActualizados: DetalleRecepcionTecnicaOrm[] = payload.detalle.map(dt =>
@@ -79,6 +82,9 @@ export class UpdateRecepcionTecnicaImpl extends BaseSource {
           delete el.recepcionTecnica;
         });
 
+        // Reemplazar solo los lotes propios de los renglones enviados, también si quedan vacíos.
+        for (const p of payload.detalle)
+          if (p.id) await recTecLoteRp.delete({ RTCProductoId: p.id });
         if (lotes.length) await recTecLoteRp.save(lotes);
 
         recTecStored.detalle = recTecProdStored;

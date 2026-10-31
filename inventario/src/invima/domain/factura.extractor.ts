@@ -10,6 +10,7 @@ import {
   extraerProveedorPdf,
   PERFILES_PDF_ADICIONALES,
 } from './proveedores-pdf.extractor';
+import { extraerLotesPdf } from './lotes-documento';
 
 const clean = (value: string) => value.replace(/\s+/g, ' ').trim();
 const normalize = (value: string) =>
@@ -399,6 +400,7 @@ export function extraerFactura(pages: PaginaTexto[]): FacturaExtraida {
       }
     }
   }
+  for (const r of renglones) r.lotesDeclarados = extraerLotesPdf(formato, r.fragmento);
   return {
     formato,
     extractorVersion: EXTRACTOR_VERSION,

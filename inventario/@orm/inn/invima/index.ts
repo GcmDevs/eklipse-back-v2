@@ -83,10 +83,40 @@ export class InvimaFacturaItemOrm extends ObservacionInvimaOrm {
   @Column({ name: 'EXCLUIDO', type: 'bit' }) excluido: boolean;
 }
 
+@Entity('EKINNIVRECEPCION')
+export class InvimaRecepcionOrm {
+  @PrimaryGeneratedColumn({ name: 'OID' }) id: number;
+  @Column({ name: 'FACTURAID', type: 'int' }) facturaId: number;
+  @Column({ name: 'ESTADO', length: 20 }) estado: string;
+  @Column({ name: 'VERSION', type: 'int' }) version: number;
+  @Column({ name: 'CREADOPOR', type: 'int' }) creadoPor: number;
+  @Column({ name: 'ACTUALIZADOPOR', type: 'int' }) actualizadoPor: number;
+  @Column({ name: 'FECHACREA', type: 'datetime2' }) fechaCreacion: Date;
+  @Column({ name: 'FECHAACT', type: 'datetime2' }) fechaActualizacion: Date;
+  @Column({ name: 'FECHAFINALIZA', type: 'datetime2', nullable: true })
+  fechaFinalizacion: Date | null;
+}
+@Entity('EKINNIVRECEPCIONITEM')
+export class InvimaRecepcionItemOrm {
+  @PrimaryGeneratedColumn({ name: 'OID' }) id: number;
+  @Column({ name: 'RECEPCIONID', type: 'int' }) recepcionId: number;
+  @Column({ name: 'FACTURAITEMID', type: 'int' }) facturaItemId: number;
+  @Column({ name: 'PRODUCTOID', type: 'int', nullable: true }) productoId: number | null;
+  @Column({ name: 'FACTURADO', type: 'nvarchar', length: 'MAX' }) facturado: string;
+  @Column({ name: 'FISICO', type: 'nvarchar', length: 'MAX' }) fisico: string;
+  @Column({ name: 'DECISION', length: 20 }) decision: string;
+  @Column({ name: 'JUSTIFICACION', type: 'nvarchar', length: 4000 }) justificacion: string;
+  @Column({ name: 'VERSION', type: 'int' }) version: number;
+  @Column({ name: 'USUARIOID', type: 'int' }) usuarioId: number;
+  @Column({ name: 'FECHA', type: 'datetime2' }) fecha: Date;
+}
+
 export const ORM_INN_INVIMA_ENTITIES = [
   InvimaProductoOrm,
   InvimaVerificacionOrm,
   InvimaConfirmacionOrm,
   InvimaFacturaOrm,
   InvimaFacturaItemOrm,
+  InvimaRecepcionOrm,
+  InvimaRecepcionItemOrm,
 ];

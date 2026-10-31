@@ -8,7 +8,38 @@ import {
   IsString,
   MaxLength,
   ValidateNested,
+  IsIn,
+  Min,
 } from 'class-validator';
+import { InspeccionGuardada } from '../../../../src/recepcion-tecnica/inspeccion';
+
+export class NovedadInspeccionDto {
+  @IsIn(['AVERIA', 'FALTANTE', 'SOBRANTE', 'NO_SOLICITADO'])
+  tipo: 'AVERIA' | 'FALTANTE' | 'SOBRANTE' | 'NO_SOLICITADO';
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @Min(0)
+  cantidad: number;
+}
+export class InspeccionDto {
+  @IsNumber({ maxDecimalPlaces: 4 })
+  @Min(0)
+  cantidadFacturada: number;
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => NovedadInspeccionDto)
+  novedades: NovedadInspeccionDto[];
+  @IsArray()
+  @IsIn(['CUM', 'INVIMA'], { each: true })
+  motivosRechazo: ('CUM' | 'INVIMA')[];
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  ium?: string;
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  numeroResolucion?: string;
+}
 import { TipoProductoCode } from '@inn/lgc/rct/types/inn/farmacia/recepcion-tecnica';
 import { TipoDocumentoCode } from '@inn/lgc/rct/types/inn/documentos';
 import {
@@ -35,6 +66,12 @@ export class ItemLoteProdDto {
 }
 
 export class RTCProductoDto {
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => InspeccionDto)
+  inspeccion?: InspeccionDto;
+  // Asignado únicamente por el servidor, no se acepta en el contrato de entrada.
+  inspeccionPersistida?: InspeccionGuardada;
   @IsNumber()
   @IsOptional()
   id?: number;
@@ -42,7 +79,7 @@ export class RTCProductoDto {
   @IsNumber()
   itemDetalleId: number;
 
-  @IsNumber()
+  @IsIn([1, 2, 3, 4])
   tipoProductoCode: TipoProductoCode;
 
   @IsNumber()
@@ -104,12 +141,14 @@ export class RTCProductoDto {
   @IsOptional()
   lotes: ItemLoteProdDto[];
 
+  @IsOptional()
   @IsNumber()
   temperatura: number;
 
   @IsNumber()
   UMTemperaturaCode: TemperaturaCode;
 
+  @IsOptional()
   @IsString()
   @MaxLength(100)
   registroInvima: string;
@@ -146,6 +185,7 @@ export class CreateRTCDto {
   @IsNumber()
   centroId: number;
 
+  @IsOptional()
   @IsBoolean()
   isLastItem: boolean;
 

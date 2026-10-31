@@ -121,7 +121,7 @@ describe('Extracción de facturas desde texto pdf-parse', () => {
       formato: 'DELTA',
       numero: 'FE53153',
       fecha: '2026-09-28',
-      extractorVersion: '6',
+      extractorVersion: '7',
       nitProveedor: '811009393',
     });
     expect(f.renglones).toHaveLength(2);

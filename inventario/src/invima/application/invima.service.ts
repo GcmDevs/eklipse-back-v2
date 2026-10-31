@@ -15,6 +15,8 @@ import {
   InvimaVerificacionOrm,
   InvimaFacturaItemOrm,
   InvimaFacturaOrm,
+  InvimaRecepcionOrm,
+  InvimaRecepcionItemOrm,
 } from '@inn/orm/inn/invima';
 import { construirFiltro, evaluarCoincidencias } from '../domain/comparacion';
 import {
@@ -23,8 +25,8 @@ import {
   MedicamentoInput,
   esMedicamento,
 } from '../domain/invima.models';
-import { cumCompleto, RenglonFactura } from '../domain/factura.models';
 import { fuentesInvima, SocrataClient, TAMANO_PAGINA } from '../infrastructure/socrata.client';
+import { cumCompleto } from '../domain/factura.models';
 
 @Injectable()
 export class InvimaService extends BaseSource {
@@ -46,14 +48,28 @@ export class InvimaService extends BaseSource {
   }
   private async producto(id: number, manager = this.conn.manager, lock = false) {
     const item = await manager.getRepository(InvimaFacturaItemOrm).findOneBy({ productoId: id });
-    if (item) {
-      // Lock the parent before the product, as review, editing and deletion do.
+    const fisico = await manager
+      .getRepository(InvimaRecepcionItemOrm)
+      .findOneBy({ productoId: id });
+    const recepcion = fisico
+      ? await manager.getRepository(InvimaRecepcionOrm).findOneBy({ id: fisico.recepcionId })
+      : null;
+    if (fisico && !recepcion) throw new NotFoundException('Recepción no encontrada.');
+    const facturaId = item?.facturaId ?? recepcion?.facturaId;
+    if (facturaId) {
       const factura = await manager.getRepository(InvimaFacturaOrm).findOne({
-        where: { id: item.facturaId },
+        where: { id: facturaId },
         ...(lock ? { lock: { mode: 'pessimistic_write' as const } } : {}),
       });
       if (!factura || factura.fechaEliminacion)
         throw new NotFoundException('Producto no encontrado en este contexto.');
+    }
+    if (recepcion && lock) {
+      const actual = await manager
+        .getRepository(InvimaRecepcionOrm)
+        .findOne({ where: { id: recepcion.id }, lock: { mode: 'pessimistic_write' } });
+      if (!actual || actual.estado === 'FINALIZADA')
+        throw new ConflictException('La recepción finalizada es de solo lectura.');
     }
     const producto = await manager.getRepository(InvimaProductoOrm).findOne({
       where: { id },
@@ -97,6 +113,13 @@ export class InvimaService extends BaseSource {
       .where(
         'NOT EXISTS (SELECT 1 FROM EKINNIVFACTURAITEM i INNER JOIN EKINNIVFACTURA f ON f.OID = i.FACTURAID WHERE i.PRODUCTOID = p.OID AND f.FECHAELIMINA IS NOT NULL)'
       );
+    visibles.andWhere(
+      'NOT EXISTS (SELECT 1 FROM EKINNIVRECEPCIONITEM ri INNER JOIN EKINNIVRECEPCION r ON r.OID = ri.RECEPCIONID INNER JOIN EKINNIVFACTURA f ON f.OID = r.FACTURAID WHERE ri.PRODUCTOID = p.OID AND f.FECHAELIMINA IS NOT NULL)'
+    );
+    if (!ids || sinFactura)
+      visibles.andWhere(
+        'NOT EXISTS (SELECT 1 FROM EKINNIVRECEPCIONITEM ri WHERE ri.PRODUCTOID = p.OID)'
+      );
     if (sinFactura)
       visibles.andWhere(
         'NOT EXISTS (SELECT 1 FROM EKINNIVFACTURAITEM i WHERE i.PRODUCTOID = p.OID)'
@@ -128,6 +151,8 @@ export class InvimaService extends BaseSource {
         'registroSanitarioVerificado'
       )
       .addSelect(`JSON_VALUE(${candidatoSql}, '$.titular')`, 'titularInvima')
+      .addSelect(`JSON_VALUE(${candidatoSql}, '$.presentacion')`, 'presentacionInvima')
+      .addSelect(`JSON_VALUE(${candidatoSql}, '$.formaFarmaceutica')`, 'formaFarmaceuticaInvima')
       .addSelect(`JSON_VALUE(${candidatoSql}, '$.estadoRegistro')`, 'estadoRegistro');
     if (ids || sinFactura) {
       if (!productos.length) return [];
@@ -146,6 +171,8 @@ export class InvimaService extends BaseSource {
         estadoRegistro: ultima?.estadoRegistro?.trim() || null,
         registroSanitarioVerificado: ultima?.registroSanitarioVerificado?.trim() || null,
         titularInvima: ultima?.titularInvima?.trim() || null,
+        presentacionInvima: ultima?.presentacionInvima?.trim() || null,
+        formaFarmaceuticaInvima: ultima?.formaFarmaceuticaInvima?.trim() || null,
         ultimaVerificacion: ultima ?? null,
       };
     });
@@ -170,12 +197,15 @@ export class InvimaService extends BaseSource {
       estadoRegistro: null,
       registroSanitarioVerificado: null,
       titularInvima: null,
+      presentacionInvima: null,
+      formaFarmaceuticaInvima: null,
     };
   }
   private datos(input: MedicamentoInput): MedicamentoInput {
     return Object.fromEntries(
       [
         'tipo',
+        'codigoDeclarado',
         'nombre',
         'cum',
         'registroSanitario',
@@ -191,51 +221,101 @@ export class InvimaService extends BaseSource {
     input: MedicamentoInput & { version?: number; codigoDeclarado?: string },
     transactionManager?: EntityManager
   ) {
-    const linked = !transactionManager
-      ? await this.conn.getRepository(InvimaFacturaItemOrm).findOneBy({ productoId: id })
-      : null;
+    if (!transactionManager) {
+      await this.producto(id);
+      const fisico = await this.conn
+        .getRepository(InvimaRecepcionItemOrm)
+        .findOneBy({ productoId: id });
+      if (fisico) throw new ConflictException('Edite la captura física desde Recepción técnica.');
+    }
     const work = async (manager: EntityManager) => {
-      // Invoice edits and full review saves always lock the parent before its products.
-      const factura = linked
-        ? await manager.getRepository(InvimaFacturaOrm).findOne({
-            where: { id: linked.facturaId },
-            lock: { mode: 'pessimistic_write' },
-          })
+      const linked = !transactionManager
+        ? await manager.getRepository(InvimaFacturaItemOrm).findOneBy({ productoId: id })
         : null;
-      const item = linked
-        ? await manager
-            .getRepository(InvimaFacturaItemOrm)
-            .findOneBy({ id: linked.id, productoId: id })
-        : null;
-      if (linked && (!factura || factura.fechaEliminacion))
-        throw new NotFoundException('Factura no encontrada en este contexto.');
-      if (linked && (factura.estado !== 'REVISADA' || !item || item.excluido))
-        throw new ConflictException(
-          'El renglón ya no está disponible para editar. Recargue la factura.'
-        );
+      let factura: InvimaFacturaOrm | null = null;
+      let recepcion: InvimaRecepcionOrm | null = null;
+      if (linked) {
+        factura = await manager
+          .getRepository(InvimaFacturaOrm)
+          .findOne({ where: { id: linked.facturaId }, lock: { mode: 'pessimistic_write' } });
+        if (!factura || factura.fechaEliminacion)
+          throw new NotFoundException('Factura no encontrada en este contexto.');
+        if (factura.estado !== 'REVISADA' || linked.excluido)
+          throw new ConflictException('El producto no está disponible para corrección.');
+        recepcion = await manager
+          .getRepository(InvimaRecepcionOrm)
+          .findOne({ where: { facturaId: factura.id }, lock: { mode: 'pessimistic_write' } });
+        if (recepcion?.estado === 'FINALIZADA')
+          throw new ConflictException('La recepción finalizada es de solo lectura.');
+      }
       const p = await this.producto(id, manager, true);
       if (input.version !== p.version)
-        throw new ConflictException('El medicamento cambió. Actualice el listado antes de editar.');
+        throw new ConflictException('El producto cambió. Recargue antes de editar.');
       const datos = this.datos(input);
       let codigoDeclarado: string | undefined;
-      if (item && factura) {
-        const anterior = JSON.parse(item.datos) as RenglonFactura;
+      if (linked && factura) {
+        const anterior = JSON.parse(linked.datos);
         codigoDeclarado =
           input.codigoDeclarado?.trim() ??
           (datos.tipo === 'MEDICAMENTO' ? datos.cum || '' : anterior.codigoDeclarado);
+        datos.codigoDeclarado = codigoDeclarado;
         datos.cum =
           datos.tipo === 'MEDICAMENTO' && cumCompleto(codigoDeclarado) ? codigoDeclarado : '';
-        item.datos = JSON.stringify({
+        const fecha = new Date();
+        const correccion = {
+          anterior: {
+            tipo: anterior.tipo,
+            descripcion: anterior.descripcion,
+            codigoDeclarado: anterior.codigoDeclarado,
+            registroSanitario: anterior.registroSanitario,
+            datosProducto: JSON.parse(p.datos),
+          },
+          versionAnterior: p.version,
+          ...this.usuario(),
+          fecha: fecha.toISOString(),
+        };
+        const actualizado = {
           ...anterior,
           tipo: datos.tipo,
           descripcion: datos.nombre,
           codigoDeclarado,
           registroSanitario: datos.registroSanitario,
-        });
-        await manager.getRepository(InvimaFacturaItemOrm).save(item);
+          correccionesProducto: [...(anterior.correccionesProducto || []), correccion],
+        };
+        linked.datos = JSON.stringify(actualizado);
+        await manager.getRepository(InvimaFacturaItemOrm).save(linked);
+        if (recepcion) {
+          const item = await manager
+            .getRepository(InvimaRecepcionItemOrm)
+            .findOneBy({ recepcionId: recepcion.id, facturaItemId: linked.id });
+          if (item) {
+            const previo = JSON.parse(item.facturado);
+            item.facturado = JSON.stringify({
+              ...previo,
+              ...actualizado,
+              correccionesRecepcion: [
+                ...(previo.correccionesRecepcion || []),
+                {
+                  ...correccion,
+                  decisionAnterior: item.decision,
+                  justificacionAnterior: item.justificacion,
+                },
+              ],
+            });
+            item.decision = 'PENDIENTE';
+            item.version++;
+            item.usuarioId = Number(this.auth.id);
+            item.fecha = fecha;
+            await manager.getRepository(InvimaRecepcionItemOrm).save(item);
+          }
+          recepcion.version++;
+          recepcion.actualizadoPor = Number(this.auth.id);
+          recepcion.fechaActualizacion = fecha;
+          await manager.getRepository(InvimaRecepcionOrm).save(recepcion);
+        }
         factura.version++;
         factura.actualizadoPor = Number(this.auth.id);
-        factura.fechaActualizacion = new Date();
+        factura.fechaActualizacion = fecha;
         await manager.getRepository(InvimaFacturaOrm).save(factura);
       }
       p.datos = JSON.stringify(datos);
@@ -253,14 +333,35 @@ export class InvimaService extends BaseSource {
         estadoRegistro: null,
         registroSanitarioVerificado: null,
         titularInvima: null,
-        ...(item ? { codigoDeclarado } : {}),
+        presentacionInvima: null,
+        formaFarmaceuticaInvima: null,
+        ...(linked ? { codigoDeclarado } : {}),
       };
     };
     return transactionManager ? work(transactionManager) : this.conn.transaction(work);
   }
   async verificar(productoId: number) {
     const p = await this.producto(productoId);
+    const recibido = await this.conn
+      .getRepository(InvimaRecepcionItemOrm)
+      .findOneBy({ productoId });
+    if (recibido) {
+      const f = JSON.parse(recibido.fisico);
+      if (!(f.cantidad > 0) || !f.descripcion?.trim())
+        throw new BadRequestException(
+          'Guarde la cantidad e identificación del producto físico antes de consultar.'
+        );
+      const r = await this.conn
+        .getRepository(InvimaRecepcionOrm)
+        .findOneBy({ id: recibido.recepcionId });
+      if (r?.estado === 'FINALIZADA')
+        throw new ConflictException('La recepción finalizada es de solo lectura.');
+    }
     const entrada = JSON.parse(p.datos) as MedicamentoInput;
+    if (entrada.tipo === 'VITAL_NO_DISPONIBLE')
+      throw new BadRequestException(
+        'El vital no disponible requiere comprobación documental; no consulta registro INVIMA.'
+      );
     if (entrada.tipo === 'SIN_CLASIFICAR')
       throw new BadRequestException('Clasifique el producto antes de verificar.');
     const item = await this.conn.getRepository(InvimaFacturaItemOrm).findOneBy({ productoId });

@@ -4,6 +4,7 @@ import {
   FacturaExtraida,
   RenglonExtraido,
 } from './factura.models';
+import { normalizarLotes } from './lotes-documento';
 
 export interface CeldaPedido {
   texto: string;
@@ -65,6 +66,13 @@ export function extraerPedidoDisfarma(hojas: HojaPedido[]): FacturaExtraida {
   const unidades = headers.indexOf('CANTIDAD_UNIDADES');
   const cantidad = unidades >= 0 ? unidades : headers.indexOf('CANTIDAD');
   const presentacion = headers.indexOf('CANTIDAD_PRESENTACION');
+  const columnasLote = headers.flatMap((h, i) =>
+    /^(?:LOTE|LOTES|LOTE_PRODUCTO|NUMERO[ _]DE[ _]LOTE|NUMERO[ _]LOTE|NRO[ _]LOTE|N[°º][ _]LOTE)$/.test(
+      h
+    )
+      ? [i]
+      : []
+  );
   const text = h.filas
     .filter(r => r.numero < header.numero)
     .flatMap(r => r.celdas.map(c => c.texto))
@@ -116,6 +124,9 @@ export function extraerPedidoDisfarma(hojas: HojaPedido[]): FacturaExtraida {
       descripcion,
       codigoDeclarado,
       registroSanitario,
+      lotesDeclarados: normalizarLotes(
+        columnasLote.filter(i => !cell(i).formula).flatMap(i => cell(i).texto.split(/[;\r\n]+/))
+      ),
       cantidad: cantidad >= 0 ? cantidadCelda(cell(cantidad)) : null,
       ...(presentacion >= 0 ? { cantidadPresentacion: cantidadCelda(cell(presentacion)) } : {}),
       paginas: [],
@@ -129,6 +140,12 @@ export function extraerPedidoDisfarma(hojas: HojaPedido[]): FacturaExtraida {
       advertencias: [],
     };
     row.advertencias = advertenciasRenglon(row);
+    if (columnasLote.some(i => cell(i).formula))
+      row.advertencias.push(
+        'Hay fórmulas en columnas de lote. Revise y complete los lotes manualmente.'
+      );
+    if (row.lotesDeclarados!.length > 100 || row.lotesDeclarados!.some(l => l.length > 120))
+      throw new Error(`Los lotes de la fila ${r.numero} superan el límite permitido.`);
     for (const [index, label] of [
       [cantidad, 'Cantidad'],
       [presentacion, 'Cantidad por presentación'],
@@ -169,7 +186,7 @@ export function extraerPedidoDisfarma(hojas: HojaPedido[]): FacturaExtraida {
     tipoDocumento: esFactura ? 'FACTURA' : 'PEDIDO',
     cliente: esFactura ? '' : 'Disfarma',
     formato: 'DISFARMA_EXCEL',
-    extractorVersion: '2',
+    extractorVersion: '3',
     numero,
     proveedor: esFactura ? 'Disfarma' : '',
     nitProveedor: '',

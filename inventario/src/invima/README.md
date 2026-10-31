@@ -4,7 +4,7 @@ Ruta de Eklipse: /inn/invima. Backend: /v4/inn/invima. Los productos pertenecen 
 
 ## Activación
 
-1. Ejecutar únicamente `inventario/database/migrations/20261022_invima_completa.sql` en cada base de contexto que habilite el módulo (SQL Server 2016 o superior por ISJSON). Ejecutar el archivo completo antes de desplegar el backend. Incluye productos, verificaciones, confirmaciones, documentos y renglones, borrado lógico, observaciones, pedidos Excel, índices y permiso. Sirve para instalación nueva o actualización de las migraciones anteriores; puede repetirse sin duplicar registros ni borrar información. Las migraciones no se ejecutan al iniciar el servidor.
+1. Ejecutar únicamente `inventario/database/migrations/20261022_invima_completa.sql` en cada base de contexto que habilite el módulo (SQL Server 2016 o superior por ISJSON). Ejecutar el archivo completo antes de desplegar el backend. Incluye productos, verificaciones, confirmaciones, documentos y renglones, borrado lógico, observaciones, pedidos Excel, recepción física por documento, índices y permiso. Sirve para instalación nueva o actualización de las migraciones anteriores; puede repetirse sin duplicar registros ni borrar información. Las migraciones no se ejecutan al iniciar el servidor.
 2. Asignar el permiso 006005002, «Verificación INVIMA», mediante la administración de permisos existente. La migración registra el permiso sin concederlo; si el código ya pertenece a otra función, aborta. Quien tenga el permiso activo ADMINISTRADOR (001001001), directamente o por su rol, puede usar todos los endpoints sin necesitar 006005002.
 3. Configurar, si se requiere, INVIMA_APP_TOKEN en el entorno del proceso del backend.
 4. Validar las fuentes con el script de comprobación antes de habilitar el acceso del equipo.
@@ -80,7 +80,7 @@ Comprobación del original `DISFARMA.xlsx` con el mismo script de aceptación: f
 
 La acción **Cargar Excel Disfarma** acepta `.xlsx` del formato suministrado. `POST facturas/pedidos/excel` recibe el multipart `archivo`, usando administrador o permiso 006005002. El documento conserva `tipoDocumento=PEDIDO` y `cliente=Disfarma`, separado de `proveedor`, que inicialmente queda vacío. El cliente y el número son obligatorios al guardar la revisión; el proveedor es opcional para pedidos. Las facturas anteriores siguen siendo FACTURA y continúan exigiendo proveedor. El tipo de documento se decide al importar y no se cambia desde la revisión.
 
-El listado distingue Pedido/Factura y busca también por cliente. El detalle y el informe PDF utilizan las etiquetas de pedido. Se reutilizan revisión, edición individual, verificación, candidatos, historial, observaciones automáticas y borrado lógico. Los originales Excel no se almacenan. Se conservan hoja, fila, fragmento de valores y advertencias de extracción; no se interpretan códigos internos ni el contenido alfanumérico de «Fecha Vence» como fechas de vencimiento. El encabezado «Elaborado por» no se convierte en proveedor o cliente.
+El listado distingue Pedido/Factura y busca también por cliente. El detalle y el informe PDF utilizan las etiquetas de pedido. Se reutilizan revisión, recepción física independiente, verificación, candidatos, historial, observaciones automáticas y borrado lógico. Los originales Excel no se almacenan. Se conservan hoja, fila, fragmento de valores y advertencias de extracción; no se interpretan códigos internos ni el contenido alfanumérico de «Fecha Vence» como fechas de vencimiento. El encabezado «Elaborado por» no se convierte en proveedor o cliente.
 
 El lector usa ExcelJS ya instalado, en un proceso terminable con 256 MB de heap, hasta dos lecturas simultáneas, 10 MB y 30 s. `INVIMA_EXCEL_MAX_BYTES`, `INVIMA_EXCEL_MAX_ROWS` (500) e `INVIMA_EXCEL_TIMEOUT_MS` permiten reducir límites. Se limita a cinco hojas, 2000 filas por hoja y 50 columnas. Se exige una única hoja de detalle reconocible para evitar omisiones. Las fórmulas no se ejecutan ni se usan sus resultados para identificadores o descripciones; quedan para corrección manual. Las celdas combinadas de encabezados y totales se leen una sola vez.
 
@@ -103,7 +103,7 @@ Los números que una factura de dispositivos rotula CUM quedan en codigoDeclarad
 - GET/POST productos: listar o registrar.
 - El listado incluye cumVerificado y estadoCum, ambos anulables. Se extraen de la coincidencia confirmada o exacta de la última verificación de la versión actual, sin consultar nuevamente a INVIMA ni descargar el historial. Crear o editar devuelve ambos campos en null.
 - El listado también proyecta `registroSanitarioVerificado` y `titularInvima`, anulables, desde el mismo candidato exacto o confirmado. La tabla muestra el registro ingresado (o «(Vacío)»), el publicado y su comparación. Ignora únicamente mayúsculas, espacios y el prefijo INVIMA al comparar; mantiene visibles los textos originales y cualquier diferencia en años/dígitos. El titular publicado se etiqueta «Titular INVIMA», separado del laboratorio ingresado: no se interpreta como fabricante. Los candidatos sin confirmar no se asocian en el listado. Editar deja ambos campos en null y conserva el historial. No requiere migración ni consultas adicionales a INVIMA.
-- PUT productos/:id: editar; exige version actual y deja solo ese producto pendiente, conservando el historial. Los productos de facturas revisadas se pueden editar individualmente: codigoDeclarado (opcional, texto de hasta 120 caracteres) corrige el código del renglón. La transacción bloquea primero la factura, sincroniza el renglón y producto e incrementa la versión y auditoría de la factura. Rechaza renglones excluidos y versiones de producto desactualizadas. No modifica el texto original del PDF. Una revisión completa posterior conserva laboratorio, concentración, forma y presentación añadidos desde la edición individual.
+- PUT productos/:id: editar productos sin factura; exige versión actual y deja solo ese producto pendiente, conservando el historial. Los productos vinculados a documentos validados se pueden corregir individualmente con versión actual, historial y auditoría; las recepciones finalizadas rechazan la corrección. Los productos físicos se editan exclusivamente mediante el endpoint del renglón de recepción, que controla versiones y restricciones de cierre.
 - POST productos/:id/verificaciones: consultar y guardar una nueva evidencia.
 - GET productos/:id/verificaciones: historial de versiones, consultas y confirmaciones.
 - GET productos/:id/verificaciones/:verificacionId/candidatos?fuenteId=vigentes&offset=20: siguiente página de 20 candidatos.
@@ -129,7 +129,7 @@ Los formatos de fecha de las fuentes se conservan como texto, incluido el año 3
 
 ### Observaciones e informe PDF
 
-Aplicar `inventario/database/migrations/20261022_invima_completa.sql` en cada contexto antes de actualizar el backend. Incluye texto, versión independiente y auditoría de observaciones a facturas y renglones, sin modificar productos ni verificaciones anteriores. Las notas se conservan al editar productos, revisar de nuevo, excluir renglones o eliminar lógicamente una factura.
+Aplicar `inventario/database/migrations/20261022_invima_completa.sql` en cada contexto antes de actualizar el backend. Incluye texto, versión independiente y auditoría de observaciones a facturas y renglones, sin modificar productos ni verificaciones anteriores. Las notas se conservan separadamente de la captura física y al eliminar lógicamente una factura. La revisión validada ya no se reabre ni permite excluir o modificar renglones.
 
 Después de guardar la revisión, el detalle permite una observación general y una por producto incluido (hasta 4000 caracteres cada una). El cliente guarda tras 700 ms sin escritura y al salir del campo, serializa cambios de un mismo campo y reintenta fallos transitorios hasta tres intentos. Muestra el estado del guardado; conserva el borrador local ante fallos. La navegación y la descarga esperan los cambios pendientes. Cerrar o recargar el navegador con cambios sin confirmar muestra la advertencia nativa. Un conflicto con otra persona permite elegir explícitamente el texto que se conservará.
 
@@ -157,3 +157,40 @@ Si se modifica el archivo .env, reiniciar el proceso de Inventario: dotenv se ej
 Si cambian las conexiones, reiniciar también General (autenticación, puerto 8101) y volver a iniciar sesión. Los dos procesos deben consultar la misma base para autenticar al usuario y resolver sus permisos. El alias admin del frontend en desarrollo no concede permisos en el backend.
 
 La ausencia de cualquiera de las cinco tablas o de las columnas de pedidos, observaciones o borrado lógico devuelve HTTP 503 con código INVIMA_MIGRACION_PENDIENTE e indica la migración única `20261022_invima_completa.sql`. No se interpreta como una lista vacía ni se crean tablas automáticamente. Otros errores SQL conservan el tratamiento habitual del backend.
+
+## Recepción técnica integrada a facturas y pedidos
+
+Después de validar el PDF o Excel, **Guardar revisión** exige cantidad facturada en todos los renglones incluidos y bloquea encabezado, cantidades, lotes y exclusiones. La identificación de un producto puede corregirse individualmente con auditoría mientras la recepción no esté finalizada. Los documentos antiguos ya revisados con cantidades ausentes conservan «Sin dato» y requieren justificación al decidir la recepción.
+
+Dentro del detalle del documento, **Iniciar recepción técnica** crea una sola recepción y una instantánea de cada renglón incluido. La captura física comienza vacía; «Coincide con la factura» copia identificación, nunca cantidades. El inspector digita el total físico; la suma de sus lotes debe coincidir. Faltantes/sobrantes se calculan sin convertir unidades ni presentaciones. Cero unidades se registra como No recibido, sin lotes ni comprobaciones físicas.
+
+Se guardan avería, no solicitado, empaque, conservación, controles de etiqueta/sellos/fabricante, muestreo y decisión. Las novedades no se suman para inferir unidades aceptadas. Rechazo por CUM/INVIMA impide aceptar el renglón. Diferencias de códigos, datos ausentes y resultados oficiales no concluyentes exigen justificación; un resultado oficial por sí solo no valida la mercancía. Medicamento y reactivos usan concentración/unidad; dispositivos las omiten. Vital no disponible requiere IUM o resolución, no consulta registro INVIMA y excluye las comprobaciones sanitarias no aplicables.
+
+Operaciones bajo `/v4/inn/invima/facturas/:id/recepcion` (administrador o 006005002):
+
+- GET: consulta la recepción o devuelve null si no comenzó.
+- POST: inicio idempotente; requiere revisión validada y documento activo.
+- PUT renglones/:itemId: guarda `{version, recepcionVersion, fisico, decision, justificacion}` dentro de una transacción. 409 conserva la captura local ante modificaciones concurrentes.
+- POST finalizar: recibe `{version}`, revalida todos los renglones y bloquea la recepción.
+
+`EKINNIVRECEPCION` y `EKINNIVRECEPCIONITEM` se incorporan a la migración consolidada. Reaplicar el archivo completo **antes** de iniciar el backend nuevo en cada contexto; la prueba SQL usa esquemas temporales con rollback y no actualiza las tablas reales. Los productos físicos están vinculados a la recepción, excluidos de Sin factura y usan verificaciones/confirmaciones/historial independientes. Cambiar su identificación reinicia únicamente su consulta; editar cantidades o empaque conserva la evidencia oficial. No se modifican existencias, lotes de inventario, comprobantes ni remisiones.
+
+La recepción finalizada admite consulta de la evidencia guardada y rechaza cambios físicos, verificaciones nuevas y confirmaciones. Las observaciones y consultas de la referencia facturada siguen siendo independientes. El PDF existente corresponde a verificación de factura; **el informe descargable de inspección queda pendiente para la siguiente etapa**.
+
+Aceptación visual automatizada (frontend): `tests/invima-recepcion-factura.smoke.cjs`, con shell/Inventario compilados, Chrome y API simulada. Comprueba PDF/escritorio y Excel/móvil, 50/60, identificación diferente, lotes, avería, empaque, verificación física, recarga y cierre. No accede a datos reales.
+
+## Lotes declarados en el documento
+
+El extractor PDF versión 7 incorpora `lotesDeclarados` por renglón. Usa etiquetas y posiciones verificadas de cada proveedor; conserva varios lotes y ceros iniciales, sin crear renglones por lote ni usar referencias, CUM o cantidades como lotes. La muestra de Cafam no declara lotes y devuelve una lista vacía.
+
+El lector Excel versión 3 lee exclusivamente columnas de lote (incluida `LOTE_PRODUCTO`), conserva texto y números enteros con formato de ceros iniciales, y omite fórmulas con advertencia. Por indicación del usuario **no interpreta «Fecha Vence» como lote**, aunque contenga códigos alfanuméricos. El original Disfarma aporta 100 renglones con lote; el pedido anterior conserva sus 46 renglones sin lote declarado.
+
+Se pueden corregir los lotes antes de guardar la revisión, uno por línea. Se guardan en los JSON originales y corregidos; un cliente que omita el campo no borra los lotes existentes. Tras validar, aparecen como referencia bloqueada en recepción y en los datos del documento. Los lotes físicos comienzan vacíos y nunca se copian al pulsar «Coincide con la factura». No requiere migración adicional. Solo las nuevas cargas pasan por el nuevo extractor: los documentos anteriores no se reprocesan ni se alteran automáticamente.
+
+## Consulta al abrir y corrección individual de factura
+
+Al abrir un renglón de recepción se consulta automáticamente el producto facturado si su versión está pendiente. Se reutiliza su verificación guardada, y los fallos se reintentan mediante una acción explícita (sin bucles automáticos). Solo una coincidencia exacta o confirmada llena los tres campos de referencia: titular publicado (no se presume fabricante), presentación comercial y forma farmacéutica. Los candidatos ambiguos conservan revisión manual. Los vitales y renglones sin clasificar no se consultan automáticamente. Cantidades, lotes e identificadores físicos siguen siendo captura independiente.
+
+«Editar producto de la factura» abre el mismo formulario de edición manual. PUT productos/:id actualiza solo identificación/metadatos del producto y deja pendiente su consulta. Conserva encabezado, cantidades, unidades, lotes, exclusiones y ORIGINAL del documento. Agrega correccionesProducto en el JSON del renglón con datos anteriores, versión, usuario y fecha. Si hay recepción abierta, actualiza su referencia facturada, agrega correccionesRecepcion (incluida la decisión previa), incrementa sus versiones y deja pendiente la decisión solo de ese renglón. No cambia la captura física ni su producto de consulta. Después del cierre se rechaza editar la referencia facturada.
+
+La pantalla conserva la captura física no guardada al sincronizar una corrección; los conflictos de versión no sobrescriben datos. La consulta automática y las consultas manuales de factura/físico coordinan su actividad para mantener el máximo de dos verificaciones por lote. No requiere migración SQL adicional.

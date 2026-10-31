@@ -1,6 +1,7 @@
 import { Transform, Type } from 'class-transformer';
 import {
   ArrayMaxSize,
+  ArrayUnique,
   IsArray,
   IsBoolean,
   IsDateString,
@@ -14,6 +15,7 @@ import {
   Min,
   MinLength,
   ValidateNested,
+  ValidateIf,
 } from 'class-validator';
 import { RenglonFactura } from '../domain/factura.models';
 import { TIPOS_PRODUCTO_INVIMA } from '../domain/invima.models';
@@ -27,6 +29,14 @@ export class RenglonFacturaDto implements RenglonFactura {
   @Transform(trim) @IsString() @MaxLength(120) codigoDeclarado: string;
   @Transform(trim) @IsString() @MaxLength(100) registroSanitario: string;
   @IsOptional() @Transform(trim) @IsString() @MaxLength(80) unidadMedida?: string;
+  @ValidateIf((_, value) => value !== undefined)
+  @IsArray()
+  @ArrayMaxSize(100)
+  @ArrayUnique()
+  @IsString({ each: true })
+  @MinLength(1, { each: true })
+  @MaxLength(120, { each: true })
+  lotesDeclarados?: string[];
   @IsOptional()
   @IsNumber({ allowNaN: false, allowInfinity: false })
   @Min(0)

@@ -21,7 +21,9 @@ export class InvimaDatabaseFilter extends BaseExceptionFilter {
       );
     const faltanTablas =
       number === 208 &&
-      /\bEKINNIV(?:PRODUCTO|VERIFICACION|CONFIRMACION|FACTURA|FACTURAITEM)\b/i.test(driver.message);
+      /\bEKINNIV(?:PRODUCTO|VERIFICACION|CONFIRMACION|FACTURA|FACTURAITEM|RECEPCION|RECEPCIONITEM)\b/i.test(
+        driver.message
+      );
     if (!faltanColumnas && !faltanTablas) {
       super.catch(exception, host);
       return;

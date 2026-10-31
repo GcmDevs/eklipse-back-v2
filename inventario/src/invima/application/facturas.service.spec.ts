@@ -113,6 +113,7 @@ function setup() {
     advertencias: [],
     renglones: [1, 2].map(i => ({
       tipo: 'MEDICAMENTO',
+      cantidad: 1,
       descripcion: 'PRODUCTO ' + i,
       codigoDeclarado: '000123-01',
       registroSanitario: '',
@@ -156,6 +157,31 @@ const input = (f: any): GuardarFacturaDto => ({
     excluido: r.excluido,
   })),
 });
+describe('Persistencia de lotes declarados', () => {
+  it('conserva originales y correcciones, y clientes que omiten lotes no los borran', async () => {
+    const { service, pdf, file, connection } = setup();
+    const parsed = await pdf.extraer();
+    parsed.renglones[0].lotesDeclarados = ['000A', '000B'];
+    pdf.extraer.mockResolvedValue(parsed);
+    const d = await service.subir(file);
+    expect(d.renglones[0].lotesDeclarados).toEqual(['000A', '000B']);
+    expect(d.renglones[0].original).toMatchObject({ lotesDeclarados: ['000A', '000B'] });
+    const review = input(d);
+    review.renglones[0].lotesDeclarados = ['000C'];
+    const f = await service.guardar(d.id, review);
+    expect(f.renglones[0].lotesDeclarados).toEqual(['000C']);
+    expect((await service.detalle(f.id)).renglones[0].original).toMatchObject({
+      lotesDeclarados: ['000A', '000B'],
+    });
+    const other = setup();
+    const raw = await other.pdf.extraer();
+    raw.renglones[0].lotesDeclarados = ['001A'];
+    other.pdf.extraer.mockResolvedValue(raw);
+    const legacy = await other.service.subir(other.file);
+    const saved = await other.service.guardar(legacy.id, input(legacy));
+    expect(saved.renglones[0].lotesDeclarados).toEqual(['001A']);
+  });
+});
 describe('Pedidos Excel y facturas comparten revisión sin confundir cliente y proveedor', () => {
   it('conserva la cantidad y unidad de un PDF en originales, revisión, recarga e informe', async () => {
     const { service, pdf, file } = setup();
@@ -173,7 +199,7 @@ describe('Pedidos Excel y facturas comparten revisión sin confundir cliente y p
     const legacy = input(saved);
     delete legacy.renglones[0].cantidad;
     delete legacy.renglones[0].unidadMedida;
-    await service.guardar(saved.id, legacy);
+    await expect(service.guardar(saved.id, legacy)).rejects.toMatchObject({ status: 409 });
     expect((await service.detalle(saved.id)).renglones[0]).toMatchObject({
       cantidad: 10,
       unidadMedida: 'caj x100',
@@ -183,53 +209,31 @@ describe('Pedidos Excel y facturas comparten revisión sin confundir cliente y p
       unidadMedida: 'caj x100',
     });
   });
-  it('conserva cantidades al guardar, recargar, editar producto y generar informe sin reiniciar verificación al cambiar solo cantidades', async () => {
-    const { service, invima, connection, excel, file } = setup();
+  it('bloquea cantidades y permite corregir el producto de Excel tras validar', async () => {
+    const { service, invima, excel, file } = setup();
     const parsed = await excel.extraer();
     parsed.renglones[0].cantidad = 42;
     parsed.renglones[0].cantidadPresentacion = 3;
-    parsed.renglones[1].cantidad = 0;
     excel.extraer.mockResolvedValue(parsed);
     file.originalname = 'Disfarma.xlsx';
     const d = await service.subir(file, true);
-    expect(d.renglones[0]).toMatchObject({
-      cantidad: 42,
-      cantidadPresentacion: 3,
-      original: { cantidad: 42, cantidadPresentacion: 3 },
-    });
     const f = await service.guardar(d.id, input(d));
-    const p = f.renglones[0].producto!;
-    const editar = jest.spyOn(invima, 'editar');
     const next = input(f);
     next.renglones[0].cantidad = 56;
-    next.renglones[0].cantidadPresentacion = 4;
-    const updated = await service.guardar(f.id, next);
-    expect(editar).not.toHaveBeenCalled();
-    expect(updated.renglones[0].producto!.version).toBe(p.version);
-    expect(updated.renglones[1].cantidad).toBe(0);
-    const oldClient = input(updated);
-    for (const row of oldClient.renglones) {
-      delete row.cantidad;
-      delete row.cantidadPresentacion;
-    }
-    const kept = await service.guardar(f.id, oldClient);
-    expect(kept.renglones[0]).toMatchObject({
-      cantidad: 56,
-      cantidadPresentacion: 4,
-      original: { cantidad: 42, cantidadPresentacion: 3 },
+    await expect(service.guardar(f.id, next)).rejects.toMatchObject({ status: 409 });
+    const p = f.renglones[0].producto!;
+    expect(
+      await invima.editar(p.id, {
+        ...p.datos,
+        codigoDeclarado: f.renglones[0].codigoDeclarado,
+        version: p.version,
+        nombre: 'Cambio',
+      })
+    ).toMatchObject({ version: 2, resultado: 'PENDIENTE' });
+    expect((await service.informe(f.id)).productos[0].datos).toMatchObject({
+      cantidad: 42,
+      cantidadPresentacion: 3,
     });
-    await invima.editar(p.id, {
-      ...kept.renglones[0].producto!.datos,
-      version: p.version,
-      nombre: 'Corregido',
-    });
-    const report = await service.informe(f.id);
-    expect(report.productos[0].datos).toMatchObject({
-      cantidad: 56,
-      cantidadPresentacion: 4,
-      descripcion: 'Corregido',
-    });
-    expect((await service.detalle(f.id)).renglones[0].cantidad).toBe(56);
   });
   it('guarda pedido, cliente, observaciones e informe sin inventar proveedor', async () => {
     const { service, file, excel, pdf } = setup();
@@ -258,8 +262,8 @@ describe('Pedidos Excel y facturas comparten revisión sin confundir cliente y p
     expect(report.productos).toHaveLength(2);
     const edit = input(f);
     edit.cliente = 'Disfarma corregido';
-    const reload = await service.guardar(f.id, edit);
-    expect(reload.cliente).toBe('Disfarma corregido');
+    await expect(service.guardar(f.id, edit)).rejects.toMatchObject({ status: 409 });
+    expect((await service.detalle(f.id)).cliente).toBe('Disfarma');
   });
   it('continúa exigiendo proveedor a facturas y no admite cambiar el tipo desde la revisión', async () => {
     const { service, file } = setup();
@@ -328,7 +332,8 @@ describe('Observaciones e informe de facturas revisadas', () => {
     expect(reload.renglones[1].observacion.version).toBe(0);
     const edit = input(reload);
     edit.renglones[0].descripcion = 'Producto corregido';
-    const updated = await service.guardar(f.id, edit);
+    await expect(service.guardar(f.id, edit)).rejects.toMatchObject({ status: 409 });
+    const updated = await service.detalle(f.id);
     expect(updated.observacion.texto).toBe(general.texto);
     expect(updated.renglones[0].observacion.texto).toBe(row.texto);
     const report = await service.informe(f.id);
@@ -358,13 +363,13 @@ describe('Observaciones e informe de facturas revisadas', () => {
   it('no permite anotar renglones de otra factura, excluidos, eliminados ni de otro contexto', async () => {
     const { service, file } = setup();
     const d = await service.subir(file);
-    const f = await service.guardar(d.id, input(d));
+    const review = input(d);
+    review.renglones[0].excluido = true;
+    const f = await service.guardar(d.id, review);
     await expect(
       service.guardarObservacion(f.id, { texto: 'x', version: 0, renglonId: 999 })
     ).rejects.toThrow('Producto no incluido');
-    const edit = input(f);
-    edit.renglones[0].excluido = true;
-    const updated = await service.guardar(f.id, edit);
+    const updated = f;
     await expect(
       service.guardarObservacion(f.id, { texto: 'x', version: 0, renglonId: f.renglones[0].id })
     ).rejects.toThrow('Producto no incluido');
@@ -431,6 +436,7 @@ describe('Facturas INVIMA, persistencia y revisión', () => {
     for (const tipo of Object.keys(GRUPOS_REGISTROS) as TipoProductoInvima[])
       edit.renglones.push({
         tipo,
+        cantidad: 1,
         descripcion: 'Producto ' + tipo,
         codigoDeclarado: '0000123',
         registroSanitario: 'RS-123',
@@ -447,88 +453,59 @@ describe('Facturas INVIMA, persistencia y revisión', () => {
       reloaded.renglones.length
     );
   });
-  it('edita un producto revisado, sincroniza el renglón y conserva historial, originales y otros productos', async () => {
+  it('corrige el producto validado y conserva original, auditoría e historial', async () => {
     const { service, invima, file, connection } = setup();
-    const draft = await service.subir(file);
-    const f = await service.guardar(draft.id, input(draft));
+    const d = await service.subir(file);
+    const f = await service.guardar(d.id, input(d));
     const p = f.renglones[0].producto;
-    const verification = await connection.getRepository(InvimaVerificacionOrm).save({
+    const v = await connection.getRepository(InvimaVerificacionOrm).save({
       productoId: p.id,
       versionProducto: 1,
       entrada: JSON.stringify(p.datos),
       resultado: 'EXACTA',
       evidencia: JSON.stringify({ consultas: [], seleccionado: null, advertencias: [] }),
     });
-    const updated = await invima.editar(p.id, {
+    await invima.editar(p.id, {
       ...p.datos,
       version: 1,
-      nombre: 'GUANTES CORREGIDOS',
-      tipo: 'MEDICO_QUIRURGICOS',
-      codigoDeclarado: '0000042',
-      laboratorio: 'Laboratorio corregido',
+      nombre: 'Cambio',
+      tipo: 'DISPOSITIVO',
+      codigoDeclarado: '00042',
     });
-    expect(updated).toMatchObject({
-      version: 2,
-      resultado: 'PENDIENTE',
-      estadoCum: null,
-      codigoDeclarado: '0000042',
+    const reload = await service.detalle(f.id);
+    expect(reload.version).toBe(f.version + 1);
+    expect(reload.renglones[0]).toMatchObject({
+      descripcion: 'Cambio',
+      tipo: 'DISPOSITIVO',
+      codigoDeclarado: '00042',
     });
-    const reloaded = await service.detalle(f.id);
-    expect(reloaded.version).toBe(f.version + 1);
-    expect(reloaded.renglones[0]).toMatchObject({
-      tipo: 'MEDICO_QUIRURGICOS',
-      descripcion: 'GUANTES CORREGIDOS',
-      codigoDeclarado: '0000042',
+    expect(reload.renglones[0].original).toEqual(f.renglones[0].original);
+    expect(reload.renglones[0].correccionesProducto[0]).toMatchObject({
+      usuarioNombre: 'Revisor',
+      anterior: { descripcion: f.renglones[0].descripcion },
     });
-    expect(reloaded.renglones[0].producto.datos).toMatchObject({
-      tipo: 'MEDICO_QUIRURGICOS',
-      cum: '',
-    });
-    expect(reloaded.renglones[0].original).toEqual(f.renglones[0].original);
-    expect(reloaded.renglones[1].producto.version).toBe(1);
-    expect((await invima.historial(p.id))[0].id).toBe(verification.id);
-    await expect(service.guardar(f.id, input(f))).rejects.toMatchObject({ status: 409 });
-    await expect(invima.editar(p.id, { ...p.datos, version: 1 })).rejects.toMatchObject({
-      status: 409,
-    });
-    expect((await service.detalle(f.id)).version).toBe(reloaded.version);
-    // Saving the review later must not erase the individually edited metadata or reset it again.
-    const reviewed = await service.guardar(f.id, input(reloaded));
-    expect(reviewed.renglones[0].producto.version).toBe(2);
-    expect(reviewed.renglones[0].producto.datos.laboratorio).toBe('Laboratorio corregido');
+    expect(reload.renglones[1].producto.version).toBe(1);
+    expect((await invima.historial(p.id))[0].id).toBe(v.id);
   });
-  it('revierte factura, renglón y producto si falla el guardado individual', async () => {
-    const { service, invima, file, connection } = setup();
-    const draft = await service.subir(file);
-    const f = await service.guardar(draft.id, input(draft));
+  it('detecta una versión de producto obsoleta sin cambiar la referencia facturada', async () => {
+    const { service, invima, file } = setup();
+    const d = await service.subir(file);
+    const f = await service.guardar(d.id, input(d));
     const p = f.renglones[0].producto;
-    const original = connection.getRepository;
-    connection.getRepository = (type: any) => {
-      const repository = original(type);
-      return type === InvimaProductoOrm
-        ? {
-            ...repository,
-            save: async () => {
-              throw new Error('Fallo de escritura');
-            },
-          }
-        : repository;
-    };
-    connection.manager.getRepository = connection.getRepository;
-    await expect(invima.editar(p.id, { ...p.datos, version: 1, nombre: 'Cambio' })).rejects.toThrow(
-      'Fallo de escritura'
-    );
+    await expect(
+      invima.editar(p.id, { ...p.datos, version: 2, nombre: 'Cambio' })
+    ).rejects.toMatchObject({ status: 409 });
     expect(await service.detalle(f.id)).toEqual(f);
   });
-  it('rechaza editar un producto excluido o perteneciente a otro contexto', async () => {
+  it('rechaza exclusiones tras validar, versiones obsoletas y ediciones de otros contextos', async () => {
     const { service, invima, file } = setup();
-    const draft = await service.subir(file);
-    const f = await service.guardar(draft.id, input(draft));
+    const d = await service.subir(file);
+    const f = await service.guardar(d.id, input(d));
     const edit = input(f);
     edit.renglones[0].excluido = true;
-    await service.guardar(f.id, edit);
+    await expect(service.guardar(f.id, edit)).rejects.toMatchObject({ status: 409 });
     const p = f.renglones[0].producto;
-    await expect(invima.editar(p.id, { ...p.datos, version: 1 })).rejects.toMatchObject({
+    await expect(invima.editar(p.id, { ...p.datos, version: 0 })).rejects.toMatchObject({
       status: 409,
     });
     await expect(setup().invima.editar(p.id, { ...p.datos, version: 1 })).rejects.toMatchObject({
@@ -595,17 +572,14 @@ describe('Facturas INVIMA, persistencia y revisión', () => {
     expect(f.renglones[0].producto.datos.cum).toBe('000123-01');
     expect(f.renglones[0].original.fragmento).toBe('Texto original 1');
   });
-  it('editar reinicia solo el producto cambiado y conserva la evidencia original', async () => {
+  it('impide reabrir la revisión y conserva versiones y evidencia facturadas', async () => {
     const { service, file } = setup();
-    const draft = await service.subir(file);
-    const f = await service.guardar(draft.id, input(draft));
+    const d = await service.subir(file);
+    const f = await service.guardar(d.id, input(d));
     const edit = input(f);
-    edit.renglones[0].descripcion = 'Descripción corregida';
-    const updated = await service.guardar(f.id, edit);
-    expect(updated.renglones[0].producto.version).toBe(2);
-    expect(updated.renglones[1].producto.version).toBe(1);
-    expect(updated.renglones[0].original.fragmento).toBe('Texto original 1');
-    expect(updated.renglones[0].producto.estadoCum).toBeNull();
+    edit.renglones[0].descripcion = 'Cambio';
+    await expect(service.guardar(f.id, edit)).rejects.toMatchObject({ status: 409 });
+    expect(await service.detalle(f.id)).toEqual(f);
   });
   it('no crea productos excluidos y conserva el código de dispositivo fuera del CUM', async () => {
     const { service, file } = setup();
@@ -633,7 +607,7 @@ describe('Facturas INVIMA, persistencia y revisión', () => {
     const current = await service.detalle(draft.id);
     const edit = input(current);
     edit.renglones[0].id = 999;
-    await expect(service.guardar(current.id, edit)).rejects.toMatchObject({ status: 400 });
+    await expect(service.guardar(current.id, edit)).rejects.toMatchObject({ status: 409 });
     expect((await service.detalle(current.id)).version).toBe(current.version);
   });
   it('revierte todos los cambios cuando un renglón falla a mitad de la revisión', async () => {
