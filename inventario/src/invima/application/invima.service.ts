@@ -37,6 +37,35 @@ export class InvimaService extends BaseSource {
     super(request);
   }
 
+  async unidadesMedida(q = '', limit = 30) {
+    if (typeof q !== 'string' || q.trim().length > 120)
+      throw new BadRequestException('La búsqueda de unidades admite hasta 120 caracteres.');
+    if (!Number.isInteger(limit) || limit < 1 || limit > 100)
+      throw new BadRequestException('El límite de unidades debe estar entre 1 y 100.');
+    const texto = q.trim();
+    const patron = `%${texto.replace(/[\\%_\[]/g, value => `\\${value}`)}%`;
+    const unidades: {
+      id: number;
+      nombre: string | null;
+      simbolo: string | null;
+      esBase: boolean | number | string;
+    }[] = await this.conn.query(
+      `SELECT TOP (@0) OID AS id, NOMBRE AS nombre, SIMBOLO AS simbolo, ESBASE AS esBase
+       FROM EKINNEQPHVUNIDADESMEDIDA
+       WHERE (@1 = N''
+         OR NOMBRE COLLATE Latin1_General_CI_AI LIKE @2 ESCAPE N'\\'
+         OR SIMBOLO COLLATE Latin1_General_CI_AI LIKE @2 ESCAPE N'\\')
+       ORDER BY NOMBRE ASC, SIMBOLO ASC, OID ASC`,
+      [limit, texto, patron]
+    );
+    return unidades.map(u => ({
+      id: Number(u.id),
+      nombre: (u.nombre || '').trim(),
+      simbolo: (u.simbolo || '').trim(),
+      esBase: u.esBase === true || u.esBase === 1 || u.esBase === '1',
+    }));
+  }
+
   private usuario() {
     const user = this.auth.user as any;
     return {
@@ -303,6 +332,11 @@ export class InvimaService extends BaseSource {
               ],
             });
             item.decision = 'PENDIENTE';
+            const captura = JSON.parse(item.fisico);
+            if (captura.borradorRecepcion) {
+              captura.borradorRecepcion.decision = 'PENDIENTE';
+              item.fisico = JSON.stringify(captura);
+            }
             item.version++;
             item.usuarioId = Number(this.auth.id);
             item.fecha = fecha;

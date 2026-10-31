@@ -14,7 +14,12 @@ import { Authorities, CommonGuards } from '@common/presentation/decorators';
 import { ADMIN_AUTHORITY } from '@common/application/constants';
 import { INN_AUTHORITIES } from '@inn/authorities';
 import { InvimaService } from '../application/invima.service';
-import { ConfirmarCandidatoDto, GuardarMedicamentoDto, PaginaCandidatoDto } from './invima.dto';
+import {
+  ConfirmarCandidatoDto,
+  GuardarMedicamentoDto,
+  ListarUnidadesMedidaDto,
+  PaginaCandidatoDto,
+} from './invima.dto';
 import { InvimaDatabaseFilter } from './invima-database.filter';
 
 @ApiTags('Verificación INVIMA')
@@ -23,6 +28,11 @@ import { InvimaDatabaseFilter } from './invima-database.filter';
 @Controller('v4/inn/invima')
 export class InvimaController {
   constructor(private readonly service: InvimaService) {}
+  @Authorities([ADMIN_AUTHORITY, INN_AUTHORITIES.PRODUCTOS.VERIFICACION_INVIMA])
+  @Get('unidades-medida')
+  unidadesMedida(@Query() query: ListarUnidadesMedidaDto) {
+    return this.service.unidadesMedida(query.q, query.limit);
+  }
   @Authorities([ADMIN_AUTHORITY, INN_AUTHORITIES.PRODUCTOS.VERIFICACION_INVIMA])
   @Get('productos')
   listar(@Query('sinFactura') sinFactura?: string) {

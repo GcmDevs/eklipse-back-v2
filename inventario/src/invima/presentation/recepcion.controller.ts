@@ -4,7 +4,11 @@ import { ADMIN_AUTHORITY } from '@common/application/constants';
 import { INN_AUTHORITIES } from '@inn/authorities';
 import { InvimaDatabaseFilter } from './invima-database.filter';
 import { RecepcionInvimaService } from '../application/recepcion.service';
-import { GuardarRecepcionItemDto, VersionRecepcionDto } from './recepcion.dto';
+import {
+  GuardarBorradorRecepcionDto,
+  GuardarRecepcionItemDto,
+  VersionRecepcionDto,
+} from './recepcion.dto';
 
 @CommonGuards()
 @UseFilters(InvimaDatabaseFilter)
@@ -29,6 +33,15 @@ export class RecepcionInvimaController {
     @Body() input: GuardarRecepcionItemDto
   ) {
     return this.service.guardar(id, itemId, input);
+  }
+  @Authorities([ADMIN_AUTHORITY, INN_AUTHORITIES.PRODUCTOS.VERIFICACION_INVIMA])
+  @Put('renglones/:itemId/borrador')
+  borrador(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('itemId', ParseIntPipe) itemId: number,
+    @Body() input: GuardarBorradorRecepcionDto
+  ) {
+    return this.service.guardarBorrador(id, itemId, input);
   }
   @Authorities([ADMIN_AUTHORITY, INN_AUTHORITIES.PRODUCTOS.VERIFICACION_INVIMA])
   @Post('finalizar')

@@ -24,12 +24,26 @@ const fisico = (cantidad = 60): FisicoRecepcion => ({
   unidadConcentracion: 'mg',
   temperatura: 20,
   estadoEmpaque: 'BUENO',
+  registroSanitarioRevisado: true,
   etiquetaConforme: true,
   sellosConformes: true,
   fabricanteConforme: true,
   lotes: [{ cantidad, lote: 'L1', vencimiento: '2028-01-01' }],
 });
 describe('Comparación factura / físico', () => {
+  it('la revisión sanitaria es manual, no se deduce de una coincidencia oficial y conserva el legado', () => {
+    const f = fisico();
+    expect(fisicoVacio('MEDICAMENTO').registroSanitarioRevisado).toBe(false);
+    f.registroSanitarioRevisado = false;
+    expect(() => validarDecision(factura, f, 'ACEPTADO', '', 'EXACTA')).toThrow('controles');
+    expect(() =>
+      validarDecision(factura, f, 'RECHAZADO', 'Registro revisado pendiente', 'EXACTA')
+    ).not.toThrow();
+    f.registroSanitarioRevisado = true;
+    expect(() => validarDecision(factura, f, 'ACEPTADO', '', 'EXACTA')).not.toThrow();
+    delete f.registroSanitarioRevisado;
+    expect(() => validarDecision(factura, f, 'ACEPTADO', '', 'EXACTA')).not.toThrow();
+  });
   it.each([
     [60, 0, 10],
     [40, 10, 0],
@@ -107,6 +121,7 @@ describe('Comparación factura / físico', () => {
   it('vital requiere IUM o resolución y no aplica CUM/INVIMA ni fabricante', () => {
     const f = fisico();
     f.tipo = 'VITAL_NO_DISPONIBLE';
+    f.registroSanitarioRevisado = false;
     f.fabricanteConforme = false;
     expect(() =>
       validarDecision(factura, f, 'ACEPTADO', 'Cambio de categoría', 'PENDIENTE')

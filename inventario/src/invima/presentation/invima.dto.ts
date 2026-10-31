@@ -35,9 +35,14 @@ export class GuardarMedicamentoDto implements MedicamentoInput {
   @IsOptional() @IsInt() @Min(1) version?: number;
 }
 export class PaginaCandidatoDto {
-  @IsIn(['vigentes', 'vencidos', 'renovacion', 'otros', 'dispositivos', 'registros']) fuenteId: string;
+  @IsIn(['vigentes', 'vencidos', 'renovacion', 'otros', 'dispositivos', 'registros'])
+  fuenteId: string;
   @Type(() => Number) @IsInt() @Min(0) @Max(100000) offset: number = 0;
 }
 export class ConfirmarCandidatoDto {
   @IsString() @Matches(/^[a-f0-9]{64}$/) clave: string;
+}
+export class ListarUnidadesMedidaDto {
+  @IsOptional() @Transform(trim) @IsString() @MaxLength(120) q: string = '';
+  @Type(() => Number) @IsInt() @Min(1) @Max(100) limit: number = 30;
 }

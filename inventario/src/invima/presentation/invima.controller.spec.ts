@@ -8,7 +8,11 @@ import { AuthoritiesGuard } from '@common/infrastructure/guards/authorities.guar
 import { fetchAuthsByUser } from '@common/infrastructure/services';
 import { InvimaController } from './invima.controller';
 import { RecepcionInvimaController } from './recepcion.controller';
-import { FisicoRecepcionDto, GuardarRecepcionItemDto } from './recepcion.dto';
+import {
+  FisicoRecepcionDto,
+  GuardarRecepcionItemDto,
+  GuardarBorradorRecepcionDto,
+} from './recepcion.dto';
 import { fisicoVacio } from '../domain/recepcion.models';
 import { FacturasInvimaController } from './facturas.controller';
 import {
@@ -33,7 +37,7 @@ jest.mock('@common/infrastructure/guards', () => ({
     .AuthoritiesGuard,
 }));
 describe('Permisos de las interfaces INVIMA', () => {
-  it.each(['iniciar', 'detalle', 'guardar', 'finalizar'])(
+  it.each(['iniciar', 'detalle', 'guardar', 'borrador', 'finalizar'])(
     'recepción %s exige administrador o permiso INVIMA',
     method => {
       expect(
@@ -59,10 +63,102 @@ describe('Permisos de las interfaces INVIMA', () => {
       { ...base.fisico, cantidad: '60' },
       { ...base.fisico, estadoEmpaque: 'INVALIDO' },
       { ...base.fisico, motivosRechazo: ['OTRO'] },
+      { ...base.fisico, registroSanitarioRevisado: null },
+      { ...base.fisico, registroSanitarioRevisado: 'true' },
+      { ...base.fisico, registroSanitarioRevisado: 1 },
     ])
       expect(
         (
           await validate(plainToInstance(GuardarRecepcionItemDto, { ...base, fisico }), {
+            whitelist: true,
+          })
+        ).length
+      ).toBeGreaterThan(0);
+  });
+  it('acepta revisión sanitaria booleana o ausente en clientes antiguos', async () => {
+    for (const value of [undefined, false, true]) {
+      const fisico = { ...fisicoVacio('MEDICAMENTO'), registroSanitarioRevisado: value };
+      expect(
+        await validate(plainToInstance(FisicoRecepcionDto, fisico), { whitelist: true })
+      ).toHaveLength(0);
+    }
+  });
+  it('el borrador admite números temporales finitos o nulos sin relajar el guardado completo', async () => {
+    const fisico = {
+      ...fisicoVacio('MEDICAMENTO'),
+      cantidad: -5,
+      cantidadAveria: null,
+      cantidadNoSolicitada: -1.5,
+      erroresCriticos: null,
+      lotes: [
+        { cantidad: null, lote: '', vencimiento: '2028-' },
+        { cantidad: -2, lote: '', vencimiento: '' },
+      ],
+    };
+    const body = {
+      version: 1,
+      recepcionVersion: 2,
+      fisico,
+      decision: 'ACEPTADO',
+      justificacion: '',
+    };
+    expect(
+      await validate(plainToInstance(GuardarBorradorRecepcionDto, body), { whitelist: true })
+    ).toHaveLength(0);
+    expect(
+      (await validate(plainToInstance(GuardarRecepcionItemDto, body), { whitelist: true })).length
+    ).toBeGreaterThan(0);
+    const instance = plainToInstance(GuardarBorradorRecepcionDto, {
+      ...body,
+      usuarioId: 999,
+      fisico: { ...fisico, borradorRecepcion: { decision: 'ACEPTADO' } },
+    });
+    expect(await validate(instance, { whitelist: true })).toHaveLength(0);
+    expect(instance).not.toHaveProperty('usuarioId');
+    expect(instance.fisico).not.toHaveProperty('borradorRecepcion');
+  });
+  it('el borrador exige estructura acotada y rechaza coerción, números no finitos o valores no sanitarios', async () => {
+    const base = {
+      version: 1,
+      recepcionVersion: 1,
+      fisico: fisicoVacio('MEDICAMENTO'),
+      decision: 'PENDIENTE',
+      justificacion: '',
+    };
+    const invalidos = [
+      { fisico: null },
+      { fisico: [] },
+      { version: 0 },
+      { recepcionVersion: '1' },
+      { decision: 'OTRA' },
+      { justificacion: 'x'.repeat(4001) },
+      ...[
+        'cantidad',
+        'cantidadAveria',
+        'cantidadNoSolicitada',
+        'erroresCriticos',
+        'temperatura',
+      ].flatMap(key =>
+        [undefined, '2', NaN, Infinity].map(value => ({ fisico: { ...base.fisico, [key]: value } }))
+      ),
+      ...[
+        { tipo: 'OTRO' },
+        { marca: null },
+        { descripcion: 'x'.repeat(241) },
+        { registroSanitarioRevisado: null },
+        { sellosConformes: 'true' },
+        { motivosRechazo: ['OTRO'] },
+        { lotes: [[]] },
+        { lotes: [{ cantidad: '2', lote: '', vencimiento: '' }] },
+        {
+          lotes: Array.from({ length: 501 }, () => ({ cantidad: null, lote: '', vencimiento: '' })),
+        },
+      ].map(fisico => ({ fisico: { ...base.fisico, ...fisico } })),
+    ];
+    for (const caso of invalidos)
+      expect(
+        (
+          await validate(plainToInstance(GuardarBorradorRecepcionDto, { ...base, ...caso }), {
             whitelist: true,
           })
         ).length
@@ -96,16 +192,22 @@ describe('Permisos de las interfaces INVIMA', () => {
       expect(await new AuthoritiesGuard(new Reflector()).canActivate(ctx)).toBe(allowed);
     }
   });
-  it.each(['listar', 'crear', 'editar', 'verificar', 'historial', 'candidatos', 'confirmar'])(
-    'permite administrador o permiso específico en %s',
-    method => {
-      expect(Reflect.getMetadata('authorities', InvimaController.prototype[method])).toEqual([
-        ADMIN_AUTHORITY,
-        '006005002',
-      ]);
-      expect(Reflect.getMetadata(GUARDS_METADATA, InvimaController)).toHaveLength(2);
-    }
-  );
+  it.each([
+    'unidadesMedida',
+    'listar',
+    'crear',
+    'editar',
+    'verificar',
+    'historial',
+    'candidatos',
+    'confirmar',
+  ])('permite administrador o permiso específico en %s', method => {
+    expect(Reflect.getMetadata('authorities', InvimaController.prototype[method])).toEqual([
+      ADMIN_AUTHORITY,
+      '006005002',
+    ]);
+    expect(Reflect.getMetadata(GUARDS_METADATA, InvimaController)).toHaveLength(2);
+  });
   it.each([
     ['006005002', true],
     [ADMIN_AUTHORITY, true],
@@ -121,7 +223,16 @@ describe('Permisos de las interfaces INVIMA', () => {
     };
     expect(await new AuthoritiesGuard(new Reflector()).canActivate(ctx)).toBe(allowed);
   });
-  it.each(['listar', 'crear', 'editar', 'verificar', 'historial', 'candidatos', 'confirmar'])(
+  it.each([
+    'unidadesMedida',
+    'listar',
+    'crear',
+    'editar',
+    'verificar',
+    'historial',
+    'candidatos',
+    'confirmar',
+  ])(
     'autoriza al administrador sin permiso INVIMA en %s y conserva los metadatos',
     async method => {
       (fetchAuthsByUser as jest.Mock).mockResolvedValue({ onlyCodes: [ADMIN_AUTHORITY] });

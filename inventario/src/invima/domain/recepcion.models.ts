@@ -28,11 +28,28 @@ export interface FisicoRecepcion {
   laboratorio: string;
   presentacion: string;
   formaFarmaceutica: string;
+  registroSanitarioRevisado?: boolean;
   etiquetaConforme: boolean;
   sellosConformes: boolean;
   fabricanteConforme: boolean;
   erroresCriticos: number;
   motivosRechazo: ('CUM' | 'INVIMA')[];
+}
+export type FisicoBorradorRecepcion = Omit<
+  FisicoRecepcion,
+  'cantidadAveria' | 'cantidadNoSolicitada' | 'erroresCriticos'
+> & {
+  cantidadAveria: number | null;
+  cantidadNoSolicitada: number | null;
+  erroresCriticos: number | null;
+};
+export interface BorradorRecepcion {
+  fisico: FisicoBorradorRecepcion;
+  decision: DecisionRecepcion;
+  justificacion: string;
+  fecha: string;
+  usuarioId: number;
+  usuarioNombre: string;
 }
 export const requiereConcentracion = (tipo: TipoProductoInvima) =>
   ['MEDICAMENTO', 'REACTIVO_DIAGNOSTICO', 'REACTIVOS_IN_VITRO', 'VITAL_NO_DISPONIBLE'].includes(
@@ -60,6 +77,7 @@ export function fisicoVacio(tipo: TipoProductoInvima): FisicoRecepcion {
     laboratorio: '',
     presentacion: '',
     formaFarmaceutica: '',
+    registroSanitarioRevisado: false,
     etiquetaConforme: false,
     sellosConformes: false,
     fabricanteConforme: false,
@@ -96,6 +114,8 @@ export function compararRecepcion(factura: RenglonFactura, fisico: FisicoRecepci
   };
 }
 export function validarCaptura(f: FisicoRecepcion) {
+  if (f.registroSanitarioRevisado !== undefined && typeof f.registroSanitarioRevisado !== 'boolean')
+    throw new Error('La revisión del registro sanitario debe ser un valor booleano.');
   if (f.cantidad !== null) validarCantidad(f.cantidad);
   validarCantidad(f.cantidadAveria);
   validarCantidad(f.cantidadNoSolicitada);
@@ -167,12 +187,14 @@ export function validarDecision(
     );
   if (decision === 'ACEPTADO') {
     if (!vital && oficial === 'PENDIENTE')
-      throw new Error('Consulte el producto físico antes de aceptarlo.');
+      throw new Error('Consulte el producto facturado antes de aceptarlo.');
     if (f.motivosRechazo.length)
       throw new Error('Un producto aceptado no puede tener motivos de rechazo.');
     if (
       !f.etiquetaConforme ||
       !f.sellosConformes ||
+      // Missing in legacy receipts: preserve their previously recorded decisions.
+      (!vital && f.registroSanitarioRevisado === false) ||
       (!vital && !f.fabricanteConforme) ||
       f.estadoEmpaque === 'DETERIORADO' ||
       !calcularMuestreo(f.cantidad, f.erroresCriticos).cumple
