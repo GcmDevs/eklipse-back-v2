@@ -40,6 +40,8 @@ export const dataToRecepcionTecnicaProducto = (
   recepcionTecnica: RecepcionTecnicaOrm
 ): DetalleRecepcionTecnicaOrm => {
   const newProducto = new DetalleRecepcionTecnicaOrm();
+  if (producto.inspeccionPersistida)
+    newProducto.inspeccionJson = JSON.stringify(producto.inspeccionPersistida);
   if (producto.id) newProducto.id = producto.id;
   newProducto.estadoEmbalajeCode = producto.estadoEmbalajeCode;
   newProducto.itemDetalleId = producto.itemDetalleId;

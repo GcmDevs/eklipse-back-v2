@@ -10,6 +10,7 @@ import {
   DetalleRecepcionTecnicaOrm,
 } from '@inn/lgc/rct/orm/inn/farmacia/recepcion-tecnica';
 import { ComprobanteEntradaOrm, RemisionEntradaOrm } from '@inn/lgc/rct/orm/inn/documentos';
+import { prepararInspecciones } from './inspeccion';
 
 @Injectable()
 export class CreateRecepcionTecnicaImpl extends BaseSource {
@@ -38,6 +39,7 @@ export class CreateRecepcionTecnicaImpl extends BaseSource {
           where: { id: payload.documentoId },
         });
 
+        if (!documento) throw new Error('No existe el documento en el contexto actual.');
         documentoId = documento.id;
       }
 
@@ -52,9 +54,15 @@ export class CreateRecepcionTecnicaImpl extends BaseSource {
       });
 
       if (!recTecStored) {
+        if (payload.id)
+          throw new Error('No se puede reutilizar el identificador de otra recepción.');
         const recTec = dataToRecepcionTecnicaOrm(payload, this.auth.id, documentoId);
         recTecStored = await recTecRp.save(recTec);
       } else {
+        if (payload.id && payload.id !== recTecStored.id)
+          throw new Error('El identificador no corresponde al documento.');
+        if (Date.now() - new Date(recTecStored.createdAt).getTime() > 7 * 86400000)
+          throw new Error('Esta recepción técnica está cerrada para edición.');
         const cond1 = recTecStored.centroId !== payload.centroId;
         const cond2 = recTecStored.transportadoraId !== payload.transportadoraId;
         if (cond1) recTecStored.centroId = payload.centroId;
@@ -62,6 +70,7 @@ export class CreateRecepcionTecnicaImpl extends BaseSource {
         if (cond1 || cond2) recTecStored = await recTecRp.save(recTecStored);
       }
 
+      await prepararInspecciones(this.qr.manager, payload, recTecStored, this.auth.id);
       const recTecProds = payload.detalle.map(item => {
         if (!item.lotes) item.lotes = [];
         return dataToRecepcionTecnicaProducto(item, recTecStored);
@@ -130,6 +139,8 @@ export class CreateRecepcionTecnicaImpl extends BaseSource {
         return {
           id: dt.id,
           itemDetalleId: dt.itemDetalleId,
+          inspeccion: dt.inspeccionJson ? JSON.parse(dt.inspeccionJson) : undefined,
+          cumpleRecepcionTecnica: dt.cumpleRecepcionTecnica,
           lotes: dt.tempLotes.map(tlt => {
             return {
               id: tlt.id,

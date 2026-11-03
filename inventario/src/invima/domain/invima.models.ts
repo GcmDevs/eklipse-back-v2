@@ -10,6 +10,7 @@ export type ResultadoInvima = (typeof RESULTADOS_INVIMA)[number];
 export type CriterioInvima = 'CUM' | 'REGISTRO' | 'NOMBRE';
 export const TIPOS_PRODUCTO_INVIMA = [
   'MEDICAMENTO',
+  'VITAL_NO_DISPONIBLE',
   'DISPOSITIVO',
   'ALIMENTOS',
   'MEDICO_QUIRURGICOS',
@@ -48,6 +49,7 @@ export const GRUPOS_REGISTROS: Partial<Record<TipoProductoInvima, string>> = {
   SUPLEMENTO_DIETARIO: 'SUPLEMENTO DIETARIO',
 };
 export interface MedicamentoInput {
+  codigoDeclarado?: string;
   tipo?: TipoProductoInvima;
   nombre: string;
   cum?: string;

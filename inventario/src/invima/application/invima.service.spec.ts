@@ -28,7 +28,8 @@ const candidato = {
   registroSanitario: 'INVIMA 2023M-0013598-R2',
   estadoRegistro: 'Vigente',
   estadoCum: 'Inactivo',
-  presentacion: 'Caja',
+  presentacion: 'Caja x 10',
+  formaFarmaceutica: 'Tableta',
   titular: 'Laboratorio',
 } as CandidatoInvima;
 function database() {
@@ -114,6 +115,8 @@ function database() {
                 estadoRegistro: seleccionado?.estadoRegistro ?? null,
                 registroSanitarioVerificado: seleccionado?.registroSanitario ?? null,
                 titularInvima: seleccionado?.titular ?? null,
+                presentacionInvima: seleccionado?.presentacion ?? null,
+                formaFarmaceuticaInvima: seleccionado?.formaFarmaceutica ?? null,
               };
             });
         return builder;
@@ -165,6 +168,8 @@ describe('Flujo de registro, consulta e historial INVIMA', () => {
         expect((await service.listar())[0]).toMatchObject({
           registroSanitarioVerificado: null,
           titularInvima: null,
+          presentacionInvima: null,
+          formaFarmaceuticaInvima: null,
         });
         await service.confirmar(p.id, v.id, candidato.clave);
       }
@@ -173,6 +178,8 @@ describe('Flujo de registro, consulta e historial INVIMA', () => {
       expect(saved).toMatchObject({
         registroSanitarioVerificado: candidato.registroSanitario,
         titularInvima: candidato.titular,
+        presentacionInvima: candidato.presentacion,
+        formaFarmaceuticaInvima: candidato.formaFarmaceutica,
         datos: { laboratorio: 'Laboratorio ingresado' },
       });
       expect(socrata.consultar).not.toHaveBeenCalled();

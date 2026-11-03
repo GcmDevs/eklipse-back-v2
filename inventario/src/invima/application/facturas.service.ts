@@ -175,10 +175,10 @@ export class FacturasInvimaService extends BaseSource {
   async subir(file: Express.Multer.File, pedido = false) {
     if (!file?.buffer)
       throw new BadRequestException(
-        pedido ? 'Seleccione un pedido Excel.' : 'Seleccione una factura PDF.'
+        pedido ? 'Seleccione un Excel Disfarma.' : 'Seleccione una factura PDF.'
       );
     if (pedido && !/\.xlsx$/i.test(file.originalname || ''))
-      throw new BadRequestException('El pedido debe ser un archivo .xlsx.');
+      throw new BadRequestException('El documento Disfarma debe ser un archivo .xlsx.');
     const archivoHash = createHash('sha256').update(file.buffer).digest('hex');
     const duplicate = await this.conn.getRepository(InvimaFacturaOrm).findOneBy({ archivoHash });
     if (duplicate)
@@ -237,6 +237,14 @@ export class FacturasInvimaService extends BaseSource {
       descripcion: r.descripcion.trim(),
       codigoDeclarado: r.codigoDeclarado.trim(),
       registroSanitario: r.registroSanitario.trim(),
+      ...(r.unidadMedida != null ? { unidadMedida: r.unidadMedida.trim() } : {}),
+      ...(r.lotesDeclarados !== undefined
+        ? { lotesDeclarados: [...new Set(r.lotesDeclarados.map(l => l.trim()).filter(Boolean))] }
+        : {}),
+      ...(r.cantidad !== undefined ? { cantidad: r.cantidad } : {}),
+      ...(r.cantidadPresentacion !== undefined
+        ? { cantidadPresentacion: r.cantidadPresentacion }
+        : {}),
     };
   }
   private entrada(r: RenglonFactura): MedicamentoInput {
@@ -408,6 +416,18 @@ export class FacturasInvimaService extends BaseSource {
       const factura = await this.factura(id, manager, true);
       if (factura.version !== input.version)
         throw new ConflictException('La factura cambió. Recargue antes de guardar.');
+      if (factura.estado === 'REVISADA')
+        throw new ConflictException(
+          'La revisión general está bloqueada. Use la edición individual para corregir productos; cantidades y lotes conservan los datos validados.'
+        );
+      if (
+        input.renglones.some(
+          r => !r.excluido && (r.cantidad == null || !Number.isFinite(r.cantidad) || r.cantidad < 0)
+        )
+      )
+        throw new BadRequestException(
+          'Complete la cantidad facturada de cada producto incluido antes de validar la revisión.'
+        );
       if (factura.tipoDocumento === 'PEDIDO' ? !input.cliente?.trim() : !input.proveedor.trim())
         throw new BadRequestException(
           factura.tipoDocumento === 'PEDIDO'
@@ -445,6 +465,16 @@ export class FacturasInvimaService extends BaseSource {
                 advertencias: ['Renglón agregado manualmente.'],
               }),
             });
+        const anteriores = JSON.parse(item.datos || '{}') as RenglonFactura;
+        // Clientes antiguos omiten las cantidades: no borrar las que ya se importaron.
+        for (const key of [
+          'cantidad',
+          'cantidadPresentacion',
+          'unidadMedida',
+          'lotesDeclarados',
+        ] as const)
+          if (incoming[key] === undefined && anteriores[key] !== undefined)
+            Object.assign(datos, { [key]: anteriores[key] });
         if (!incoming.excluido) {
           const entrada = this.entrada(datos);
           if (item.productoId) {
@@ -455,7 +485,11 @@ export class FacturasInvimaService extends BaseSource {
               throw new ConflictException('Un producto cambió. Recargue la factura.');
             const stored = JSON.parse(p.datos);
             const storedRow = JSON.parse(item.datos) as RenglonFactura;
-            if (Object.entries(datos).some(([k, v]) => storedRow[k] !== v))
+            if (
+              ['tipo', 'descripcion', 'codigoDeclarado', 'registroSanitario'].some(
+                k => storedRow[k] !== datos[k]
+              )
+            )
               await this.invima.editar(
                 p.id,
                 {
