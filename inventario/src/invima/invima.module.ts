@@ -8,9 +8,11 @@ import { FacturasInvimaController } from './presentation/facturas.controller';
 import { PdfExtractorService } from './infrastructure/pdf-extractor.service';
 import { InformeInvimaPdfService } from './infrastructure/informe-pdf.service';
 import { PedidoExcelService } from './infrastructure/pedido-excel.service';
+import { RecepcionInvimaService } from './application/recepcion.service';
+import { RecepcionInvimaController } from './presentation/recepcion.controller';
 
 @Module({
-  controllers: [InvimaController, FacturasInvimaController],
+  controllers: [InvimaController, FacturasInvimaController, RecepcionInvimaController],
   providers: [
     InvimaService,
     SocrataClient,
@@ -19,6 +21,7 @@ import { PedidoExcelService } from './infrastructure/pedido-excel.service';
     PdfExtractorService,
     InformeInvimaPdfService,
     PedidoExcelService,
+    RecepcionInvimaService,
   ],
 })
 export class InvimaModule {}

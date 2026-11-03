@@ -33,8 +33,9 @@ describe('Categorías y fuente RS/NSO', () => {
     expect(fuentesInvima('MEDICAMENTO')).toEqual(fuentesInvima());
     expect(fuentesInvima('DISPOSITIVO')[0].id).toBe('dispositivos');
     expect(fuentesInvima('SIN_CLASIFICAR')).toEqual([]);
+    expect(fuentesInvima('VITAL_NO_DISPONIBLE')).toEqual([]);
     expect(Object.keys(GRUPOS_REGISTROS)).toHaveLength(14);
-    expect(TIPOS_PRODUCTO_INVIMA).toHaveLength(17);
+    expect(TIPOS_PRODUCTO_INVIMA).toHaveLength(18);
     expect(Object.values(GRUPOS_REGISTROS)).not.toContain('OPERACIONES');
     expect(Object.values(GRUPOS_REGISTROS)).not.toContain('RADIOFARMACOS');
   });

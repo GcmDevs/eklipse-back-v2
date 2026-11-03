@@ -80,10 +80,20 @@ export function htmlInformeInvima(f: Informe) {
       const warnings = v?.advertencias?.length
         ? `<div class="warning">${v.advertencias.map(escape).join(' · ')}</div>`
         : '';
+      const cantidades = [
+        p.datos.cantidad != null
+          ? `${p.datos.cantidadPresentacion !== undefined ? 'Unidades' : 'Cantidad'}: ${p.datos.cantidad}${p.datos.unidadMedida ? ' ' + p.datos.unidadMedida : ''}`
+          : '',
+        p.datos.cantidadPresentacion != null
+          ? `Presentaciones: ${p.datos.cantidadPresentacion}`
+          : '',
+      ]
+        .filter(Boolean)
+        .join(' · ');
       // Long observations can flow across pages. Ordinary products stay together.
       const long = (p.observacion.texto?.length || 0) + detalles.length + audit.length > 1400;
       return `<tbody class="product${long ? ' product-long' : ''}"><tr class="product-main">
-      <td><strong class="product-name">${p.orden}. ${escape(p.datos.descripcion)}</strong><div class="type">${escape(tipo.replace(/_/g, ' '))}</div>${c ? value('Titular INVIMA:', c.titular) : ''}</td>
+      <td><strong class="product-name">${p.orden}. ${escape(p.datos.descripcion)}</strong><div class="type">${escape(tipo.replace(/_/g, ' '))}</div>${cantidades ? `<div class="value">${escape(cantidades)}</div>` : ''}${c ? value('Titular INVIMA:', c.titular) : ''}</td>
       <td>${value('Declarado:', p.datos.codigoDeclarado || '(Vacío)')}${c?.cum ? value('Verificado:', c.cum) : ''}${value('Estado CUM:', estadoCum)}</td>
       <td>${value('Ingresado:', p.datos.registroSanitario || '(Vacío)')}${value('INVIMA:', c?.registroSanitario || (c ? 'Sin dato publicado' : 'Sin coincidencia asociada'))}${value('Estado registro:', c?.estadoRegistro || (c ? 'Sin dato publicado' : 'Sin coincidencia asociada'))}</td>
       <td><span class="result" data-result="${escape(p.resultado)}">${escape(resultados[p.resultado] || p.resultado)}</span></td>

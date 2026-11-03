@@ -39,6 +39,9 @@
       "<rootDir>/src/"
     ],
     "moduleNameMapper": {
+      "^@inn/lgc/rct/orm/(.*)$": "<rootDir>/legacy/recepciones-tecnicas/@orm/$1",
+      "^@inn/lgc/rct/types/(.*)$": "<rootDir>/legacy/recepciones-tecnicas/@types/$1",
+      "^@inn/lgc/rct/(.*)$": "<rootDir>/legacy/recepciones-tecnicas/$1",
       "^@inn/authorities$": "<rootDir>/authorities/index.ts",
       "^@common/(.*)$": "<rootDir>/../@common/$1",
       "^@inn/types/(.*)$": "<rootDir>/@types/$1",
