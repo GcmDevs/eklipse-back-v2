@@ -1,6 +1,5 @@
 # compiled output
 /node_modules
-/.env
 /env.ts
 .agents
 skill.md
@@ -19,3 +18,4 @@ temp_auto_push.bat
 /cartera/dist
 /inventario/dist.gitignore
 branch_structure.json
+config.bat
