@@ -14,12 +14,13 @@ import {
   DieSubgrupoOrm,
   DietaConfExtraOrm,
   ScheduleOrm,
+  TransactionDietaOrm,
 } from '../orm';
 import { ESTADOS_DIETA } from '@lgc/die/domain/types';
 import { fetchCamasRegistradasEnJornadaQuery } from '../queries';
-import { getDateToExactMidNight, removeTimeZone } from '@lgc/die/application/services';
 import { ADMIN_AUTHORITY } from '@common/application/constants';
 import { HPN_AUTHORITIES } from '@authorities';
+import { bloquearDietas } from '../utils/bloqueo-dietas';
 
 interface CamaEnJornadaI {
   id: number;
@@ -38,65 +39,70 @@ export class ActualizarDietasImpl extends BaseSource {
   }
 
   async execute(payload: UpdateDietaDto): Promise<boolean> {
-    const dieCentroRp = this.conn.getRepository(DieCentroOrm);
-    const dieJornadaRp = this.conn.getRepository(DieJornadaOrm);
-    const dieSubgrupoRp = this.conn.getRepository(DieSubgrupoOrm);
-    const scheduleRp = this.conn.getRepository(ScheduleOrm);
-
-    const dieCentro = await dieCentroRp.findOne({ where: { id: payload.dieCentroId } });
-
-    const dieJornada = await dieJornadaRp.findOne({
+    // Only the persisted date is read before the lock; all mutable state is read again below.
+    const referencia = await this.conn.getRepository(DieJornadaOrm).findOne({
       where: { id: payload.dieJornadaId, dieCentroId: payload.dieCentroId },
-      relations: ['horario'],
+      select: { id: true, fecha: true },
     });
-    dieJornada.setTypes();
-
-    const dieSubgrupo = await dieSubgrupoRp.findOne({
-      where: { id: payload.dieSubgrupoId, dieJornadaId: payload.dieJornadaId },
-    });
-
-    if (!dieCentro || !dieJornada || !dieSubgrupo) {
+    if (!referencia) {
       throw new BadRequestException('Uno o mas registros relacionados no existen');
     }
-
-    const transaction = await this._transaction.execute(false, {
-      jornada: dieJornada.jornada.getCode(),
-      usuarioId: this.auth.user.id,
-      pacienteId: payload.pacienteId,
-      tipo: 2,
-    });
-
+    const fechaJornada = new Date(referencia.fecha);
     const canIgnoreHorario = await this.hasAnyAuthority([
       ADMIN_AUTHORITY,
       HPN_AUTHORITIES.DIETAS.REGISTRAR_IGNORA_JORNADA,
     ]);
-
-    const jornada = await scheduleRp.findOne({
-      where: { clientId: dieCentro.centroId, id: dieJornada.horarioId },
-    });
-
-    jornada.timeInMinutesToDate();
-
-    jornada.startTime = new Date(jornada.startTime);
-    jornada.endTime = new Date(jornada.endTime);
-
-    if (!validRangeForJornada(jornada, canIgnoreHorario)) {
-      const errorMsg = 'Ha expirado la jornada';
-      throw new BadRequestException(`${errorMsg}, ya no puede modificarla`);
-    }
-
+    let transaction: TransactionDietaOrm;
     try {
       await this.qr.connect();
       await this.qr.startTransaction();
+      await bloquearDietas(this.qr, this.auth.context, fechaJornada);
+      const dieCentro = await this.qr.manager.getRepository(DieCentroOrm).findOne({
+        where: { id: payload.dieCentroId },
+      });
+      const dieJornada = await this.qr.manager.getRepository(DieJornadaOrm).findOne({
+        where: { id: payload.dieJornadaId, dieCentroId: payload.dieCentroId },
+        relations: ['horario'],
+      });
+      const dieSubgrupo = await this.qr.manager.getRepository(DieSubgrupoOrm).findOne({
+        where: { id: payload.dieSubgrupoId, dieJornadaId: payload.dieJornadaId },
+      });
+      if (
+        !dieCentro ||
+        !dieJornada ||
+        !dieSubgrupo ||
+        new Date(dieJornada.fecha).getTime() !== fechaJornada.getTime()
+      ) {
+        throw new BadRequestException('Uno o mas registros relacionados no existen');
+      }
+      dieJornada.setTypes();
+      transaction = await this._transaction.execute(false, {
+        jornada: dieJornada.jornada.getCode(),
+        usuarioId: this.auth.user.id,
+        pacienteId: payload.pacienteId,
+        tipo: 2,
+      });
+      const jornada = await this.qr.manager.getRepository(ScheduleOrm).findOne({
+        where: { clientId: dieCentro.centroId, id: dieJornada.horarioId },
+      });
+      if (!jornada) {
+        throw new BadRequestException('Este horario no está relacionado a este centro');
+      }
+      jornada.timeInMinutesToDate();
+      if (!validRangeForJornada(jornada, canIgnoreHorario)) {
+        throw new BadRequestException('Ha expirado la jornada, ya no puede modificarla');
+      }
       const dieConfigRp = this.qr.manager.getRepository(DietaConfExtraOrm);
       const dieEstadoRp = this.qr.manager.getRepository(DieEstadoOrm);
 
       if (!payload.id) {
-        const fecha = removeTimeZone(new Date());
-        const fechaFt = getDateToExactMidNight(fecha);
-
         const camasEnJornada: CamaEnJornadaI[] = await this.qr.query(
-          fetchCamasRegistradasEnJornadaQuery(fechaFt, payload.horarioId, [0], [payload.pacienteId])
+          fetchCamasRegistradasEnJornadaQuery(
+            fechaJornada,
+            dieJornada.horarioId,
+            [0],
+            [payload.pacienteId]
+          )
         );
 
         const camasEnJornadaIds: number[] = [];
@@ -170,11 +176,15 @@ export class ActualizarDietasImpl extends BaseSource {
         }
       }
 
+      transaction.success = true;
+      await this.qr.manager.getRepository(TransactionDietaOrm).save(transaction);
       await this.qr.commitTransaction();
       return true;
     } catch (error: any) {
-      await this.qr.rollbackTransaction();
-      await this._transaction.execute(false, {}, transaction, error.message);
+      if (this.qr.isTransactionActive) await this.qr.rollbackTransaction();
+      if (transaction) {
+        await this._transaction.execute(false, {}, transaction, error.message);
+      }
       throw new BadRequestException(error.message);
     } finally {
       await this.qr.release();

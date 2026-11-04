@@ -17,6 +17,8 @@ async function bootstrap() {
     ENVIRONMENTS.isHttps ? { httpsOptions } : {}
   );
 
+  app.enableShutdownHooks();
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

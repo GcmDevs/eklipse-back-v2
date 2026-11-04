@@ -17,6 +17,11 @@ export const valueForDieta = (payload: DataDieFPI) => {
 
   const isDieFami = payload.isDietaFamiliar;
   const isMerien = payload.isMerienda;
+  const negacionCoherente =
+    codes.length === 2 &&
+    ((codes.includes('1') && codes.includes('17')) ||
+      (codes.includes('2') && codes.includes('18')));
+  if (!isDieFami && !isMerien && negacionCoherente) return 0;
   const isSolida = getConsistencia(codes) === 'SOLIDA';
   const isLiquida = getConsistencia(codes) === 'LIQUIDA';
   const isDesayuno = payload.jornada && payload.jornada === JORNADAS_DIETA.DESAYUNO;
