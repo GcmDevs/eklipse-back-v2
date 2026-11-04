@@ -7,6 +7,8 @@ import {
 import { InfoIngresoResponse, LiquidoResponse, SignoVitalResponse } from '../responses';
 import { cloneDeep, orderBy } from 'lodash';
 import { groupByKey } from '@hcn/old/common/presentation/helpers';
+import { GCM_CONTEXTS, GcmContextType } from '@common/domain/types';
+import { GcmContexts } from '@common/application/constants';
 
 export const dataToInfoIngresoDto = (_: InfoIngresoResponse): InfoIngresoDto => {
   const result: InfoIngresoDto = {
@@ -36,7 +38,7 @@ export const dataToInfoIngresoDto = (_: InfoIngresoResponse): InfoIngresoDto => 
 
 export const organizarLiquidos = (
   data: LiquidoResponse[],
-  ignoreAutocompleteByIngresoElMismoDia: number[]
+  ignoreAutocompleteByIngresoElMismoDia: number[],
 ) => {
   const liquidosAgrupados = groupByKey(data, 'LIQUIDO', 'LIQUIDO');
 
@@ -100,7 +102,8 @@ export const organizarLiquidos = (
 
 export const organizarSignosVitales = (
   signosVitales: SignoVitalResponse[],
-  ignoreAutocompleteByIngresoElMismoDia: number[]
+  ignoreAutocompleteByIngresoElMismoDia: number[],
+  context : GcmContextType
 ): SignoVitalDto[] => {
   const signosVitalesReducidos = signosVitales.reduce((h, signoVital) => {
     h[signoVital.SIGNO] = (h[signoVital.SIGNO] || []).concat(signoVital);
@@ -119,9 +122,10 @@ export const organizarSignosVitales = (
 
   let signosVitalesFiltrados = cloneDeep(signosVitalesAgrupados);
 
-  if (signosVitalesAgrupados.filter(_ => _.signo === 'TENSION ARTERIAL MEDIA').length) {
+  if(context.getCode() !== GCM_CONTEXTS.VALLEDUPAR.getCode()){
+    if (signosVitalesAgrupados.filter(el => el.signo === 'TENSION ARTERIAL MEDIA').length) {
     signosVitalesFiltrados = signosVitalesAgrupados.filter(
-      _ => _.signo !== 'TENSION ARTERIAL MEDIA'
+      el => el.signo !== 'TENSION ARTERIAL MEDIA'
     );
 
     const TAM = {
@@ -135,21 +139,22 @@ export const organizarSignosVitales = (
 
     if (temp.length) {
       temp
-        .filter((_: { signo: string }) => _.signo === 'TENSION ARTERIAL')[0]
-        .resultados.map((_f: SignoVitalResponse) => {
-          const sistolica = +_f.valor.split('/')[0];
-          const diastolica = +_f.valor.split('/')[1];
+        .filter((el: { signo: string }) => el.signo === 'TENSION ARTERIAL')[0]
+        .resultados.map((r: SignoVitalResponse) => {
+          const sistolica = +r.valor.split('/')[0];
+          const diastolica = +r.valor.split('/')[1];
           const result = (sistolica - diastolica) / 3;
 
           TAM.resultados.push({
-            hora: _f.hora,
+            hora: r.hora,
             valor: Math.round(diastolica + result),
           });
         });
     }
-
     signosVitalesFiltrados.push(TAM);
+    }
   }
+
 
   signosVitalesFiltrados.map(_ => {
     _.orden = _addOrdenSignoVitalByNombre(_.signo);

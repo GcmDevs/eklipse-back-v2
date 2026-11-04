@@ -23,7 +23,7 @@ import {
   LIQUIDOS_ELIMINADOS,
 } from '@hcn/rft/historia-clinica/reportes/application/constants';
 import { orderBy } from 'lodash';
-import { GCM_CONTEXTS, GcmContextCode } from '@common/domain/types';
+import { GCM_CONTEXTS, GcmContextCode, gcmContextFactory, GcmContextType } from '@common/domain/types';
 import { DataSource } from 'typeorm';
 
 @Injectable()
@@ -87,8 +87,7 @@ export class FetchReporteSabanasUciExternoServices {
 
       if (result) return result;
       else throw new Error('No existen registros con este consecutivo en esa fecha');
-    } catch (error) {
-      //console.log(error.message);
+    } catch (error:any) {
       throw new Error(error.message);
     }
   }
@@ -126,7 +125,8 @@ export class FetchReporteSabanasUciExternoServices {
         consecutivos,
         fecha,
         ignoreAutocompleteByIngresoElMismoDia,
-        conn
+        conn,
+        gcmContextFactory(context)
       );
 
       const estadisticas = await this._fetchEstadisticasFromLiquidos(
@@ -137,7 +137,8 @@ export class FetchReporteSabanasUciExternoServices {
         fecha,
         ignoreAutocompleteByIngresoElMismoDia.length > 1,
         signosVitales,
-        conn
+        conn,
+        gcmContextFactory(context)
       );
 
       let glucometrias = await this._fetchGlucometrias(consecutivos, fecha, conn);
@@ -191,7 +192,8 @@ export class FetchReporteSabanasUciExternoServices {
     consecutivos: number[],
     fecha: Date,
     ignoreAutocompleteByIngresoElMismoDia: number[],
-    conn: DataSource
+    conn: DataSource,
+    context: GcmContextType
   ) {
     const signosVitalesRs: SignoVitalResponse[] = await conn.query(
       fetchSignosVitalesQuery(consecutivos, fecha)
@@ -206,7 +208,7 @@ export class FetchReporteSabanasUciExternoServices {
     }
 
     const signosVitales = signosVitalesRs.length
-      ? organizarSignosVitales(signosVitalesRs, ignoreAutocompleteByIngresoElMismoDia)
+      ? organizarSignosVitales(signosVitalesRs, ignoreAutocompleteByIngresoElMismoDia,context )
       : [];
 
     return signosVitales;
@@ -220,7 +222,8 @@ export class FetchReporteSabanasUciExternoServices {
     fecha: Date,
     ingresoElMismoDia: boolean,
     signosVitales: SignoVitalDto[],
-    conn: DataSource
+    conn: DataSource,
+    context: GcmContextType
   ) {
     let liquidosAdministrados = 0;
     let liquidosEliminados = 0;
@@ -266,7 +269,8 @@ export class FetchReporteSabanasUciExternoServices {
         consecutivos,
         new Date(fecha.getTime() - 86400000),
         [],
-        conn
+        conn,
+        context        
       );
 
       const perdidasInsensiblesDiaAnterior = this._calcularPerdidasInsensibles(
