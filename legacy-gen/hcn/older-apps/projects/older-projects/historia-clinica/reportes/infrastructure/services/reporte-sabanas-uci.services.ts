@@ -23,8 +23,8 @@ import {
   LIQUIDOS_ADMINISTRADOS,
   LIQUIDOS_ELIMINADOS,
 } from '@hcn/rft/historia-clinica/reportes/application/constants';
-import { orderBy, slice } from 'lodash';
-import { GCM_CONTEXTS } from '@common/domain/types';
+import { orderBy } from 'lodash';
+import { GCM_CONTEXTS, gcmContextFactory } from '@common/domain/types';
 
 @Injectable()
 export class FetchReporteSabanasUciServices extends BaseSource {
@@ -71,9 +71,9 @@ export class FetchReporteSabanasUciServices extends BaseSource {
         }
       }
 
-      const ingresos = ingresosQR.map((_: any) => _.OID);
+      const ingresos = ingresosQR.map((el: any) => el.OID);
 
-      const consecutivos = ingresosQR.map((_: any) => _.AINCONSEC);
+      const consecutivos = ingresosQR.map((el: any) => el.AINCONSEC);
 
       const result = await this.fetchByConsecutivo(
         consecutivo,
@@ -85,8 +85,7 @@ export class FetchReporteSabanasUciServices extends BaseSource {
 
       if (result) return result;
       else throw new Error('No existen registros con este consecutivo en esa fecha');
-    } catch (error) {
-      //console.log(error.message);
+    } catch (error:any) {
       throw new Error(error.message);
     }
   }
@@ -189,7 +188,8 @@ export class FetchReporteSabanasUciServices extends BaseSource {
       fetchSignosVitalesQuery(consecutivos, fecha)
     );
 
-    if (!signosVitalesRs.filter(_ => _.SIGNO! === 'VENTILADO SI=1 / NO=2').length) {
+
+    if (!signosVitalesRs.filter(el => el.SIGNO! === 'VENTILADO SI=1 / NO=2').length) {
       signosVitalesRs.push({
         hora: 0,
         valor: '2',
@@ -198,7 +198,11 @@ export class FetchReporteSabanasUciServices extends BaseSource {
     }
 
     const signosVitales = signosVitalesRs.length
-      ? organizarSignosVitales(signosVitalesRs, ignoreAutocompleteByIngresoElMismoDia)
+      ? organizarSignosVitales(
+        signosVitalesRs,
+        ignoreAutocompleteByIngresoElMismoDia,
+        gcmContextFactory(this.auth.context)
+      )
       : [];
 
     return signosVitales;
