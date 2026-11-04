@@ -42,7 +42,7 @@ import {
   VehiculoInvolucradoDto,
 } from '../dtos';
 import { LGC_TAS_LOCATIONS } from '../../application/constants';
-import { TrasladosRealtimeGateway } from '../gateways/traslados-realtime.gateway';
+import { TrasladosRealtimeDestinatariosService } from '../../infrastructure/services/traslados-realtime-destinatarios.service';
 import { ESTADOS_ASISTENCIA } from '../../@types/gcn';
 import {
   deletePrimarioSegmentadoFile,
@@ -60,7 +60,7 @@ export class PrimarioSegmentadoController {
     private readonly source: PrimarioSegmentadoImpl,
     private readonly registrosClinicos: RegistrosClinicosImpl,
     private readonly vehiculosInvolucrados: VehiculosInvolucradosImpl,
-    private readonly events: TrasladosRealtimeGateway
+    private readonly events: TrasladosRealtimeDestinatariosService
   ) {}
 
   private async parseMultipart<T extends object>(type: new () => T, data: string): Promise<T> {
@@ -80,7 +80,7 @@ export class PrimarioSegmentadoController {
   public async create(@Body() body: CreatePrimarioSegmentadoDto) {
     try {
       const result = await this.source.create(body);
-      this.events.publish({
+      await this.events.publish({
         tipo: ESTADOS_ASISTENCIA.CREADO.getCode(),
         trasladoId: result.trasladoId,
         contextoCode: this.source.getRealtimeContextCode(),
@@ -361,12 +361,13 @@ export class PrimarioSegmentadoController {
       ) {
         throw new Error('El archivo firma no corresponde a recibidoPorFirmaImg');
       }
+      const anteriores = await this.events.recipients(+trasladoId, this.source.getRealtimeContextCode());
       const result = await this.source.finalizar(+trasladoId, payload, file?.filename);
-      this.events.publish({
+      await this.events.publish({
         tipo: ESTADOS_ASISTENCIA.FINALIZADO.getCode(),
         trasladoId: +trasladoId,
         contextoCode: this.source.getRealtimeContextCode(),
-      });
+      }, anteriores);
       return result;
     } catch (error: any) {
       if (file) await deletePrimarioSegmentadoFile('firma', file.filename);

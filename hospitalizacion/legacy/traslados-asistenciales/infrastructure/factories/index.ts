@@ -256,6 +256,7 @@ export const newDataToTraslados = (
 
     if (item.contexto || contexto) {
       traslado.contexto = item.contexto || contexto;
+      traslado.contextoCode = traslado.contexto.getCode();
       traslado.codigo = `${(item.contexto || contexto).getAbbreviation()}-${item.id}`;
     }
     traslado.cupsCode = item.cupsCode;

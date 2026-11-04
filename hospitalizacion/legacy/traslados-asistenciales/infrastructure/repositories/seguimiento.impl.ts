@@ -357,8 +357,6 @@ export class SeguimientoTrasladoImpl extends RecursosCompartidosSource {
         qr,
       });
 
-      // throw new Error('testesignacion 79');
-
       await qr.commitTransaction();
       return true;
     } catch (error: any) {

@@ -1,3 +1,4 @@
+import { TrasladosRealtimeDestinatariosService } from './infrastructure/services/traslados-realtime-destinatarios.service';
 import { Module } from '@nestjs/common';
 import {
   TrasladoMonitoreoController,
@@ -42,6 +43,7 @@ import { TrasladosRealtimeGateway } from './presentation/gateways/traslados-real
     RecursosCompartidosSource,
     DescargarPdfService,
     TrasladosRealtimeGateway,
+    TrasladosRealtimeDestinatariosService,
     PrimarioSegmentadoImpl,
     RegistrosClinicosImpl,
     VehiculosInvolucradosImpl,

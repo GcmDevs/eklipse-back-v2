@@ -25,7 +25,7 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { DescargarPdfService } from '../../infrastructure/services';
 import { GcmContextCode } from '@common/domain/types';
-import { TrasladosRealtimeGateway } from '../gateways/traslados-realtime.gateway';
+import { TrasladosRealtimeDestinatariosService } from '../../infrastructure/services/traslados-realtime-destinatarios.service';
 import { HPN_AUTHORITIES } from '@authorities';
 import { LGC_TAS_LOCATIONS } from '../../application/constants';
 import { ESTADOS_ASISTENCIA } from '../../@types/gcn';
@@ -38,7 +38,7 @@ export class TrasladoController {
   constructor(
     private readonly _source: TrasladoCrudSource,
     private readonly _pdfService: DescargarPdfService,
-    private readonly _events: TrasladosRealtimeGateway
+    private readonly _events: TrasladosRealtimeDestinatariosService
   ) {}
 
   @ApiOperation({ summary: 'Obtener mis solicitudes de traslado por rango de fechas' })
@@ -157,7 +157,7 @@ export class TrasladoController {
 
       const result = await this._source.createPrimario(payload);
       if (result.result) {
-        this._events.publish({
+        await this._events.publish({
           tipo: ESTADOS_ASISTENCIA.FINALIZADO.getCode(),
           trasladoId: result.trasladoId,
           contextoCode: this._source.getRealtimeContextCode(),
@@ -176,7 +176,7 @@ export class TrasladoController {
     try {
       const result = await this._source.createSecundario(body);
       if (result.result) {
-        this._events.publish({
+        await this._events.publish({
           tipo: ESTADOS_ASISTENCIA.CREADO.getCode(),
           trasladoId: result.trasladoId,
           contextoCode: this._source.getRealtimeContextCode(),
@@ -221,7 +221,7 @@ export class TrasladoController {
     try {
       const result = await this._source.inicioSecundario(body);
       if (result)
-        this._events.publish({
+        await this._events.publish({
           tipo: ESTADOS_ASISTENCIA.EN_CURSO.getCode(),
           trasladoId: body.trasladoId,
           contextoCode: body.contextoCode,

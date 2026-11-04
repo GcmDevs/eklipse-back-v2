@@ -10,7 +10,7 @@ import {
 } from '../dtos';
 import { SeguimientoTrasladoImpl } from '@hpn/lgc/tas/infrastructure';
 import { HPN_AUTHORITIES } from '@authorities';
-import { TrasladosRealtimeGateway } from '../gateways/traslados-realtime.gateway';
+import { TrasladosRealtimeDestinatariosService } from '../../infrastructure/services/traslados-realtime-destinatarios.service';
 import { ESTADOS_ASISTENCIA } from '../../@types/gcn';
 
 @ApiTags('Traslados Asistenciales')
@@ -20,7 +20,7 @@ import { ESTADOS_ASISTENCIA } from '../../@types/gcn';
 export class SeguimientoTrasladoController {
   constructor(
     private _source: SeguimientoTrasladoImpl,
-    private readonly _events: TrasladosRealtimeGateway
+    private readonly _events: TrasladosRealtimeDestinatariosService
   ) {}
 
   @ApiOperation({ summary: 'Registrar la entrega del paciente' })
@@ -30,7 +30,7 @@ export class SeguimientoTrasladoController {
     try {
       const result = await this._source.entregarPaciente(body);
       if (result)
-        this._events.publish({
+        await this._events.publish({
           tipo: ESTADOS_ASISTENCIA.ENTREGADO.getCode(),
           trasladoId: body.trasladoId,
           contextoCode: body.contextoCode,
@@ -48,7 +48,7 @@ export class SeguimientoTrasladoController {
     try {
       const result = await this._source.recibirPaciente(body);
       if (result)
-        this._events.publish({
+        await this._events.publish({
           tipo: ESTADOS_ASISTENCIA.RECIBIDO.getCode(),
           trasladoId: body.trasladoId,
           contextoCode: body.contextoCode,
@@ -66,7 +66,7 @@ export class SeguimientoTrasladoController {
     try {
       const result = await this._source.asignar(body);
       if (result)
-        this._events.publish(
+        await this._events.publish(
           {
             tipo: ESTADOS_ASISTENCIA.ASIGNADO.getCode(),
             trasladoId: body.trasladoId,
@@ -85,15 +85,16 @@ export class SeguimientoTrasladoController {
   @Post('reasignar')
   public async reassign(@Body() body: ReasignarTrasladoDto) {
     try {
+      const anteriores = await this._events.recipients(body.trasladoId, body.contextoCode);
       const result = await this._source.reasignar(body);
       if (result)
-        this._events.publish(
+        await this._events.publish(
           {
             tipo: ESTADOS_ASISTENCIA.REASIGNADO.getCode(),
             trasladoId: body.trasladoId,
             contextoCode: body.contextoCode,
           },
-          [body.conductor?.documento, body.auxiliar?.documento, body.medico?.documento]
+          anteriores
         );
       return result;
     } catch (error: any) {
@@ -108,7 +109,7 @@ export class SeguimientoTrasladoController {
     try {
       const result = await this._source.iniciarRetorno(body);
       if (result)
-        this._events.publish({
+        await this._events.publish({
           tipo: ESTADOS_ASISTENCIA.EN_CURSO.getCode(),
           trasladoId: body.trasladoId,
           contextoCode: body.contextoCode,
@@ -126,7 +127,7 @@ export class SeguimientoTrasladoController {
     try {
       const result = await this._source.registrarComplicacion(body);
       /*    if (result)
-        this._events.publish({
+        await this._events.publish({
           tipo: 'INCIDENTE',
           trasladoId: body.trasladoId,
           contextoCode: body.contextoCode,

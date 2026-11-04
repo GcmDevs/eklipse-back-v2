@@ -1,4 +1,4 @@
-import { GcmContextType } from '@common/domain/types';
+import { GcmContextCode, GcmContextType } from '@common/domain/types';
 import { TipoTrasladoItemTypeCode, TipoTrasladoTypeCode } from '@hpn/lgc/tas/types/gcn';
 import {
   AsistenciaTipoCode,
@@ -85,6 +85,7 @@ export class TrasladoAsistencialDataRes {
   tieneAccidente: boolean;
   codigo: string;
   contexto: GcmContextType;
+  contextoCode: GcmContextCode;
   id: number;
   cupsCode: CodigoCupsTypeCode;
   paciente: PacienteDataRes;

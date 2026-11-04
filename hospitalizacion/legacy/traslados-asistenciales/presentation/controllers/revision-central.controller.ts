@@ -4,7 +4,7 @@ import { Authorities, CommonGuards } from '@common/presentation/decorators';
 import { TrasladoRevisionCentralImpl } from '@hpn/lgc/tas/infrastructure/repositories';
 import { CreateRevisionCentralDto, CancelTrasladoDto } from '../dtos';
 import { HPN_AUTHORITIES } from '@authorities';
-import { TrasladosRealtimeGateway } from '../gateways/traslados-realtime.gateway';
+import { TrasladosRealtimeDestinatariosService } from '../../infrastructure/services/traslados-realtime-destinatarios.service';
 import { ESTADOS_ASISTENCIA } from '../../@types/gcn';
 
 @ApiTags('Traslados Asistenciales')
@@ -14,7 +14,7 @@ import { ESTADOS_ASISTENCIA } from '../../@types/gcn';
 export class TrasladoRevisionCentralController {
   constructor(
     private _source: TrasladoRevisionCentralImpl,
-    private readonly _events: TrasladosRealtimeGateway
+    private readonly _events: TrasladosRealtimeDestinatariosService
   ) {}
 
   @ApiOperation({ summary: 'Tomar decisión en la revisión central del traslado' })
@@ -24,8 +24,10 @@ export class TrasladoRevisionCentralController {
     try {
       const result = await this._source.decidir(body);
       if (result)
-        this._events.publish({
-          tipo: ESTADOS_ASISTENCIA.APROBADO.getCode(),
+        await this._events.publish({
+          tipo: body.aprobado
+            ? ESTADOS_ASISTENCIA.APROBADO.getCode()
+            : ESTADOS_ASISTENCIA.RECHAZADO.getCode(),
           trasladoId: body.trasladoId,
           contextoCode: body.contextoCode,
         });
@@ -40,13 +42,17 @@ export class TrasladoRevisionCentralController {
   @Post('cancel')
   public async cancel(@Body() body: CancelTrasladoDto) {
     try {
+      const anteriores = await this._events.recipients(body.trasladoId, body.contextoCode);
       const result = await this._source.cancel(body);
       if (result)
-        this._events.publish({
-          tipo: ESTADOS_ASISTENCIA.CANCELADO.getCode(),
-          trasladoId: body.trasladoId,
-          contextoCode: body.contextoCode,
-        });
+        await this._events.publish(
+          {
+            tipo: ESTADOS_ASISTENCIA.CANCELADO.getCode(),
+            trasladoId: body.trasladoId,
+            contextoCode: body.contextoCode,
+          },
+          anteriores
+        );
       return result;
     } catch (error: any) {
       throw new BadRequestException(error.message);
