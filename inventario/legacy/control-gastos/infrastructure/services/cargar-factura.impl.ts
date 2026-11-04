@@ -1,6 +1,6 @@
 import { resolverOrdenRelacionada } from './orden-relacionada';
 import { Injectable } from '@nestjs/common';
-import { gcmContextFactory } from '@common/domain/types';
+import { GCM_CONTEXTS, gcmContextFactory } from '@common/domain/types';
 import { CargarFacturaControlGastosPayload } from '@inn/lgc/cgt/application/payloads/control-gastos.payloads';
 import { BaseSource } from '@common/infrastructure/services';
 import { ControlGastoHistorialOrm } from '@inn/lgc/cgt/orm/inn/farmacia/control-gastos/historial-control-gasto.orm';
@@ -9,6 +9,7 @@ import { deleteFile } from '@common/presentation/helpers';
 import { FILE_LOCATIONS } from '@common/application/file-locations';
 import { ESTADOS_CONTROL_GASTO } from '@inn/lgc/cgt/types/inn/farmacia/control-gastos/estado-control-gasto.type';
 import { mapOrdenesControlGasto } from './ordenes-control-gasto.mapper';
+import { ControlGastoArchivoOrm } from '../../@orm/inn/farmacia/control-gastos';
 
 @Injectable()
 export class CargarFacturaControlGastoImpl extends BaseSource {
@@ -29,15 +30,8 @@ export class CargarFacturaControlGastoImpl extends BaseSource {
   public async execute(payload: CargarFacturaControlGastosPayload) {
     const ctx = gcmContextFactory(payload.contextCode);
 
-    // const userHasPermissions = await this.hasAnyAuthority([
-    //   INN_AUTHORITIES.FARMACIA.CONTROL_GASTOS_FACTURADOR,
-    // ]);
-
-    // if (!userHasPermissions) {
-    //   throw new Error('No tiene permisos para realizar esta acción');
-    // }
-
     const qr = this.dynamicQR(ctx);
+    const amConn = this.dynamicConn(GCM_CONTEXTS.AMMEDICAL);
     await qr.connect();
     try {
       await qr.startTransaction();
@@ -48,20 +42,13 @@ export class CargarFacturaControlGastoImpl extends BaseSource {
 
       const controlGastoRp = qr.manager.getRepository(ControlGastoOrm);
       const historialRp = qr.manager.getRepository(ControlGastoHistorialOrm);
+      const archivoRp = amConn.getRepository(ControlGastoArchivoOrm);
 
-      // let controlGasto = new ControlGastoOrm();
-
-      // if (payload.idControlGasto) {
       const controlGasto = await controlGastoRp.findOne({
         where: { id: payload.idControlGasto },
         relations: ['ordenRelacionada', 'archivos', 'archivos.documento'],
         lock: { mode: 'pessimistic_write' },
       });
-      // } else {
-      //   controlGasto = await controlGastoRp.findOne({
-      //     where: { ordenDespachoId: payload.suministroPacienteId },
-      //   });
-      // }
 
       if (!controlGasto) {
         throw new Error(
@@ -89,7 +76,8 @@ export class CargarFacturaControlGastoImpl extends BaseSource {
       }
       if (
         controlGasto.requiereOrdenesCompraServicio !== false &&
-        !mapOrdenesControlGasto(controlGasto).some(orden => !orden.rechazadoAt)
+        !mapOrdenesControlGasto(controlGasto).some(orden => !orden.rechazadoAt) &&
+        !controlGasto.ordenRelacionadaId
       ) {
         throw new Error('Debe asociar una orden de compra o servicio antes de subir la factura');
       }
