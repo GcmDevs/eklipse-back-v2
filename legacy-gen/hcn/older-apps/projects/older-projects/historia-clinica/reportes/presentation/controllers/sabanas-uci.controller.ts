@@ -16,7 +16,7 @@ export class SabanasUciController {
     try {
       fecha = new Date(`${fecha}:00:00`);
       return await this._fetchReporteSabanasUci.single(consecutivo, fecha);
-    } catch (error) {
+    } catch (error:any) {
       throw new BadRequestException(error.message);
     }
   }
