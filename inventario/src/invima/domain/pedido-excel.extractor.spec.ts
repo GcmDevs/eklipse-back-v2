@@ -10,6 +10,35 @@ const hoja = (rows: string[][]): HojaPedido => ({
   ].map((r, i) => ({ numero: i + 1, celdas: r.map(texto => ({ texto })) })),
 });
 describe('Pedido Excel Disfarma', () => {
+  it('asocia cada lote con su fecha explícita sin usar el vencimiento del documento', () => {
+    const h = hoja([]);
+    h.filas[3].celdas = ['Descripción', 'CUM', 'INVIMA', 'LOTE_PRODUCTO', 'FEC_VEN_LOTE'].map(
+      texto => ({ texto })
+    );
+    h.filas.push(
+      ...[
+        ['Producto A', '0001-01', '', '001A', '2029-01-31'],
+        ['Producto B', '0002-01', '', '002B;003C', '30/04/2028;05/2029'],
+        ['Producto C', '0003-01', '', '004D;005E', '2028-01-31'],
+        ['Producto D', '0004-01', '', '006F', '31/02/2028'],
+        ['Producto E', '0005-01', '', '007G;007G', '2028-03-31;2029-04-30'],
+      ].map((r, i) => ({ numero: 5 + i, celdas: r.map(texto => ({ texto })) }))
+    );
+    const r = extraerPedidoDisfarma([h]);
+    expect(r.renglones[0].lotesDocumento).toEqual([{ lote: '001A', vencimiento: '2029-01-31' }]);
+    expect(r.renglones[1].lotesDocumento).toEqual([
+      { lote: '002B', vencimiento: '2028-04-30' },
+      { lote: '003C', vencimiento: '2029-05' },
+    ]);
+    expect(r.renglones[2].lotesDocumento?.every(l => l.vencimiento === null)).toBe(true);
+    expect(r.renglones[2].advertencias.join(' ')).toContain('inequívoca');
+    expect(r.renglones[3].lotesDocumento).toEqual([{ lote: '006F', vencimiento: null }]);
+    expect(r.renglones[4].lotesDocumento).toEqual([
+      { lote: '007G', vencimiento: '2028-03-31' },
+      { lote: '007G', vencimiento: '2029-04-30' },
+    ]);
+    expect(r.renglones[4].advertencias.join(' ')).toContain('vencimientos distintos');
+  });
   it('distingue cliente y pedido de un proveedor y conserva cada renglón con evidencia', () => {
     const r = extraerPedidoDisfarma([
       hoja([
@@ -104,7 +133,7 @@ describe('Pedido Excel Disfarma', () => {
       numero: 'ZD 753889',
       proveedor: 'Disfarma',
       cliente: '',
-      extractorVersion: '3',
+      extractorVersion: '4',
       fecha: '2026-09-30',
     });
     expect(r.renglones).toHaveLength(1);

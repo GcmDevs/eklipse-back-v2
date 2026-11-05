@@ -9,7 +9,7 @@ import { REQUEST } from '@nestjs/core';
 import { Request } from 'express';
 import { createHash } from 'node:crypto';
 import { basename } from 'node:path';
-import { In } from 'typeorm';
+import { EntityManager, In } from 'typeorm';
 import { BaseSource } from '@common/infrastructure/services';
 import {
   InvimaFacturaItemOrm,
@@ -18,6 +18,8 @@ import {
   InvimaVerificacionOrm,
   InvimaConfirmacionOrm,
   ObservacionInvimaOrm,
+  InvimaRecepcionOrm,
+  InvimaRecepcionItemOrm,
 } from '@inn/orm/inn/invima';
 import {
   advertenciasRenglon,
@@ -29,11 +31,23 @@ import { MedicamentoInput } from '../domain/invima.models';
 import { PdfExtractorService } from '../infrastructure/pdf-extractor.service';
 import { PedidoExcelService } from '../infrastructure/pedido-excel.service';
 import {
+  normalizarLotes,
+  normalizarLotesDocumento,
+  normalizarVencimiento,
+} from '../domain/lotes-documento';
+import {
   GuardarFacturaDto,
   ListarFacturasDto,
   ObservacionFacturaDto,
 } from '../presentation/factura.dto';
 import { InvimaService } from './invima.service';
+import {
+  BorradorRecepcion,
+  compararRecepcion,
+  FisicoBorradorRecepcion,
+  FisicoRecepcion,
+} from '../domain/recepcion.models';
+import { calcularMuestreo } from '../../recepcion-tecnica/inspeccion';
 
 @Injectable()
 export class FacturasInvimaService extends BaseSource {
@@ -105,6 +119,7 @@ export class FacturasInvimaService extends BaseSource {
       const rows = await manager
         .getRepository(InvimaFacturaItemOrm)
         .find({ where: { facturaId: id, excluido: false }, order: { orden: 'ASC' } });
+      const recepcion = await this.informeRecepcion(id, rows, manager);
       const ids = rows.flatMap(r => (r.productoId ? [r.productoId] : []));
       const productos = ids.length
         ? await manager.getRepository(InvimaProductoOrm).find({ where: { id: In(ids) } })
@@ -131,6 +146,7 @@ export class FacturasInvimaService extends BaseSource {
         fecha: factura.fecha,
         observacion: this.observacion(factura),
         generadoEn: new Date(),
+        recepcion,
         productos: rows.map(row => {
           const p = productos.find(p => p.id === row.productoId);
           const v =
@@ -144,8 +160,10 @@ export class FacturasInvimaService extends BaseSource {
           const c = v && confirmaciones.find(c => c.verificacionId === v.id);
           const evidencia = v ? JSON.parse(v.evidencia) : null;
           return {
+            renglonId: row.id,
             orden: row.orden,
             datos: JSON.parse(row.datos),
+            datosProducto: p ? (JSON.parse(p.datos) as MedicamentoInput) : null,
             observacion: this.observacion(row),
             resultado: c ? 'CONFIRMADA' : v?.resultado || 'PENDIENTE',
             candidato: c
@@ -171,6 +189,69 @@ export class FacturasInvimaService extends BaseSource {
         }),
       };
     });
+  }
+  private async informeRecepcion(
+    facturaId: number,
+    rows: InvimaFacturaItemOrm[],
+    manager: EntityManager
+  ) {
+    // Match the write lock order: invoice, then receipt. Do not start or change a receipt
+    // while generating a report, and never use obsolete physical verification products.
+    const recepcion = await manager.getRepository(InvimaRecepcionOrm).findOne({
+      where: { facturaId },
+      lock: { mode: 'pessimistic_write' },
+    });
+    if (!recepcion) return null;
+    const items = await manager.getRepository(InvimaRecepcionItemOrm).find({
+      where: { recepcionId: recepcion.id },
+      order: { id: 'ASC' },
+    });
+    const muestreo = (fisico: Pick<FisicoBorradorRecepcion, 'cantidad' | 'erroresCriticos'>) =>
+      typeof fisico.cantidad === 'number' &&
+      Number.isFinite(fisico.cantidad) &&
+      fisico.cantidad >= 0 &&
+      Number.isInteger(fisico.erroresCriticos) &&
+      fisico.erroresCriticos >= 0
+        ? calcularMuestreo(fisico.cantidad, fisico.erroresCriticos)
+        : null;
+    return {
+      ...recepcion,
+      renglones: rows.flatMap(row => {
+        const item = items.find(i => i.facturaItemId === row.id);
+        if (!item) return [];
+        const facturado = JSON.parse(item.facturado) as RenglonFactura;
+        const { borradorRecepcion, ...fisico } = JSON.parse(item.fisico) as FisicoRecepcion & {
+          borradorRecepcion?: BorradorRecepcion;
+        };
+        return [
+          {
+            id: item.id,
+            facturaItemId: item.facturaItemId,
+            orden: row.orden,
+            version: item.version,
+            usuarioId: item.usuarioId,
+            fecha: item.fecha,
+            facturado,
+            fisico,
+            decision: item.decision,
+            justificacion: item.justificacion,
+            diferencias: compararRecepcion(facturado, fisico),
+            muestreo: muestreo(fisico),
+            // Partial captures remain visibly distinct from the last confirmed capture.
+            borrador: borradorRecepcion
+              ? {
+                  ...borradorRecepcion,
+                  diferencias: compararRecepcion(
+                    facturado,
+                    borradorRecepcion.fisico as FisicoRecepcion
+                  ),
+                  muestreo: muestreo(borradorRecepcion.fisico),
+                }
+              : null,
+          },
+        ];
+      }),
+    };
   }
   async subir(file: Express.Multer.File, pedido = false) {
     if (!file?.buffer)
@@ -232,15 +313,32 @@ export class FacturasInvimaService extends BaseSource {
     }
   }
   private datos(r: RenglonFactura): RenglonFactura {
+    if (
+      r.lotesDocumento?.some(
+        l =>
+          !l.lote?.trim() ||
+          l.lote.length > 120 ||
+          (l.vencimiento !== null &&
+            (!/^\d{4}-\d{2}(?:-\d{2})?$/.test(l.vencimiento) ||
+              normalizarVencimiento(l.vencimiento, 'YMD') !== l.vencimiento))
+      )
+    )
+      throw new BadRequestException(
+        'Revise el lote y su vencimiento: use AAAA-MM-DD, AAAA-MM o deje la fecha vacía.'
+      );
+    const lotes =
+      r.lotesDocumento !== undefined ? normalizarLotesDocumento(r.lotesDocumento) : undefined;
     return {
       tipo: r.tipo,
       descripcion: r.descripcion.trim(),
       codigoDeclarado: r.codigoDeclarado.trim(),
       registroSanitario: r.registroSanitario.trim(),
       ...(r.unidadMedida != null ? { unidadMedida: r.unidadMedida.trim() } : {}),
-      ...(r.lotesDeclarados !== undefined
-        ? { lotesDeclarados: [...new Set(r.lotesDeclarados.map(l => l.trim()).filter(Boolean))] }
-        : {}),
+      ...(lotes !== undefined
+        ? { lotesDocumento: lotes, lotesDeclarados: normalizarLotes(lotes.map(l => l.lote)) }
+        : r.lotesDeclarados !== undefined
+          ? { lotesDeclarados: normalizarLotes(r.lotesDeclarados) }
+          : {}),
       ...(r.cantidad !== undefined ? { cantidad: r.cantidad } : {}),
       ...(r.cantidadPresentacion !== undefined
         ? { cantidadPresentacion: r.cantidadPresentacion }
@@ -360,7 +458,15 @@ export class FacturasInvimaService extends BaseSource {
         `SUM(CASE WHEN i.EXCLUIDO = 0 AND COALESCE(JSON_VALUE(p.DATOS,'$.tipo'),'MEDICAMENTO') = 'MEDICAMENTO' AND JSON_VALUE(${selected},'$.estadoCum') = '${value}' THEN 1 ELSE 0 END)`,
         key
       );
-    const byId = new Map((await counts.getRawMany()).map(r => [Number(r.facturaId), r]));
+    const [rawConteos, recepciones] = await Promise.all([
+      counts.getRawMany(),
+      this.conn.getRepository(InvimaRecepcionOrm).find({
+        select: { facturaId: true, estado: true },
+        where: { facturaId: In(facturas.map(f => f.id)) },
+      }),
+    ]);
+    const byId = new Map(rawConteos.map(r => [Number(r.facturaId), r]));
+    const estadosRecepcion = new Map(recepciones.map(r => [r.facturaId, r.estado]));
     return {
       datos: facturas.map(f => {
         const raw = byId.get(f.id) || {};
@@ -387,6 +493,7 @@ export class FacturasInvimaService extends BaseSource {
           nitProveedor: f.nitProveedor,
           fecha: f.fecha,
           estado: f.estado,
+          estadoRecepcion: estadosRecepcion.get(f.id) ?? null,
           version: f.version,
           fechaCreacion: f.fechaCreacion,
           conteos,
@@ -473,8 +580,21 @@ export class FacturasInvimaService extends BaseSource {
           'unidadMedida',
           'lotesDeclarados',
         ] as const)
-          if (incoming[key] === undefined && anteriores[key] !== undefined)
+          if (
+            incoming[key] === undefined &&
+            anteriores[key] !== undefined &&
+            (key !== 'lotesDeclarados' || incoming.lotesDocumento === undefined)
+          )
             Object.assign(datos, { [key]: anteriores[key] });
+        // A legacy client can update lot codes without discarding dates of unchanged lots.
+        // Removed lots lose their dates; new codes start with no inferred expiration.
+        if (incoming.lotesDocumento === undefined && anteriores.lotesDocumento !== undefined)
+          datos.lotesDocumento = normalizarLotesDocumento(
+            (datos.lotesDeclarados || []).flatMap(lote => {
+              const previos = anteriores.lotesDocumento.filter(l => l.lote === lote);
+              return previos.length ? previos : [{ lote, vencimiento: null }];
+            })
+          );
         if (!incoming.excluido) {
           const entrada = this.entrada(datos);
           if (item.productoId) {

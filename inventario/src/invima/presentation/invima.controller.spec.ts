@@ -252,6 +252,41 @@ describe('Permisos de las interfaces INVIMA', () => {
   );
 });
 describe('Validación de entrada INVIMA', () => {
+  it('valida cada par lote/vencimiento y conserva precisión mensual', async () => {
+    const { RenglonFacturaDto } = await import('./factura.dto');
+    const base = {
+      tipo: 'MEDICAMENTO',
+      descripcion: 'Producto',
+      codigoDeclarado: '',
+      registroSanitario: '',
+      excluido: false,
+    };
+    for (const lotesDocumento of [
+      undefined,
+      [],
+      [{ lote: '000A', vencimiento: null }],
+      [
+        { lote: '000A', vencimiento: '2028-02-29' },
+        { lote: '000B', vencimiento: '2029-04' },
+      ],
+    ])
+      expect(
+        await validate(plainToInstance(RenglonFacturaDto, { ...base, lotesDocumento }))
+      ).toHaveLength(0);
+    for (const lotesDocumento of [
+      null,
+      '000A',
+      [123],
+      [{ lote: '000A' }],
+      [{ lote: '', vencimiento: null }],
+      [{ lote: 'A', vencimiento: '2029-02-29' }],
+      [{ lote: 'A', vencimiento: '2029-13' }],
+      [{ lote: 'A', vencimiento: '01/02/2029' }],
+    ])
+      expect(
+        (await validate(plainToInstance(RenglonFacturaDto, { ...base, lotesDocumento }))).length
+      ).toBeGreaterThan(0);
+  });
   it('valida lotes declarados como lista acotada y rechaza null, duplicados y tipos ajenos', async () => {
     const { RenglonFacturaDto } = await import('./factura.dto');
     const base = {
