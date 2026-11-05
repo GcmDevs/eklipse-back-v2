@@ -1,6 +1,11 @@
 import { MedicamentoInput, TipoProductoInvima } from './invima.models';
 
-export const EXTRACTOR_VERSION = '7';
+export const EXTRACTOR_VERSION = '9';
+/** Fecha civil del producto: AAAA-MM-DD o AAAA-MM cuando solo se publica el mes. */
+export interface LoteDocumento {
+  lote: string;
+  vencimiento: string | null;
+}
 export interface RenglonFactura {
   correccionesProducto?: {
     anterior: {
@@ -23,6 +28,7 @@ export interface RenglonFactura {
   cantidadPresentacion?: number | null;
   unidadMedida?: string;
   lotesDeclarados?: string[];
+  lotesDocumento?: LoteDocumento[];
 }
 export interface RenglonExtraido extends RenglonFactura {
   hoja?: string;

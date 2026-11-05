@@ -73,7 +73,7 @@ export class FacturasInvimaController {
   async informe(@Param('id', ParseIntPipe) id: number) {
     return new StreamableFile(await this.pdf.generar(await this.service.informe(id)), {
       type: 'application/pdf',
-      disposition: `attachment; filename="verificacion-invima-${id}.pdf"`,
+      disposition: `attachment; filename="recepcion-tecnica-invima-${id}.pdf"`,
     });
   }
   @Authorities([ADMIN_AUTHORITY, INN_AUTHORITIES.PRODUCTOS.VERIFICACION_INVIMA])

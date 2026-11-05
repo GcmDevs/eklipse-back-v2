@@ -6,9 +6,12 @@ import {
   InvimaProductoOrm,
   InvimaVerificacionOrm,
   InvimaConfirmacionOrm,
+  InvimaRecepcionOrm,
+  InvimaRecepcionItemOrm,
 } from '@inn/orm/inn/invima';
 import { GuardarFacturaDto } from '../presentation/factura.dto';
 import { GRUPOS_REGISTROS, TipoProductoInvima } from '../domain/invima.models';
+import { fisicoVacio } from '../domain/recepcion.models';
 
 jest.mock('@common/infrastructure/services', () => ({
   BaseSource: class {
@@ -158,6 +161,50 @@ const input = (f: any): GuardarFacturaDto => ({
   })),
 });
 describe('Persistencia de lotes declarados', () => {
+  it('conserva asociaciones lote/vencimiento en originales, revisión y recepción; clientes antiguos no las borran', async () => {
+    const { service, pdf, file } = setup();
+    const parsed = await pdf.extraer();
+    const lotes = [
+      { lote: '000A', vencimiento: '2029-01-31' },
+      { lote: '000B', vencimiento: '2028-04' },
+    ];
+    parsed.renglones[0].lotesDeclarados = ['000A', '000B'];
+    parsed.renglones[0].lotesDocumento = lotes;
+    pdf.extraer.mockResolvedValue(parsed);
+    const d = await service.subir(file);
+    expect(d.renglones[0]).toMatchObject({
+      lotesDocumento: lotes,
+      original: { lotesDocumento: lotes },
+    });
+    const review = input(d);
+    review.renglones[0].lotesDeclarados = ['000A', '000C'];
+    const f = await service.guardar(d.id, review);
+    expect(f.renglones[0].lotesDocumento).toEqual([
+      { lote: '000A', vencimiento: '2029-01-31' },
+      { lote: '000C', vencimiento: null },
+    ]);
+    expect((await service.detalle(f.id)).renglones[0].original.lotesDocumento).toEqual(lotes);
+    expect((await service.informe(f.id)).productos[0].datos.lotesDocumento).toEqual(
+      f.renglones[0].lotesDocumento
+    );
+  });
+  it('permite corregir la fecha sin separar el par y conserva el original', async () => {
+    const { service, pdf, file } = setup();
+    const parsed = await pdf.extraer();
+    parsed.renglones[0].lotesDocumento = [{ lote: '000A', vencimiento: '2028-04' }];
+    pdf.extraer.mockResolvedValue(parsed);
+    const d = await service.subir(file),
+      review = input(d);
+    review.renglones[0].lotesDocumento = [{ lote: '000C', vencimiento: '2028-04-30' }];
+    const f = await service.guardar(d.id, review);
+    expect(f.renglones[0]).toMatchObject({
+      lotesDeclarados: ['000C'],
+      lotesDocumento: [{ lote: '000C', vencimiento: '2028-04-30' }],
+    });
+    expect(f.renglones[0].original.lotesDocumento).toEqual([
+      { lote: '000A', vencimiento: '2028-04' },
+    ]);
+  });
   it('conserva originales y correcciones, y clientes que omiten lotes no los borran', async () => {
     const { service, pdf, file, connection } = setup();
     const parsed = await pdf.extraer();
@@ -297,6 +344,178 @@ describe('Pedidos Excel y facturas comparten revisión sin confundir cliente y p
   });
 });
 describe('Observaciones e informe de facturas revisadas', () => {
+  it('genera el informe sin iniciar una recepción cuando aún no existe', async () => {
+    const { service, file, connection } = setup();
+    const d = await service.subir(file);
+    const f = await service.guardar(d.id, input(d));
+    const report = await service.informe(f.id);
+    expect(report.recepcion).toBeNull();
+    expect(report.productos.map(p => p.renglonId)).toEqual(f.renglones.map(r => r.id));
+    expect(await connection.getRepository(InvimaRecepcionOrm).find()).toEqual([]);
+    expect(await connection.getRepository(InvimaRecepcionItemOrm).find()).toEqual([]);
+  });
+  it('incluye captura confirmada, diferencias y borrador parcial separados, con su auditoría', async () => {
+    const { service, file, connection } = setup();
+    const d = await service.subir(file);
+    const review = input(d);
+    review.renglones[0].cantidad = 10;
+    const f = await service.guardar(d.id, review);
+    const sourceRepo = connection.getRepository(InvimaProductoOrm);
+    const sourceProduct = await sourceRepo.findOneBy({ id: f.renglones[0].producto.id });
+    sourceProduct.datos = JSON.stringify({
+      ...JSON.parse(sourceProduct.datos),
+      laboratorio: 'Laboratorio ingresado de la factura',
+      presentacion: 'Presentación ingresada de la factura',
+      formaFarmaceutica: 'Forma ingresada de la factura',
+    });
+    await sourceRepo.save(sourceProduct);
+    const r = await connection.getRepository(InvimaRecepcionOrm).save({
+      facturaId: f.id,
+      estado: 'BORRADOR',
+      version: 7,
+      creadoPor: 11,
+      actualizadoPor: 12,
+      fechaCreacion: new Date('2026-11-01T13:00:00Z'),
+      fechaActualizacion: new Date('2026-11-02T15:00:00Z'),
+      fechaFinalizacion: null,
+    });
+    const fisico = {
+      ...fisicoVacio('MEDICAMENTO'),
+      descripcion: 'Recibido',
+      cantidad: 8,
+      codigoDeclarado: '000123-02',
+      registroSanitario: 'INVIMA RS-2',
+      cantidadAveria: 1,
+      cantidadNoSolicitada: 2,
+      laboratorio: 'Laboratorio observado físicamente',
+      presentacion: 'Presentación observada físicamente',
+      formaFarmaceutica: 'Forma observada físicamente',
+      estadoEmpaque: 'DETERIORADO',
+      motivosRechazo: ['CUM'],
+      lotes: [{ cantidad: 8, lote: '000A', vencimiento: '2027-01-01' }],
+    };
+    const borradorRecepcion = {
+      fisico: { ...fisico, cantidad: 12, erroresCriticos: null },
+      decision: 'ACEPTADO',
+      justificacion: 'Cambio aún sin confirmar',
+      usuarioId: 13,
+      usuarioNombre: 'Inspector borrador',
+      fecha: '2026-11-02T16:00:00Z',
+    };
+    const original = JSON.stringify({ ...fisico, borradorRecepcion });
+    const item = await connection.getRepository(InvimaRecepcionItemOrm).save({
+      recepcionId: r.id,
+      facturaItemId: f.renglones[0].id,
+      facturado: JSON.stringify({
+        tipo: 'MEDICAMENTO',
+        descripcion: 'PRODUCTO 1',
+        cantidad: 10,
+        codigoDeclarado: '000123-01',
+        registroSanitario: 'RS-1',
+        lotesDeclarados: ['000A'],
+        unidadMedida: 'UD',
+      }),
+      fisico: original,
+      decision: 'RECHAZADO',
+      justificacion: 'Código físico diferente',
+      version: 4,
+      usuarioId: 12,
+      fecha: new Date('2026-11-02T15:00:00Z'),
+    });
+    const report = await service.informe(f.id);
+    expect(report.productos[0].datosProducto).toMatchObject({
+      laboratorio: 'Laboratorio ingresado de la factura',
+      presentacion: 'Presentación ingresada de la factura',
+      formaFarmaceutica: 'Forma ingresada de la factura',
+    });
+    expect(report.recepcion).toMatchObject({
+      id: r.id,
+      estado: 'BORRADOR',
+      version: 7,
+      creadoPor: 11,
+      actualizadoPor: 12,
+    });
+    expect(report.recepcion.renglones).toHaveLength(1);
+    const row = report.recepcion.renglones[0];
+    expect(row).toMatchObject({
+      id: item.id,
+      facturaItemId: f.renglones[0].id,
+      usuarioId: 12,
+      version: 4,
+      decision: 'RECHAZADO',
+      justificacion: 'Código físico diferente',
+      fisico,
+      facturado: { cantidad: 10, lotesDeclarados: ['000A'], unidadMedida: 'UD' },
+      diferencias: { cum: 'DIFIERE', registro: 'DIFIERE', faltante: 2, sobrante: 0 },
+      muestreo: { nivel: 'A', muestra: 2, cumple: true },
+      borrador: {
+        ...borradorRecepcion,
+        diferencias: { faltante: 0, sobrante: 2 },
+        muestreo: null,
+      },
+    });
+    expect(row.fisico).not.toHaveProperty('borradorRecepcion');
+    expect(
+      (await connection.getRepository(InvimaRecepcionItemOrm).findOneBy({ id: item.id })).fisico
+    ).toBe(original);
+  });
+  it('conserva recepción finalizada, cantidades ausentes y no recibido, sin incluir otros documentos', async () => {
+    const { service, file, connection } = setup();
+    const d = await service.subir(file);
+    const f = await service.guardar(d.id, input(d));
+    const r = await connection.getRepository(InvimaRecepcionOrm).save({
+      facturaId: f.id,
+      estado: 'FINALIZADA',
+      version: 3,
+      creadoPor: 12,
+      actualizadoPor: 12,
+      fechaFinalizacion: new Date('2026-11-02T23:00:00Z'),
+    });
+    const repo = connection.getRepository(InvimaRecepcionItemOrm);
+    await repo.save({
+      recepcionId: r.id,
+      facturaItemId: f.renglones[0].id,
+      facturado: JSON.stringify({
+        tipo: 'MEDICAMENTO',
+        descripcion: 'Antiguo',
+        cantidad: null,
+        codigoDeclarado: '',
+        registroSanitario: '',
+      }),
+      fisico: JSON.stringify({ ...fisicoVacio('MEDICAMENTO'), cantidad: 0 }),
+      decision: 'NO_RECIBIDO',
+      justificacion: 'Factura antigua sin cantidad',
+      usuarioId: 12,
+    });
+    await repo.save({
+      recepcionId: r.id,
+      facturaItemId: 9999,
+      facturado: '{"descripcion":"No incluido"}',
+      fisico: '{}',
+      decision: 'PENDIENTE',
+    });
+    await repo.save({
+      recepcionId: r.id + 1,
+      facturaItemId: f.renglones[0].id,
+      facturado: '{"descripcion":"Otro documento"}',
+      fisico: '{}',
+      decision: 'PENDIENTE',
+    });
+    const report = await service.informe(f.id);
+    expect(report.recepcion).toMatchObject({
+      estado: 'FINALIZADA',
+      fechaFinalizacion: r.fechaFinalizacion,
+    });
+    expect(report.recepcion.renglones).toHaveLength(1);
+    expect(report.recepcion.renglones[0]).toMatchObject({
+      facturado: { cantidad: null },
+      fisico: { cantidad: 0 },
+      borrador: null,
+      decision: 'NO_RECIBIDO',
+      diferencias: { faltante: null, sobrante: null },
+      muestreo: { nivel: 'N/A', muestra: 0 },
+    });
+  });
   it('rechaza observaciones e informe antes de guardar la revisión', async () => {
     const { service, file } = setup();
     const f = await service.subir(file);
@@ -556,6 +775,50 @@ describe('Facturas INVIMA, persistencia y revisión', () => {
       total: 0,
       resumen: { total: 25, borradores: 21, revisadas: 4 },
       pagina: 2,
+    });
+  });
+  it('lista el estado real de recepción por documento sin confundirlo con la revisión', async () => {
+    const { service, connection } = setup();
+    const facturas = [1, 2, 3].map(id => ({ id, estado: 'REVISADA', numero: 'F-' + id }));
+    const repositorio = connection.getRepository;
+    await repositorio(InvimaRecepcionOrm).save([
+      { facturaId: 2, estado: 'BORRADOR' },
+      { facturaId: 3, estado: 'FINALIZADA' },
+      { facturaId: 99, estado: 'FINALIZADA' },
+    ]);
+    const recepciones = repositorio(InvimaRecepcionOrm);
+    const buscar = jest.fn(recepciones.find);
+    const consulta = (factura: boolean) => {
+      const q: any = {};
+      for (const key of [
+        'select',
+        'addSelect',
+        'where',
+        'leftJoin',
+        'groupBy',
+        'orderBy',
+        'skip',
+        'take',
+      ])
+        q[key] = () => q;
+      q.clone = () => q;
+      q.getRawMany = async () => (factura ? [{ estado: 'REVISADA', total: 3 }] : []);
+      q.getManyAndCount = async () => [facturas, facturas.length];
+      return q;
+    };
+    connection.getRepository = (type: any) => {
+      if (type === InvimaFacturaOrm) return { createQueryBuilder: () => consulta(true) };
+      if (type === InvimaFacturaItemOrm) return { createQueryBuilder: () => consulta(false) };
+      if (type === InvimaRecepcionOrm) return { ...recepciones, find: buscar };
+      return repositorio(type);
+    };
+    const r = await service.listar({ pagina: 1, limite: 20 });
+    expect(r.datos.map(f => f.estadoRecepcion)).toEqual([null, 'BORRADOR', 'FINALIZADA']);
+    expect(r.datos.every(f => f.estado === 'REVISADA')).toBe(true);
+    expect(buscar).toHaveBeenCalledTimes(1);
+    expect(buscar.mock.calls[0][0]).toMatchObject({
+      select: { facturaId: true, estado: true },
+      where: { facturaId: expect.objectContaining({ _value: [1, 2, 3] }) },
     });
   });
   it('guarda borrador y evidencia sin PDF; crea productos distintos al revisar aunque repitan CUM', async () => {
