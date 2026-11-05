@@ -27,6 +27,7 @@ import {
   DecisionRecepcion,
   BorradorRecepcion,
   FisicoBorradorRecepcion,
+  ErrorValidacionRecepcion,
 } from '../domain/recepcion.models';
 import { RenglonFactura } from '../domain/factura.models';
 import {
@@ -88,6 +89,13 @@ export class RecepcionInvimaService extends BaseSource {
       vencimiento: l.vencimiento,
     }));
     return copia as T;
+  }
+  private errorValidacion(error: Error, item: InvimaRecepcionItemOrm, prefijo = '') {
+    return new BadRequestException({
+      message: `${prefijo}${error.message}`,
+      ...(error instanceof ErrorValidacionRecepcion ? { campos: error.campos } : {}),
+      facturaItemId: item.facturaItemId,
+    });
   }
   async iniciar(id: number) {
     await this.conn.transaction(async manager => {
@@ -206,7 +214,7 @@ export class RecepcionInvimaService extends BaseSource {
       try {
         validarDecision(JSON.parse(i.facturado), f, input.decision, input.justificacion, oficial);
       } catch (e) {
-        throw new BadRequestException(e.message);
+        throw this.errorValidacion(e, i);
       }
       i.fisico = JSON.stringify(f);
       i.decision = input.decision;
@@ -277,14 +285,25 @@ export class RecepcionInvimaService extends BaseSource {
       const items = await manager
         .getRepository(InvimaRecepcionItemOrm)
         .find({ where: { recepcionId: r!.id } });
-      if (items.some(i => this.leerFisico(i.fisico).borrador))
-        throw new BadRequestException(
-          'Hay capturas parciales pendientes. Guarde cada producto antes de finalizar la recepción.'
+      const parcial = items.find(i => this.leerFisico(i.fisico).borrador);
+      if (parcial)
+        throw this.errorValidacion(
+          new ErrorValidacionRecepcion(
+            'Hay capturas parciales pendientes. Guarde cada producto antes de finalizar la recepción.',
+            ['borrador']
+          ),
+          parcial
         );
-      if (!items.length || items.some(i => i.decision === 'PENDIENTE'))
-        throw new BadRequestException(
-          'Guarde una decisión para todos los productos antes de finalizar.'
-        );
+      const pendiente = items.find(i => i.decision === 'PENDIENTE');
+      if (!items.length || pendiente) {
+        const message = 'Guarde una decisión para todos los productos antes de finalizar.';
+        if (pendiente)
+          throw this.errorValidacion(
+            new ErrorValidacionRecepcion(message, ['decision']),
+            pendiente
+          );
+        throw new BadRequestException(message);
+      }
       for (const i of items) {
         const oficial = await this.oficialFactura(id, i, manager);
         try {
@@ -296,7 +315,7 @@ export class RecepcionInvimaService extends BaseSource {
             oficial
           );
         } catch (e) {
-          throw new BadRequestException(`Producto ${i.facturaItemId}: ${e.message}`);
+          throw this.errorValidacion(e, i, `Producto ${i.facturaItemId}: `);
         }
       }
       r!.estado = 'FINALIZADA';

@@ -134,17 +134,21 @@ Aplicar `inventario/database/migrations/20261022_invima_completa.sql` en cada co
 Después de guardar la revisión, el detalle permite una observación general y una por producto incluido (hasta 4000 caracteres cada una). El cliente guarda tras 700 ms sin escritura y al salir del campo, serializa cambios de un mismo campo y reintenta fallos transitorios hasta tres intentos. Muestra el estado del guardado; conserva el borrador local ante fallos. La navegación y la descarga esperan los cambios pendientes. Cerrar o recargar el navegador con cambios sin confirmar muestra la advertencia nativa. Un conflicto con otra persona permite elegir explícitamente el texto que se conservará.
 
 - `PATCH facturas/:id/observaciones`: `{ texto, version, renglonId? }`. Omitir `renglonId` actualiza la observación general. Devuelve `{ texto, version, usuarioNombre, fecha }`; la versión inicial es 0. La auditoría y el contexto provienen de la sesión. La escritura bloquea primero la factura y no incrementa la versión de revisión/producto ni reinicia verificaciones. Un texto idéntico es idempotente; un conflicto devuelve HTTP 409 con `actual`. Facturas borrador reciben 400 y facturas eliminadas, ajenas al contexto o renglones no incluidos reciben 404.
-- `GET facturas/:id/informe.pdf`: descarga privada sin caché, disponible para facturas revisadas. Usa una instantánea consistente de metadatos, observaciones y últimas verificaciones de la versión vigente de cada producto, con fuentes, coincidencias confirmadas/exactas, estados separados, advertencias y auditoría en Colombia. Los productos pendientes se identifican claramente. No consulta INVIMA ni almacena un PDF nuevo.
+- `GET facturas/:id/informe.pdf`: descarga privada sin caché, disponible para facturas revisadas. Usa una instantánea consistente de metadatos, observaciones, últimas verificaciones de la versión vigente de cada producto y recepción técnica guardada, con fuentes, coincidencias confirmadas/exactas, estados separados, advertencias y auditoría en Colombia. Los productos pendientes se identifican claramente. No consulta INVIMA ni almacena un PDF nuevo.
 
 El informe usa Puppeteer ya incluido en el proyecto. El servidor necesita el Chromium instalado por Puppeteer; `INVIMA_PDF_BROWSER_PATH` permite señalar un ejecutable compatible en el despliegue. No requiere cambiar `.env` en desarrollo cuando el navegador predeterminado ya está instalado. El HTML escapa todos los datos, deshabilita JavaScript y bloquea peticiones de recursos externos. Admite dos informes simultáneos por proceso; los adicionales reciben 503. La preparación del navegador tiene un límite de 15 s y la impresión 30 s, con cierre de recursos incluso ante fallos. Un error al generar el PDF no borra las notas.
 
 Informe sintético de aceptación (sin acceso a bases de datos), desde `inventario`:
 
-El PDF utiliza una tabla compacta en A4 vertical con encabezados repetidos por página. Agrupa producto/titular, códigos CUM, registros ingresados/encontrados y resultado; mantiene separados los estados CUM y del registro. Los datos publicados, auditoría y observaciones aparecen debajo de cada fila. No imprime bloques vacíos de observación por producto; la nota general permanece al inicio. Las fuentes se enumeran una sola vez al final y cada producto referencia los números consultados, indicando los fallos. Las observaciones extensas fluyen entre páginas sin truncarse. El diseño conserva el tamaño del texto principal y reduce espacios, márgenes y etiquetas repetidas.
+El PDF utiliza A4 vertical con encabezados de tablas repetidos. Con recepción iniciada, muestra por producto la factura validada, la captura física y los datos oficiales en columnas separadas: cantidades y unidades, códigos, registro, presentación, laboratorio/titular y forma farmacéutica. Incluye faltantes, sobrantes, averías, no solicitado, estado de empaque, identificación y conservación, IUM/resolución para vitales, lotes y comparación con los declarados, los cuatro controles físicos, muestreo, motivos de rechazo, decisión y justificación. Los estados oficiales y las decisiones conservan semáforos independientes. Cero recibido deja las comprobaciones físicas como no aplicables; datos antiguos ausentes siguen como «Sin dato».
+
+El encabezado distingue recepción en curso y finalizada; cada renglón presenta la captura guardada y, si existe, un bloque independiente de borrador parcial sin confirmar, con su propia decisión propuesta y auditoría. Descargar no confirma productos ni finaliza la recepción. El frontend espera que observaciones y borradores estén sincronizados; un error o conflicto bloquea la descarga y conserva la captura local. La lectura del informe bloquea factura y recepción dentro de la misma transacción, sin crear ni modificar registros. Sin recepción iniciada se conserva el informe de verificación y se indica expresamente esa condición. No requiere migración SQL.
+
+Las observaciones extensas fluyen entre páginas sin truncarse y las decisiones cortas se mantienen juntas. Las fuentes se enumeran una sola vez al final y cada producto referencia las consultadas y sus errores. La nota general permanece al inicio; no se repiten observaciones vacías por producto.
 
     node -r ts-node/register -r tsconfig-paths/register scripts/verificar-informe-invima.ts
 
-Genera `dist/invima-qa/observaciones.pdf` con notas multilínea, nota extensa, CUM inactivo con registro vigente, consultas incompletas, dispositivos y productos pendientes. Revisar las páginas renderizadas antes de cambiar su diseño.
+Genera tres informes sintéticos en `dist/invima-qa`: `recepcion-tecnica-finalizada.pdf`, `recepcion-tecnica-en-curso.pdf` (pedido Disfarma con borrador separado) y `observaciones.pdf` (sin recepción). Incluyen sobrante/faltante, lotes coincidentes y diferentes, averías, no recibido, datos antiguos ausentes, rechazo por CUM/INVIMA, vital con IUM/resolución, notas extensas, estados oficiales independientes y consulta incompleta. No lee documentos originales ni bases de datos. Revisar todas las páginas renderizadas antes de cambiar su diseño.
 
 Las peticiones externas tienen un límite de 12 segundos y como máximo un reintento ante fallos transitorios. Los metadatos se guardan en memoria durante cinco minutos; las páginas adicionales comprueban la versión de la fuente. La pantalla procesa como máximo dos productos simultáneos y permite reintentar cada producto fallido. Salir detiene el envío de nuevas consultas; las peticiones ya enviadas pueden terminar y quedar en el historial.
 
@@ -156,7 +160,7 @@ Si se modifica el archivo .env, reiniciar el proceso de Inventario: dotenv se ej
 
 Si cambian las conexiones, reiniciar también General (autenticación, puerto 8101) y volver a iniciar sesión. Los dos procesos deben consultar la misma base para autenticar al usuario y resolver sus permisos. El alias admin del frontend en desarrollo no concede permisos en el backend.
 
-La ausencia de cualquiera de las cinco tablas o de las columnas de pedidos, observaciones o borrado lógico devuelve HTTP 503 con código INVIMA_MIGRACION_PENDIENTE e indica la migración única `20261022_invima_completa.sql`. No se interpreta como una lista vacía ni se crean tablas automáticamente. Otros errores SQL conservan el tratamiento habitual del backend.
+La ausencia de cualquiera de las siete tablas o de las columnas de pedidos, observaciones o borrado lógico devuelve HTTP 503 con código INVIMA_MIGRACION_PENDIENTE e indica la migración única `20261022_invima_completa.sql`. No se interpreta como una lista vacía ni se crean tablas automáticamente. Otros errores SQL conservan el tratamiento habitual del backend.
 
 ## Recepción técnica integrada a facturas y pedidos
 
@@ -168,18 +172,56 @@ Se guardan avería, no solicitado, empaque, conservación, controles de etiqueta
 
 Operaciones bajo `/v4/inn/invima/facturas/:id/recepcion` (administrador o 006005002):
 
+El listado de facturas y pedidos devuelve `estadoRecepcion`: `null` si no se ha iniciado, `BORRADOR` mientras está en curso y `FINALIZADA` al cerrarla. La columna «Recepción técnica» es independiente de la revisión del documento. Se leen únicamente los encabezados de recepción de la página actual, en una consulta por contexto; no se cargan capturas ni se consulta INVIMA. No requiere migración SQL adicional.
+
 - GET: consulta la recepción o devuelve null si no comenzó.
 - POST: inicio idempotente; requiere revisión validada y documento activo.
 - PUT renglones/:itemId: guarda `{version, recepcionVersion, fisico, decision, justificacion}` dentro de una transacción. 409 conserva la captura local ante modificaciones concurrentes.
 - POST finalizar: recibe `{version}`, revalida todos los renglones y bloquea la recepción.
 
+Los errores de reglas de inspección devuelven HTTP 400 con `message`, `campos` (rutas del formulario y mensajes) y `facturaItemId`. Los lotes se identifican por índice, por ejemplo `fisico.lotes.0.vencimiento`; errores generales de lotes usan `fisico.lotes`. El frontend selecciona el producto afectado al finalizar, resalta los campos en rojo y enfoca el primero visible con su mensaje accesible. Corregir el dato retira su marcador; los errores de red o concurrencia permanecen como avisos generales y no se atribuyen a un campo arbitrario. Los borradores parciales conservan su comportamiento y no activan esta navegación al escribir.
+
 `EKINNIVRECEPCION` y `EKINNIVRECEPCIONITEM` se incorporan a la migración consolidada. Reaplicar el archivo completo **antes** de iniciar el backend nuevo en cada contexto; la prueba SQL usa esquemas temporales con rollback y no actualiza las tablas reales. Los productos físicos están vinculados a la recepción, excluidos de Sin factura y usan verificaciones/confirmaciones/historial independientes. Cambiar su identificación reinicia únicamente su consulta; editar cantidades o empaque conserva la evidencia oficial. No se modifican existencias, lotes de inventario, comprobantes ni remisiones.
 
-La recepción finalizada admite consulta de la evidencia guardada y rechaza cambios físicos, verificaciones nuevas y confirmaciones. Las observaciones y consultas de la referencia facturada siguen siendo independientes. El PDF existente corresponde a verificación de factura; **el informe descargable de inspección queda pendiente para la siguiente etapa**.
+La recepción finalizada admite consulta de la evidencia guardada y rechaza cambios físicos, verificaciones nuevas y confirmaciones. Las observaciones y consultas de la referencia facturada siguen siendo independientes. El botón **PDF de recepción técnica** descarga el informe completo de inspección y su referencia INVIMA, tanto en curso como finalizada, sin cambiar el estado de la recepción.
 
 Aceptación visual automatizada (frontend): `tests/invima-recepcion-factura.smoke.cjs`, con shell/Inventario compilados, Chrome y API simulada. Comprueba PDF/escritorio y Excel/móvil, 50/60, identificación diferente, lotes, avería, empaque, verificación física, recarga y cierre. No accede a datos reales.
 
 ## Lotes declarados en el documento
+
+### Vencimiento por lote (PDF 9 / Excel 4)
+
+Las nuevas cargas conservan pares `lotesDocumento: [{lote, vencimiento}]` en los JSON original y revisado. `lotesDeclarados` mantiene los códigos para los clientes y comparadores anteriores. El vencimiento es una fecha civil `AAAA-MM-DD`, o `AAAA-MM` cuando solo se publica mes/año; no se inventa el día ni se usa la fecha de pago o de registro sanitario. Fechas ausentes o inválidas quedan nulas y se advierten para revisión. Se conservan los ceros del lote y las fechas contradictorias del mismo código para revisión.
+
+Los 40 perfiles PDF extraen la fecha en las posiciones verificadas de cada formato cuando está publicada. LH no la publica en su muestra; Cafam, Nestlé, Intersurgical e Imcolmédica no publican lotes ni vencimientos en sus muestras. Disfarma lee `FEC_VEN_LOTE` y columnas explícitas de vencimiento, incluidas celdas de fecha de Excel; omite fórmulas y asociaciones ambiguas. Los valores alfanuméricos de «Fecha Vence» del pedido anterior siguen siendo evidencia, nunca se convierten en lotes o fechas.
+
+La revisión presenta lote y vencimiento en el mismo campo, un par por línea (`LOTE | AAAA-MM-DD` o `LOTE | AAAA-MM`). Ambos se muestran juntos en resultados, recepción e informe PDF. Los lotes físicos permanecen independientes. Los documentos anteriores conservan sus datos y muestran «Sin fecha»; solo una nueva carga ejecuta el extractor actualizado. No requiere migración SQL ni modifica existencias.
+
+Comprobación de los proveedores anteriores con originales externos:
+
+```powershell
+$env:TS_NODE_PROJECT='inventario/tsconfig.json'
+node -r ts-node/register/transpile-only inventario/scripts/verificar-vencimientos-legacy.ts '<Downloads>' '<Temp>'
+```
+
+El script de noviembre que aparece a continuación comprueba también sus asociaciones lote-vencimiento. Los originales de Disfarma se verificaron con 100 pares completos y 46 renglones sin lote en el pedido anterior. Las pruebas cubren persistencia, clientes anteriores que omiten fechas, correcciones, calendario, precisión mensual y lectura del informe.
+
+### Facturadores añadidos en noviembre (extractor 8)
+
+Se añaden 20 perfiles reconocidos por contenido del documento: Sherleg Laboratories, LH / Líneas Hospitalarias, Más Salud IPS, Nestlé, LivaNova, Ropsohn, Amarey Nova Medical, Biospifar, Blau Farmacéutica, Laboratorios Ryan, Fresenius Kabi, GE Healthcare, Intersurgical, Industrias Cardiomed, BSN Medical / Essity, Arrow Medical, Fundación Cardiovascular de Colombia, Becton Dickinson, RP Médicas e Imcolmédica. Son 40 proveedores PDF en total; Disfarma conserva su flujo Excel.
+
+Las 21 muestras de esta ampliación recuperan 220 renglones (incluye Delta FE53153, 6 renglones de regresión). Se leen descripciones multilínea, cantidades y unidades sin conversiones, identificadores declarados y lotes según sus columnas. Sherleg y BSN mantienen varios lotes en un solo renglón; los renglones explícitos repetidos por lote conservan su identidad. Los códigos internos no se convierten en CUM. El IUM y la resolución de Blau se mantienen como evidencia y advertencias; el vital no disponible usa comprobación documental. Los CUM sin separador de Fresenius se conservan sin inventar expediente/consecutivo y requieren revisión. El registro general de las observaciones FCV no se aplica automáticamente a cada producto. Imcolmédica excluye el flete con aviso. Los formatos que publican un conteo inequívoco avisan si no coincide con los renglones extraídos.
+
+Cardiomed lee la fecha de la tabla de factura, distinta del pie en formato mes/día; Biospifar usa el número del documento y no el rango autorizado. Nestlé conserva UN y CA sin transformar cajas a unidades. Los datos ausentes permanecen vacíos para revisión. Esta versión se aplica a nuevas cargas, sin modificar facturas guardadas ni requerir migración SQL.
+
+Aceptación con los originales, desde la raíz del backend (no lee ni escribe bases de datos):
+
+```powershell
+$env:TS_NODE_PROJECT='inventario/tsconfig.json'
+node -r ts-node/register/transpile-only inventario/scripts/verificar-facturadores-202611.ts '<carpeta-de-las-21-muestras>'
+```
+
+Las pruebas sintéticas están en `proveedores-pdf-202611.extractor.spec.ts`. No se incluyen originales ni datos de clientes en el repositorio.
 
 El extractor PDF versión 7 incorpora `lotesDeclarados` por renglón. Usa etiquetas y posiciones verificadas de cada proveedor; conserva varios lotes y ceros iniciales, sin crear renglones por lote ni usar referencias, CUM o cantidades como lotes. La muestra de Cafam no declara lotes y devuelve una lista vacía.
 

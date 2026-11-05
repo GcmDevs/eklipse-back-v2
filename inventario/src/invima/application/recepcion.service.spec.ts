@@ -636,6 +636,46 @@ describe('Recepción de factura INVIMA: persistencia y límites de contexto', ()
     expect(await s.getRepository(Producto).find()).toHaveLength(1);
     expect((await s.service.detalle(1))!.version).toBe(1);
   });
+  it('devuelve la ruta y renglón del campo inválido sin cambiar captura ni versión', async () => {
+    const s = setup();
+    const r = await s.init();
+    r.renglones[0].fisico.cantidad = 60;
+    r.renglones[0].fisico.cantidadAveria = 61;
+    const error = await s.save(r).catch(e => e);
+    expect(error.getResponse()).toEqual({
+      message: 'Las novedades no pueden superar lo recibido físicamente.',
+      campos: {
+        'fisico.cantidadAveria': 'Las novedades no pueden superar lo recibido físicamente.',
+      },
+      facturaItemId: 1,
+    });
+    expect((await s.service.detalle(1))!.version).toBe(1);
+  });
+  it('finalizar identifica el producto pendiente y conserva la recepción abierta', async () => {
+    const s = setup();
+    const r = await s.init();
+    const error = await s.service.finalizar(1, r.version).catch(e => e);
+    expect(error.getResponse()).toMatchObject({
+      facturaItemId: 1,
+      campos: { decision: expect.stringContaining('decisión') },
+    });
+    expect((await s.service.detalle(1))!.estado).toBe('BORRADOR');
+  });
+  it('finalizar incluye la ruta del control defectuoso y la facturaItemId correspondiente', async () => {
+    const s = setup();
+    let r = completar(await s.init());
+    await s.verificarFactura();
+    r = await s.save(r);
+    const item = await s.getRepository(Item).findOneBy({ id: r.renglones[0].id });
+    item.fisico = JSON.stringify({ ...JSON.parse(item.fisico), etiquetaConforme: false });
+    await s.getRepository(Item).save(item);
+    const error = await s.service.finalizar(1, r.version).catch(e => e);
+    expect(error.getResponse()).toMatchObject({
+      message: expect.stringContaining('Producto 1:'),
+      facturaItemId: 1,
+      campos: { 'fisico.etiquetaConforme': expect.stringContaining('controles') },
+    });
+  });
   it('consulta facturada fallida permite decisión documentada sin producto físico y conserva evidencia incompleta', async () => {
     const s = setup();
     let r = await s.init();

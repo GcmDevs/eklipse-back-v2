@@ -1,6 +1,8 @@
 import { Logger } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
 import { htmlInformeInvima, InformeInvimaPdfService } from './informe-pdf.service';
+import { compararRecepcion, fisicoVacio } from '../domain/recepcion.models';
+import { calcularMuestreo } from '../../recepcion-tecnica/inspeccion';
 jest.mock('puppeteer', () => ({ launch: jest.fn() }));
 
 describe('Informe PDF INVIMA', () => {
@@ -175,5 +177,237 @@ describe('Informe PDF INVIMA', () => {
       'Nota',
     ])
       expect(html).toContain(text);
+  });
+
+  const conRecepcion = () => {
+    const f = fixture();
+    const datos = {
+      tipo: 'MEDICAMENTO',
+      descripcion: 'Medicamento de prueba',
+      cantidad: 50,
+      unidadMedida: 'UD',
+      codigoDeclarado: '0000123-01',
+      registroSanitario: '2025M-123',
+      lotesDeclarados: ['000LOTE-A'],
+      lotesDocumento: [{ lote: '000LOTE-A', vencimiento: '2029-04' }],
+    };
+    const fisico = {
+      ...fisicoVacio('MEDICAMENTO'),
+      descripcion: 'Medicamento físico',
+      cantidad: 60,
+      codigoDeclarado: '0000122-01',
+      registroSanitario: '2025M-123',
+      cantidadAveria: 2,
+      cantidadNoSolicitada: 1,
+      estadoEmpaque: 'DETERIORADO',
+      riesgo: 'III',
+      marca: 'Marca física',
+      concentracion: '500',
+      unidadConcentracion: 'mg',
+      temperatura: 22,
+      laboratorio: 'Fabricante físico',
+      presentacion: 'Caja física',
+      formaFarmaceutica: 'Tableta física',
+      registroSanitarioRevisado: true,
+      etiquetaConforme: true,
+      sellosConformes: false,
+      fabricanteConforme: false,
+      motivosRechazo: ['CUM', 'INVIMA'],
+      lotes: [
+        { cantidad: 30, lote: '000lote-a', vencimiento: '2027-01-01' },
+        { cantidad: 30, lote: '000LOTE-X', vencimiento: '2027-02-01' },
+      ],
+    };
+    f.productos = [
+      {
+        renglonId: 101,
+        orden: 1,
+        datos,
+        datosProducto: {
+          laboratorio: 'Laboratorio ingresado',
+          formaFarmaceutica: 'Forma ingresada',
+        },
+        resultado: 'EXACTA',
+        candidato: {
+          cum: '123-1',
+          registroSanitario: 'INVIMA 2025M-123',
+          titular: 'Titular oficial',
+          estadoCum: 'Inactivo',
+          estadoRegistro: 'Vigente',
+          presentacion: 'Caja oficial',
+          formaFarmaceutica: 'Tableta oficial',
+        },
+        observacion: { texto: 'Observación por producto', fecha: null },
+        verificacion: {
+          fecha: '2026-11-03T18:00:00Z',
+          usuarioNombre: 'Inspector oficial',
+          fuentes: [],
+          advertencias: [],
+        },
+      },
+    ];
+    f.recepcion = {
+      id: 1,
+      facturaId: 1,
+      estado: 'FINALIZADA',
+      version: 4,
+      creadoPor: 8,
+      actualizadoPor: 9,
+      fechaCreacion: '2026-11-03T17:00:00Z',
+      fechaActualizacion: '2026-11-03T18:00:00Z',
+      fechaFinalizacion: '2026-11-03T18:30:00Z',
+      renglones: [
+        {
+          id: 201,
+          facturaItemId: 101,
+          version: 3,
+          usuarioId: 9,
+          fecha: '2026-11-03T18:00:00Z',
+          facturado: datos,
+          fisico,
+          decision: 'RECHAZADO',
+          justificacion: 'CUM diferente y averías',
+          diferencias: compararRecepcion(datos as any, fisico as any),
+          muestreo: calcularMuestreo(60, 0),
+          borrador: null,
+        },
+      ],
+    };
+    return f;
+  };
+  it('incluye comparación, lotes, conservación, novedades, controles y decisión sin confundir estados oficiales', () => {
+    const html = htmlInformeInvima(conRecepcion());
+    for (const s of [
+      'Informe de recepción técnica',
+      'Finalizada',
+      'Factura validada',
+      'Recibido físicamente',
+      'INVIMA · Factura',
+      '50 UD',
+      '60',
+      'Faltante',
+      'Sobrante',
+      'Avería · unidades dañadas',
+      'No solicitado',
+      'Deteriorado',
+      '0000123-01',
+      '0000122-01',
+      '123-1',
+      'Difiere',
+      '000lote-a',
+      '000LOTE-A · Vence: 2029-04',
+      '000LOTE-X',
+      '2027-02-01',
+      'Coincide con la factura',
+      'No coincide con la factura',
+      'Clasificación de riesgo',
+      'Marca física',
+      '22 °C',
+      'Laboratorio ingresado',
+      'Fabricante físico',
+      'Titular oficial',
+      'Forma ingresada',
+      'Tableta física',
+      'Tableta oficial',
+      'Registro sanitario verificado en la base de datos INVIMA',
+      'Etiquetas del producto revisadas',
+      'Ortografía y sellos de seguridad revisados',
+      'Fabricante corresponde al expediente sanitario',
+      'Muestreo: E',
+      'Muestra: 13',
+      'Errores críticos: 0',
+      'Por CUM, Por INVIMA',
+      'CUM diferente y averías',
+      'Observación por producto',
+      'Usuario ID 9',
+    ])
+      expect(html).toContain(s);
+    expect(html).toContain('rt-badge danger">Inactivo');
+    expect(html).toContain('rt-badge success">Vigente');
+    expect(html).not.toContain('INFORME EN CURSO');
+  });
+  it('separa captura y decisión guardadas del borrador parcial y conserva valores temporalmente vacíos', () => {
+    const f = conRecepcion(),
+      i = f.recepcion.renglones[0];
+    f.recepcion.estado = 'BORRADOR';
+    f.recepcion.fechaFinalizacion = null;
+    i.borrador = {
+      fisico: {
+        ...i.fisico,
+        cantidad: 7,
+        cantidadAveria: null,
+        erroresCriticos: null,
+        codigoDeclarado: 'CODIGO-PARCIAL',
+      },
+      decision: 'PENDIENTE',
+      justificacion: 'Justificación parcial',
+      fecha: '2026-11-03T19:00:00Z',
+      usuarioId: 10,
+      usuarioNombre: 'Inspector parcial',
+      diferencias: compararRecepcion(i.facturado, { ...i.fisico, cantidad: 7 }),
+      muestreo: null,
+    };
+    const html = htmlInformeInvima(f);
+    for (const s of [
+      'INFORME EN CURSO',
+      '1 borradores parciales sin confirmar',
+      'Captura guardada',
+      'Borrador parcial · Sin confirmar',
+      'Decisión propuesta (sin confirmar)',
+      'Rechazado · No cumple',
+      'CODIGO-PARCIAL',
+      'Justificación parcial',
+      'Inspector parcial',
+      'Muestreo: Sin calcular',
+    ])
+      expect(html).toContain(s);
+    expect(html).toContain('No sustituye la captura confirmada');
+  });
+  it('respeta vitales, cero unidades, cantidad facturada ausente y controles heredados sin inferir cumplimiento', () => {
+    const f = conRecepcion(),
+      i = f.recepcion.renglones[0];
+    i.fisico = {
+      ...i.fisico,
+      tipo: 'VITAL_NO_DISPONIBLE',
+      ium: 'IUM-A001',
+      numeroResolucion: 'RES-001',
+      motivosRechazo: [],
+    };
+    f.productos[0].datos.tipo = 'VITAL_NO_DISPONIBLE';
+    f.productos[0].candidato = null;
+    let html = htmlInformeInvima(f);
+    for (const s of ['IUM-A001', 'RES-001', 'Código IUM', 'Número de resolución', 'No aplica'])
+      expect(html).toContain(s);
+    i.fisico = { ...i.fisico, cantidad: 0, lotes: [] };
+    i.decision = 'NO_RECIBIDO';
+    i.facturado.cantidad = null;
+    i.diferencias = compararRecepcion(i.facturado, i.fisico);
+    i.muestreo = calcularMuestreo(0, 0);
+    html = htmlInformeInvima(f);
+    expect(html).toContain('Sin unidades para inspeccionar');
+    expect(html).toContain('Muestreo: N/A · Muestra: 0');
+    expect(html).toContain('No recibido');
+    expect(html).not.toContain('rt-badge danger">No cumple');
+    i.fisico = {
+      ...i.fisico,
+      cantidad: 1,
+      tipo: 'MEDICAMENTO',
+      registroSanitarioRevisado: undefined,
+    };
+    html = htmlInformeInvima(f);
+    expect(html).toContain('rt-badge neutral">Sin dato');
+  });
+  it('escapa la captura física, lotes, motivos y justificación incluidos en el nuevo informe', () => {
+    const f = conRecepcion(),
+      i = f.recepcion.renglones[0];
+    i.fisico.descripcion = '<script>físico</script>';
+    i.fisico.lotes[0].lote = '<img src="https://evil">';
+    i.justificacion = '<b>Justificación</b>';
+    i.fisico.motivosRechazo = ['<script>'];
+    const html = htmlInformeInvima(f);
+    expect(html).not.toContain('<script>');
+    expect(html).not.toContain('<img src=');
+    expect(html).toContain('&lt;script&gt;físico&lt;/script&gt;');
+    expect(html).toContain('&lt;b&gt;Justificación&lt;/b&gt;');
   });
 });

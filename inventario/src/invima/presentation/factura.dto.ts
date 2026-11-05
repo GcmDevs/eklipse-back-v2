@@ -16,10 +16,30 @@ import {
   MinLength,
   ValidateNested,
   ValidateIf,
+  ValidateBy,
 } from 'class-validator';
-import { RenglonFactura } from '../domain/factura.models';
+import { LoteDocumento, RenglonFactura } from '../domain/factura.models';
+import { normalizarVencimiento } from '../domain/lotes-documento';
 import { TIPOS_PRODUCTO_INVIMA } from '../domain/invima.models';
 const trim = ({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value);
+
+export class LoteDocumentoDto implements LoteDocumento {
+  @Transform(trim) @IsString() @MinLength(1) @MaxLength(120) lote: string;
+  @ValidateIf((_, value) => value !== null)
+  @IsString()
+  @ValidateBy({
+    name: 'vencimientoDocumento',
+    validator: {
+      validate: value =>
+        typeof value === 'string' &&
+        /^\d{4}-\d{2}(?:-\d{2})?$/.test(value) &&
+        normalizarVencimiento(value, 'YMD') === value,
+      defaultMessage: () =>
+        'El vencimiento debe ser una fecha válida AAAA-MM-DD o AAAA-MM, o null si no está disponible.',
+    },
+  })
+  vencimiento: string | null;
+}
 
 export class RenglonFacturaDto implements RenglonFactura {
   @IsOptional() @IsInt() @Min(1) id?: number;
@@ -37,6 +57,12 @@ export class RenglonFacturaDto implements RenglonFactura {
   @MinLength(1, { each: true })
   @MaxLength(120, { each: true })
   lotesDeclarados?: string[];
+  @ValidateIf((_, value) => value !== undefined)
+  @IsArray()
+  @ArrayMaxSize(100)
+  @ValidateNested({ each: true })
+  @Type(() => LoteDocumentoDto)
+  lotesDocumento?: LoteDocumentoDto[];
   @IsOptional()
   @IsNumber({ allowNaN: false, allowInfinity: false })
   @Min(0)

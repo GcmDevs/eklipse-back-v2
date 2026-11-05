@@ -4,12 +4,17 @@ import {
   FacturaExtraida,
   RenglonExtraido,
 } from './factura.models';
-import { normalizarLotes } from './lotes-documento';
+import {
+  normalizarLotes,
+  normalizarLotesDocumento,
+  normalizarVencimiento,
+} from './lotes-documento';
 
 export interface CeldaPedido {
   texto: string;
   formula?: boolean;
   numero?: number;
+  fecha?: string;
 }
 export interface HojaPedido {
   nombre: string;
@@ -61,7 +66,13 @@ export function extraerPedidoDisfarma(hojas: HojaPedido[]): FacturaExtraida {
   const desc = headers.findIndex(v => v.startsWith('DESCRIPCI') || v === 'NOMBRE_PRODUCTO'),
     cum = headers.indexOf('CUM'),
     reg = headers.indexOf('INVIMA');
-  const vence = headers.findIndex(v => /^FECHA.*VENCE/.test(v));
+  const columnasVence = headers.flatMap((h, i) =>
+    /^(?:FEC[ _]VEN[ _]LOTE|FECHA[ _](?:DE[ _])?VENCIMIENTO(?:[ _](?:DEL?[ _])?LOTE)?|FECHA[ _]VENCE|VENCIMIENTO(?:[ _]LOTE)?|VENCE)$/.test(
+      h
+    )
+      ? [i]
+      : []
+  );
   const codigo = headers.findIndex(v => /^C[OÓ�]?DIGO$/.test(v) || v === 'PRODUCTO');
   const unidades = headers.indexOf('CANTIDAD_UNIDADES');
   const cantidad = unidades >= 0 ? unidades : headers.indexOf('CANTIDAD');
@@ -140,11 +151,60 @@ export function extraerPedidoDisfarma(hojas: HojaPedido[]): FacturaExtraida {
       advertencias: [],
     };
     row.advertencias = advertenciasRenglon(row);
+    const fechasRaw = columnasVence
+      .flatMap(i => (cell(i).formula ? [] : (cell(i).fecha || cell(i).texto).split(/[;\r\n]+/)))
+      .map(v => v.trim())
+      .filter(Boolean);
+    const fechas = fechasRaw.map(v => normalizarVencimiento(v));
+    const lotes = columnasLote
+      .filter(i => !cell(i).formula)
+      .flatMap(i => cell(i).texto.split(/[;\r\n]+/))
+      .map(l => l.trim())
+      .filter(Boolean);
+    // Only unambiguous row-level or positional lot/date pairs are associated.
+    const asociables =
+      columnasLote.length === 1 && columnasVence.length === 1 && fechas.length === lotes.length;
+    row.lotesDocumento = normalizarLotesDocumento(
+      lotes.map((lote, i) => ({
+        lote,
+        vencimiento: asociables ? fechas[i] : null,
+      }))
+    );
+    if (fechasRaw.some((_, i) => !fechas[i]) || columnasVence.some(i => cell(i).formula))
+      row.advertencias.push(
+        'El vencimiento del lote es inválido, ambiguo o contiene una fórmula. Revíselo manualmente; se conserva el valor original.'
+      );
+    if (fechasRaw.length && !asociables && lotes.length)
+      row.advertencias.push(
+        'No se puede asociar cada vencimiento a un lote de forma inequívoca. Revise los pares lote y fecha.'
+      );
+    if (row.lotesDocumento.some(l => !l.vencimiento))
+      row.advertencias.push(
+        'Hay lotes sin vencimiento identificable. Revise la fecha en el documento.'
+      );
+    if (
+      row.lotesDeclarados!.some(
+        lote =>
+          new Set(
+            row
+              .lotesDocumento!.filter(l => l.lote === lote)
+              .map(l => l.vencimiento)
+              .filter(Boolean)
+          ).size > 1
+      )
+    )
+      row.advertencias.push(
+        'El mismo lote presenta vencimientos distintos. Revise las asociaciones antes de guardar.'
+      );
     if (columnasLote.some(i => cell(i).formula))
       row.advertencias.push(
         'Hay fórmulas en columnas de lote. Revise y complete los lotes manualmente.'
       );
-    if (row.lotesDeclarados!.length > 100 || row.lotesDeclarados!.some(l => l.length > 120))
+    if (
+      row.lotesDocumento.length > 100 ||
+      row.lotesDeclarados!.length > 100 ||
+      row.lotesDeclarados!.some(l => l.length > 120)
+    )
       throw new Error(`Los lotes de la fila ${r.numero} superan el límite permitido.`);
     for (const [index, label] of [
       [cantidad, 'Cantidad'],
@@ -186,7 +246,7 @@ export function extraerPedidoDisfarma(hojas: HojaPedido[]): FacturaExtraida {
     tipoDocumento: esFactura ? 'FACTURA' : 'PEDIDO',
     cliente: esFactura ? '' : 'Disfarma',
     formato: 'DISFARMA_EXCEL',
-    extractorVersion: '3',
+    extractorVersion: '4',
     numero,
     proveedor: esFactura ? 'Disfarma' : '',
     nitProveedor: '',
@@ -200,14 +260,11 @@ export function extraerPedidoDisfarma(hojas: HojaPedido[]): FacturaExtraida {
       esFactura
         ? 'Factura del formato Disfarma. Confirme el proveedor y los productos antes de verificar.'
         : 'Pedido del cliente Disfarma. Confirme el cliente y los productos antes de verificar.',
-      ...(h.filas.some(
-        r =>
-          r.numero > header.numero &&
-          r.celdas[vence]?.texto &&
-          !/^\d{2}\/\d{2}\/\d{4}$/.test(r.celdas[vence].texto)
+      ...(renglones.some(r =>
+        r.advertencias.some(a => a.startsWith('El vencimiento del lote es inválido'))
       )
         ? [
-            'La columna «Fecha Vence» contiene valores que no son fechas. Se conservan en la evidencia sin interpretarlos como vencimientos.',
+            'Las columnas de vencimiento contienen valores que no son fechas o incluyen fórmulas. Se conservan en la evidencia sin interpretarlos como vencimientos.',
           ]
         : []),
       ...(renglones.some(r => r.advertencias.some(a => a.startsWith('CUM repetido')))

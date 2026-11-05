@@ -10,7 +10,8 @@ import {
   extraerProveedorPdf,
   PERFILES_PDF_ADICIONALES,
 } from './proveedores-pdf.extractor';
-import { extraerLotesPdf } from './lotes-documento';
+import { extraerLotesPdf, extraerLotesDocumentoPdf, normalizarLotes } from './lotes-documento';
+import { PERFILES_PDF_202611, extraerProveedor202611 } from './proveedores-pdf-202611.extractor';
 
 const clean = (value: string) => value.replace(/\s+/g, ' ').trim();
 const normalize = (value: string) =>
@@ -20,6 +21,7 @@ const normalize = (value: string) =>
     .toUpperCase();
 const registroPattern = /\b(?:INVIMA\s*)?(\d{4}\s*(?:DM|RD|MB|M)\s*-\s*\d+(?:\s*-\s*R\d+)?)/gi;
 const profiles = [
+  ...PERFILES_PDF_202611,
   ...PERFILES_PDF_ADICIONALES,
   {
     id: 'DELTA',
@@ -180,7 +182,8 @@ export function extraerFactura(pages: PaginaTexto[]): FacturaExtraida {
   const text = pages.map(p => p.text).join('\n');
   const profile = profiles.find(p => p.match.test(normalize(text)));
   const formato = profile?.id ?? 'DESCONOCIDO';
-  const adicional = extraerProveedorPdf(formato, pages, row);
+  const nuevos = extraerProveedor202611(formato, pages, row);
+  const adicional = nuevos || extraerProveedorPdf(formato, pages, row);
   let numero = adicional?.numero || '';
   if (formato === 'LIFE')
     numero = 'E ' + (text.match(/Actividad ICA[^\n]*\s(\d{4,})\s*\n/)?.[1] || '');
@@ -400,7 +403,29 @@ export function extraerFactura(pages: PaginaTexto[]): FacturaExtraida {
       }
     }
   }
-  for (const r of renglones) r.lotesDeclarados = extraerLotesPdf(formato, r.fragmento);
+  for (const r of renglones) {
+    r.lotesDeclarados ??= extraerLotesPdf(formato, r.fragmento);
+    r.lotesDocumento ??= extraerLotesDocumentoPdf(formato, r.fragmento, r.lotesDeclarados);
+    r.lotesDeclarados = normalizarLotes(r.lotesDocumento.map(l => l.lote));
+    if (r.lotesDocumento.some(l => !l.vencimiento))
+      r.advertencias.push(
+        'Hay lotes sin vencimiento identificable. Revise la fecha en el documento.'
+      );
+    if (
+      r.lotesDeclarados.some(
+        l =>
+          new Set(
+            r.lotesDocumento
+              .filter(p => p.lote === l)
+              .map(p => p.vencimiento)
+              .filter(Boolean)
+          ).size > 1
+      )
+    )
+      r.advertencias.push(
+        'El mismo lote presenta vencimientos distintos. Revise las asociaciones antes de guardar.'
+      );
+  }
   return {
     formato,
     extractorVersion: EXTRACTOR_VERSION,
@@ -411,6 +436,7 @@ export function extraerFactura(pages: PaginaTexto[]): FacturaExtraida {
     paginas: pages.length,
     renglones,
     advertencias: [
+      ...(nuevos?.advertencias || []),
       ...(profile ? [] : ['Formato no reconocido. Revise o agregue los productos manualmente.']),
       ...(renglones.length
         ? []
