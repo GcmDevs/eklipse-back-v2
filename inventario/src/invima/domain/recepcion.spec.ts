@@ -3,6 +3,7 @@ import {
   fisicoVacio,
   validarDecision,
   FisicoRecepcion,
+  ErrorValidacionRecepcion,
 } from './recepcion.models';
 import { RenglonFactura } from './factura.models';
 const factura: RenglonFactura = {
@@ -143,5 +144,64 @@ describe('Comparación factura / físico', () => {
     expect(() => validarDecision(factura, f, 'ACEPTADO', 'Cambio', 'CONFIRMADA')).toThrow(
       'concentración'
     );
+  });
+  const errores = (
+    f: FisicoRecepcion,
+    decision: 'PENDIENTE' | 'ACEPTADO' = 'ACEPTADO',
+    oficial = 'EXACTA',
+    justificacion = ''
+  ) => {
+    try {
+      validarDecision(factura, f, decision, justificacion, oficial);
+      throw new Error('Se esperaba un error de validación.');
+    } catch (error) {
+      expect(error).toBeInstanceOf(ErrorValidacionRecepcion);
+      return (error as ErrorValidacionRecepcion).campos;
+    }
+  };
+  it('localiza cantidades y únicamente los campos comunes que están vacíos', () => {
+    const f = fisico();
+    f.cantidad = null;
+    expect(errores(f)).toEqual({ 'fisico.cantidad': 'Digite la cantidad física recibida.' });
+    f.cantidad = 60;
+    f.riesgo = '';
+    f.marca = '';
+    expect(Object.keys(errores(f))).toEqual(['fisico.riesgo', 'fisico.marca']);
+    f.marca = 'Marca';
+    f.riesgo = 'II';
+    f.cantidadAveria = 61;
+    expect(Object.keys(errores(f, 'PENDIENTE'))).toEqual(['fisico.cantidadAveria']);
+    f.cantidadAveria = 0;
+    f.lotes[0].cantidad = -1;
+    expect(Object.keys(errores(f, 'PENDIENTE'))).toEqual(['fisico.lotes.0.cantidad']);
+  });
+  it('identifica el lote y dato defectuoso, sin señalar campos completos', () => {
+    const f = fisico();
+    f.lotes[0].vencimiento = '2027-02-30';
+    expect(Object.keys(errores(f))).toEqual(['fisico.lotes.0.vencimiento']);
+    f.lotes[0].vencimiento = '2028-01-01';
+    f.lotes[0].cantidad = 30;
+    f.lotes.push({ cantidad: 30, lote: 'l1', vencimiento: '2028-02-01' });
+    expect(Object.keys(errores(f))).toEqual(['fisico.lotes.1.lote']);
+    f.lotes[1].lote = 'L2';
+    f.lotes[1].cantidad = 29;
+    expect(Object.keys(errores(f))).toEqual(['fisico.lotes']);
+  });
+  it('identifica justificación, control físico, consulta y alternativas documentales del vital', () => {
+    const f = fisico();
+    f.codigoDeclarado = '000122-01';
+    expect(Object.keys(errores(f))).toEqual(['justificacion']);
+    f.codigoDeclarado = factura.codigoDeclarado;
+    f.registroSanitarioRevisado = false;
+    expect(Object.keys(errores(f))).toEqual(['fisico.registroSanitarioRevisado']);
+    f.registroSanitarioRevisado = true;
+    expect(Object.keys(errores(f, 'ACEPTADO', 'PENDIENTE', 'Excepción'))).toEqual([
+      'verificacionFactura',
+    ]);
+    f.tipo = 'VITAL_NO_DISPONIBLE';
+    expect(Object.keys(errores(f, 'ACEPTADO', 'PENDIENTE', 'Cambio de tipo'))).toEqual([
+      'fisico.ium',
+      'fisico.numeroResolucion',
+    ]);
   });
 });

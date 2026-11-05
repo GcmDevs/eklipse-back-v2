@@ -1,6 +1,5 @@
 # compiled output
 /node_modules
-/.env
 /Automatización
 /env.ts
 .agents
@@ -38,3 +37,4 @@ branch_structure.json
 .public.gitignore
 /inventario/dist.gitignore
 branch_structure.json
+config.bat

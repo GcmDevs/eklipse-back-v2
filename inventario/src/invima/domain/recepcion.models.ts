@@ -113,24 +113,54 @@ export function compararRecepcion(factura: RenglonFactura, fisico: FisicoRecepci
         : Math.max(0, redondearCantidad(fisico.cantidad - factura.cantidad)),
   };
 }
+/** Field paths match the reception payload so clients can locate invalid inputs. */
+export class ErrorValidacionRecepcion extends Error {
+  readonly campos: Record<string, string>;
+  constructor(message: string, campos: string[] | Record<string, string>) {
+    super(message);
+    this.name = 'ErrorValidacionRecepcion';
+    this.campos = Array.isArray(campos)
+      ? Object.fromEntries(campos.map(campo => [campo, message]))
+      : campos;
+  }
+}
+function cantidadValida(cantidad: number, campo: string, positiva = false) {
+  try {
+    validarCantidad(cantidad, positiva);
+  } catch (error) {
+    throw new ErrorValidacionRecepcion(error.message, [campo]);
+  }
+}
 export function validarCaptura(f: FisicoRecepcion) {
   if (f.registroSanitarioRevisado !== undefined && typeof f.registroSanitarioRevisado !== 'boolean')
-    throw new Error('La revisión del registro sanitario debe ser un valor booleano.');
-  if (f.cantidad !== null) validarCantidad(f.cantidad);
-  validarCantidad(f.cantidadAveria);
-  validarCantidad(f.cantidadNoSolicitada);
+    throw new ErrorValidacionRecepcion(
+      'La revisión del registro sanitario debe ser un valor booleano.',
+      ['fisico.registroSanitarioRevisado']
+    );
+  if (f.cantidad !== null) cantidadValida(f.cantidad, 'fisico.cantidad');
+  cantidadValida(f.cantidadAveria, 'fisico.cantidadAveria');
+  cantidadValida(f.cantidadNoSolicitada, 'fisico.cantidadNoSolicitada');
   if (f.cantidad !== null && (f.cantidadAveria > f.cantidad || f.cantidadNoSolicitada > f.cantidad))
-    throw new Error('Las novedades no pueden superar lo recibido físicamente.');
+    throw new ErrorValidacionRecepcion('Las novedades no pueden superar lo recibido físicamente.', [
+      ...(f.cantidadAveria > f.cantidad ? ['fisico.cantidadAveria'] : []),
+      ...(f.cantidadNoSolicitada > f.cantidad ? ['fisico.cantidadNoSolicitada'] : []),
+    ]);
   if (
     f.motivosRechazo.some(m => !['CUM', 'INVIMA'].includes(m)) ||
     new Set(f.motivosRechazo).size !== f.motivosRechazo.length
   )
-    throw new Error('Motivos de rechazo inválidos.');
+    throw new ErrorValidacionRecepcion('Motivos de rechazo inválidos.', ['fisico.motivosRechazo']);
   if (f.tipo === 'VITAL_NO_DISPONIBLE' && f.motivosRechazo.length)
-    throw new Error('CUM e INVIMA no aplican al vital no disponible.');
-  for (const l of f.lotes) if (l.cantidad !== null) validarCantidad(l.cantidad, true);
+    throw new ErrorValidacionRecepcion('CUM e INVIMA no aplican al vital no disponible.', [
+      'fisico.motivosRechazo',
+    ]);
+  f.lotes.forEach((l, index) => {
+    if (l.cantidad !== null) cantidadValida(l.cantidad, `fisico.lotes.${index}.cantidad`, true);
+  });
   if (!Number.isInteger(f.erroresCriticos) || f.erroresCriticos < 0)
-    throw new Error('Los errores críticos deben ser enteros no negativos.');
+    throw new ErrorValidacionRecepcion('Los errores críticos deben ser enteros no negativos.', [
+      'fisico.erroresCriticos',
+    ]);
 }
 export function validarDecision(
   factura: RenglonFactura,
@@ -141,55 +171,116 @@ export function validarDecision(
 ) {
   validarCaptura(f);
   if (decision === 'PENDIENTE') return;
-  if (f.cantidad === null) throw new Error('Digite la cantidad física recibida.');
+  if (f.cantidad === null)
+    throw new ErrorValidacionRecepcion('Digite la cantidad física recibida.', ['fisico.cantidad']);
   if (f.cantidad === 0) {
     if (decision !== 'NO_RECIBIDO' || f.lotes.length || f.cantidadAveria || f.cantidadNoSolicitada)
-      throw new Error(
-        'Con cero unidades seleccione No recibido y retire los lotes/novedades físicas.'
+      throw new ErrorValidacionRecepcion(
+        'Con cero unidades seleccione No recibido y retire los lotes/novedades físicas.',
+        [
+          ...(decision !== 'NO_RECIBIDO' ? ['decision'] : []),
+          ...(f.lotes.length ? ['fisico.lotes'] : []),
+          ...(f.cantidadAveria ? ['fisico.cantidadAveria'] : []),
+          ...(f.cantidadNoSolicitada ? ['fisico.cantidadNoSolicitada'] : []),
+        ]
       );
     if (factura.cantidad == null && !justificacion.trim())
-      throw new Error('Justifique la cantidad facturada ausente del documento antiguo.');
+      throw new ErrorValidacionRecepcion(
+        'Justifique la cantidad facturada ausente del documento antiguo.',
+        ['justificacion']
+      );
     return;
   }
-  if (decision === 'NO_RECIBIDO') throw new Error('No recibido requiere cantidad física cero.');
+  if (decision === 'NO_RECIBIDO')
+    throw new ErrorValidacionRecepcion('No recibido requiere cantidad física cero.', ['decision']);
   if (!f.descripcion.trim() || f.tipo === 'SIN_CLASIFICAR')
-    throw new Error('Identifique y clasifique el producto físico.');
+    throw new ErrorValidacionRecepcion('Identifique y clasifique el producto físico.', [
+      ...(!f.descripcion.trim() ? ['fisico.descripcion'] : []),
+      ...(f.tipo === 'SIN_CLASIFICAR' ? ['fisico.tipo'] : []),
+    ]);
   if (!f.estadoEmpaque || !f.riesgo.trim() || !f.marca.trim() || f.temperatura === null)
-    throw new Error('Complete riesgo, marca, temperatura y estado del empaque.');
+    throw new ErrorValidacionRecepcion(
+      'Complete riesgo, marca, temperatura y estado del empaque.',
+      {
+        ...(!f.riesgo.trim() ? { 'fisico.riesgo': 'Seleccione la clasificación de riesgo.' } : {}),
+        ...(!f.marca.trim() ? { 'fisico.marca': 'Digite la marca del producto.' } : {}),
+        ...(f.temperatura === null
+          ? { 'fisico.temperatura': 'Digite la temperatura recibida.' }
+          : {}),
+        ...(!f.estadoEmpaque
+          ? { 'fisico.estadoEmpaque': 'Seleccione el estado del empaque.' }
+          : {}),
+      }
+    );
   if (requiereConcentracion(f.tipo) && (!f.concentracion.trim() || !f.unidadConcentracion.trim()))
-    throw new Error('Complete concentración y unidad de medida.');
+    throw new ErrorValidacionRecepcion('Complete concentración y unidad de medida.', {
+      ...(!f.concentracion.trim()
+        ? { 'fisico.concentracion': 'Digite la concentración del producto.' }
+        : {}),
+      ...(!f.unidadConcentracion.trim()
+        ? { 'fisico.unidadConcentracion': 'Seleccione la unidad de medida.' }
+        : {}),
+    });
   const vital = f.tipo === 'VITAL_NO_DISPONIBLE';
   if (vital && !f.ium.trim() && !f.numeroResolucion.trim())
-    throw new Error('El vital no disponible requiere IUM o resolución.');
+    throw new ErrorValidacionRecepcion('El vital no disponible requiere IUM o resolución.', [
+      'fisico.ium',
+      'fisico.numeroResolucion',
+    ]);
   const nombres = new Set<string>();
   let total = 0;
-  for (const l of f.lotes) {
-    if (
-      l.cantidad === null ||
-      !l.lote.trim() ||
+  for (const [index, l] of f.lotes.entries()) {
+    const cantidadAusente = l.cantidad === null;
+    const nombreInvalido = !l.lote.trim() || nombres.has(codigo(l.lote));
+    const fechaInvalida =
       !/^\d{4}-\d{2}-\d{2}$/.test(l.vencimiento) ||
       !Number.isFinite(new Date(l.vencimiento).getTime()) ||
-      new Date(l.vencimiento).toISOString().slice(0, 10) !== l.vencimiento ||
-      nombres.has(codigo(l.lote))
-    )
-      throw new Error('Complete los lotes, sin duplicar nombres y con fecha válida.');
+      new Date(l.vencimiento).toISOString().slice(0, 10) !== l.vencimiento;
+    if (cantidadAusente || nombreInvalido || fechaInvalida)
+      throw new ErrorValidacionRecepcion(
+        'Complete los lotes, sin duplicar nombres y con fecha válida.',
+        {
+          ...(cantidadAusente
+            ? { [`fisico.lotes.${index}.cantidad`]: 'Digite la cantidad del lote.' }
+            : {}),
+          ...(nombreInvalido
+            ? {
+                [`fisico.lotes.${index}.lote`]: !l.lote.trim()
+                  ? 'Digite el lote recibido.'
+                  : 'El nombre del lote ya está registrado.',
+              }
+            : {}),
+          ...(fechaInvalida
+            ? { [`fisico.lotes.${index}.vencimiento`]: 'Digite una fecha de vencimiento válida.' }
+            : {}),
+        }
+      );
     nombres.add(codigo(l.lote));
     total = redondearCantidad(total + l.cantidad);
   }
   if (total !== f.cantidad)
-    throw new Error('La suma de los lotes debe coincidir con la cantidad física digitada.');
+    throw new ErrorValidacionRecepcion(
+      'La suma de los lotes debe coincidir con la cantidad física digitada.',
+      ['fisico.lotes']
+    );
   const c = compararRecepcion(factura, f);
   const diferencias = [c.cum, c.registro, c.tipo].some(v => v === 'DIFIERE' || v === 'SIN_DATO');
   const excepcion = !vital && !['EXACTA', 'CONFIRMADA'].includes(oficial);
   if ((diferencias || factura.cantidad == null || excepcion) && !justificacion.trim())
-    throw new Error(
-      'Justifique las diferencias, datos ausentes o la consulta oficial no concluyente.'
+    throw new ErrorValidacionRecepcion(
+      'Justifique las diferencias, datos ausentes o la consulta oficial no concluyente.',
+      ['justificacion']
     );
   if (decision === 'ACEPTADO') {
     if (!vital && oficial === 'PENDIENTE')
-      throw new Error('Consulte el producto facturado antes de aceptarlo.');
+      throw new ErrorValidacionRecepcion('Consulte el producto facturado antes de aceptarlo.', [
+        'verificacionFactura',
+      ]);
     if (f.motivosRechazo.length)
-      throw new Error('Un producto aceptado no puede tener motivos de rechazo.');
+      throw new ErrorValidacionRecepcion(
+        'Un producto aceptado no puede tener motivos de rechazo.',
+        ['decision', 'fisico.motivosRechazo']
+      );
     if (
       !f.etiquetaConforme ||
       !f.sellosConformes ||
@@ -199,7 +290,23 @@ export function validarDecision(
       f.estadoEmpaque === 'DETERIORADO' ||
       !calcularMuestreo(f.cantidad, f.erroresCriticos).cumple
     )
-      throw new Error('Los controles físicos o el muestreo no cumplen. Registre rechazo.');
+      throw new ErrorValidacionRecepcion(
+        'Los controles físicos o el muestreo no cumplen. Registre rechazo.',
+        [
+          ...(!f.etiquetaConforme ? ['fisico.etiquetaConforme'] : []),
+          ...(!f.sellosConformes ? ['fisico.sellosConformes'] : []),
+          ...(!vital && f.registroSanitarioRevisado === false
+            ? ['fisico.registroSanitarioRevisado']
+            : []),
+          ...(!vital && !f.fabricanteConforme ? ['fisico.fabricanteConforme'] : []),
+          ...(f.estadoEmpaque === 'DETERIORADO' ? ['fisico.estadoEmpaque'] : []),
+          ...(!calcularMuestreo(f.cantidad, f.erroresCriticos).cumple
+            ? ['fisico.erroresCriticos']
+            : []),
+        ]
+      );
   } else if (decision === 'RECHAZADO' && !f.motivosRechazo.length && !justificacion.trim())
-    throw new Error('Indique el motivo u observación del rechazo.');
+    throw new ErrorValidacionRecepcion('Indique el motivo u observación del rechazo.', [
+      'justificacion',
+    ]);
 }
