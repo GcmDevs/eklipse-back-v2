@@ -1,6 +1,8 @@
 import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
 import { FacturasInvimaService } from '../application/facturas.service';
+import { detalleRecepcion, estilosRecepcion, resumenRecepcion } from './informe-recepcion.template';
+import { lotesDocumentoDe } from '../domain/lotes-documento';
 
 type Informe = Awaited<ReturnType<FacturasInvimaService['informe']>>;
 const escape = (s: unknown) =>
@@ -49,15 +51,18 @@ export function htmlInformeInvima(f: Informe) {
         v = p.verificacion,
         tipo = p.datos.tipo || 'MEDICAMENTO';
       const estadoCum =
-        tipo === 'MEDICAMENTO'
-          ? c?.estadoCum || (c ? 'Sin dato de estado' : resultados[p.resultado]) || 'Sin dato'
-          : ['ALIMENTOS', 'DISPOSITIVO', 'MEDICO_QUIRURGICOS'].includes(tipo)
-            ? 'No aplica'
-            : 'No disponible en esta fuente';
+        tipo === 'VITAL_NO_DISPONIBLE'
+          ? 'No aplica'
+          : tipo === 'MEDICAMENTO'
+            ? c?.estadoCum || (c ? 'Sin dato de estado' : resultados[p.resultado]) || 'Sin dato'
+            : ['ALIMENTOS', 'DISPOSITIVO', 'MEDICO_QUIRURGICOS'].includes(tipo)
+              ? 'No aplica'
+              : 'No disponible en esta fuente';
       const detalles = c
         ? [
             c.nombre && c.nombre !== p.datos.descripcion ? ['Producto INVIMA', c.nombre] : null,
             c.presentacion ? ['Presentación', c.presentacion] : null,
+            c.formaFarmaceutica ? ['Forma farmacéutica', c.formaFarmaceutica] : null,
             c.grupo ? ['Grupo', c.grupo] : null,
             c.fechaExpedicion ? ['Expedición publicada', c.fechaExpedicion] : null,
             c.fechaVencimiento ? ['Vencimiento publicado', c.fechaVencimiento] : null,
@@ -90,10 +95,13 @@ export function htmlInformeInvima(f: Informe) {
       ]
         .filter(Boolean)
         .join(' · ');
+      const lotes = lotesDocumentoDe(p.datos)
+        .map(l => `${l.lote} · Vence: ${l.vencimiento || 'Sin fecha'}`)
+        .join('; ');
       // Long observations can flow across pages. Ordinary products stay together.
       const long = (p.observacion.texto?.length || 0) + detalles.length + audit.length > 1400;
       return `<tbody class="product${long ? ' product-long' : ''}"><tr class="product-main">
-      <td><strong class="product-name">${p.orden}. ${escape(p.datos.descripcion)}</strong><div class="type">${escape(tipo.replace(/_/g, ' '))}</div>${cantidades ? `<div class="value">${escape(cantidades)}</div>` : ''}${c ? value('Titular INVIMA:', c.titular) : ''}</td>
+      <td><strong class="product-name">${p.orden}. ${escape(p.datos.descripcion)}</strong><div class="type">${escape(tipo.replace(/_/g, ' '))}</div>${cantidades ? `<div class="value">${escape(cantidades)}</div>` : ''}${lotes ? value('Lotes / vencimiento:', lotes) : ''}${c ? value('Titular INVIMA:', c.titular) : ''}</td>
       <td>${value('Declarado:', p.datos.codigoDeclarado || '(Vacío)')}${c?.cum ? value('Verificado:', c.cum) : ''}${value('Estado CUM:', estadoCum)}</td>
       <td>${value('Ingresado:', p.datos.registroSanitario || '(Vacío)')}${value('INVIMA:', c?.registroSanitario || (c ? 'Sin dato publicado' : 'Sin coincidencia asociada'))}${value('Estado registro:', c?.estadoRegistro || (c ? 'Sin dato publicado' : 'Sin coincidencia asociada'))}</td>
       <td><span class="result" data-result="${escape(p.resultado)}">${escape(resultados[p.resultado] || p.resultado)}</span></td>
@@ -117,8 +125,10 @@ export function htmlInformeInvima(f: Informe) {
     .note{white-space:pre-wrap;overflow-wrap:anywhere;margin:4px 0 2px}.warning{font-size:10px;color:#795514;background:#fff7e6;padding:4px 6px;margin:3px 0}
     .sources{font-size:9px;overflow-wrap:anywhere;columns:2;column-gap:18px}.sources div{break-inside:avoid;margin:2px 0}
     .footnote{font-size:9px;color:#607386;margin-top:8px;padding-top:6px;border-top:1px solid #dbe5ec;orphans:3;widows:3}
+    .report-end{break-inside:avoid}
+    ${estilosRecepcion}
     </style></head><body>
-    <header class="hero"><div class="brand">Eklipse · Inventario</div><h1>Informe de verificación INVIMA</h1>
+    <header class="hero"><div class="brand">Eklipse · Inventario</div><h1>${f.recepcion ? 'Informe de recepción técnica' : 'Informe de verificación INVIMA'}</h1>
       <p>${pedido ? 'Pedido' : 'Factura'} <strong>${escape(f.numero)}</strong> · ${pedido ? 'Cliente: ' + escape(f.cliente) : escape(f.proveedor)}</p>
       <p class="meta">${pedido && f.proveedor ? `Proveedor: ${escape(f.proveedor)} · ` : ''}${!pedido && f.nitProveedor ? `NIT: ${escape(f.nitProveedor)} · ` : ''}${pedido ? 'Fecha de pedido' : 'Fecha de factura'}: ${escape(f.fecha || 'Sin fecha')} · ${f.productos.length} productos · Generado: ${escape(fecha(f.generadoEn))} (Colombia)</p>
     </header>
@@ -126,9 +136,10 @@ export function htmlInformeInvima(f: Informe) {
       .map(([r, n]) => `<span>${escape(resultados[r] || r)}: <strong>${n}</strong></span>`)
       .join('')}</div>
     <section class="general"><strong>Observación general</strong>${f.observacion.texto?.trim() ? nota(f.observacion) : '<span> · Sin observaciones.</span>'}</section>
-    <table aria-label="Resultados por producto"><thead><tr><th>Producto / titular INVIMA</th><th>CUM / código</th><th>Registro sanitario</th><th>Comparación</th></tr></thead>${productos}</table>
-    ${sources.size ? `<h2>Fuentes consultadas</h2><div class="sources">${[...sources.values()].map(s => `<div><strong>${s.id}.</strong> ${escape(s.nombre)} (${escape(s.dataset)})</div>`).join('')}</div>` : ''}
-    <p class="footnote">Resultados guardados y observaciones del equipo. “Sin coincidencias” no significa que el producto carezca de registro sanitario. Los estados del CUM y del registro son independientes; las fechas publicadas no determinan por sí solas su vigencia. Sin nuevas consultas a INVIMA para generar este informe.</p>
+    ${resumenRecepcion(f)}
+    ${f.recepcion ? detalleRecepcion(f, (dataset, nombre) => sources.get(JSON.stringify([dataset, nombre]))?.id) : `<table aria-label="Resultados por producto"><thead><tr><th>Producto / titular INVIMA</th><th>CUM / código</th><th>Registro sanitario</th><th>Comparación</th></tr></thead>${productos}</table>`}
+    <section class="report-end">${sources.size ? `<h2>Fuentes consultadas</h2><div class="sources">${[...sources.values()].map(s => `<div><strong>${s.id}.</strong> ${escape(s.nombre)} (${escape(s.dataset)})</div>`).join('')}</div>` : ''}
+    <p class="footnote">Resultados guardados y observaciones del equipo. “Sin coincidencias” no significa que el producto carezca de registro sanitario. Los estados del CUM y del registro son independientes; las fechas publicadas no determinan por sí solas su vigencia. La consulta corresponde a la factura y no implica conformidad de la mercancía física. El titular no identifica necesariamente al fabricante. Las novedades pueden afectar las mismas unidades y no se suman para deducir unidades aceptadas. Se conservan las unidades del documento, sin conversiones. Sin nuevas consultas a INVIMA para generar este informe.</p></section>
     </body></html>`;
 }
 
@@ -169,8 +180,7 @@ export class InformeInvimaPdfService {
             margin: { top: '11mm', bottom: '15mm', left: '12mm', right: '12mm' },
             displayHeaderFooter: true,
             headerTemplate: '<span></span>',
-            footerTemplate:
-              '<div style="font:9px Arial;color:#607386;width:100%;padding:0 12mm;display:flex;justify-content:space-between"><span>Eklipse · Verificación INVIMA</span><span>Página <span class="pageNumber"></span> de <span class="totalPages"></span></span></div>',
+            footerTemplate: `<div style="font:9px Arial;color:#607386;width:100%;padding:0 12mm;display:flex;justify-content:space-between"><span>Eklipse · ${informe.recepcion ? 'Recepción técnica' : 'Verificación INVIMA'}</span><span>Página <span class="pageNumber"></span> de <span class="totalPages"></span></span></div>`,
             timeout: 20000,
           })
         );

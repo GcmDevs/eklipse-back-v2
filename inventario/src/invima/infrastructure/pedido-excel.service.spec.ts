@@ -13,6 +13,25 @@ async function excel(rows = 2) {
   return Buffer.from(await w.xlsx.writeBuffer());
 }
 describe('Lectura Excel aislada', () => {
+  it('lee vencimientos de celdas fecha sin cambios de zona horaria ni fórmulas', async () => {
+    const w = new Workbook(),
+      h = w.addWorksheet('DetalleFactura');
+    h.addRow(['FACTURA ZD NO. 753889']);
+    h.addRow(['NOMBRE_PRODUCTO', 'CUM', 'INVIMA', 'LOTE_PRODUCTO', 'FEC_VEN_LOTE']);
+    h.addRow(['Producto', '000123-001', '', '000A', new Date('2029-01-31T00:00:00Z')]);
+    h.getCell('E3').numFmt = 'dd/mm/yyyy';
+    h.addRow([
+      'Otro',
+      '000123-002',
+      '',
+      '000B',
+      { formula: 'E3', result: new Date('2029-01-31T00:00:00Z') },
+    ]);
+    const r = await new PedidoExcelService().extraer(Buffer.from(await w.xlsx.writeBuffer()));
+    expect(r.renglones[0].lotesDocumento).toEqual([{ lote: '000A', vencimiento: '2029-01-31' }]);
+    expect(r.renglones[1].lotesDocumento).toEqual([{ lote: '000B', vencimiento: null }]);
+    expect(r.renglones[1].advertencias.join(' ')).toContain('fórmula');
+  });
   const original = { ...process.env };
   afterEach(() => (process.env = { ...original }));
   it('lee XLSX con celdas combinadas, conserva ceros y excluye los totales', async () => {
