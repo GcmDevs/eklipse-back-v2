@@ -7,7 +7,7 @@ import {
   OnModuleInit,
   ServiceUnavailableException,
 } from '@nestjs/common';
-import { spawn, ChildProcess } from 'node:child_process';
+import { spawn, execFile, ChildProcess } from 'node:child_process';
 import { createHash, randomUUID } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { PassThrough, pipeline } from 'node:stream';
@@ -71,6 +71,8 @@ interface EstadoWorker {
     type:
       | 'recalculo-ingreso'
       | 'ordenes-sin-confirmar'
+      | 'codigo-salario'
+      | 'servicios-sin-cubrimiento'
       | 'enfermeria-sin-notas'
       | 'historias-sin-folios'
       | 'prefactura-sin-servicios'
@@ -91,7 +93,14 @@ interface EstadoWorker {
     details: string;
   };
   failures?: EstadoWorker['failure'][];
-  status: 'queued' | 'starting' | 'running' | 'complete' | 'failed' | 'prefactura-unavailable';
+  status:
+    | 'queued'
+    | 'starting'
+    | 'running'
+    | 'complete'
+    | 'failed'
+    | 'prefactura-unavailable'
+    | 'cancelled';
   message: string;
   updatedAt: string;
   files: ArchivoWorker[];
@@ -119,6 +128,7 @@ interface Trabajo {
   startedAt?: string;
   deadline?: string;
   reemplazadoPor?: string;
+  cancelledAt?: string;
 }
 
 function procesoVivo(pid?: number): boolean {
@@ -156,6 +166,8 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
   private mutex: Promise<unknown> = Promise.resolve();
   private detenido = false;
   private programado?: ReturnType<typeof setTimeout>;
+  private cancelaciones = new Set<string>();
+  private cierreActual?: { child: ChildProcess; terminado: Promise<void> };
 
   constructor(private readonly consultaClinica: ConsultaColaReportesImpl) {}
 
@@ -167,6 +179,32 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
 
   private mismoPropietario(a: PropietarioReportes, b: PropietarioReportes): boolean {
     return a.usuario === b.usuario && a.contexto === b.contexto && a.esDinamica === b.esDinamica;
+  }
+
+  private estadoCancelado(job: Trabajo, estado: EstadoWorker): EstadoWorker {
+    return {
+      ...estado,
+      process: job.proceso,
+      status: 'cancelled',
+      message: 'Solicitud cancelada. Se conservaron los PDF descargados.',
+      updatedAt: job.cancelledAt ?? estado.updatedAt,
+      failure: undefined,
+      pendingFailures: [],
+    };
+  }
+
+  private async liberarBloqueo(trabajos: string, pid?: number) {
+    const ruta = join(trabajos, 'runner.lock');
+    try {
+      const bloqueo = JSON.parse(await readFile(ruta, 'utf8'));
+      if (
+        (pid && bloqueo.childPid === pid) ||
+        (!pid && !bloqueo.childPid && bloqueo.pid === process.pid)
+      )
+        await unlink(ruta);
+    } catch {
+      /* Un cierre antiguo no puede retirar el bloqueo de otro ejecutor. */
+    }
   }
 
   private estadoPerdido(job: Trabajo): EstadoWorker {
@@ -233,12 +271,14 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
               'complete',
               'failed',
               'prefactura-unavailable',
+              'cancelled',
             ].includes(estado.status)
           )
             estado = this.estadoPerdido(job);
         } catch {
           estado = this.estadoPerdido(job);
         }
+        if (job.cancelledAt) estado = this.estadoCancelado(job, estado);
         encontrados.push({ job, estado });
       } catch {
         /* Un archivo incompleto nunca se convierte en una solicitud ejecutable. */
@@ -318,7 +358,9 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
         anterior.job.id === job.id ||
         this.clave(anterior.job) !== this.clave(job) ||
         this.compararSolicitudes(anterior.job, job) >= 0 ||
-        !['complete', 'failed', 'prefactura-unavailable'].includes(anterior.estado.status) ||
+        !['complete', 'failed', 'prefactura-unavailable', 'cancelled'].includes(
+          anterior.estado.status
+        ) ||
         anterior.job.id === this.activo
       )
         continue;
@@ -368,6 +410,29 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
         const registros = await this.registros(trabajos);
         for (const { job, estado } of registros) {
           this.secuenciaCola = Math.max(this.secuenciaCola, job.secuenciaCola ?? 0);
+          if (job.cancelledAt) {
+            this.cancelaciones.add(job.id);
+            await this.guardar(join(trabajos, job.id), 'cancel.json', {
+              requestedAt: job.cancelledAt,
+            });
+            if (procesoVivo(job.pid)) {
+              const pertenece = await this.perteneceEjecutor(job, trabajos);
+              if (pertenece === false && procesoVivo(job.pid)) {
+                job.pid = undefined;
+                await this.guardar(join(trabajos, job.id), 'job.json', job);
+              }
+            }
+            if (procesoVivo(job.pid)) this.activo ??= job.id;
+            else {
+              await this.guardar(
+                join(trabajos, job.id),
+                'execution.json',
+                this.estadoCancelado(job, estado)
+              );
+              await this.liberarBloqueo(trabajos, job.pid);
+            }
+            continue;
+          }
           if (['starting', 'running'].includes(estado.status)) {
             if (
               !procesoVivo(job.pid) &&
@@ -412,6 +477,10 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
         await this.persistirCola(trabajos);
       })().catch(error => {
         this.inicializada = undefined;
+        if (['EACCES', 'EPERM', 'ENOENT', 'ENOTDIR', 'EEXIST', 'EROFS'].includes(error?.code))
+          throw new ServiceUnavailableException(
+            'No se pudo acceder al almacenamiento de AUDITOR-IA. Revisa la ruta y los permisos de escritura.'
+          );
         throw error;
       });
     return this.inicializada;
@@ -442,6 +511,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
   }
 
   private async registrarFallo(job: Trabajo, estado: EstadoWorker, mensaje: string) {
+    if (job.cancelledAt || this.cancelaciones.has(job.id)) return;
     const failure = {
       occurredAt: new Date().toISOString(),
       message: mensaje,
@@ -462,6 +532,164 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
     });
   }
 
+  private async perteneceEjecutor(job: Trabajo, trabajos: string): Promise<boolean | undefined> {
+    if (!Number.isInteger(job.pid) || job.pid <= 0 || job.pid === process.pid) return false;
+    const esperado = resolve(trabajos, job.id);
+    try {
+      if (process.platform === 'win32') {
+        const comando = await new Promise<string>((resolve, reject) => {
+          execFile(
+            'powershell.exe',
+            [
+              '-NoProfile',
+              '-NonInteractive',
+              '-Command',
+              `[Console]::OutputEncoding = New-Object System.Text.UTF8Encoding($false); $p = Get-CimInstance Win32_Process -Filter 'ProcessId = ${job.pid}'; if ($p) { [Console]::Out.Write($p.CommandLine) }`,
+            ],
+            { windowsHide: true, timeout: 2500, maxBuffer: 65536 },
+            (error, salida) => (error ? reject(error) : resolve(salida))
+          );
+        });
+        const carpeta = comando.match(/(?:^|\s)--carpeta\s+(?:"([^"]+)"|'([^']+)'|(\S+))/);
+        const destino = carpeta?.[1] ?? carpeta?.[2] ?? carpeta?.[3];
+        return Boolean(
+          /(?:^|[\\/\s"'])worker\.ts(?:[\s"']|$)/i.test(comando) &&
+          destino &&
+          resolve(destino).toLowerCase() === esperado.toLowerCase()
+        );
+      }
+      const argumentos = (await readFile(`/proc/${job.pid}/cmdline`, 'utf8')).split('\0');
+      const indice = argumentos.indexOf('--carpeta');
+      return (
+        argumentos.some(argumento => basename(argumento) === 'worker.ts') &&
+        indice >= 0 &&
+        argumentos[indice + 1] !== undefined &&
+        resolve(argumentos[indice + 1]) === esperado
+      );
+    } catch {
+      // Sin evidencia del comando no se termina un PID adoptado tras reiniciar.
+      return undefined;
+    }
+  }
+
+  private async solicitarCierreCancelado(job: Trabajo, trabajos: string) {
+    if (!job.pid || job.pid === process.pid || !procesoVivo(job.pid)) return;
+    if (Date.now() - Date.parse(job.cancelledAt ?? '') < 2000) return;
+    const propio =
+      this.activo === job.id &&
+      this.child?.pid === job.pid &&
+      this.child.exitCode === null &&
+      this.child.signalCode === null;
+    if (!propio) {
+      try {
+        const bloqueo = JSON.parse(await readFile(join(trabajos, 'runner.lock'), 'utf8'));
+        if (bloqueo.childPid !== job.pid) return;
+      } catch {
+        return;
+      }
+      if ((await this.perteneceEjecutor(job, trabajos)) !== true) return;
+    }
+    // Primero se permite que el worker cierre Chrome y guarde los PDF. El
+    // cierre forzado solo alcanza el PID conocido de esta ejecución y su árbol.
+    if (process.platform === 'win32') {
+      await new Promise<void>(resolve => {
+        const cierre = spawn('taskkill', ['/PID', String(job.pid), '/T', '/F'], {
+          windowsHide: true,
+          shell: false,
+          stdio: 'ignore',
+        });
+        const timer = setTimeout(resolve, 2500);
+        timer.unref();
+        const terminar = () => {
+          clearTimeout(timer);
+          resolve();
+        };
+        cierre.once('close', terminar);
+        cierre.once('error', terminar);
+      });
+    } else {
+      try {
+        process.kill(job.pid, 'SIGKILL');
+      } catch {
+        /* El proceso pudo terminar durante el cierre cooperativo. */
+      }
+    }
+  }
+
+  async cancelar(id: string, propietario: PropietarioReportes): Promise<EjecucionReportes> {
+    await this.inicializar();
+    const respuesta = await this.exclusivo(async () => {
+      const contenido = await this.leer(id, propietario);
+      const { trabajos } = await this.ubicacion();
+      const { job, estado } = contenido;
+      if (!['queued', 'starting', 'running', 'cancelled'].includes(estado.status))
+        throw new ConflictException('Solo puedes cancelar una solicitud pendiente o en ejecución.');
+      if (job.pid === process.pid && ['starting', 'running'].includes(estado.status))
+        throw new ConflictException(
+          'No fue posible identificar un ejecutor independiente para cancelar.'
+        );
+      if (job.pid && this.child?.pid !== job.pid) {
+        const pertenece = await this.perteneceEjecutor(job, trabajos);
+        if (pertenece === false && procesoVivo(job.pid)) {
+          if (this.activo === id) this.activo = undefined;
+          job.pid = undefined;
+        }
+      }
+      const destino = join(trabajos, id);
+      // job.json es la marca durable: si el servidor cae entre escrituras, la
+      // recuperación no puede volver a encolar ni ejecutar esta solicitud.
+      job.cancelledAt ??= new Date().toISOString();
+      await this.guardar(destino, 'job.json', job);
+      this.cancelaciones.add(id);
+      this.cola = this.cola.filter(pendiente => pendiente !== id);
+      await this.guardar(destino, 'cancel.json', { requestedAt: job.cancelledAt }).catch(() => {});
+      const cierre =
+        this.cierreActual && this.cierreActual.child.pid === job.pid
+          ? this.cierreActual.terminado
+          : undefined;
+      const limite = Date.now() + 9000;
+      while (procesoVivo(job.pid) && Date.now() < limite) {
+        await this.solicitarCierreCancelado(job, trabajos);
+        if (procesoVivo(job.pid)) await new Promise(resolve => setTimeout(resolve, 100));
+      }
+      if (procesoVivo(job.pid)) {
+        this.programar(1000);
+        throw new ConflictException(
+          'La cancelación quedó solicitada. El ejecutor aún se está cerrando.'
+        );
+      }
+      if (cierre) await cierre;
+      // Leer después de la salida conserva cualquier archivo que terminó de
+      // guardarse durante el cierre; luego ningún worker puede sobrescribirlo.
+      let ultimo = estado;
+      try {
+        const guardado = JSON.parse(await readFile(join(destino, 'execution.json'), 'utf8'));
+        if (Array.isArray(guardado.files)) ultimo = guardado;
+      } catch {
+        /* El estado ya validado conserva los archivos conocidos. */
+      }
+      await this.guardar(destino, 'execution.json', this.estadoCancelado(job, ultimo));
+      await this.liberarBloqueo(trabajos, job.pid);
+      if (this.activo === id) this.activo = undefined;
+      if (this.child?.pid === job.pid) this.child = undefined;
+      job.pid = undefined;
+      job.deadline = undefined;
+      job.startedAt = undefined;
+      await this.guardar(destino, 'job.json', job);
+      await this.persistirCola(trabajos);
+      const final = await this.leer(id, propietario);
+      return this.respuesta(
+        final.job,
+        final.estado,
+        final.disponibles,
+        final.soportesCompletos,
+        final.sinSoportesRequeridos
+      );
+    });
+    this.programar();
+    return respuesta;
+  }
+
   private async procesarCola() {
     if (this.detenido) return;
     await this.inicializar();
@@ -470,36 +698,51 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
       if (this.child) return;
       const registro = (await this.registros(trabajos)).find(({ job }) => job.id === this.activo);
       if (registro && procesoVivo(registro.job.pid)) {
-        const limite = this.duracionMaxima();
-        const inicio = Date.parse(
-          registro.job.startedAt ?? registro.job.enColaDesde ?? registro.job.createdAt
-        );
-        const deadline =
-          Date.parse(registro.job.deadline ?? '') ||
-          (Number.isFinite(inicio) ? inicio : Date.now()) + limite;
-        if (!registro.job.deadline) {
-          registro.job.startedAt = new Date(deadline - limite).toISOString();
-          registro.job.deadline = new Date(deadline).toISOString();
-          await this.guardar(join(trabajos, registro.job.id), 'job.json', registro.job);
-        }
-        if (Date.now() >= deadline && registro.job.pid !== process.pid) {
-          let bloqueo: { childPid?: number };
-          try {
-            bloqueo = JSON.parse(await readFile(join(trabajos, 'runner.lock'), 'utf8'));
-          } catch {
-            bloqueo = {};
+        if (registro.job.cancelledAt) {
+          await this.solicitarCierreCancelado(registro.job, trabajos);
+          if (procesoVivo(registro.job.pid)) {
+            const pertenece = await this.perteneceEjecutor(registro.job, trabajos);
+            if (procesoVivo(registro.job.pid)) {
+              if (pertenece !== false) {
+                this.programar(1000);
+                return;
+              }
+              registro.job.pid = undefined;
+              await this.guardar(join(trabajos, registro.job.id), 'job.json', registro.job);
+            }
           }
-          if (bloqueo.childPid === registro.job.pid) {
-            this.detenerPid(registro.job.pid);
-            await this.registrarFallo(
-              registro.job,
-              registro.estado,
-              'La generación superó el tiempo máximo. Puedes reanudar conservando los PDF guardados.'
-            );
+        } else {
+          const limite = this.duracionMaxima();
+          const inicio = Date.parse(
+            registro.job.startedAt ?? registro.job.enColaDesde ?? registro.job.createdAt
+          );
+          const deadline =
+            Date.parse(registro.job.deadline ?? '') ||
+            (Number.isFinite(inicio) ? inicio : Date.now()) + limite;
+          if (!registro.job.deadline) {
+            registro.job.startedAt = new Date(deadline - limite).toISOString();
+            registro.job.deadline = new Date(deadline).toISOString();
+            await this.guardar(join(trabajos, registro.job.id), 'job.json', registro.job);
           }
+          if (Date.now() >= deadline && registro.job.pid !== process.pid) {
+            let bloqueo: { childPid?: number };
+            try {
+              bloqueo = JSON.parse(await readFile(join(trabajos, 'runner.lock'), 'utf8'));
+            } catch {
+              bloqueo = {};
+            }
+            if (bloqueo.childPid === registro.job.pid) {
+              this.detenerPid(registro.job.pid);
+              await this.registrarFallo(
+                registro.job,
+                registro.estado,
+                'La generación superó el tiempo máximo. Puedes reanudar conservando los PDF guardados.'
+              );
+            }
+          }
+          this.programar(1000);
+          return;
         }
-        this.programar(1000);
-        return;
       }
       if (registro && ['starting', 'running'].includes(registro.estado.status))
         await this.registrarFallo(
@@ -507,6 +750,14 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
           registro.estado,
           'La ejecución se interrumpió. Puedes reanudar conservando los PDF guardados.'
         );
+      if (registro?.job.cancelledAt) {
+        await this.guardar(
+          join(trabajos, registro.job.id),
+          'execution.json',
+          this.estadoCancelado(registro.job, registro.estado)
+        );
+        await this.liberarBloqueo(trabajos, registro.job.pid);
+      }
       this.activo = undefined;
     }
     while (this.cola.length && !this.child && !this.detenido) {
@@ -535,7 +786,8 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
           throw new BadRequestException(
             'El ingreso ya no está disponible para el proceso solicitado.'
           );
-        job.tipoIngreso = ingreso.tipoIngreso?.trim() || 'Desconocido';
+        job.tipoIngreso =
+          ingreso.areaTrabajo?.trim() || ingreso.tipoIngreso?.trim() || 'Desconocido';
       } catch (error) {
         await this.registrarFallo(
           job,
@@ -612,6 +864,16 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
   }
 
   private async ubicacion() {
+    const configurada = process.env.EKLIPSE_AUTOMATION_DATA_DIR?.trim();
+    if (
+      configurada &&
+      (!isAbsolute(configurada) ||
+        (process.platform === 'win32' &&
+          !/^(?:[a-z]:[\\/]|[\\/]{2}[^\\/]+[\\/][^\\/]+)/i.test(configurada)))
+    )
+      throw new ServiceUnavailableException(
+        'Configura EKLIPSE_AUTOMATION_DATA_DIR con una ruta absoluta de almacenamiento.'
+      );
     const opciones = process.env.EKLIPSE_AUTOMATION_DIR
       ? [resolve(process.env.EKLIPSE_AUTOMATION_DIR)]
       : [
@@ -621,10 +883,12 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
     for (const carpeta of opciones) {
       try {
         await access(join(carpeta, 'src/worker.ts'));
-        return { carpeta, trabajos: join(carpeta, 'artifacts/eklipse-jobs') };
       } catch {
         /* Probar la siguiente carpeta local. */
+        continue;
       }
+      const datos = configurada ? resolve(configurada) : carpeta;
+      return { carpeta, datos, trabajos: join(datos, 'artifacts', 'eklipse-jobs') };
     }
     throw new ServiceUnavailableException(
       'Configura EKLIPSE_AUTOMATION_DIR con la carpeta de automatización.'
@@ -861,7 +1125,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
   private async iniciar(job: Trabajo, anteriorEstado: EstadoWorker, bloqueo: string) {
     this.reservando = true;
     try {
-      const { carpeta, trabajos } = await this.ubicacion();
+      const { carpeta, datos, trabajos } = await this.ubicacion();
       const destino = join(trabajos, job.id);
       const documento = job.documento;
       const ingreso = job.ingreso;
@@ -900,22 +1164,31 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
           shell: false,
           stdio: 'ignore',
           // DG Web usa su propio .env; no recibe los secretos del backend de Eklipse.
-          env: Object.fromEntries(
-            Object.entries(process.env).filter(([key]) =>
-              /^(PATH|PATHEXT|SYSTEMROOT|WINDIR|COMSPEC|TEMP|TMP|USERPROFILE|LOCALAPPDATA|APPDATA|HOMEDRIVE|HOMEPATH|PROGRAMFILES|PROGRAMFILES\(X86\))$/i.test(
-                key
+          env: {
+            ...Object.fromEntries(
+              Object.entries(process.env).filter(([key]) =>
+                /^(PATH|PATHEXT|SYSTEMROOT|WINDIR|COMSPEC|TEMP|TMP|USERPROFILE|LOCALAPPDATA|APPDATA|HOMEDRIVE|HOMEPATH|PROGRAMFILES|PROGRAMFILES\(X86\))$/i.test(
+                  key
+                )
               )
-            )
-          ),
+            ),
+            EKLIPSE_AUTOMATION_DATA_DIR: datos,
+          },
         }
       );
       this.child = child;
+      let terminarCierre: () => void;
+      this.cierreActual = {
+        child,
+        terminado: new Promise<void>(resolve => {
+          terminarCierre = resolve;
+        }),
+      };
       let terminarPreparacion: () => void;
       const preparacion = new Promise<void>(resolve => {
         terminarPreparacion = resolve;
       });
       job.pid = child.pid;
-      const rutaBloqueo = bloqueo;
       const limite = this.duracionMaxima();
       job.startedAt = new Date().toISOString();
       job.deadline = new Date(Date.now() + limite).toISOString();
@@ -940,9 +1213,13 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
             } catch {
               /* No arrancó. */
             }
+            const cancelada = this.cancelaciones.has(job.id);
             if (
-              !estado ||
-              !['complete', 'failed', 'prefactura-unavailable'].includes(estado.status)
+              !cancelada &&
+              (!estado ||
+                !['complete', 'failed', 'prefactura-unavailable', 'cancelled'].includes(
+                  estado.status
+                ))
             ) {
               const message = errorArranque
                 ? `No se pudo iniciar el ejecutor de reportes (${errorArranque}).`
@@ -971,9 +1248,9 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
               });
               await this.guardar(destino, `fallo-${Date.now()}.json`, failure);
             }
-            await this.leer(job.id, job.propietario).catch(() => {});
+            if (!cancelada) await this.leer(job.id, job.propietario).catch(() => {});
           } finally {
-            await unlink(rutaBloqueo).catch(() => {});
+            await this.liberarBloqueo(trabajos, child.pid);
             if (this.child === child) {
               if (this.activo === job.id) this.activo = undefined;
               try {
@@ -984,7 +1261,12 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
               }
             }
           }
-        })().catch(() => {});
+        })()
+          .catch(() => {})
+          .finally(() => {
+            terminarCierre();
+            if (this.cierreActual?.child === child) this.cierreActual = undefined;
+          });
       });
       try {
         await this.guardar(destino, 'job.json', job);
@@ -1008,8 +1290,10 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
     estado: EstadoWorker,
     disponibles?: Set<string>,
     soportesCompletos = false,
-    sinSoportesRequeridos = false
+    sinSoportesRequeridos = false,
+    propietario?: PropietarioReportes
   ): EjecucionReportes {
+    const puedeGestionar = !propietario || this.mismoPropietario(job.propietario, propietario);
     const archivos = estado.files.flatMap((archivo, indice) =>
       archivo.superseded ||
       (disponibles && !disponibles.has(String(indice))) ||
@@ -1067,6 +1351,8 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
     const mensaje = typeof estado.message === 'string' ? estado.message : '';
     return {
       id: job.id,
+      claveReporte: createHash('sha256').update(this.clave(job)).digest('hex'),
+      puedeGestionar,
       documento: job.documento,
       ingreso: job.ingreso,
       ...(job.loteId ? { loteId: job.loteId } : {}),
@@ -1110,6 +1396,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
           : []
       ),
       reanudable: Boolean(
+        puedeGestionar &&
         job.proceso &&
         (estado.status === 'failed' ||
           (estado.status === 'complete' && documentosPendientes.includes('soportes-requeridos')))
@@ -1258,7 +1545,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
     }
   }
 
-  private async leer(id: string, propietario: PropietarioReportes) {
+  private async leer(id: string, propietario: PropietarioReportes, permitirCompartido = false) {
     if (!JOB_ID.test(id)) throw new NotFoundException();
     const { trabajos } = await this.ubicacion();
     const carpeta = join(trabajos, id);
@@ -1270,11 +1557,8 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
     }
     if (job.id !== id || !job.propietario || !PROCESOS_REPORTES.includes(job.proceso))
       throw new NotFoundException();
-    if (
-      job.propietario.usuario !== propietario.usuario ||
-      job.propietario.contexto !== propietario.contexto ||
-      job.propietario.esDinamica !== propietario.esDinamica
-    )
+    const propio = this.mismoPropietario(job.propietario, propietario);
+    if (job.propietario.contexto !== propietario.contexto || (!propio && !permitirCompartido))
       throw new NotFoundException();
     if (!(await this.vigente(job, trabajos)))
       throw new NotFoundException('La solicitud fue reemplazada o no tiene un proceso vigente.');
@@ -1283,14 +1567,28 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
       estado = JSON.parse(await readFile(join(carpeta, 'execution.json'), 'utf8'));
       if (
         !Array.isArray(estado.files) ||
-        !['queued', 'starting', 'running', 'complete', 'failed', 'prefactura-unavailable'].includes(
-          estado.status
-        )
+        ![
+          'queued',
+          'starting',
+          'running',
+          'complete',
+          'failed',
+          'prefactura-unavailable',
+          'cancelled',
+        ].includes(estado.status)
       )
         estado = this.estadoPerdido(job);
     } catch {
       estado = this.estadoPerdido(job);
     }
+    if (job.cancelledAt) estado = this.estadoCancelado(job, estado);
+    // La biblioteca comparte documentos ya generados; el seguimiento y las
+    // acciones de la cola continúan siendo exclusivos de su propietario.
+    if (
+      !propio &&
+      !['complete', 'failed', 'prefactura-unavailable', 'cancelled'].includes(estado.status)
+    )
+      throw new NotFoundException();
     // Recupera los avisos que las ejecuciones anteriores guardaban solo junto a la prefactura.
     if (
       !estado.notices?.length &&
@@ -1311,6 +1609,8 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
               [
                 'recalculo-ingreso',
                 'ordenes-sin-confirmar',
+                'codigo-salario',
+                'servicios-sin-cubrimiento',
                 'prefactura-sin-servicios',
                 'prefactura-no-disponible',
               ].includes(notice.type) &&
@@ -1388,6 +1688,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
       };
       await this.guardar(carpeta, 'execution.json', estado);
     }
+    if (!propio && !disponibles.size) throw new NotFoundException('No hay PDF disponibles.');
     const validacionSoportes = await this.validarSoportes(carpeta, job, estado, disponibles);
     const soportesCompletos = validacionSoportes !== undefined;
     const sinSoportesRequeridos = validacionSoportes === 'sin-adjuntos';
@@ -1400,9 +1701,17 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
     this.programar();
     const { job, estado, disponibles, soportesCompletos, sinSoportesRequeridos } = await this.leer(
       id,
+      propietario,
+      true
+    );
+    return this.respuesta(
+      job,
+      estado,
+      disponibles,
+      soportesCompletos,
+      sinSoportesRequeridos,
       propietario
     );
-    return this.respuesta(job, estado, disponibles, soportesCompletos, sinSoportesRequeridos);
   }
 
   async consultarCola(propietario: PropietarioReportes): Promise<ColaReportes> {
@@ -1449,6 +1758,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
           procesados,
           enCurso: enCurso.length,
           pendientes: lista.filter(trabajo => trabajo.estado === 'queued').length,
+          cancelados: lista.filter(trabajo => trabajo.estado === 'cancelled').length,
           porcentaje: lista.length
             ? Math.min(100, Math.floor(((procesados + avance) / lista.length) * 100))
             : 0,
@@ -1511,16 +1821,19 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
       if (error instanceof ServiceUnavailableException) return vacio();
       throw error;
     }
-    const terminales = ['complete', 'failed', 'prefactura-unavailable'];
+    const terminales = ['complete', 'failed', 'prefactura-unavailable', 'cancelled'];
     const reportes: EjecucionReportes[] = [];
-    for (const { job, estado } of this.ultimos(await this.registros(trabajos, propietario))) {
+    const registros = (await this.registros(trabajos)).filter(
+      ({ job }) => job.propietario.contexto === propietario.contexto
+    );
+    for (const { job, estado } of this.ultimos(registros)) {
       if (documento && !String(job.documento ?? '').includes(documento)) continue;
       if (ingreso && !String(job.ingreso ?? '').includes(ingreso)) continue;
       if (proceso && (job.proceso ?? 'anteriores') !== proceso) continue;
       if (!terminales.includes(estado.status)) continue;
       let contenido: Awaited<ReturnType<EjecucionesReportesImpl['leer']>>;
       try {
-        contenido = await this.leer(job.id, propietario);
+        contenido = await this.leer(job.id, propietario, true);
       } catch (error) {
         if (error instanceof NotFoundException) continue;
         throw error;
@@ -1530,7 +1843,8 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
         contenido.estado,
         contenido.disponibles,
         contenido.soportesCompletos,
-        contenido.sinSoportesRequeridos
+        contenido.sinSoportesRequeridos,
+        propietario
       );
       // Una reanudación concurrente puede cambiar a queued durante esta lectura.
       if (!terminales.includes(reporte.estado) || !reporte.archivos.length) continue;
@@ -1638,7 +1952,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
   }
 
   async archivo(id: string, archivoId: string, propietario: PropietarioReportes) {
-    const { carpeta, estado, job } = await this.leer(id, propietario);
+    const { carpeta, estado, job } = await this.leer(id, propietario, true);
     if (!/^\d{1,6}$/.test(archivoId)) throw new NotFoundException();
     const archivo = estado.files[Number(archivoId)];
     if (!archivo || (job.proceso && !DOCUMENTOS_POR_PROCESO[job.proceso].includes(archivo.kind)))
@@ -1652,7 +1966,7 @@ export class EjecucionesReportesImpl implements OnModuleDestroy, OnModuleInit {
   }
 
   async archivos(id: string, propietario: PropietarioReportes) {
-    const { carpeta, estado, job } = await this.leer(id, propietario);
+    const { carpeta, estado, job } = await this.leer(id, propietario, true);
     const zip = new JSZip();
     const entradas: ReturnType<typeof createReadStream>[] = [];
     let disponibles = 0;

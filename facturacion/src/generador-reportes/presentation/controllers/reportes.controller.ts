@@ -5,6 +5,8 @@ import {
   ConflictException,
   Get,
   Header,
+  HttpCode,
+  NotFoundException,
   Param,
   Post,
   Query,
@@ -64,7 +66,10 @@ export class GeneradorReportesController {
     const propietario = this.propietario(request);
     const consecutivos = ingresos.map(ingreso => String(ingreso.consecutivo));
     const reportes = await this.ejecuciones.listar(
-      consulta.paciente.documento, consecutivos, propietario, busqueda.proceso
+      consulta.paciente.documento,
+      consecutivos,
+      propietario,
+      busqueda.proceso
     );
     const porIngreso = new Map(reportes.map(reporte => [reporte.ingreso, reporte]));
     return {
@@ -185,7 +190,7 @@ export class GeneradorReportesController {
       this.propietario(request),
       datos.proceso,
       undefined,
-      ingreso.tipoIngreso?.trim() || 'Desconocido'
+      ingreso.areaTrabajo?.trim() || ingreso.tipoIngreso?.trim() || 'Desconocido'
     );
   }
 
@@ -203,6 +208,7 @@ export class GeneradorReportesController {
   public async reanudar(@Param('id') id: string, @Req() request: Request) {
     const propietario = this.propietario(request);
     const ejecucion = await this.ejecuciones.consultar(id, propietario);
+    if (ejecucion.puedeGestionar === false) throw new NotFoundException();
     if (!ejecucion.proceso) {
       throw new ConflictException(
         'Los reportes anteriores son de consulta. Genera una nueva ejecución con el proceso seleccionado.'
@@ -222,6 +228,14 @@ export class GeneradorReportesController {
       ejecucion.proceso
     );
     return this.ejecuciones.reanudar(id, propietario);
+  }
+
+  @Post('ejecuciones/:id/cancelar')
+  @HttpCode(200)
+  @Header('Cache-Control', 'no-store')
+  @Authorities([SLN_AUTHORITIES.GENERADOR_REPORTES.CONSULTAR])
+  public async cancelar(@Param('id') id: string, @Req() request: Request) {
+    return this.ejecuciones.cancelar(id, this.propietario(request));
   }
 
   @Get('ejecuciones/:id/archivos/:archivo')
