@@ -24,6 +24,7 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     ordenGuardado = 0;
     carpeta = await mkdtemp(join(tmpdir(), 'eklipse-reportes-'));
     process.env.EKLIPSE_AUTOMATION_DIR = carpeta;
+    delete process.env.EKLIPSE_AUTOMATION_DATA_DIR;
     delete process.env.EKLIPSE_AUTOMATION_NODE;
     delete process.env.EKLIPSE_AUTOMATION_CONTEXT;
     delete process.env.EKLIPSE_AUTOMATION_TIMEOUT_MS;
@@ -578,7 +579,190 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     ).toBe('Hospitalización de Urgencias');
   });
 
-  it('el historial muestra vigentes propios con PDF y oculta legacy sin tocar la cola', async () => {
+  it('revalida el área clínica al iniciar y reanudar un ingreso remitido', async () => {
+    let areaTrabajo = 'Hospitalización';
+    consultaClinica.consultar.mockImplementation(async documento => ({
+      paciente: { documento },
+      ingresos: [
+        {
+          consecutivo: 20,
+          estado: 'Registrado',
+          activo: true,
+          tipoIngreso: 'Remitido',
+          areaTrabajo,
+        },
+      ],
+    }));
+    await writeFile(
+      join(carpeta, 'src/worker.ts'),
+      `
+      const fs = require('node:fs/promises'), path = require('node:path');
+      const folder = process.argv[process.argv.indexOf('--carpeta') + 1];
+      const resumed = process.argv.includes('--reanudar');
+      fs.writeFile(path.join(folder, 'execution.json'), JSON.stringify({ process: 'concurrente', completedStages: [], status: resumed ? 'complete' : 'failed', files: [], message: process.argv[process.argv.indexOf('--tipo-ingreso') + 1], updatedAt: new Date().toISOString() }));
+    `
+    );
+    const job = await servicio.crear(
+      '001234',
+      '20',
+      propietario,
+      'concurrente',
+      undefined,
+      'Remitido'
+    );
+    expect((await esperar(job.id, 'failed')).mensaje).toBe('Hospitalización');
+    await esperarCierre();
+    const path = join(carpeta, 'artifacts/eklipse-jobs', job.id, 'job.json');
+    expect(JSON.parse(await readFile(path, 'utf8')).tipoIngreso).toBe('Hospitalización');
+    areaTrabajo = 'Consulta externa';
+    expect(await servicio.reanudar(job.id, propietario)).toMatchObject({
+      id: job.id,
+      estado: 'queued',
+    });
+    expect((await esperar(job.id, 'complete')).mensaje).toBe('Consulta externa');
+    expect(JSON.parse(await readFile(path, 'utf8')).tipoIngreso).toBe('Consulta externa');
+  });
+
+  it('conserva identidades separadas por propietario al compartir y reemplazar el mismo paciente, ingreso y proceso', async () => {
+    const reemplazado = await guardado({ proceso: 'concurrente', estado: 'failed' });
+    const clavePropia = (await servicio.consultar(reemplazado.id, propietario)).claveReporte;
+    const otroUsuario = { ...propietario, usuario: 8 };
+    const otroOrigen = { ...propietario, esDinamica: false };
+    const ajeno = await guardado({
+      proceso: 'concurrente',
+      estado: 'failed',
+      propietario: otroUsuario,
+    });
+    const origen = await guardado({
+      proceso: 'concurrente',
+      estado: 'failed',
+      propietario: otroOrigen,
+    });
+    const propio = await guardado({ proceso: 'concurrente', estado: 'failed' });
+    const biblioteca = await servicio.listarGenerados(propietario);
+    expect(new Set(biblioteca.reportes.map(reporte => reporte.id))).toEqual(
+      new Set([propio.id, ajeno.id, origen.id])
+    );
+    expect(new Set(biblioteca.reportes.map(reporte => reporte.claveReporte)).size).toBe(3);
+    expect(biblioteca.reportes.find(reporte => reporte.id === propio.id)?.claveReporte).toBe(
+      clavePropia
+    );
+    for (const reporte of biblioteca.reportes) {
+      expect(reporte.claveReporte).toMatch(/^[a-f0-9]{64}$/);
+      expect(reporte.puedeGestionar).toBe(reporte.id === propio.id);
+      expect(reporte.reanudable).toBe(reporte.id === propio.id);
+      expect(JSON.stringify(reporte)).not.toContain('propietario');
+    }
+    const vistaAjena = await servicio.consultar(ajeno.id, propietario);
+    const vistaPropia = await servicio.consultar(ajeno.id, otroUsuario);
+    expect(vistaAjena.claveReporte).toBe(vistaPropia.claveReporte);
+    expect(vistaAjena).toMatchObject({ puedeGestionar: false, reanudable: false });
+    expect(vistaPropia).toMatchObject({ puedeGestionar: true, reanudable: true });
+    expect(
+      (await servicio.listar('001234', ['20'], propietario, 'concurrente')).map(
+        reporte => reporte.id
+      )
+    ).toEqual([propio.id]);
+    await expect(servicio.consultar(reemplazado.id, otroUsuario)).rejects.toBeInstanceOf(
+      NotFoundException
+    );
+    await expect(servicio.reanudar(ajeno.id, propietario)).rejects.toBeInstanceOf(
+      NotFoundException
+    );
+    await expect(servicio.cancelar(ajeno.id, propietario)).rejects.toBeInstanceOf(
+      NotFoundException
+    );
+    await expect(servicio.reanudar(origen.id, propietario)).rejects.toBeInstanceOf(
+      NotFoundException
+    );
+    expect((await servicio.consultarCola(propietario)).trabajos).toEqual([]);
+  });
+
+  it.each(['complete', 'failed', 'prefactura-unavailable', 'cancelled'])(
+    'comparte el detalle y el PDF del estado terminal %s aunque el origen de usuario sea diferente',
+    async estado => {
+      const job = await guardado({
+        proceso: 'concurrente',
+        estado,
+        propietario: { ...propietario, usuario: 8, esDinamica: false },
+      });
+      const reporte = await servicio.consultar(job.id, propietario);
+      expect(reporte).toMatchObject({
+        id: job.id,
+        estado,
+        puedeGestionar: false,
+        reanudable: false,
+      });
+      expect(reporte.archivos).toHaveLength(1);
+      const pdf = await servicio.archivo(job.id, '0', propietario);
+      expect(await readFile(pdf.ruta, 'utf8')).toBe('%PDF-1.7 test');
+      expect((await servicio.listarGenerados(propietario)).reportes.map(item => item.id)).toEqual([
+        job.id,
+      ]);
+      await expect(
+        servicio.consultar(job.id, { ...propietario, contexto: 'SANJUAN' })
+      ).rejects.toBeInstanceOf(NotFoundException);
+      await expect(
+        servicio.archivo(job.id, '0', { ...propietario, contexto: 'SANJUAN' })
+      ).rejects.toBeInstanceOf(NotFoundException);
+    }
+  );
+
+  it.each(['queued', 'starting', 'running'])(
+    'no comparte ni permite descargar una ejecución ajena %s aunque ya tenga un PDF parcial',
+    async estado => {
+      jest.spyOn(servicio as any, 'inicializar').mockResolvedValue(undefined);
+      jest.spyOn(servicio as any, 'programar').mockImplementation(() => {});
+      const job = await guardado({
+        proceso: 'concurrente',
+        estado,
+        propietario: { ...propietario, usuario: 8 },
+      });
+      expect((await servicio.listarGenerados(propietario)).total).toBe(0);
+      for (const lectura of [
+        () => servicio.consultar(job.id, propietario),
+        () => servicio.archivo(job.id, '0', propietario),
+        () => servicio.archivos(job.id, propietario),
+      ])
+        await expect(lectura()).rejects.toBeInstanceOf(NotFoundException);
+      expect(JSON.parse(await readFile(join(job.destino, 'execution.json'), 'utf8')).status).toBe(
+        estado
+      );
+    }
+  );
+
+  it('retira de la biblioteca compartida un PDF perdido y conserva el restante sin ofrecer reanudar al lector', async () => {
+    const job = await guardado({
+      proceso: 'concurrente',
+      propietario: { ...propietario, usuario: 8 },
+      archivos: ['perdido.pdf', 'conservado.pdf'],
+    });
+    await rm(join(job.destino, 'perdido.pdf'));
+    const parcial = await servicio.consultar(job.id, propietario);
+    expect(parcial).toMatchObject({
+      estado: 'failed',
+      disponibleParaProceso: false,
+      reanudable: false,
+      puedeGestionar: false,
+      archivos: [{ id: '1', nombre: 'conservado.pdf' }],
+    });
+    expect((await servicio.archivo(job.id, '1', propietario)).nombre).toBe('conservado.pdf');
+    await expect(servicio.archivo(job.id, '0', propietario)).rejects.toBeInstanceOf(
+      NotFoundException
+    );
+    await rm(join(job.destino, 'conservado.pdf'));
+    expect((await servicio.listarGenerados(propietario)).total).toBe(0);
+    await expect(servicio.consultar(job.id, propietario)).rejects.toBeInstanceOf(NotFoundException);
+    await expect(servicio.archivos(job.id, propietario)).rejects.toBeInstanceOf(NotFoundException);
+    expect(await servicio.consultar(job.id, { ...propietario, usuario: 8 })).toMatchObject({
+      estado: 'failed',
+      archivos: [],
+      puedeGestionar: true,
+      reanudable: true,
+    });
+  });
+
+  it('la biblioteca muestra vigentes de todos los usuarios de la sede con PDF y oculta legacy sin tocar la cola', async () => {
     const anterior = await guardado({
       legacy: true,
       archivos: ['historia.pdf', 'notas.pdf', 'prefactura.pdf'],
@@ -603,9 +787,15 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
       estado: 'prefactura-unavailable',
       actualizacion: '2026-10-09T12:00:00Z',
     });
-    await guardado({ propietario: { ...propietario, usuario: 8 } });
+    const otroUsuario = await guardado({
+      propietario: { ...propietario, usuario: 8 },
+      actualizacion: '2026-10-07T12:00:00Z',
+    });
     await guardado({ propietario: { ...propietario, contexto: 'SANJUAN' } });
-    await guardado({ propietario: { ...propietario, esDinamica: false } });
+    const otroOrigen = await guardado({
+      propietario: { ...propietario, esDinamica: false },
+      actualizacion: '2026-10-06T12:00:00Z',
+    });
     await guardado({ estado: 'failed', archivos: [], ingreso: '22' });
     const activos = [];
     for (const [index, estado] of ['queued', 'starting', 'running'].entries())
@@ -613,12 +803,17 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     const inicializar = jest.spyOn(servicio as any, 'inicializar');
     const programar = jest.spyOn(servicio as any, 'programar');
     const historial = await servicio.listarGenerados(propietario);
-    expect(historial).toMatchObject({ total: 3, pagina: 1, porPagina: 10 });
+    expect(historial).toMatchObject({ total: 5, pagina: 1, porPagina: 10 });
     expect(historial.reportes.map(reporte => reporte.id)).toEqual([
       parcial.id,
       completo.id,
       sinPrefactura.id,
+      otroUsuario.id,
+      otroOrigen.id,
     ]);
+    expect(
+      historial.reportes.filter(reporte => !reporte.puedeGestionar).map(reporte => reporte.id)
+    ).toEqual([otroUsuario.id, otroOrigen.id]);
     expect(historial.reportes.some(reporte => reporte.id === anterior.id)).toBe(false);
     expect(inicializar).not.toHaveBeenCalled();
     expect(programar).not.toHaveBeenCalled();
@@ -632,7 +827,7 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
       ).toBe(['queued', 'starting', 'running'][i]);
   });
 
-  it('pagina los reportes generados propios de diez en diez después de descartar los que no tienen PDF', async () => {
+  it('pagina los reportes de todos los usuarios de diez en diez después de descartar los que no tienen PDF', async () => {
     const guardados = [];
     for (let i = 0; i < 23; i++)
       guardados.push(
@@ -643,7 +838,7 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
         })
       );
     await guardado({ archivos: [], actualizacion: '2026-10-28T00:00:00Z' });
-    await guardado({
+    const ajeno = await guardado({
       propietario: { ...propietario, usuario: 8 },
       actualizacion: '2026-10-28T00:00:00Z',
     });
@@ -651,17 +846,17 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     const segundo = await servicio.listarGenerados(propietario, 2);
     const tercero = await servicio.listarGenerados(propietario, 3);
     const vacio = await servicio.listarGenerados(propietario, 4);
-    const ordenados = guardados.map(reporte => reporte.id).reverse();
-    expect(primero).toMatchObject({ total: 23, pagina: 1, porPagina: 10 });
+    const ordenados = [ajeno.id, ...guardados.map(reporte => reporte.id).reverse()];
+    expect(primero).toMatchObject({ total: 24, pagina: 1, porPagina: 10 });
     expect(primero.reportes.map(reporte => reporte.id)).toEqual(ordenados.slice(0, 10));
-    expect(segundo).toMatchObject({ total: 23, pagina: 2, porPagina: 10 });
+    expect(segundo).toMatchObject({ total: 24, pagina: 2, porPagina: 10 });
     expect(segundo.reportes.map(reporte => reporte.id)).toEqual(ordenados.slice(10, 20));
-    expect(tercero).toMatchObject({ total: 23, pagina: 3, porPagina: 10 });
+    expect(tercero).toMatchObject({ total: 24, pagina: 3, porPagina: 10 });
     expect(tercero.reportes.map(reporte => reporte.id)).toEqual(ordenados.slice(20));
-    expect(vacio).toEqual({ reportes: [], total: 23, pagina: 4, porPagina: 10 });
+    expect(vacio).toEqual({ reportes: [], total: 24, pagina: 4, porPagina: 10 });
   });
 
-  it('busca en todos los resultados propios antes de paginar y conserva el límite de diez', async () => {
+  it('busca en los resultados de todos los usuarios antes de paginar y conserva el límite de diez', async () => {
     const coincidentes = [];
     for (let i = 0; i < 12; i++) {
       const job = await guardado({
@@ -671,18 +866,21 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
       });
       if (i < 11) coincidentes.push(job.id);
     }
-    await guardado({ documento: '001234', propietario: { ...propietario, usuario: 8 } });
+    const ajeno = await guardado({
+      documento: '001234',
+      propietario: { ...propietario, usuario: 8 },
+    });
     const primero = await servicio.listarGenerados(propietario, 1, ' 001234 ');
     const segundo = await servicio.listarGenerados(propietario, 2, '001234');
-    expect(primero).toMatchObject({ total: 11, porPagina: 10, pagina: 1 });
+    expect(primero).toMatchObject({ total: 12, porPagina: 10, pagina: 1 });
     expect(primero.reportes.map(reporte => reporte.id)).toEqual(coincidentes.slice(1).reverse());
-    expect(segundo).toMatchObject({ total: 11, porPagina: 10, pagina: 2 });
-    expect(segundo.reportes.map(reporte => reporte.id)).toEqual([coincidentes[0]]);
+    expect(segundo).toMatchObject({ total: 12, porPagina: 10, pagina: 2 });
+    expect(segundo.reportes.map(reporte => reporte.id)).toEqual([coincidentes[0], ajeno.id]);
     expect(
       (await servicio.listarGenerados(propietario, 1, '1000')).reportes.map(reporte => reporte.id)
     ).toEqual([coincidentes[0]]);
     expect((await servicio.listarGenerados(propietario, 1, 'sin coincidencias')).total).toBe(0);
-    expect((await servicio.listarGenerados(propietario, 1, '   ')).total).toBe(12);
+    expect((await servicio.listarGenerados(propietario, 1, '   ')).total).toBe(13);
   });
 
   it('busca por proceso y archivo sin distinguir mayúsculas o tildes y admite palabras combinadas', async () => {
@@ -707,7 +905,7 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     ).toEqual([]);
   });
 
-  it('combina filtros independientes con coincidencias parciales y proceso exacto en el historial propio', async () => {
+  it('combina filtros independientes con coincidencias parciales y proceso exacto entre todos los usuarios', async () => {
     const cuenta = await guardado({
       documento: '001234',
       ingreso: '00921160',
@@ -732,12 +930,13 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
       ingreso: '00921160',
       archivos: ['HC-antigua.pdf'],
     });
-    await guardado({
+    const cuentaAjena = await guardado({
       documento: '001234',
       ingreso: '00921160',
       proceso: 'conciliacion',
       archivos: ['NOTAS-ENFERMERÍA.pdf'],
       propietario: { ...propietario, usuario: 8 },
+      actualizacion: '2026-10-10T12:00:00Z',
     });
     expect(
       (
@@ -748,7 +947,7 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
           archivo: ' notas ENFERMERIA ',
         })
       ).reportes.map(reporte => reporte.id)
-    ).toEqual([cuenta.id]);
+    ).toEqual([cuentaAjena.id, cuenta.id]);
     expect(
       (await servicio.listarGenerados(propietario, 1, { proceso: 'anteriores' })).reportes.map(
         reporte => reporte.id
@@ -770,7 +969,7 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
         })
       ).total
     ).toBe(0);
-    expect((await servicio.listarGenerados(propietario, 1, {})).total).toBe(3);
+    expect((await servicio.listarGenerados(propietario, 1, {})).total).toBe(4);
   });
 
   it('aplica los filtros por campo antes de paginar todos los resultados', async () => {
@@ -812,7 +1011,7 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     expect(ubicacion).not.toHaveBeenCalled();
   });
 
-  it('el historial excluye PDF ausentes o alterados, conserva los válidos y no inspecciona archivos ajenos', async () => {
+  it('la biblioteca verifica los PDF de todos los usuarios y no inspecciona archivos de otra sede', async () => {
     const parcial = await guardado({
       proceso: 'concurrente',
       archivos: ['borrado.pdf', 'conservado.pdf'],
@@ -824,11 +1023,16 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
       proceso: 'concurrente',
       propietario: { ...propietario, usuario: 8 },
     });
+    const otraSede = await guardado({
+      proceso: 'concurrente',
+      propietario: { ...propietario, contexto: 'SANJUAN' },
+    });
     await rm(join(parcial.destino, 'borrado.pdf'));
     await rm(join(borrado.destino, 'grupo-001.pdf'));
     await writeFile(join(alterado.destino, 'grupo-001.pdf'), '%PDF-1.7 fake');
     await writeFile(join(legadoInvalido.destino, 'grupo-001.pdf'), '<html>No es un PDF</html>');
     await rm(join(ajeno.destino, 'grupo-001.pdf'));
+    await rm(join(otraSede.destino, 'grupo-001.pdf'));
     const leer = jest.spyOn(servicio as any, 'leer');
     const historial = await servicio.listarGenerados(propietario);
     expect(historial.total).toBe(1);
@@ -840,10 +1044,14 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
       disponibleParaProceso: false,
       archivos: [{ id: '1', nombre: 'conservado.pdf' }],
     });
-    expect(leer.mock.calls.map(([id]) => id)).not.toContain(ajeno.id);
+    expect(leer.mock.calls.map(([id]) => id)).toContain(ajeno.id);
     expect(JSON.parse(await readFile(join(ajeno.destino, 'execution.json'), 'utf8')).status).toBe(
-      'complete'
+      'failed'
     );
+    expect(leer.mock.calls.map(([id]) => id)).not.toContain(otraSede.id);
+    expect(
+      JSON.parse(await readFile(join(otraSede.destino, 'execution.json'), 'utf8')).status
+    ).toBe('complete');
     expect((await servicio.archivo(parcial.id, '1', propietario)).nombre).toBe('conservado.pdf');
     await expect(servicio.archivo(legadoInvalido.id, '0', propietario)).rejects.toBeInstanceOf(
       NotFoundException
@@ -900,6 +1108,323 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
       porPagina: 10,
     });
   });
+
+  it('cancela un pendiente intermedio, recalcula los puestos y conserva la cancelación tras reiniciar', async () => {
+    jest.spyOn(servicio as any, 'programar').mockImplementation(() => {});
+    const primero = await servicio.crear('001234', '20', propietario, 'concurrente');
+    const segundo = await servicio.crear('005678', '21', propietario, 'concurrente');
+    const tercero = await servicio.crear('007777', '22', propietario, 'concurrente');
+    expect(await servicio.cancelar(segundo.id, propietario)).toMatchObject({
+      estado: 'cancelled',
+      reanudable: false,
+      disponibleParaProceso: false,
+    });
+    expect((await servicio.consultar(tercero.id, propietario)).posicionCola).toBe(2);
+    expect((await servicio.consultar(primero.id, propietario)).posicionCola).toBe(1);
+    const trabajos = join(carpeta, 'artifacts/eklipse-jobs');
+    expect(JSON.parse(await readFile(join(trabajos, 'queue.json'), 'utf8')).pendientes).toEqual([
+      primero.id,
+      tercero.id,
+    ]);
+    const marker = JSON.parse(await readFile(join(trabajos, segundo.id, 'cancel.json'), 'utf8'));
+    expect(marker.requestedAt).toBeTruthy();
+    // Simula un último guardado tardío del worker y la pérdida del índice/aviso.
+    await writeFile(
+      join(trabajos, segundo.id, 'execution.json'),
+      JSON.stringify({ status: 'running', files: [], message: 'Estado antiguo' })
+    );
+    await rm(join(trabajos, segundo.id, 'cancel.json'));
+    servicio.onModuleDestroy();
+    servicio = new EjecucionesReportesImpl(consultaClinica as any);
+    jest.spyOn(servicio as any, 'programar').mockImplementation(() => {});
+    await servicio.onModuleInit();
+    expect(await servicio.consultar(segundo.id, propietario)).toMatchObject({
+      estado: 'cancelled',
+      reanudable: false,
+    });
+    expect(JSON.parse(await readFile(join(trabajos, segundo.id, 'cancel.json'), 'utf8'))).toEqual(
+      marker
+    );
+    expect((await servicio.consultarCola(propietario)).resumen).toMatchObject({
+      total: 3,
+      pendientes: 2,
+      procesados: 1,
+      cancelados: 1,
+    });
+    expect((servicio as any).cola).toEqual([primero.id, tercero.id]);
+  });
+
+  it('la cancelación es idempotente y no permite reanudar ni perder los PDF conservados', async () => {
+    jest.spyOn(servicio as any, 'programar').mockImplementation(() => {});
+    const job = await guardado({ proceso: 'concurrente', estado: 'failed' });
+    await servicio.reanudar(job.id, propietario);
+    const primera = await servicio.cancelar(job.id, propietario);
+    const segunda = await servicio.cancelar(job.id, propietario);
+    expect(segunda).toEqual(primera);
+    expect(segunda).toMatchObject({
+      estado: 'cancelled',
+      reanudable: false,
+      disponibleParaProceso: false,
+    });
+    expect(segunda.archivos).toHaveLength(1);
+    expect((await servicio.archivo(job.id, '0', propietario)).nombre).toBe('grupo-001.pdf');
+    expect(
+      (await servicio.listarGenerados(propietario)).reportes.map(reporte => reporte.id)
+    ).toEqual([job.id]);
+    await expect(servicio.reanudar(job.id, propietario)).rejects.toBeInstanceOf(ConflictException);
+    await expect(
+      servicio.crear('001234', '20', propietario, 'concurrente', job.id)
+    ).rejects.toBeInstanceOf(ConflictException);
+    await rm(join(job.destino, 'grupo-001.pdf'));
+    expect(await servicio.consultar(job.id, propietario)).toMatchObject({
+      estado: 'cancelled',
+      archivos: [],
+      reanudable: false,
+    });
+  });
+
+  it.each(['complete', 'failed', 'prefactura-unavailable'])(
+    'rechaza cancelar un resultado terminal %s',
+    async estado => {
+      const job = await guardado({ proceso: 'concurrente', estado });
+      await expect(servicio.cancelar(job.id, propietario)).rejects.toBeInstanceOf(
+        ConflictException
+      );
+      expect(
+        JSON.parse(await readFile(join(job.destino, 'job.json'), 'utf8')).cancelledAt
+      ).toBeUndefined();
+    }
+  );
+
+  it('solo permite cancelar solicitudes propias y vigentes', async () => {
+    jest.spyOn(servicio as any, 'programar').mockImplementation(() => {});
+    const antiguo = await guardado({ proceso: 'concurrente', estado: 'queued' });
+    const vigente = await guardado({ proceso: 'concurrente', estado: 'queued' });
+    await expect(
+      servicio.cancelar(vigente.id, { ...propietario, usuario: 8 })
+    ).rejects.toBeInstanceOf(NotFoundException);
+    await expect(servicio.cancelar(antiguo.id, propietario)).rejects.toBeInstanceOf(
+      NotFoundException
+    );
+    expect((await servicio.consultar(vigente.id, propietario)).estado).toBe('queued');
+  });
+
+  it('si falla guardar la marca durable mantiene el pendiente en la cola', async () => {
+    jest.spyOn(servicio as any, 'programar').mockImplementation(() => {});
+    const job = await servicio.crear('001234', '20', propietario, 'concurrente');
+    const guardar = (servicio as any).guardar.bind(servicio);
+    jest
+      .spyOn(servicio as any, 'guardar')
+      .mockImplementation(async (destino, nombre, valor: any) => {
+        if (nombre === 'job.json' && valor.cancelledAt) throw new Error('Disco no disponible');
+        return guardar(destino, nombre, valor);
+      });
+    await expect(servicio.cancelar(job.id, propietario)).rejects.toThrow('Disco no disponible');
+    expect((servicio as any).cola).toEqual([job.id]);
+    expect((await servicio.consultar(job.id, propietario)).estado).toBe('queued');
+    await expect(
+      readFile(join(carpeta, 'artifacts/eklipse-jobs', job.id, 'cancel.json'))
+    ).rejects.toMatchObject({ code: 'ENOENT' });
+  });
+
+  it('cancela al pasar de pendiente a ejecución y espera su cierre antes del siguiente turno', async () => {
+    const primero = await servicio.crear('001234', '20', propietario, 'concurrente');
+    await esperar(primero.id, 'running');
+    const pid = (servicio as any).child.pid;
+    const segundo = await servicio.crear('005678', '21', propietario, 'concurrente');
+    const cancelado = await servicio.cancelar(primero.id, propietario);
+    expect(cancelado).toMatchObject({
+      estado: 'cancelled',
+      reanudable: false,
+      disponibleParaProceso: false,
+    });
+    expect(cancelado.archivos).toHaveLength(1);
+    expect(() => process.kill(pid, 0)).toThrow();
+    await esperar(segundo.id, 'complete');
+    await esperarCierre();
+    expect((await servicio.consultar(primero.id, propietario)).estado).toBe('cancelled');
+    expect(
+      JSON.parse(
+        await readFile(
+          join(carpeta, 'artifacts/eklipse-jobs', primero.id, 'execution.json'),
+          'utf8'
+        )
+      ).status
+    ).toBe('cancelled');
+  });
+
+  it('no termina un PID ajeno que fue reutilizado por otra aplicación', async () => {
+    const externo = spawn(process.execPath, ['-e', 'setInterval(() => {}, 1000)'], {
+      windowsHide: true,
+      stdio: 'ignore',
+    });
+    procesosExternos.push(externo);
+    await new Promise<void>((resolve, reject) => {
+      externo.once('spawn', resolve);
+      externo.once('error', reject);
+    });
+    const job = await guardado({ proceso: 'concurrente', estado: 'running' });
+    const ruta = join(job.destino, 'job.json');
+    await writeFile(
+      ruta,
+      JSON.stringify({ ...JSON.parse(await readFile(ruta, 'utf8')), pid: externo.pid })
+    );
+    jest.spyOn(servicio as any, 'programar').mockImplementation(() => {});
+    expect((await servicio.cancelar(job.id, propietario)).estado).toBe('cancelled');
+    expect(() => process.kill(externo.pid, 0)).not.toThrow();
+    expect(externo.exitCode).toBeNull();
+  });
+
+  it('cierra por su PID al ejecutor propio que ignora el aviso sin convertir la cancelación en fallo', async () => {
+    await writeFile(
+      join(carpeta, 'src/worker.ts'),
+      `
+      const fs=require('node:fs/promises'),path=require('node:path');
+      const folder=process.argv[process.argv.indexOf('--carpeta')+1];
+      (async()=>{
+        const file={name:'conservado.pdf',relativePath:'conservado.pdf',bytes:13,sha256:require('node:crypto').createHash('sha256').update('%PDF-1.7 test').digest('hex'),group:1,totalGroups:1,kind:'historias-clinicas'};
+        await fs.writeFile(path.join(folder,'conservado.pdf'),'%PDF-1.7 test');
+        await fs.writeFile(path.join(folder,'execution.json'),JSON.stringify({process:'concurrente',status:'running',message:'Trabajo sintético que ignora cancel.json',updatedAt:new Date().toISOString(),files:[file],completedStages:[]}));
+        setInterval(()=>{},1000);
+      })();
+    `
+    );
+    const job = await servicio.crear('001234', '20', propietario, 'concurrente');
+    await esperar(job.id, 'running');
+    const pid = (servicio as any).child.pid;
+    const resultado = await servicio.cancelar(job.id, propietario);
+    expect(resultado).toMatchObject({
+      estado: 'cancelled',
+      reanudable: false,
+    });
+    expect(resultado.fallasPendientes ?? []).toEqual([]);
+    expect(resultado.fallo).toBeUndefined();
+    expect(resultado.archivos.map(archivo => archivo.nombre)).toEqual(['conservado.pdf']);
+    expect(() => process.kill(pid, 0)).toThrow();
+    await esperarCierre();
+  });
+
+  it('cancela un worker adoptado tras reiniciar usando el aviso durable y conserva su último PDF', async () => {
+    const job = await guardado({ proceso: 'concurrente', estado: 'running' });
+    await writeFile(
+      join(carpeta, 'src/worker.ts'),
+      `
+      const fs=require('node:fs/promises'),path=require('node:path');
+      const folder=process.argv[process.argv.indexOf('--carpeta')+1];
+      const timer=setInterval(async()=>{
+        try { await fs.access(path.join(folder,'cancel.json')); } catch { return; }
+        clearInterval(timer);
+        const state=JSON.parse(await fs.readFile(path.join(folder,'execution.json'),'utf8'));
+        // Simula el último guardado de un ejecutor anterior al protocolo nuevo.
+        await fs.writeFile(path.join(folder,'execution.json'),JSON.stringify({...state,status:'complete'}));
+      },40);
+    `
+    );
+    const externo = spawn(
+      process.execPath,
+      ['src/worker.ts', '--carpeta', job.destino, '--proceso', 'concurrente'],
+      { cwd: carpeta, windowsHide: true, stdio: 'ignore' }
+    );
+    procesosExternos.push(externo);
+    await new Promise<void>((resolve, reject) => {
+      externo.once('spawn', resolve);
+      externo.once('error', reject);
+    });
+    const ruta = join(job.destino, 'job.json');
+    await writeFile(
+      ruta,
+      JSON.stringify({ ...JSON.parse(await readFile(ruta, 'utf8')), pid: externo.pid })
+    );
+    await writeFile(
+      join(carpeta, 'artifacts/eklipse-jobs/runner.lock'),
+      JSON.stringify({ pid: 2147483647, childPid: externo.pid })
+    );
+    jest.spyOn(servicio as any, 'programar').mockImplementation(() => {});
+    await servicio.onModuleInit();
+    expect((servicio as any).activo).toBe(job.id);
+    expect((await servicio.cancelar(job.id, propietario)).archivos).toHaveLength(1);
+    expect((await servicio.consultar(job.id, propietario)).estado).toBe('cancelled');
+    expect(() => process.kill(externo.pid, 0)).toThrow();
+    await expect(
+      readFile(join(carpeta, 'artifacts/eklipse-jobs/runner.lock'))
+    ).rejects.toMatchObject({ code: 'ENOENT' });
+  });
+
+  it.each(['cierre forzado', 'consulta de pertenencia', 'recuperación inicial'])(
+    'libera el bloqueo exacto al terminar un cancelado recuperado durante %s y comienza el siguiente turno',
+    async fase => {
+      const cancelado = await guardado({ proceso: 'concurrente', estado: 'running' });
+      const siguiente = await guardado({
+        proceso: 'concurrente',
+        estado: 'queued',
+        ingreso: '21',
+        archivos: [],
+      });
+      await writeFile(
+        join(carpeta, 'src/worker.ts'),
+        `
+      const fs=require('node:fs/promises'),path=require('node:path');
+      const folder=process.argv[process.argv.indexOf('--carpeta')+1];
+      const ingreso=process.argv[process.argv.indexOf('--ingreso')+1];
+      if(ingreso==='20') setInterval(()=>{},1000);
+      else (async()=>{
+        const state=JSON.parse(await fs.readFile(path.join(folder,'execution.json'),'utf8'));
+        await fs.writeFile(path.join(folder,'execution.json'),JSON.stringify({...state,status:'complete',message:'Turno siguiente terminado'}));
+      })();
+    `
+      );
+      const externo = spawn(
+        process.execPath,
+        [
+          'src/worker.ts',
+          '--carpeta',
+          cancelado.destino,
+          '--ingreso',
+          '20',
+          '--proceso',
+          'concurrente',
+        ],
+        { cwd: carpeta, windowsHide: true, stdio: 'ignore' }
+      );
+      procesosExternos.push(externo);
+      await new Promise<void>((resolve, reject) => {
+        externo.once('spawn', resolve);
+        externo.once('error', reject);
+      });
+      const ruta = join(cancelado.destino, 'job.json');
+      await writeFile(
+        ruta,
+        JSON.stringify({
+          ...JSON.parse(await readFile(ruta, 'utf8')),
+          pid: externo.pid,
+          cancelledAt: new Date(Date.now() - 10000).toISOString(),
+        })
+      );
+      const bloqueo = join(carpeta, 'artifacts/eklipse-jobs/runner.lock');
+      await writeFile(bloqueo, JSON.stringify({ pid: process.pid, childPid: externo.pid }));
+      if (fase !== 'cierre forzado') {
+        const saleDuranteConsulta = async () => {
+          await new Promise<void>(resolve => {
+            externo.once('exit', () => resolve());
+            externo.kill();
+          });
+          return false;
+        };
+        const verificar = jest.spyOn(servicio as any, 'perteneceEjecutor');
+        if (fase === 'recuperación inicial') verificar.mockImplementationOnce(saleDuranteConsulta);
+        else {
+          verificar.mockResolvedValueOnce(true).mockImplementationOnce(saleDuranteConsulta);
+          jest.spyOn(servicio as any, 'solicitarCierreCancelado').mockResolvedValue(undefined);
+        }
+      }
+      await servicio.onModuleInit();
+      await esperar(siguiente.id, 'complete');
+      await esperarCierre();
+      expect((await servicio.consultar(cancelado.id, propietario)).estado).toBe('cancelled');
+      expect(() => process.kill(externo.pid, 0)).toThrow();
+      await expect(readFile(bloqueo)).rejects.toMatchObject({ code: 'ENOENT' });
+    }
+  );
 
   it('encola diferentes pacientes en FIFO y muestra el puesto global sin exponer trabajos de otro usuario', async () => {
     const primero = await servicio.crear('001234', '20', propietario, 'concurrente');
@@ -1493,6 +2018,76 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     );
   });
 
+  it.each([
+    ['codigo-salario', 'Código Salario 026\nValor Salario $ 1.750.905,00'],
+    [
+      'servicios-sin-cubrimiento',
+      'Hay Servicios sin Cubrimiento o sin Valor en Rangos de Fechas y se marcaron como NIN.',
+    ],
+  ] as const)(
+    'conserva el texto íntegro del aviso %s sin convertirlo en una falla',
+    async (tipo, mensaje) => {
+      const job = await guardado({ estado: 'complete' });
+      const path = join(job.destino, 'execution.json');
+      const state = JSON.parse(await readFile(path, 'utf8'));
+      const notice = {
+        type: tipo,
+        admission: '20',
+        occurredAt: '2026-11-05T21:00:00Z',
+        message: mensaje,
+        orders: [],
+      };
+      await writeFile(path, JSON.stringify({ ...state, notices: [notice] }));
+      const result = await servicio.consultar(job.id, propietario);
+      expect(result.estado).toBe('complete');
+      expect(result.reanudable).toBe(false);
+      expect(result.fallo).toBeUndefined();
+      expect(result.fallasPendientes ?? []).toEqual([]);
+      expect(result.avisos).toEqual([
+        { tipo, ingreso: '20', fecha: notice.occurredAt, mensaje, ordenes: [] },
+      ]);
+    }
+  );
+
+  it('recupera ambos avisos informativos desde la prefactura sin mezclar ingresos', async () => {
+    const job = await guardado({ estado: 'complete', archivos: [] });
+    const folder = join(job.destino, 'reportes', '001234', '20', 'prefactura');
+    await mkdir(folder, { recursive: true });
+    const notices = [
+      {
+        type: 'codigo-salario',
+        admission: '20',
+        occurredAt: '2026-11-05T21:00:00Z',
+        message: 'Código Salario 026\nValor Salario $ 1.750.905,00',
+        orders: [],
+      },
+      {
+        type: 'servicios-sin-cubrimiento',
+        admission: '20',
+        occurredAt: '2026-11-05T21:00:01Z',
+        message:
+          'Hay Servicios sin Cubrimiento o sin Valor en Rangos de Fechas y se marcaron como NIN.',
+        orders: [],
+      },
+    ];
+    await writeFile(
+      join(folder, 'avisos.json'),
+      JSON.stringify([
+        ...notices,
+        { ...notices[0], admission: '999', message: 'Aviso de otro ingreso.' },
+      ])
+    );
+    const result = await servicio.consultar(job.id, propietario);
+    expect(result.avisos?.map(aviso => ({ tipo: aviso.tipo, mensaje: aviso.mensaje }))).toEqual(
+      notices.map(notice => ({ tipo: notice.type, mensaje: notice.message }))
+    );
+    expect(result.estado).toBe('complete');
+    expect(result.fallo).toBeUndefined();
+    await expect(servicio.consultar(job.id, { ...propietario, usuario: 8 })).rejects.toBeInstanceOf(
+      NotFoundException
+    );
+  });
+
   it('mantiene la ausencia de notas como aviso informativo con ejecución completa al 100%', async () => {
     const job = await guardado({
       estado: 'complete',
@@ -1679,13 +2274,10 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     });
   });
 
-  it('descarga en ZIP los PDF existentes y conserva el aislamiento por usuario', async () => {
+  it('comparte el ZIP de PDF existentes entre usuarios de la sede y rechaza otra sede', async () => {
     const job = await guardado({ archivos: ['grupo-001.pdf', 'grupo-002.pdf', 'grupo-003.pdf'] });
     await rm(join(job.destino, 'grupo-003.pdf'));
-    await expect(servicio.archivos(job.id, { ...propietario, usuario: 8 })).rejects.toBeInstanceOf(
-      NotFoundException
-    );
-    const resultado = await servicio.archivos(job.id, propietario);
+    const resultado = await servicio.archivos(job.id, { ...propietario, usuario: 8 });
     const bloques: Buffer[] = [];
     for await (const bloque of resultado.contenido) bloques.push(Buffer.from(bloque));
     const zip = await JSZip.loadAsync(Buffer.concat(bloques));
@@ -1777,7 +2369,7 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     expect((await servicio.consultar(anterior.id, propietario)).progreso).toBeUndefined();
   });
 
-  it('arranca sin terminal, bloquea duplicados, persiste el resultado y protege los archivos por usuario', async () => {
+  it('arranca sin terminal, bloquea duplicados y comparte el resultado terminado en la sede', async () => {
     const job = await servicio.crear('001234', '20', propietario, 'concurrente');
     expect(job.estado).toBe('queued');
     expect((await servicio.crear('001234', '20', propietario, 'concurrente')).id).toBe(job.id);
@@ -1795,9 +2387,9 @@ describe('Ejecuciones locales con proceso real y reportes sintéticos', () => {
     const archivo = await servicio.archivo(job.id, '0', propietario);
     expect(await readFile(archivo.ruta, 'utf8')).toContain('%PDF');
     expect(archivo.bytes).toBe((await readFile(archivo.ruta)).length);
-    await expect(
-      servicio.archivo(job.id, '0', { ...propietario, usuario: 8 })
-    ).rejects.toBeInstanceOf(NotFoundException);
+    expect((await servicio.archivo(job.id, '0', { ...propietario, usuario: 8 })).ruta).toBe(
+      archivo.ruta
+    );
     await expect(
       servicio.consultar(job.id, { ...propietario, contexto: 'SANJUAN' })
     ).rejects.toBeInstanceOf(NotFoundException);

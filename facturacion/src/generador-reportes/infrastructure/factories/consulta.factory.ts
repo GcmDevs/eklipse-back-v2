@@ -13,6 +13,7 @@ export interface FilaPacienteReportes {
 
 export interface FilaIngresoReportes {
   TIPO_INGRESO?: string | null;
+  AREA_TRABAJO?: string | null;
   INGRESO_ACTIVO?: boolean | number;
   CAMA_CODIGO?: string | null;
   CAMA_NOMBRE?: string | null;
@@ -43,6 +44,7 @@ export function ingresoReportesFactory(fila: FilaIngresoReportes): IngresoReport
     !['facturado', 'anulado', 'cerrado'].includes(fila.ESTADO_INGRESO.trim().toLowerCase());
   const codigo = fila.CAMA_CODIGO?.trim() || null;
   const nombre = fila.CAMA_NOMBRE?.trim() || null;
+  const areaTrabajo = fila.AREA_TRABAJO?.trim();
   return {
     activo,
     cama:
@@ -53,5 +55,10 @@ export function ingresoReportesFactory(fila: FilaIngresoReportes): IngresoReport
     fechaIngreso: fila.AINFECING instanceof Date ? fila.AINFECING.toISOString() : fila.AINFECING,
     estado: fila.ESTADO_INGRESO,
     tipoIngreso: fila.TIPO_INGRESO?.trim() || 'Desconocido',
+    ...(areaTrabajo === 'Urgencias' ||
+    areaTrabajo === 'Consulta externa' ||
+    areaTrabajo === 'Hospitalización'
+      ? { areaTrabajo }
+      : {}),
   };
 }

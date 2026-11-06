@@ -30,6 +30,8 @@ export interface AvisoReporte {
   tipo:
     | 'recalculo-ingreso'
     | 'ordenes-sin-confirmar'
+    | 'codigo-salario'
+    | 'servicios-sin-cubrimiento'
     | 'enfermeria-sin-notas'
     | 'historias-sin-folios'
     | 'prefactura-sin-servicios'
@@ -41,6 +43,8 @@ export interface AvisoReporte {
 }
 
 export interface EjecucionReportes {
+  claveReporte: string;
+  puedeGestionar: boolean;
   proceso?: ProcesoReportes;
   posicionCola?: number;
   enColaDesde?: string;
@@ -66,7 +70,14 @@ export interface EjecucionReportes {
   ingreso: string;
   createdAt: string;
   updatedAt: string;
-  estado: 'queued' | 'starting' | 'running' | 'complete' | 'failed' | 'prefactura-unavailable';
+  estado:
+    | 'queued'
+    | 'starting'
+    | 'running'
+    | 'complete'
+    | 'failed'
+    | 'prefactura-unavailable'
+    | 'cancelled';
   mensaje: string;
   archivos: ArchivoReporte[];
   progreso?: ProgresoReportes;
@@ -80,6 +91,7 @@ export interface ColaReportes {
     procesados: number;
     enCurso: number;
     pendientes: number;
+    cancelados?: number;
     porcentaje: number;
   };
 }
