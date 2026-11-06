@@ -13,6 +13,7 @@ export interface CamaIngresoReportes {
 
 export interface IngresoReportes {
   tipoIngreso?: string;
+  areaTrabajo?: 'Urgencias' | 'Consulta externa' | 'Hospitalización';
   activo?: boolean;
   cama?: CamaIngresoReportes | null;
   consecutivo: number;

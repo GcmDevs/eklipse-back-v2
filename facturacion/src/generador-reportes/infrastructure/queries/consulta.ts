@@ -39,6 +39,12 @@ export const INGRESOS_REPORTES_SQL = `SELECT i.AINCONSEC, i.AINFECING,
     WHEN 13 THEN 'UCI Adulto'
     ELSE 'Desconocido'
   END AS TIPO_INGRESO,
+  CASE
+    WHEN i.AINTIPING = 2 THEN 'Hospitalización'
+    WHEN i.AINURGCON = 1 THEN 'Consulta externa'
+    WHEN i.AINURGCON = 5 THEN 'Hospitalización'
+    ELSE 'Urgencias'
+  END AS AREA_TRABAJO,
   CASE WHEN i.AINFECEGRE IS NULL AND i.AINESTADO NOT IN (1, 2, 4)
     THEN CAST(1 AS bit) ELSE CAST(0 AS bit) END AS INGRESO_ACTIVO,
   ubicacion.CAMA_CODIGO, ubicacion.CAMA_NOMBRE, ubicacion.CAMA_UNIDAD

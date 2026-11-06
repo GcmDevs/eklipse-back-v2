@@ -1,6 +1,5 @@
 # compiled output
 /node_modules
-/.env
 /env.ts
 .agents
 skill.md
@@ -25,3 +24,4 @@ temp_auto_push.bat
 /inventario/dist
 /inventario/private.gitignore
 branch_structure.json
+config.bat

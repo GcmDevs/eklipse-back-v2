@@ -38,6 +38,7 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
   const consultar = jest.fn();
   const crear = jest.fn();
   const reanudar = jest.fn();
+  const cancelar = jest.fn();
   const consultarEjecucion = jest.fn();
   const listar = jest.fn();
   const consultarCola = jest.fn();
@@ -56,6 +57,7 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
           useValue: {
             crear,
             reanudar,
+            cancelar,
             consultar: consultarEjecucion,
             listar,
             consultarCola,
@@ -75,6 +77,7 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
     consultar.mockReset().mockResolvedValue({ paciente: null, ingresos: [] });
     crear.mockReset().mockResolvedValue({ id: 'job-test', estado: 'queued', posicionCola: 2 });
     reanudar.mockReset().mockResolvedValue({ id: 'job-test', estado: 'queued', posicionCola: 3 });
+    cancelar.mockReset().mockResolvedValue({ id: 'job-test', estado: 'cancelled', archivos: [] });
     consultarEjecucion.mockReset().mockResolvedValue({ id: 'job-test', estado: 'complete' });
     listar.mockReset().mockResolvedValue([]);
     consultarCola.mockReset().mockResolvedValue({
@@ -100,6 +103,38 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
       .set('Authorization', 'Bearer falso')
       .expect(401);
     expect(consultar).not.toHaveBeenCalled();
+  });
+
+  it('cancela con el propietario de sesión sin consultar ni aceptar datos clínicos del cliente', async () => {
+    await request(app.getHttpServer())
+      .post('/v1/generador-reportes/ejecuciones/job-test/cancelar')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ propietario: { usuario: 999 }, proceso: 'concurrente' })
+      .expect(200, { id: 'job-test', estado: 'cancelled', archivos: [] });
+    expect(cancelar).toHaveBeenCalledWith('job-test', {
+      usuario: 7,
+      contexto: 'ALTACENTRO',
+      esDinamica: true,
+    });
+    expect(consultar).not.toHaveBeenCalled();
+  });
+
+  it('exige sesión, permiso y propietario para cancelar', async () => {
+    await request(app.getHttpServer())
+      .post('/v1/generador-reportes/ejecuciones/job-test/cancelar')
+      .expect(401);
+    (fetchAuthsByUser as jest.Mock).mockResolvedValue({ onlyCodes: ['004006'] });
+    await request(app.getHttpServer())
+      .post('/v1/generador-reportes/ejecuciones/job-test/cancelar')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(403);
+    expect(cancelar).not.toHaveBeenCalled();
+    (fetchAuthsByUser as jest.Mock).mockResolvedValue({ onlyCodes: ['004006001'] });
+    cancelar.mockRejectedValue(new NotFoundException());
+    await request(app.getHttpServer())
+      .post('/v1/generador-reportes/ejecuciones/ajeno/cancelar')
+      .set('Authorization', `Bearer ${token}`)
+      .expect(404);
   });
 
   it('consulta solo la cola del propietario de sesión y conserva puestos globales', async () => {
@@ -757,6 +792,65 @@ describe('GET /v1/generador-reportes (HTTP y guardas reales)', () => {
       undefined,
       'UCI Adulto'
     );
+  });
+
+  it('envía Hospitalización para un ingreso remitido hospitalario e ignora el área indicada por el cliente', async () => {
+    consultar.mockResolvedValue({
+      paciente: { documento: '001234' },
+      ingresos: [
+        {
+          consecutivo: 20,
+          estado: 'Registrado',
+          tipoIngreso: 'Remitido',
+          areaTrabajo: 'Hospitalización',
+        },
+      ],
+    });
+    await request(app.getHttpServer())
+      .post('/v1/generador-reportes/ejecuciones')
+      .set('Authorization', `Bearer ${token}`)
+      .send({
+        documento: '001234',
+        ingreso: '20',
+        proceso: 'pre-envio',
+        areaTrabajo: 'Consulta externa',
+      })
+      .expect(201);
+    expect(crear).toHaveBeenCalledWith(
+      '001234',
+      '20',
+      { usuario: 7, contexto: 'ALTACENTRO', esDinamica: true },
+      'pre-envio',
+      undefined,
+      'Hospitalización'
+    );
+  });
+
+  it('rechaza reanudar un reporte compartido antes de consultar datos clínicos o llamar al ejecutor', async () => {
+    consultarEjecucion.mockResolvedValue({
+      id: 'job-ajeno',
+      claveReporte: 'clave-del-otro-propietario',
+      puedeGestionar: false,
+      documento: '001234',
+      ingreso: '20',
+      proceso: 'pre-envio',
+      estado: 'failed',
+      reanudable: false,
+      archivos: [{ id: '0', nombre: 'historia.pdf' }],
+    });
+    await request(app.getHttpServer())
+      .post('/v1/generador-reportes/ejecuciones/job-ajeno/reanudar')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ usuario: 8, proceso: 'concurrente' })
+      .expect(404);
+    expect(consultarEjecucion).toHaveBeenCalledWith('job-ajeno', {
+      usuario: 7,
+      contexto: 'ALTACENTRO',
+      esDinamica: true,
+    });
+    expect(consultar).not.toHaveBeenCalled();
+    expect(reanudar).not.toHaveBeenCalled();
+    expect(crear).not.toHaveBeenCalled();
   });
 
   it('permite solicitar reanudación de una extracción completa con soportes pendientes', async () => {

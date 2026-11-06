@@ -82,6 +82,34 @@ describe('GeneradorReportesImpl', () => {
     expect(INGRESOS_REPORTES_SQL).toContain('END AS TIPO_INGRESO');
   });
 
+  it('separa el área de trabajo hospitalaria de la forma de ingreso Remitido', async () => {
+    query.mockResolvedValueOnce([paciente]).mockResolvedValueOnce([
+      {
+        AINCONSEC: 201,
+        AINFECING: null,
+        ESTADO_INGRESO: 'Registrado',
+        TIPO_INGRESO: ' Remitido ',
+        AREA_TRABAJO: ' Hospitalización ',
+      },
+      {
+        AINCONSEC: 200,
+        AINFECING: null,
+        ESTADO_INGRESO: 'Registrado',
+        TIPO_INGRESO: 'UCI Adulto',
+        AREA_TRABAJO: 'Remitido',
+      },
+    ]);
+    const result = await servicio.consultar('001234');
+    expect(result.ingresos[0]).toMatchObject({
+      tipoIngreso: 'Remitido',
+      areaTrabajo: 'Hospitalización',
+    });
+    expect(result.ingresos[1].tipoIngreso).toBe('UCI Adulto');
+    expect(result.ingresos[1].areaTrabajo).toBeUndefined();
+    expect(INGRESOS_REPORTES_SQL).toContain("WHEN i.AINTIPING = 2 THEN 'Hospitalización'");
+    expect(INGRESOS_REPORTES_SQL).toContain('END AS AREA_TRABAJO');
+  });
+
   it('devuelve la cama actual solo para el ingreso activo del paciente', async () => {
     query.mockResolvedValueOnce([paciente]).mockResolvedValueOnce([
       {
