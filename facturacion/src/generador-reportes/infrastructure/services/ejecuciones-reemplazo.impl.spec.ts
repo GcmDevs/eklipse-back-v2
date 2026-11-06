@@ -27,6 +27,7 @@ describe('Una única solicitud vigente por propietario, paciente, ingreso y proc
     carpeta = await mkdtemp(join(tmpdir(), 'eklipse-reemplazo-'));
     trabajos = join(carpeta, 'artifacts', 'eklipse-jobs');
     process.env.EKLIPSE_AUTOMATION_DIR = carpeta;
+    delete process.env.EKLIPSE_AUTOMATION_DATA_DIR;
     delete process.env.EKLIPSE_AUTOMATION_NODE;
     delete process.env.EKLIPSE_AUTOMATION_CONTEXT;
     delete process.env.EKLIPSE_AUTOMATION_TIMEOUT_MS;
